@@ -38,16 +38,19 @@
 
 __all__ = [ 'get_items', 'get_menu' ]
 
+# kaa imports
+import kaa.popcorn
+
 # freevo imports
 from freevo.ui.menu import *
 
 
-def play_movie(item, mplayer_options=None):
+def play_movie(item, **kwargs):
     """
     play the movie (again)
     """
     item.show_menu(False)
-    item.play(mplayer_options=mplayer_options)
+    item.play(**kwargs)
 
 
 def set_variable(item, variable, value):
@@ -58,12 +61,13 @@ def set_variable(item, variable, value):
     item.get_menustack().back_one_menu()
 
 
-def start_chapter(item, mplayer_options):
+def start_chapter(item, chapter):
     """
     Handle chapter selection.
     """
     item.show_menu(False)
-    play_movie(item, mplayer_options)
+    # FIXME: kaa.popcorn syntax
+    play_movie(item, chapter=chapter)
 
 
 def start_subitem(item, pos):
@@ -134,6 +138,18 @@ def chapter_selection(item):
     item.pushmenu(Menu(_('Chapter Menu'), menu_items))
 
 
+def player_selection(item):
+    """
+    Submenu for player selection.
+    """
+    menu_items = []
+    for player in kaa.popcorn.player_names():
+        a = ActionItem(player, item, play_movie)
+        a.parameter(player=player)
+        menu_items.append(a)
+    item.pushmenu(Menu(_('Player Selection'), menu_items))
+
+    
 def subitem_selection(item):
     """
     Submenu for subitem selection.
@@ -184,15 +200,17 @@ def get_items(item):
         if item.info.has_key('subtitles') and len(item.info['subtitles']) > 1:
             a = ActionItem(_('Subtitle selection'), item, subtitle_selection)
             items.append(a)
-        if item.info.has_key('chapters') and item.info['chapters'] > 1:
-            a = ActionItem(_('Chapter selection'), item, chapter_selection)
-            items.append(a)
+        # FIXME: kaa.popcorn does not understand chapter selection
+        # if item.info.has_key('chapters') and item.info['chapters'] > 1:
+        #   a = ActionItem(_('Chapter selection'), item, chapter_selection)
+        #   items.append(a)
     if item.subitems:
         # show subitems as chapter
         a = ActionItem(_('Chapter selection'), item, subitem_selection)
         items.append(a)
 
     items.append(add_toggle(item, _('deinterlacing'), 'interlaced'))
+    items.append(ActionItem(_('Select player'), item, player_selection))
     return items
 
 

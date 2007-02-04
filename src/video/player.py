@@ -63,10 +63,11 @@ class Player(Application):
         self.elapsed_timer = kaa.notifier.WeakTimer(self.elapsed)
 
 
-    def play(self, item):
+    def play(self, item, player=None):
         """
         play an item
         """
+        retry = kaa.notifier.Callback(self.play, item, player)
         if not self.status in (STATUS_IDLE, STATUS_STOPPED):
             # Already running, stop the current player by sending a STOP
             # event. The event will also get to the playlist behind the
@@ -74,7 +75,7 @@ class Player(Application):
             Event(STOP, handler=self.eventhandler).post()
             # Now connect to our own 'stop' signal once to repeat this current
             # function call without the player playing
-            self.signals['stop'].connect_once(self.play, item)
+            self.signals['stop'].connect_once(retry)
             return True
 
         if not kaa.notifier.running:
@@ -94,7 +95,7 @@ class Player(Application):
             Event(STOP, handler=blocked['VIDEO'].eventhandler).post()
             # Now connect to the 'stop' signal once to repeat this current
             # function call without the player playing
-            blocked['VIDEO'].signals['stop'].connect_once(self.play, item)
+            blocked['VIDEO'].signals['stop'].connect_once(retry)
             return True
         if 'AUDIO' in blocked:
             # AUDIO is blocked, VIDEO is not. This is most likely the audio
@@ -104,7 +105,7 @@ class Player(Application):
                 Event(STOP, handler=blocked['AUDIO'].eventhandler).post()
                 # Now connect to the 'stop' signal once to repeat this current
                 # function call without the player playing
-                blocked['AUDIO'].signals['stop'].connect_once(self.play, item)
+                blocked['AUDIO'].signals['stop'].connect_once(retry)
                 return True
             # Now pause the current player. On its pause signal this player can
             # play again. And on the stop signal of this player (STATUS_IDLE)
@@ -112,7 +113,7 @@ class Player(Application):
             in_progress = blocked['AUDIO'].pause()
             if isinstance(in_progress, kaa.notifier.InProgress):
                 # takes some time, wait
-                in_progress.connect(self.play, item).set_ignore_caller_args()
+                in_progress.connect(retry).set_ignore_caller_args()
             if in_progress is not False:
                 # we paused the application, resume on our stop
                 self.signals['stop'].connect_once(blocked['AUDIO'].resume)
@@ -128,7 +129,7 @@ class Player(Application):
         self.engine.set_item(self.item)
         self.status = STATUS_RUNNING
 
-        self.player.open(self.item.url)
+        self.player.open(self.item.url, player=player)
         self.player.signals['end'].connect_once(PLAY_END.post, self.item)
         self.player.signals['start'].connect_once(PLAY_START.post, self.item)
 

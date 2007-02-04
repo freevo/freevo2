@@ -334,7 +334,7 @@ class VideoItem(MediaItem):
         self.pushmenu(moviemenu)
 
 
-    def play(self):
+    def play(self, **kwargs):
         """
         Play the item.
         """
@@ -375,7 +375,7 @@ class VideoItem(MediaItem):
             file = self.filename
 
         # call the player to play the item
-        videoplayer.play(self)
+        videoplayer.play(self, **kwargs)
 
 
     def stop(self):
