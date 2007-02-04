@@ -51,7 +51,7 @@ class PluginInterface(InputPlugin):
     """
     def __init__(self):
         InputPlugin.__init__(self)
-        gui.display._window.signals["key_press_event"].connect(self.handle)
+        gui.get_display()._window.signals["key_press_event"].connect(self.handle)
 
 
     def handle( self, keycode ):
@@ -62,7 +62,7 @@ class PluginInterface(InputPlugin):
             global SCREENSHOT
             filename = 'screenshots/screenshot-%04d.png' % SCREENSHOT
             log.info('screenshot %s' % filename)
-            gui.display._backing_store._image.save(filename)
+            gui.get_display()._backing_store._image.save(filename)
             SCREENSHOT += 1
             return True
 

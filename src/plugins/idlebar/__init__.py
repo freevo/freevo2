@@ -73,7 +73,7 @@ class PluginInterface(plugin.Plugin):
 
         self.container = widgets.Container()
         self.container.set_zindex(10)
-        gui.display.add_child(self.container)
+        gui.get_display().add_child(self.container)
 
         self._timer = kaa.notifier.Timer(self.poll)
         self._timer.start(30)
@@ -91,7 +91,7 @@ class PluginInterface(plugin.Plugin):
         """
         changed = False
 
-        w = gui.display.width
+        w = gui.get_display().width
         h = config.GUI_OVERSCAN_Y + 60
 
         x1 = config.GUI_OVERSCAN_X
@@ -139,7 +139,7 @@ class PluginInterface(plugin.Plugin):
         self.visible = True
         self.update()
         if update:
-            gui.display.update()
+            gui.get_display().update()
 
 
     def hide(self, update=True, fade=0):
@@ -148,7 +148,7 @@ class PluginInterface(plugin.Plugin):
         animation.FadeAnimation([self.container], fade, 255, 0).start()
         self.visible = False
         if update:
-            gui.display.update()
+            gui.get_display().update()
 
 
     def add_background(self):
@@ -157,7 +157,7 @@ class PluginInterface(plugin.Plugin):
         """
         if not self.background:
             # FIXME: respect fxd settings changes!!!
-            s = gui.display
+            s = gui.get_display()
             size = (s.width, s.height)
             self.background = imagelib.load('background', size)
             if self.background:
@@ -184,7 +184,7 @@ class PluginInterface(plugin.Plugin):
         fade = True
         
         # get gui informations
-        w = gui.display.width
+        w = gui.get_display().width
         h = config.GUI_OVERSCAN_Y + 60
 
         f = theme.image('idlebar')
@@ -223,7 +223,7 @@ class PluginInterface(plugin.Plugin):
         if not self.visible:
             return
         if self.update():
-            gui.display.update()
+            gui.get_display().update()
 
 
 

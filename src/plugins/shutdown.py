@@ -118,12 +118,13 @@ class ShutdownItem(MainMenuItem):
         """
         Clear the screen and show the message.
         """
-        msg = widgets.Text(text, (0, 0), (gui.width, gui.height),
+        size = gui.get_display().width, gui.get_display().height
+        msg = widgets.Text(text, (0, 0), size,
                            theme.font('default'), align_h='center',
                            align_v='center')
-        gui.display.clear()
-        gui.display.add_child(msg)
-        gui.display.update()
+        gui.get_display().clear()
+        gui.get_display().add_child(msg)
+        gui.get_display().update()
 
         
     def shutdown_freevo(self):

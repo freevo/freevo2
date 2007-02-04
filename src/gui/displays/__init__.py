@@ -62,10 +62,7 @@ def get():
     display = Display(size, True)
     display_stack.append(display)
     animation.create(display)
-    # set global gui width / height
-    gui.width   = display.width
-    gui.height  = display.height
-    gui.display = display
+    gui._display = display
     return display
 
 # create a display (== get first one)
@@ -98,10 +95,7 @@ def set(name, size, *args, **kwargs):
     display.update()
 
     animation.create(display)
-    # set global gui width / height
-    gui.width   = display.width
-    gui.height  = display.height
-    gui.display = display
+    gui._display = display
     return display
 
 
@@ -130,10 +124,7 @@ def remove(screen):
     display = display_stack[-1]
     display.show()
     animation.create(display)
-    # set global gui width / height
-    gui.width   = display.width
-    gui.height  = display.height
-    gui.display = display
+    gui._display = display
     return display
 
 

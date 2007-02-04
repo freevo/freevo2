@@ -65,10 +65,10 @@ class PluginInterface(InputPlugin):
                 log.error('unable to find key code for %s' % key)
 
         # set mouse hiding on
-        gui.display._window.hide_mouse = True
+        gui.get_display()._window.hide_mouse = True
 
         # connect to signals
-        signals = gui.display._window.signals
+        signals = gui.get_display()._window.signals
         signals['key_press_event'].connect(self.key_press_event)
 
 

@@ -82,9 +82,10 @@
 #
 # -----------------------------------------------------------------------------
 
-width   = 0
-height  = 0
-display = None
+_display = None
+
+def get_display():
+    return _display
 
 # ugly compat code until the new gui is ready
 from compat import *

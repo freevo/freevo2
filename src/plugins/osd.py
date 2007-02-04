@@ -72,7 +72,7 @@ class PluginInterface(plugin.Plugin):
         """
         update the display
         """
-        display = gui.display
+        display = gui.get_display()
         if self.gui_object:
             # remove the current text from the display
             self.gui_object.unparent()

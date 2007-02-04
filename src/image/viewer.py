@@ -179,6 +179,8 @@ class ImageViewer(Application):
             return
 
         width, height = image.width, image.height
+        gui_width = gui.get_display().width
+        gui_height = gui.get_display().height
 
         # Bounding box default values
         bbx = bby = bbw = bbh = 0
@@ -198,16 +200,16 @@ class ImageViewer(Application):
 
             # calculate the scaling that the image is 3 times that big
             # as the screen (3 times because we have a 3x3 grid)
-            scale_x = float(gui.width*3) / width
-            scale_y = float(gui.height*3) / height
+            scale_x = float(gui_width*3) / width
+            scale_y = float(gui_height*3) / height
             scale   = min(scale_x, scale_y)
 
             # create bbx and bby were to start showing the zoomed image
             bbx, bby = int(scale*bbx), int(scale*bby)
-            if int(width*scale) - bbx < gui.width:
-                bbx = int(width*scale) - gui.width
-            if int(height*scale) - bby < gui.height:
-                bby = int(height*scale) - gui.height
+            if int(width*scale) - bbx < gui_width:
+                bbx = int(width*scale) - gui_width
+            if int(height*scale) - bby < gui_height:
+                bby = int(height*scale) - gui_height
             # calculate new width and height after scaling
             width  = int(scale * 3 * width)
             height = int(scale * 3 * height)
@@ -215,8 +217,8 @@ class ImageViewer(Application):
 
         else:
             # No zoom, scale image that it fits the screen
-            scale_x = float(gui.width) / width
-            scale_y = float(gui.height) / height
+            scale_x = float(gui_width) / width
+            scale_y = float(gui_height) / height
             scale   = min(scale_x, scale_y)
             # calculate new width and height after scaling
             width  = int(scale * width)
@@ -224,8 +226,8 @@ class ImageViewer(Application):
 
         # Now we have all necessary informations about zoom yes/no and
         # the kind of rotation
-        x = max((gui.width - width) / 2, 0)
-        y = max((gui.height - height) / 2, 0)
+        x = max((gui_width - width) / 2, 0)
+        y = max((gui_height - height) / 2, 0)
 
         # copy the image because we will change it (scale, rotate)
         image = image.copy()
@@ -250,15 +252,15 @@ class ImageViewer(Application):
         if (self.last_image and self.last_item != item and
             config.IMAGEVIEWER_BLEND_MODE != None):
             # blend over to the new image
-            gui.display.add_child(image)
+            gui.get_display().add_child(image)
             a = Transition([self.last_image], [image], 20,
-                           (gui.width, gui.height), config.IMAGEVIEWER_BLEND_MODE)
+                           (gui_width, gui_height), config.IMAGEVIEWER_BLEND_MODE)
             # start the animation and wait until it's done
             a.start()
             a.wait()
         else:
             # add the new image
-            gui.display.add_child(image)
+            gui.get_display().add_child(image)
 
         # remove the last image if there is one
         if self.last_image:
@@ -434,24 +436,27 @@ class ImageViewer(Application):
             # remove the first space from the string
             osdstring = osdstring[1:]
 
+        gui_width = gui.get_display().width
+        gui_height = gui.get_display().height
+
         # create the text widget
         pos = (config.GUI_OVERSCAN_X + 10, config.GUI_OVERSCAN_Y + 10)
-        size = (gui.width - 2 * config.GUI_OVERSCAN_X - 20,
-                gui.height - 2 * config.GUI_OVERSCAN_Y - 20)
+        size = (gui_width - 2 * config.GUI_OVERSCAN_X - 20,
+                gui_height - 2 * config.GUI_OVERSCAN_Y - 20)
         self.osd_text = widgets.Textbox(osdstring, pos, size,
                                         theme.font('default'),
                                         'left', 'bottom', mode='soft')
         # add the text widget to the screen, make sure the zindex
         # is 2 (== above the image and the box)
         self.osd_text.set_zindex(2)
-        gui.display.add_child(self.osd_text)
+        gui.get_display().add_child(self.osd_text)
 
         # create a box around the text
         rect = self.osd_text.get_size()
 
         if rect[1] < 100:
             # text too small, set to a minimum position
-            self.osd_text.set_pos((self.osd_text.get_pos()[0], gui.height - \
+            self.osd_text.set_pos((self.osd_text.get_pos()[0], gui_height - \
                                    config.GUI_OVERSCAN_Y - 100))
             rect = rect[0], 100
 
@@ -465,8 +470,8 @@ class ImageViewer(Application):
 
         # build a new rectangle.
         pos  = (0, self.osd_text.get_pos()[1] - 10)
-        size = (gui.width, rect[1] + 20)
-        background = imagelib.load('background', (gui.width, gui.height))
+        size = (gui_width, rect[1] + 20)
+        background = imagelib.load('background', (gui_width, gui_height))
         if background:
             background.crop(pos, size)
             self.osd_box = widgets.Image(background, pos)
@@ -477,7 +482,7 @@ class ImageViewer(Application):
         # put the rectangle on the screen and set the zindex to 1
         # (between image and text)
         self.osd_box.set_zindex(1)
-        gui.display.add_child(self.osd_box)
+        gui.get_display().add_child(self.osd_box)
 
         if newosd:
             # show the idlebar but not update the screen now
