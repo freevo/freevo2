@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
-<config name="">
-    <desc lang="en">Freevo Config</desc>
-    <group name="directory">
-        <desc>Directory view configuration</desc>
+<config name="audio.plugin">
+    <desc lang="en">audio plugins</desc>
+    <group name="artist" plugin="10">
+        <desc>Show audio files sorted by artist and album</desc>
     </group>
 </config>
