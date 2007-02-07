@@ -100,7 +100,7 @@ for dirname in freevo.conf.cfgfilepath:
     if isinstance(has_config, str):
         overridefile = has_config
     else:
-        overridefile = dirname + '/local_conf.py'
+        overridefile = dirname + '/local_conf2.py'
     if os.path.isfile(overridefile):
         log.info('Loading cfg overrides: %s' % overridefile)
         execfile(overridefile, globals(), locals())
