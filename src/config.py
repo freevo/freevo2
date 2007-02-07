@@ -59,8 +59,26 @@ execfile(pycfgfile)
 config.add_variable('player', kaa.popcorn.config)
 
 # load config
-config.load(os.path.expanduser('~/.freevo/freevo2.conf'), create=True)
+cfgfile = os.path.expanduser('~/.freevo/freevo2.conf')
+if not os.path.isfile(cfgfile):
+    print '%s does not exist' % cfgfile
+    print 'The file is now created and Freevo will stop so you can'
+    print 'adjust the config settings.'
+    print 'Note: local_conf.py is still needed for some settings and is'
+    print 'now called local_conf2.py. Please adjust the name and check'
+    print 'freevo_config.py for possible variables still used in local_conf2.py.'
+    print 'This is temporary, the local_conf2.py will be removed later.'
+    print 'You should recheck freevo2.conf after every svn update. Use'
+    print '\'freevo setup\' to rebuild the file without starting freevo.'
+    print 'Your settings will be saved when the config file is rewritten.'
+    config.load(cfgfile, create=True)
+    sys.exit(0)
 
+config.load(cfgfile, create=True)
+if len(sys.argv) > 1 and sys.argv[1] in ('setup', '--setup', 'config', '--config'):
+    print 'wrote %s' % cfgfile
+    sys.exit(0)
+    
 # plugins ist a list of known plugins
 for p in plugins:
     c = config
