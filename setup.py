@@ -6,12 +6,12 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2007 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
-# Please see the file doc/CREDITS for a complete list of authors.
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,14 +29,38 @@
 #
 # -----------------------------------------------------------------------------
 
+# python imports
+import sys
+import os
+import stat
+
 # Freevo distutils stuff
 from freevo.distribution import setup, VERSION
+import freevo.conf
 
 data_files = []
 # add some files to Docs
 for f in ('COPYING', 'ChangeLog', 'INSTALL', 'README'):
     data_files.append(('share/doc/freevo-%s' % VERSION, ['%s' % f ]))
 
+if len(sys.argv) > 1 and not '--help' in sys.argv and \
+       not '--help-commands' in sys.argv:
+    def cxml_finder(result, dirname, names):
+        for name in names:
+            if name.endswith('.cxml'):
+                result.append(os.path.join(dirname, name))
+        return result
+    cxml_files = []
+    os.path.walk('./src', cxml_finder, cxml_files)
+    if not os.path.isfile('build/config.cxml') or \
+       os.stat('build/config.cxml')[stat.ST_MTIME] < \
+       max(*[os.stat(x)[stat.ST_MTIME] for x in cxml_files ]):
+        if not os.path.isdir('build'):
+            os.mkdir('build')
+        freevo.conf.xmlconfig('build/config.cxml', cxml_files)
+
+    data_files.append(('share/freevo/config', [ 'build/config.cxml' ]))
+    
 # now start the python magic
 setup (name         = 'freevo',
        version      = VERSION,

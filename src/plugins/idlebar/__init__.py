@@ -45,6 +45,8 @@ from freevo.ui.event import *
 # get logging object
 log = logging.getLogger()
 
+# get gui config object
+guicfg = config.config.gui
 
 class PluginInterface(plugin.Plugin):
     """
@@ -92,11 +94,11 @@ class PluginInterface(plugin.Plugin):
         changed = False
 
         w = gui.get_display().width
-        h = config.GUI_OVERSCAN_Y + 60
+        h = guicfg.display.overscan.y + 60
 
-        x1 = config.GUI_OVERSCAN_X
-        y1 = config.GUI_OVERSCAN_Y
-        x2 = w - config.GUI_OVERSCAN_X
+        x1 = guicfg.display.overscan.x
+        y1 = guicfg.display.overscan.y
+        x2 = w - guicfg.display.overscan.x
         y2 = h
 
         for p in plugin.get('idlebar'):
@@ -161,7 +163,7 @@ class PluginInterface(plugin.Plugin):
             size = (s.width, s.height)
             self.background = imagelib.load('background', size)
             if self.background:
-                size = (s.width, config.GUI_OVERSCAN_Y + 60)
+                size = (s.width, guicfg.display.overscan.y + 60)
                 self.background.crop((0,0), size)
                 self.background = widgets.Image(self.background, (0,0))
                 self.background.set_alpha(230)
@@ -185,7 +187,7 @@ class PluginInterface(plugin.Plugin):
         
         # get gui informations
         w = gui.get_display().width
-        h = config.GUI_OVERSCAN_Y + 60
+        h = guicfg.display.overscan.y + 60
 
         f = theme.image('idlebar')
 
@@ -197,7 +199,7 @@ class PluginInterface(plugin.Plugin):
             self.container.add_child(self.bar)
         
         if fade:
-            fade = config.GUI_FADE_STEPS
+            fade = guicfg.theme.fadestep
         else:
             fade = 0
         if fullscreen:

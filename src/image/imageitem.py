@@ -38,7 +38,7 @@ __all__ = [ 'ImageItem' ]
 import time
 
 # freevo imports
-from freevo.ui import config
+from freevo.ui.config import config
 from freevo.ui.menu import MediaItem, Action
 from viewer import viewer
 
@@ -46,7 +46,7 @@ class ImageItem(MediaItem):
     """
     An item for image files
     """
-    def __init__(self, url, parent, duration = config.IMAGEVIEWER_DURATION):
+    def __init__(self, url, parent, duration = config.image.viewer.duration):
         MediaItem.__init__(self, parent, type='image')
         # set url and parse the name
         self.set_url(url)

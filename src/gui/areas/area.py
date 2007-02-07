@@ -53,14 +53,17 @@ import copy
 import os
 
 # freevo imports
-from freevo.ui import config
 from freevo.ui import util
+from freevo.ui.config import config
 
 # gui imports
 from freevo.ui.gui.widgets import Rectangle, Text, Textbox, Image
 
 import logging
 log = logging.getLogger('gui')
+
+# overscan config object
+overscan = config.gui.display.overscan
 
 class Area(object):
     """
@@ -236,12 +239,12 @@ class Area(object):
 
             if bg.type == 'image' and bg.visible:
                 # if this is the real background image, ignore the
-                # OVERSCAN to fill the whole screen
+                # overscan to fill the whole screen
                 if bg.label == 'background':
-                    bg.x -= config.GUI_OVERSCAN_X
-                    bg.y -= config.GUI_OVERSCAN_Y
-                    bg.width  += 2 * config.GUI_OVERSCAN_X
-                    bg.height += 2 * config.GUI_OVERSCAN_Y
+                    bg.x -= overscan.x
+                    bg.y -= overscan.y
+                    bg.width  += 2 * overscan.x
+                    bg.height += 2 * overscan.y
                 if bg.label == 'watermark' and self.menu.selected.image:
                     imagefile = self.menu.selected.image
                 else:

@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<config name="">
+    <desc lang="en">Freevo Config</desc>
+    <group name="directory">
+        <desc>Directory view configuration</desc>
+    </group>
+</config>

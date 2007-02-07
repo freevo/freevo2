@@ -40,8 +40,9 @@
 __all__ = [ 'PluginInterface' ]
 
 # freevo imports
-from freevo.ui import config, plugin, fxditem
+from freevo.ui import plugin, fxditem
 from freevo.ui.menu import MediaPlugin
+from freevo.ui.config import config
 
 # ImageItem
 from imageitem import ImageItem
@@ -63,7 +64,7 @@ class PluginInterface(MediaPlugin):
         fxditem.add_parser(['image'], 'slideshow', fxdhandler)
 
         # activate the mediamenu for image
-        args = _('Image Main Menu'), 'image', config.IMAGE_ITEMS
+        args = _('Image Main Menu'), 'image', config.image.items
         plugin.activate('mediamenu', level=level, args=args)
 
 
@@ -71,7 +72,7 @@ class PluginInterface(MediaPlugin):
         """
         return the list of suffixes this class handles
         """
-        return [ 'beacon:image' ] + config.IMAGE_SUFFIX
+        return [ 'beacon:image' ] + config.image.suffix.split(',')
 
 
     def get(self, parent, listing):

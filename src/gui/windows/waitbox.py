@@ -39,7 +39,7 @@ import math
 import logging
 
 # freevo imports
-from freevo.ui import config
+from freevo.ui.config import config
 
 # gui imports
 from freevo.ui.gui import displays
@@ -51,6 +51,8 @@ from window import Window
 # get logging object
 log = logging.getLogger()
 
+# overscan config object
+overscan = config.gui.display.overscan
 
 class WaitBox(Window):
     """
@@ -74,8 +76,8 @@ class WaitBox(Window):
         text_height = int(self.widget_normal.font.height * 1.2)
         w = max(min(int(math.sqrt(text_height * text_width * 4 / 3)),
                     displays.get().width - 60 - \
-                    2 * config.GUI_OVERSCAN_X), width)
-        h = displays.get().height - 100 - 2 * config.GUI_OVERSCAN_Y
+                    2 * overscan.x), width)
+        h = displays.get().height - 100 - 2 * overscan.y
 
         # now create the label
         self.label = Textbox(text, self.get_content_pos(), (w, h),

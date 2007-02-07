@@ -47,8 +47,8 @@ import re
 from kaa.strutils import unicode_to_str, str_to_unicode
 
 # freevo imports
-from freevo.ui import config
 from freevo.ui import util
+from freevo.ui.config import config
 
 from freevo.ui.application import MessageWindow, ConfirmWindow
 from freevo.ui.menu import Menu, MediaItem, Files, Action
@@ -64,7 +64,7 @@ import player as videoplayer
 log = logging.getLogger('video')
 
 # compile VIDEO_SHOW_REGEXP
-regexp = config.VIDEO_SHOW_REGEXP
+regexp = config.video.show_regexp
 VIDEO_SHOW_REGEXP_MATCH = re.compile("^.*" + regexp).match
 VIDEO_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + regexp + "[\.\- ]*").split
 

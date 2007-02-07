@@ -34,15 +34,15 @@ class BaseApplication(object):
     
     def __init__(self):
         from freevo.ui.gui.areas import Handler
-        from freevo.ui import config
-        self.GUI_FADE_STEPS = config.GUI_FADE_STEPS
+        from freevo.ui.config import config
+        self._fade_steps = config.gui.theme.fadestep
         self.engine = Handler(self.name, self.areas)
 
     def show(self):
         if BaseApplication.visible and BaseApplication.visible != self:
-            BaseApplication.visible.hide(self.GUI_FADE_STEPS)
+            BaseApplication.visible.hide(self._fade_steps)
         BaseApplication.visible = self
-        self.engine.show(self.GUI_FADE_STEPS)
+        self.engine.show(self._fade_steps)
 
     def hide(self, fade=0):
         if BaseApplication.visible == self:

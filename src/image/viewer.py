@@ -40,8 +40,9 @@ import kaa.notifier
 from kaa.strutils import to_unicode
 
 # freevo imports
-from freevo.ui import config, plugin, gui
+from freevo.ui import plugin, gui
 from freevo.ui.gui import theme, imagelib, widgets
+from freevo.ui.config import config
 
 # cache for loading images
 from freevo.ui.util import ObjectCache
@@ -59,6 +60,26 @@ log = logging.getLogger('image')
 # global viewer, will be set to the ImageViewer
 viewer = None
 
+# gui.display.overscan config
+overscan = config.gui.display.overscan
+# set config to image.viewer config
+config = config.image.viewer
+
+# FIXME: this belongs to the theme
+IMAGEVIEWER_OSD = [
+    # First OSD info
+    [ (_('Title')+': ',      'name'),
+      (_('Description')+': ','description'),
+      (_('Author')+': ',     'author') ],
+
+    # Second OSD info
+    [ (_('Title')+': ',    'name'),
+      (_('Date')+': ' ,    'date'),
+      ('W:',               'width'),
+      ('H:',               'height'),
+      (_('Model')+': ',    'hardware'),
+      (_('Software')+': ', 'software') ]
+    ]
 
 class ImageViewer(Application):
     """
@@ -250,11 +271,11 @@ class ImageViewer(Application):
             image = widgets.Image(image, (x, y))
 
         if (self.last_image and self.last_item != item and
-            config.IMAGEVIEWER_BLEND_MODE != None):
+            config.blend_mode != 'none'):
             # blend over to the new image
             gui.get_display().add_child(image)
             a = Transition([self.last_image], [image], 20,
-                           (gui_width, gui_height), config.IMAGEVIEWER_BLEND_MODE)
+                           (gui_width, gui_height), config.blend_mode)
             # start the animation and wait until it's done
             a.start()
             a.wait()
@@ -359,7 +380,7 @@ class ImageViewer(Application):
 
         if event == TOGGLE_OSD:
             # show/hide image information
-            self.osd_mode = (self.osd_mode+1) % (len(config.IMAGEVIEWER_OSD)+1)
+            self.osd_mode = (self.osd_mode+1) % (len(IMAGEVIEWER_OSD)+1)
             self.drawosd()
             self.engine.update()
             return True
@@ -424,7 +445,7 @@ class ImageViewer(Application):
 
         # create the osdstring to write
         osdstring = u''
-        for strtag in config.IMAGEVIEWER_OSD[self.osd_mode-1]:
+        for strtag in IMAGEVIEWER_OSD[self.osd_mode-1]:
             i = str(self.item[strtag[1]])
             if i:
                 osdstring += u' %s %s' % (to_unicode(strtag[0]), to_unicode(i))
@@ -440,9 +461,9 @@ class ImageViewer(Application):
         gui_height = gui.get_display().height
 
         # create the text widget
-        pos = (config.GUI_OVERSCAN_X + 10, config.GUI_OVERSCAN_Y + 10)
-        size = (gui_width - 2 * config.GUI_OVERSCAN_X - 20,
-                gui_height - 2 * config.GUI_OVERSCAN_Y - 20)
+        pos = (overscan.x + 10, overscan.y + 10)
+        size = (gui_width - 2 * overscan.x - 20,
+                gui_height - 2 * overscan.y - 20)
         self.osd_text = widgets.Textbox(osdstring, pos, size,
                                         theme.font('default'),
                                         'left', 'bottom', mode='soft')
@@ -457,7 +478,7 @@ class ImageViewer(Application):
         if rect[1] < 100:
             # text too small, set to a minimum position
             self.osd_text.set_pos((self.osd_text.get_pos()[0], gui_height - \
-                                   config.GUI_OVERSCAN_Y - 100))
+                                   overscan.y - 100))
             rect = rect[0], 100
 
         # now draw a box around the osd

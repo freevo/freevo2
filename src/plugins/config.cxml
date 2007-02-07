@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<config name="plugin">
+    <group name="shutdown" plugin="90">
+        <desc>Shutdown plugin for the main menu</desc>
+        
+        <var name="confirm" default="True">
+            <desc>Show window asking for confirmation of shutdown</desc>
+        </var>
+        <var name="default" default="freevo">
+            <desc>
+                Default item. Either 'system' for system shutdown or 'freevo' for
+                Freevo shutdown.
+            </desc>
+            <values>
+                <value>system</value>
+                <value>freevo</value>
+            </values>
+        </var>
+        <group name="command">
+            <var name="halt" default="shutdown -h now">
+                <desc>command to execute on system shutdown</desc>
+            </var>
+            <var name="restart" default="shutdown -h now">
+                <desc>command to execute on system restart</desc>
+            </var>
+        </group>
+    </group>
+</config>

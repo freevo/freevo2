@@ -39,8 +39,9 @@ import logging
 from kaa.notifier import OneShotTimer, EventHandler
 
 # freevo imports
-from freevo.ui import config, plugin, gui
+from freevo.ui import plugin, gui
 from freevo.ui.gui import theme, widgets
+from freevo.ui.config import config
 
 from freevo.ui.event import OSD_MESSAGE
 
@@ -87,18 +88,17 @@ class PluginInterface(plugin.Plugin):
         # get the osd from from the settings
         font = theme.font('osd')
 
-        over_x = config.GUI_OVERSCAN_X
-        over_y = config.GUI_OVERSCAN_Y
+        overscan = config.display.overscan
 
         # create the text object
-        y = over_y + 10
+        y = overscan.y + 10
         if plugin.getbyname('idlebar') != None:
             y += 60
 
 
-        self.gui_object = widgets.Text(self.message, (over_x, y),
-                                       (display.width - 10 - 2 * over_x,
-                                        over_y + 10 + font.height),
+        self.gui_object = widgets.Text(self.message, (overscan.x, y),
+                                       (display.width - 10 - 2 * overscan.x,
+                                        overscan.y + 10 + font.height),
                                        font, align_h='right')
 
         # make sure the object is on top of everything else

@@ -77,6 +77,9 @@ signals = { 'theme change': kaa.notifier.Signal() }
 
 current_theme = None
 
+guicfg   = config.config.gui
+overscan = config.config.gui.display.overscan
+
 def get():
     """
     get current fxd theme
@@ -582,12 +585,12 @@ class Area(XMLData):
         XMLData.parse(self, node, scale, current_dir)
         if x != self.x:
             try:
-                self.x += config.GUI_OVERSCAN_X
+                self.x += overscan.x
             except TypeError:
                 pass
         if y != self.y:
             try:
-                self.y += config.GUI_OVERSCAN_Y
+                self.y += overscan.y
             except TypeError:
                 pass
         for subnode in node.children:
@@ -600,12 +603,12 @@ class Area(XMLData):
                     self.images[label].parse(subnode, scale, current_dir)
                     if x != self.images[label].x:
                         try:
-                            self.images[label].x += config.GUI_OVERSCAN_X
+                            self.images[label].x += overscan.x
                         except TypeError:
                             pass
                     if y != self.images[label].y:
                         try:
-                            self.images[label].y += config.GUI_OVERSCAN_Y
+                            self.images[label].y += overscan.y
                         except TypeError:
                             pass
 
@@ -623,17 +626,17 @@ class Area(XMLData):
 
     def rect(self, type):
         if type == 'screen':
-            return (self.x - config.GUI_OVERSCAN_X,
-                    self.y - config.GUI_OVERSCAN_X,
-                    self.width + 2 * config.GUI_OVERSCAN_X,
-                    self.height + 2 * config.GUI_OVERSCAN_X)
+            return (self.x - overscan.x,
+                    self.y - overscan.x,
+                    self.width + 2 * overscan.x,
+                    self.height + 2 * overscan.x)
         return (self.x, self.y, self.width, self.height)
 
 
     def pos(self, type):
         if type == 'screen':
-            return (self.x - config.GUI_OVERSCAN_X,
-                    self.y - config.GUI_OVERSCAN_X)
+            return (self.x - overscan.x,
+                    self.y - overscan.x)
         return (self.x, self.y)
 
 
@@ -1332,10 +1335,10 @@ class FXDSettings(object):
         if file_geometry:
             w, h = file_geometry.split('x')
         else:
-            w, h = config.GUI_WIDTH, config.GUI_HEIGHT
+            w, h = guicfg.display.width, guicfg.display.height
 
-        scale = (float(config.GUI_WIDTH-2*config.GUI_OVERSCAN_X)/float(w),
-                 float(config.GUI_HEIGHT-2*config.GUI_OVERSCAN_Y)/float(h))
+        scale = (float(guicfg.display.width-2*overscan.x)/float(w),
+                 float(guicfg.display.height-2*overscan.y)/float(h))
 
         include = attr_str(node, 'include', '')
 
@@ -1415,8 +1418,8 @@ def set_base_fxd(name):
     """
     Set the basic skin fxd file and store it
     """
-    config.GUI_XML_FILE = os.path.splitext(os.path.basename(name))[0]
-    log.info('load basic skin settings: %s' % config.GUI_XML_FILE)
+    log.info('load basic skin settings: %s',
+             os.path.splitext(os.path.basename(name))[0])
 
     try:
         # try to load the new skin
@@ -1451,5 +1454,5 @@ def init_module():
     """
     global current_theme
     # load the fxd file at set current_theme
-    current_theme = set_base_fxd(config.GUI_XML_FILE)
-    current_theme.filename = config.GUI_XML_FILE
+    current_theme = set_base_fxd(guicfg.theme.engine)
+    current_theme.filename = guicfg.theme.engine

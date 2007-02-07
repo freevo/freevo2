@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<config name="video" plugin="20">
+    <desc lang="en">video plugin</desc>
+    <list name="items">
+        <desc>
+            Set video items for the media menu. This is a list with path
+            and name. To set the subdir video in your home directory and
+            /video write
+
+            video.items[0].path = $(HOME)/video
+            video.items[0].name = My Home Videos
+            video.items[1].path = /video
+            video.items[1].name = My Local Videos
+        </desc>
+        <var name="path" type="str">
+            <desc>Path of the directory / file.</desc>
+        </var>
+        <var name="name" type="unicode">
+            <desc>Name in the mediamenu</desc>
+        </var>
+    </list>
+    <var name="suffix" default="bin,viv,iso,nsv,rmvb,cue,avi,mpg,mpeg,wmv,rm,divx,ogm,vob,asf,m2v,m2p,mp4,nuv,mov,mkv,ts">
+        <desc>Comma seperated list of video suffixes.</desc>
+    </var>
+    <var name="show-regexp" 
+        default="s?([0-9]|[0-9][0-9])[xe]([0-9]|[0-9][0-9])[^0-9]">
+        <desc>
+            Regular expression to detect tv show by name, season, epsiode
+            and title. Do not change this unless you know what you are doing.
+        </desc>
+    </var>
+</config>

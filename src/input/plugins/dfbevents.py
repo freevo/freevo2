@@ -54,7 +54,7 @@ class PluginInterface(InputPlugin):
     def __init__(self):
         InputPlugin.__init__(self)
 
-        if config.GUI_DISPLAY.lower() == 'dfb':
+        if config.gui.display.engine.lower() == 'dfb':
             self.dfb = displays.get().dfb
         else:
             self.dfb = directfb.DirectFB()

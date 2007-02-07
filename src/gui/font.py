@@ -39,13 +39,16 @@ import kaa.mevas
 
 # freevo imports
 import freevo.conf
-from freevo.ui import config
+from freevo.ui.config import config
 
 # get logging object
 log = logging.getLogger('gui')
 
 # list of fonts already known to be not found
 font_warning = []
+
+# get gui.font config object
+fontcfg = config.gui.font
 
 class Font(object):
     """
@@ -90,8 +93,8 @@ class Font(object):
             log.debug('Couldn\'t load font "%s"' % name)
 
             # Ok, see if there is an alternate font to use
-            if name in config.GUI_FONT_ALIASES:
-                alt_fname = config.GUI_FONT_ALIASES[name]
+            if name in fontcfg.alias:
+                alt_fname = fontcfg.alias[name]
                 log.debug('trying alternate: %s' % alt_fname)
                 try:
                     return kaa.mevas.imagelib.load_font(alt_fname, ptsize)
@@ -108,7 +111,7 @@ class Font(object):
 # init mevas font (imlib2)
 FONT_DIR = os.path.join(freevo.conf.SHAREDIR, 'fonts')
 kaa.mevas.imagelib.add_font_path(FONT_DIR)
-DEFAULT_FONT = os.path.join(FONT_DIR, config.GUI_FONT_DEFAULT_NAME)
+DEFAULT_FONT = os.path.join(FONT_DIR, fontcfg.default)
 
 # the font cache object for 'get'
 font_info_cache = {}

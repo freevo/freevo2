@@ -58,7 +58,7 @@ import os
 from kaa.strutils import unicode_to_str
 
 # Freevo imports
-from freevo.ui import config
+from freevo.ui.config import config
 from freevo.ui import plugin
 from freevo.ui import menu
 
@@ -90,7 +90,7 @@ def fxdhandler(node, parent, listing):
             if child.name == 'directory':
                 # for directories add all files in it
                 recursive = fxd.getattr(child, 'recursive', 0)
-                files = match_files(fname, config.IMAGE_SUFFIX, recursive)
+                files = match_files(fname, config.image.suffix.split(','), recursive)
 
             elif child.name == 'file':
                 # add the given filename
@@ -98,7 +98,7 @@ def fxdhandler(node, parent, listing):
 
             # get duration until the next images comes up
             duration = fxd.getattr(child, 'duration', 0) or \
-                       config.IMAGEVIEWER_DURATION
+                       config.image.viewer.duration
 
             for file in files:
                 items.append(ImageItem(file, None, duration))

@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<config name="image" plugin="40">
+    <desc lang="en">image configuration</desc>
+    <list name="items">
+        <desc>
+            Set image items for the media menu. This is a list with path
+            and name. To set the subdir image in your home directory and
+            /image write
+
+            image.items[0].path = $(HOME)/image
+            image.items[0].name = My Home Images
+            image.items[1].path = /image
+            image.items[1].name = My Local Images
+        </desc>
+        <var name="path" type="str">
+            <desc>Path of the directory / file.</desc>
+        </var>
+        <var name="name" type="unicode">
+            <desc>Name in the mediamenu</desc>
+        </var>
+    </list>
+    <var name="suffix" default="jpg,gif,png,jpeg,bmp,tiff">
+        <desc>Comma seperated list of image suffixes.</desc>
+    </var>
+    <group name="viewer">
+        <var name="duration" default="0">
+            <desc>
+                Default duration for the image viewer. If greater 0, the
+                imageviewer will be in auto-slideshow mode.
+            </desc>
+        </var>
+        <var name="blend-mode" default="random">
+            <desc>
+                Blend effect when switching from one image to another. Possible
+                values are random, alpha, wipe and none.
+            </desc>
+            <values>
+                <value>random</value>
+                <value>alpha</value>
+                <value>wipe</value>
+                <value>none</value>
+            </values>
+        </var>
+    </group>
+</config>

@@ -46,23 +46,26 @@ from freevo.ui import config
 # display imports
 from display import Display as Base
 
+# gui.display.fb config object
+config = config.gui.display.fb
+
 class Display(FramebufferCanvas, Base):
     """
     Display class for framebuffer output
     """
-    def __init__(self, size, default=False):
-        if config.GUI_DISPLAY_FB_MODE == 'mga':
+    def __init__(self, size, default=False, fullscreen=False):
+        if config.mga:
             # switch heads
             os.system('matroxset -f /dev/fb1 -m 0')
             os.system('matroxset -f /dev/fb0 -m 3')
-            if config.GUI_DISPLAY_FB_NORM == 'pal':
+            if config.norm == 'pal':
                 # switch to PAL
                 os.system('matroxset 1')
             else:
                 # switch to NTSC
                 os.system('matroxset -f /dev/fb0 2 2')
             # activate framebuffer with tv norm
-            FramebufferCanvas.__init__(self, size, config.GUI_DISPLAY_FB_NORM)
+            FramebufferCanvas.__init__(self, size, config.norm)
 
         else:
             # activate framebuffer without changing the resolution
@@ -80,7 +83,7 @@ class Display(FramebufferCanvas, Base):
         Stop the display
         """
         if Base.stop(self):
-            if config.GUI_DISPLAY_FB_MODE == 'mga':
+            if config.mga:
                 # switch heads back
                 os.system('matroxset -f /dev/fb0 -m 1')
                 os.system('matroxset -f /dev/fb1 -m 0')

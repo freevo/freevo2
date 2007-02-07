@@ -37,7 +37,7 @@ import logging
 import kaa.notifier
 
 # freevo imports
-from freevo.ui import config
+from freevo.ui.config import config
 
 # gui imports
 from freevo.ui import gui
@@ -49,6 +49,10 @@ log = logging.getLogger('gui')
 # Stack of the current active displays
 display_stack  = []
 
+# gui.display config object
+config = config.gui.display
+
+fullscreen = config.fullscreen
 
 def get():
     """
@@ -57,8 +61,8 @@ def get():
     """
     if display_stack:
         return display_stack[-1]
-    exec('from %s import Display' % config.GUI_DISPLAY.lower())
-    size = (config.GUI_WIDTH, config.GUI_HEIGHT)
+    exec('from %s import Display' % config.engine.lower())
+    size = (config.width, config.height)
     display = Display(size, True)
     display_stack.append(display)
     animation.create(display)
@@ -138,7 +142,7 @@ def shutdown():
         d.stop()
     # switch to none display
     from none import Display
-    size = (config.GUI_WIDTH, config.GUI_HEIGHT)
+    size = (config.width, config.height)
     display_stack = [ Display(size) ]
 
 

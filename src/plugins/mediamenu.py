@@ -61,7 +61,7 @@ class PluginInterface(MainMenuPlugin):
     the 'video', 'audio', 'image' or 'games' plugin.
     """
     def __init__(self, name, type, items):
-        if items is None:
+        if not items:
             self.reason = 'No items defined for %s menu' % type
             return
         MainMenuPlugin.__init__(self)
@@ -94,6 +94,9 @@ class MediaMenu(MainMenuItem):
 
         self._items = items
         for filename in self._items:
+            if hasattr(filename, 'path'):
+                # kaa.config object
+                filename = filename.path.replace('$(HOME)', os.environ.get('HOME'))
             if not isinstance(filename, (str, unicode)):
                 filename = filename[1]
             filename = os.path.abspath(filename)
@@ -119,7 +122,11 @@ class MediaMenu(MainMenuItem):
             try:
                 # split the list on dir/file, title and add_args
                 add_args = None
-                if isinstance(item, (str, unicode)):
+                if hasattr(item, 'path'):
+                    # kaa.config object
+                    title = unicode(item.name)
+                    filename = item.path.replace('$(HOME)', os.environ.get('HOME'))
+                elif isinstance(item, (str, unicode)):
                     # only a filename is given
                     title, filename = u'', item
                 elif self.display_type == 'games':

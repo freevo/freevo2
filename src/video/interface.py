@@ -41,8 +41,9 @@ import copy
 import string
 
 # freevo imports
-from freevo.ui import config, util, plugin, fxditem
+from freevo.ui import util, plugin, fxditem
 from freevo.ui.menu import Files, MediaPlugin
+from freevo.ui.config import config
 
 # video imports
 from videoitem import VideoItem
@@ -67,7 +68,7 @@ class PluginInterface(MediaPlugin):
         database.update()
         
         # activate the mediamenu for video
-        args = _('Video Main Menu'), 'video', config.VIDEO_ITEMS
+        args = _('Video Main Menu'), 'video', config.video.items
         plugin.activate('mediamenu', level=level, args=args)
 
         
@@ -75,7 +76,7 @@ class PluginInterface(MediaPlugin):
         """
         return the list of suffixes this class handles
         """
-        return [ 'beacon:video' ] + config.VIDEO_SUFFIX
+        return [ 'beacon:video' ] + config.video.suffix.split(',')
 
 
     def get(self, parent, listing):

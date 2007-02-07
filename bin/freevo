@@ -95,7 +95,7 @@ try:
     import freevo
 
     from freevo.ui import config
-    if config.GUI_DISPLAY == 'SDL':
+    if config.config.gui.display.engine.lower() == 'sdl':
         import pygame
 
 except ImportError, i:
@@ -121,7 +121,7 @@ if len(sys.argv) == 2 and sys.argv[1] in ('-daemon', '--daemon', '-d'):
             return True
         lirc.stop()
         options = ''
-        if config.GUI_DISPLAY in ( 'imlib2', ) and not \
+        if config.config.gui.display.engine.lower() in ( 'imlib2', ) and not \
                (os.environ.has_key('DISPLAY') and os.environ['DISPLAY']):
             options = '-fs'
         log.info('start freevo %s', options)
@@ -223,7 +223,7 @@ class Splashscreen(areas.Area):
         """
         fade out
         """
-        self.engine.hide(config.GUI_FADE_STEPS)
+        self.engine.hide(config.config.gui.theme.fadestep)
 
 
     def destroy(self):
@@ -242,9 +242,9 @@ if len(sys.argv) >= 2:
 
     # force fullscreen mode
     # deactivate screen blanking and set osd to fullscreen
-    if sys.argv[1] == '-force-fs':
+    if '-force-fs' in sys.argv[1]:
         os.system('xset -dpms s off')
-        config.GUI_FULLSCREEN = 1
+        displays.fullscreen = True
 
 try:
     freevo.ipc.Instance('freevo', **config.MBUS_ADDR)

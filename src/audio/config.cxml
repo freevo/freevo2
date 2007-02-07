@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<config name="audio" plugin="30">
+    <desc lang="en">audio configuration</desc>
+    <list name="items">
+        <desc>
+            Set audio items for the media menu. This is a list with path
+            and name. To set the subdir audio in your home directory and
+            /audio write
+
+            audio.items[0].path = $(HOME)/audio
+            audio.items[0].name = My Music
+            audio.items[1].path = /audio
+            audio.items[1].name = More Music
+        </desc>
+        <var name="path" type="str">
+            <desc>Path of the directory / file.</desc>
+        </var>
+        <var name="name" type="unicode">
+            <desc>Name in the mediamenu</desc>
+        </var>
+    </list>
+    <var name="suffix" default="mp3,ogg,wav,m4a,wma,aac,flac,mka,ac3">
+        <desc>Comma seperated list of audio suffixes.</desc>
+    </var>
+    <var name="include-video" default="False">
+        <!-- FIXME: not used -->
+        <desc>Include video files in audio listing (e.g. music videos)</desc>
+    </var>
+</config>

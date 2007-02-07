@@ -35,7 +35,7 @@ import math
 import logging
 
 # freevo imports
-from freevo.ui import config
+from freevo.ui.config import config
 from freevo.ui.event import *
 
 # gui imports
@@ -48,6 +48,8 @@ from window import Window
 # get logging object
 log = logging.getLogger()
 
+# overscan config object
+overscan = config.gui.display.overscan
 
 class InputBox(Window):
     """
@@ -122,8 +124,8 @@ class InputBox(Window):
         text_height = int(self.widget_normal.font.height * 1.2)
         w = max(min(int(math.sqrt(text_height * text_width * 4 / 3)),
                     displays.get().width - 60 - \
-                    2 * config.GUI_OVERSCAN_X), width)
-        self.h = displays.get().height - 100 - 2 * config.GUI_OVERSCAN_Y
+                    2 * overscan.x), width)
+        self.h = displays.get().height - 100 - 2 * overscan.y
 
         # now create the label
         self.label = Textbox(text, self.get_content_pos(), (w, self.h),

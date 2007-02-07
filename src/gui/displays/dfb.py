@@ -41,7 +41,7 @@ __all__ = [ 'Display' ]
 from kaa.mevas.displays.directfbcanvas import DirectFBCanvas
 
 # freevo imports
-from freevo.ui import config
+from freevo.ui.config import config
 
 # display imports
 from display import Display as Base
@@ -52,5 +52,5 @@ class Display(DirectFBCanvas, Base):
     Display class for DirectFB output
     """
     def __init__(self, size, default=False):
-        DirectFBCanvas.__init__(self, size, config.GUI_DFB_LAYER)
+        DirectFBCanvas.__init__(self, size, config.gui.display.dfb.layer)
         Base.__init__(self)

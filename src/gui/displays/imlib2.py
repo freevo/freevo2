@@ -33,14 +33,14 @@ __all__ = [ 'Display' ]
 
 # python imports
 from freevo.ui import plugin
-from freevo.ui import config
 
 # mevas imports
 from kaa.mevas.displays.imlib2canvas import Imlib2Canvas
 
 # display imports
 from display import Display as Base
-
+# FIXME: ugly hack
+import freevo.ui.gui.displays as config
 
 class Display(Imlib2Canvas, Base):
     """
@@ -50,7 +50,7 @@ class Display(Imlib2Canvas, Base):
         Imlib2Canvas.__init__(self, size)
         Base.__init__(self)
         plugin.activate( 'input.x11' )
-        if config.GUI_FULLSCREEN:
+        if config.fullscreen:
             # FIXME: use xrandr to set resolution if possible
             self.update()
             self._window.set_fullscreen()

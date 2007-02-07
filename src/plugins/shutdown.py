@@ -38,12 +38,15 @@ import os
 import kaa.notifier
 
 # freevo imports
-from freevo.ui import config, gui
+from freevo.ui import gui
 from freevo.ui.menu import Action
 from freevo.ui.application import ConfirmWindow
 from freevo.ui.mainmenu import MainMenuItem, MainMenuPlugin
 from freevo.ui.gui import theme, widgets
+from freevo.ui.config import config
 
+# get shutdown config
+config = config.plugin.shutdown
 
 class ShutdownItem(MainMenuItem):
     """
@@ -57,7 +60,7 @@ class ShutdownItem(MainMenuItem):
         """
         return a list of actions for this item
         """
-        if config.SHUTDOWN_CONFIRM:
+        if config.confirm:
             items = [ Action(_('Shutdown Freevo'), self.confirm_freevo),
                       Action(_('Shutdown system'), self.confirm_system),
                       Action(_('Restart Freevo'), self.confirm_freevo_restart),
@@ -68,7 +71,7 @@ class ShutdownItem(MainMenuItem):
                       Action(_('Restart Freevo'), self.shutdown_freevo_restart),
                       Action(_('Restart system'), self.shutdown_sys_restart) ]
 
-        if config.SHUTDOWN_SYS_DEFAULT:
+        if config.default == 'system':
             items = [ items[1], items[0], items[2] ]
 
         return items
@@ -140,7 +143,7 @@ class ShutdownItem(MainMenuItem):
         shutdown the complete system
         """
         self.show_gui_message(_('shutting down system...'))
-        kaa.notifier.OneShotTimer(os.system, config.SHUTDOWN_SYS_CMD).start(1)
+        kaa.notifier.OneShotTimer(os.system, config.command.halt).start(1)
 
 
     def shutdown_freevo_restart(self):
@@ -157,7 +160,7 @@ class ShutdownItem(MainMenuItem):
         restart the complete system
         """
         self.show_gui_message(_('restarting system...'))
-        kaa.notifier.OneShotTimer(os.system, config.RESTART_SYS_CMD).start(1)
+        kaa.notifier.OneShotTimer(os.system, config.command.restart).start(1)
 
 
 
