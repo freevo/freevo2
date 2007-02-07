@@ -1,7 +1,64 @@
 <?xml version="1.0"?>
-<config name="audio.plugin">
-    <desc lang="en">audio plugins</desc>
-    <group name="artist" plugin="10">
-	<desc>Show audio files sorted by artist and album</desc>
+<config name="">
+    <group name="directory">
+        <desc>Directory settings</desc>
+
+        <group name="sort">
+            <desc>Settings how to sort items in a directory</desc>
+            <var name="type" default="tv-by-date">
+                <desc>
+                    How to sort the items in a directory. Valid values are
+                    'name' (sort by name), 'date' (sort by date) and
+                    'tv-by-date' (sort by name and only sort directories in the
+                    tv menu by date)
+                </desc>
+                <values>
+                    <value>name</value>
+                    <value>date</value>
+                    <value>tv-by-date</value>
+                </values>
+            </var>
+            <var name="reverse" default="False">
+                <desc>Sort directory items in reverse order</desc>
+            </var>
+            <var name="smart" default="True">
+                <desc>Ignore 'The' and 'A' when sorting by name</desc>
+            </var>
+        </group>
+        
+        <group name="playlist">
+            <desc>Setting for handling a directory as playlist</desc>
+            
+            <var name="autoplay" default="True">
+                <desc>Autoplay an item if only one item is in the directory</desc>
+            </var>
+
+            <var name="isplaylist" default="audio,image">
+                <desc>
+                    Make all items a playlist. So when one is finished, the
+                    next one will start. It's also possible to browse through
+                    the list with UP and DOWN. The value is a comma sperated
+                    list of media types.
+                </desc>
+            </var>
+
+            <var name="include" default="audio,image">
+                <desc>
+                    Add playlist file from the directory. The value is a comma
+                    sperated list of media types.
+                </desc>
+            </var>
+            <var name="random" default="audio">
+                <desc>
+                    Add a random playlist item.  The value is a comma sperated
+                    list of media types.
+                </desc>
+            </var>
+        </group>
+
+        <var name="use-metadata" default="True">
+            <desc>Use names from metadata and not the filename</desc>
+        </var>
     </group>
+
 </config>

@@ -44,7 +44,7 @@ from kaa.weakref import weakref
 from kaa.strutils import str_to_unicode
 
 # freevo imports
-import config
+from config import config
 import util
 
 import menu
@@ -60,32 +60,39 @@ from application import MessageWindow
 log = logging.getLogger()
 
 # variables for 'configure' submenu
-_variables = [
-    ('SORT_BY_DATE', _('Sort By Date'),
+CONFIGURE = [
+    ('sort_type', _('Sort By Date'),
      _('Sort directory by date and not by name.')),
-    ('AUTOPLAY_SINGLE_ITEM', _('Autoplay Single Item'),
+    ('autoplay_single_item', _('Autoplay Single Item'),
      _('Don\'t show directory if only one item exists and auto select the item.')),
-    ('USE_MEDIADB_NAMES', _('Use Tag Names'),
+    ('use_metadata', _('Use Tag Names'),
      _('Use the names from the media files tags as display name.')),
-    ('REVERSE_SORT', _('Reverse Sort'),
+    ('sort_reverse', _('Reverse Sort'),
      _('Show the items in the list in reverse order.')),
-    ('CREATE_PLAYLIST', _('Create Playlist'),
+    ('isplaylist', _('Is Playlist'),
      _('Handle the directory as playlist and play the next item when ine is done.')) ,
-    ('AUTOPLAY_ITEMS', _('Autoplay Items'),
+    ('autoplay_items', _('Autoplay Items'),
      _('Autoplay the whole directory (as playlist) when it contains only files.')),
-    ('HIDE_PLAYED', _('Hide Played Items'),
+    ('hide_played', _('Hide Played Items'),
      _('Hide items already played.'))]
 
 
+# get config object directory
+config = config.directory
+
+# mapping from internal names to config file
+CONFIG_MAPPING = {
+    'sort_type': config.sort.type,
+    'autoplay_single_item': config.playlist.autoplay,
+    'use_metadata': config.use_metadata,
+    'sort_reverse': config.sort.reverse,
+    'isplaylist': config.playlist.isplaylist,
+    }
+
+# register to beacon as string: on/off/auto
 kaa.beacon.register_file_type_attrs('dir',
     freevo_num_items = (dict, kaa.beacon.ATTR_SIMPLE),
-    freevo_sort_by_date = (str, kaa.beacon.ATTR_SIMPLE),
-    freevo_autoplay_single_item = (str, kaa.beacon.ATTR_SIMPLE),
-    freevo_use_mediadb_names = (str, kaa.beacon.ATTR_SIMPLE),
-    freevo_reverse_sort = (str, kaa.beacon.ATTR_SIMPLE),
-    freevo_create_playlist = (str, kaa.beacon.ATTR_SIMPLE),
-    freevo_autoplay_items = (str, kaa.beacon.ATTR_SIMPLE),
-    freevo_hide_played = (str, kaa.beacon.ATTR_SIMPLE),
+    **dict([ ('freevo_' + x[0], (str, kaa.beacon.ATTR_SIMPLE)) for x in CONFIGURE ])
 )
 
 def smartsort(x,y):
@@ -256,7 +263,8 @@ class DirItem(Playlist):
                 return value == 'yes'
             if isinstance(self.parent, DirItem):
                 return self.parent[key]
-            value = getattr(config, 'DIRECTORY_%s' % key[7:].upper(), False)
+            # config does not know about autoplay_items and hide_played
+            value = CONFIG_MAPPING.get(key[7:], False)
             if not isinstance(value, (list, tuple)):
                 if value in (1, True):
                     return True
@@ -454,7 +462,7 @@ class DirItem(Playlist):
         #
 
         # sort directories
-        if config.DIRECTORY_SMART_SORT:
+        if config.sort.smart:
             dir_items.sort(lambda l, o: smartsort(l.dir,o.dir))
         else:
             dir_items.sort(lambda l, o: cmp(l.dir.upper(), o.dir.upper()))
@@ -463,10 +471,10 @@ class DirItem(Playlist):
         pl_items.sort(lambda l, o: cmp(l.name.upper(), o.name.upper()))
 
         # sort normal items
-        sort_by_date = self['config:sort_by_date']
-        if sort_by_date == 2 and not self.display_type == 'tv':
-            sort_by_date = False
-        if sort_by_date:
+        sort_type = self['config:sort_type']
+        if sort_type == 'tv-by-date' and not self.display_type == 'tv':
+            sort_type = False
+        if sort_type:
             play_items.sort(lambda l, o: cmp(l.sort('date').upper(),
                                              o.sort('date').upper()))
         else:
@@ -482,19 +490,19 @@ class DirItem(Playlist):
             num_items[2] = len(dir_items)
             self.info['freevo_num_items'] = copy.copy(num_items_all)
 
-        if self['config:reverse_sort']:
+        if self['config:sort_reverse']:
             dir_items.reverse()
             play_items.reverse()
             pl_items.reverse()
 
         # delete pl_items if they should not be displayed
         if self.display_type and not self.display_type in \
-               config.DIRECTORY_ADD_PLAYLIST_FILES:
+               config.playlist.include:
             pl_items = []
 
         # add all playable items to the playlist of the directory
         # to play one files after the other
-        if self['config:create_playlist']:
+        if self['config:isplaylist']:
             self.playlist = play_items
 
 
@@ -503,8 +511,7 @@ class DirItem(Playlist):
 
         # random playlist (only active for audio)
         if self.display_type and self.display_type in \
-               config.DIRECTORY_ADD_RANDOM_PLAYLIST \
-               and len(play_items) > 1:
+               config.playlist.random and len(play_items) > 1:
             pl = Playlist(_('Random playlist'), play_items, self,
                           random=True)
             pl.autoplay = True
@@ -571,7 +578,7 @@ class DirItem(Playlist):
         show the configure dialog for folder specific settings
         """
         items = []
-        for i, name, descr in _variables:
+        for i, name, descr in CONFIGURE:
             name += '\t'  + self.configure_get_status(i)
             action = ActionItem(name, self, self.configure_set_var, descr)
             action.parameter(var=i)
