@@ -98,16 +98,10 @@ class VideoItem(MediaItem):
         show_name = None
         self.tv_show = False
 
-        if self.name.find(u"The ") == 0:
-            self.sort_name = self.name[4:]
-        self.sort_name = self.name
-
         if self.info['episode'] and self.info['subtitle']:
             # get informations for recordings
             show_name = (self.name, '', self.info['episode'], \
                          self.info['subtitle'])
-            self.sort_name += u' ' + self.info['episode'] + u' ' + \
-                              self.info['subtitle']
         elif VIDEO_SHOW_REGEXP_MATCH(self.name) and not self.network_play:
             # split tv show files based on regexp
             show_name = VIDEO_SHOW_REGEXP_SPLIT(self.name)
@@ -130,8 +124,6 @@ class VideoItem(MediaItem):
             self.show_name    = show_name
             self.tv_show_name = show_name[0]
             self.tv_show_ep   = show_name[3]
-        if self.mode == 'file' and os.path.isfile(self.filename):
-            self.sort_name += u'  ' + str_to_unicode(str(os.stat(self.filename).st_ctime))
 
 
     def set_url(self, url):
@@ -235,17 +227,6 @@ class VideoItem(MediaItem):
             return length
 
         return MediaItem.__getitem__(self, key)
-
-
-    def sort(self, mode=None):
-        """
-        Returns the string how to sort this item
-        """
-        if mode == 'date' and self.mode == 'file' and \
-               os.path.isfile(self.filename):
-            return u'%s%s' % (os.stat(self.filename).st_ctime,
-                              str_to_unicode(self.filename))
-        return self.sort_name
 
 
     def __set_next_available_subitem(self):

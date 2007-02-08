@@ -146,15 +146,6 @@ class Container(Item):
         self.display_type = parent.display_type
         
 
-    def sort(self, mode=None):
-        """
-        Returns the string how to sort this item
-        """
-        if mode == 'date':
-            return '0'
-        return self.name
-
-
     def actions(self):
         """
         actions for this item

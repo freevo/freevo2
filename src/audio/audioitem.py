@@ -68,23 +68,17 @@ class AudioItem(MediaItem):
             self.length = 0
 
 
-    def sort(self, mode=None):
+    def sort(self, mode='name'):
         """
         Returns the string how to sort this item
         """
-        if mode == 'date':
-            if self.filename:
-                return u'%s%s' % (os.stat(self.filename).st_ctime,
-                                  str_to_unicode(self.filename))
-        if mode == 'advanced':
-            # sort by track number
+        if mode in ('name', 'smart'):
             try:
-                return '%s %0.3i-%s' % (self['discs'], int(self['trackno']),
-                                        str_to_unicode(self.url))
-            except ValueError:
-                return '%s-%s' % (unicode(self['trackno']),
-                                  str_to_unicode(self.url))
-        return str_to_unicode(self.url)
+                track = int(self.info.get('trackno'))
+            except (ValueError, KeyError, TypeError):
+                track = 0
+            return u'%20d %s' % (track, self.name)
+        return MediaItem.sort(self, mode)
 
 
     def set_url(self, url):

@@ -61,18 +61,18 @@ log = logging.getLogger()
 
 # variables for 'configure' submenu
 CONFIGURE = [
-    ('sort_type', _('Sort By Date'),
-     _('Sort directory by date and not by name.')),
+    ('sort', _('Sort'),
+     _('How to sort items.')),
     ('autoplay_single_item', _('Autoplay Single Item'),
      _('Don\'t show directory if only one item exists and auto select the item.')),
+    ('autoplay_items', _('Autoplay Items'),
+     _('Autoplay the whole directory (as playlist) when it contains only files.')),
     ('use_metadata', _('Use Tag Names'),
      _('Use the names from the media files tags as display name.')),
     ('sort_reverse', _('Reverse Sort'),
      _('Show the items in the list in reverse order.')),
     ('isplaylist', _('Is Playlist'),
      _('Handle the directory as playlist and play the next item when ine is done.')) ,
-    ('autoplay_items', _('Autoplay Items'),
-     _('Autoplay the whole directory (as playlist) when it contains only files.')),
     ('hide_played', _('Hide Played Items'),
      _('Hide items already played.'))]
 
@@ -80,38 +80,11 @@ CONFIGURE = [
 # get config object directory
 config = config.directory
 
-# mapping from internal names to config file
-CONFIG_MAPPING = {
-    'sort_type': config.sort.type,
-    'autoplay_single_item': config.playlist.autoplay,
-    'use_metadata': config.use_metadata,
-    'sort_reverse': config.sort.reverse,
-    'isplaylist': config.playlist.isplaylist,
-    }
-
 # register to beacon as string: on/off/auto
 kaa.beacon.register_file_type_attrs('dir',
     freevo_num_items = (dict, kaa.beacon.ATTR_SIMPLE),
     **dict([ ('freevo_' + x[0], (str, kaa.beacon.ATTR_SIMPLE)) for x in CONFIGURE ])
 )
-
-def smartsort(x,y):
-    """
-    Compares strings after stripping off 'The' and 'A' to be 'smarter'
-    Also obviously ignores the full path when looking for 'The' and 'A'
-    """
-    m = os.path.basename(x)
-    n = os.path.basename(y)
-
-    for word in ('The', 'A'):
-        word += ' '
-        if m.find(word) == 0:
-            m = m.replace(word, '', 1)
-        if n.find(word) == 0:
-            n = n.replace(word, '', 1)
-
-    return cmp(m.upper(),n.upper()) # be case insensitive
-
 
 def find_start_string(s1, s2):
     """
@@ -255,6 +228,7 @@ class DirItem(Playlist):
                 return '%d:%02d' % (length / 60, length % 60)
 
         if key.startswith('config:'):
+
             value = self.info.get('tmp:%s' % key[7:])
             if value is not None:
                 return value
@@ -263,17 +237,17 @@ class DirItem(Playlist):
                 return value == 'yes'
             if isinstance(self.parent, DirItem):
                 return self.parent[key]
-            # config does not know about autoplay_items and hide_played
-            value = CONFIG_MAPPING.get(key[7:], False)
-            if not isinstance(value, (list, tuple)):
-                if value in (1, True):
-                    return True
-                if value in (0, False):
-                    return False
+            if key == 'config:sort':
+                if self.display_type == 'tv':
+                    return config.tvsort
+                return config.sort
+            # config does not know about hide_played
+            value = getattr(config, key[7:], False)
+            if isinstance(value, bool):
                 return value
             if self.display_type == 'tv':
-                return 'video' in value
-            return self.display_type in value
+                return 'video' in value.split(',')
+            return self.display_type in value.split(',')
 
         return Item.__getitem__(self, key)
 
@@ -461,25 +435,27 @@ class DirItem(Playlist):
         # sort all items
         #
 
-        # sort directories
-        if config.sort.smart:
-            dir_items.sort(lambda l, o: smartsort(l.dir,o.dir))
-        else:
-            dir_items.sort(lambda l, o: cmp(l.dir.upper(), o.dir.upper()))
+        def _sortfunc(m):
+            return lambda l, o: cmp(l.sort(m).lower(), o.sort(m).lower())
 
-        # sort playlist
-        pl_items.sort(lambda l, o: cmp(l.name.upper(), o.name.upper()))
+        # sort directories by name
+        dir_items.sort(_sortfunc('name'))
 
-        # sort normal items
-        sort_type = self['config:sort_type']
-        if sort_type == 'tv-by-date' and not self.display_type == 'tv':
-            sort_type = False
-        if sort_type:
-            play_items.sort(lambda l, o: cmp(l.sort('date').upper(),
-                                             o.sort('date').upper()))
+        # sort playlist by name or delete if they should not be displayed
+        if self.display_type and not self.display_type in \
+               config.add_playlist_items.split(','):
+            pl_items = []
         else:
-            play_items.sort(lambda l, o: cmp(l.sort().upper(),
-                                             o.sort().upper()))
+            pl_items.sort(_sortfunc('name'))
+
+        sorttype = self['config:sort']
+        play_items.sort(_sortfunc(sorttype))
+        if sorttype == 'date-new-first':
+            play_items.reverse()
+
+        #
+        # final settings
+        #
 
         # update num_items information if needed
         num_items_all = self.info.get('freevo_num_items') or {}
@@ -490,28 +466,18 @@ class DirItem(Playlist):
             num_items[2] = len(dir_items)
             self.info['freevo_num_items'] = copy.copy(num_items_all)
 
-        if self['config:sort_reverse']:
-            dir_items.reverse()
-            play_items.reverse()
-            pl_items.reverse()
-
-        # delete pl_items if they should not be displayed
-        if self.display_type and not self.display_type in \
-               config.playlist.include:
-            pl_items = []
 
         # add all playable items to the playlist of the directory
         # to play one files after the other
         if self['config:isplaylist']:
             self.playlist = play_items
 
-
         # build a list of all items
         items = dir_items + pl_items + play_items
 
         # random playlist (only active for audio)
         if self.display_type and self.display_type in \
-               config.playlist.random and len(play_items) > 1:
+               config.add_random_playlist and len(play_items) > 1:
             pl = Playlist(_('Random playlist'), play_items, self,
                           random=True)
             pl.autoplay = True

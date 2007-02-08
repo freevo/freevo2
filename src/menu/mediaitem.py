@@ -193,11 +193,15 @@ class MediaItem(Item):
         """
         Returns the string how to sort this item
         """
-        if mode == 'date' and self.filename:
-            uf = unicode(self.filename, errors = 'replace')
-            return u'%s%s' % (os.stat(self.filename).st_ctime, uf)
-
-        return u'0%s' % self.name
+        if mode == 'date':
+            if self.filename:
+                return u'%s%s' % (os.stat(self.filename).st_ctime, self.name)
+            return u'0%s' % self.name
+        if mode == 'filename':
+            if self.filename:
+                return unicode(self.filename, errors = 'replace')
+            return self.name
+        return Item.sort(self, mode)
 
 
     def cache(self):

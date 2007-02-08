@@ -132,9 +132,19 @@ class Item(object):
         """
         Returns the string how to sort this item
         """
-        return u'0%s' % self.name
+        if mode == 'name':
+            return self.name
+        if mode == 'smart':
+            name = self.name
+            if name.lower().startswith('the '):
+                return name[4:]
+            if name.lower().startswith('a '):
+                return name[2:]
+            return name
+        print 'oops', mode, self
+        return ''
 
-
+    
     def actions(self):
         """
         Returns a list of possible actions on this item. The first
