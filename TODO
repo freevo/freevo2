@@ -1,6 +1,7 @@
 Stuff that needs to be done before 2.0pre1
 
-o kaa.config integration
 o kaa.candy
 o Support non X11 based outputs
 o Watch TV
+o Fix broken plugins from WIP
+o Fix DVD support
