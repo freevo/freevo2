@@ -85,6 +85,3 @@ for p in plugins:
             plugin.activate(p)
         else:
             plugin.activate(p, level=c.activate)
-
-ICON_DIR  = os.path.join(freevo.conf.SHAREDIR, 'icons')
-IMAGE_DIR = os.path.join(freevo.conf.SHAREDIR, 'images')

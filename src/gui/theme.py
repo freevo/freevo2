@@ -56,7 +56,7 @@ import kaa.strutils
 
 # freevo imports
 import freevo.conf
-from freevo.ui import config
+from freevo.ui.config import config
 from freevo.ui import util
 from freevo.ui import plugin
 
@@ -70,6 +70,10 @@ log = logging.getLogger('gui')
 # Internal fxd file version
 FXD_FORMAT_VERSION = 2
 
+# internal variables
+ICON_DIR  = os.path.join(freevo.conf.SHAREDIR, 'icons')
+IMAGE_DIR = os.path.join(freevo.conf.SHAREDIR, 'images')
+
 # signals
 signals = { 'theme change': kaa.notifier.Signal() }
 
@@ -77,8 +81,8 @@ signals = { 'theme change': kaa.notifier.Signal() }
 
 current_theme = None
 
-guicfg   = config.config.gui
-overscan = config.config.gui.display.overscan
+guicfg   = config.gui
+overscan = config.gui.display.overscan
 
 def get():
     """
@@ -358,7 +362,7 @@ class MainMenu(object):
 
     def prepare_copy(self, search_dirs, image_names):
         ret = MainMenu()
-        ret.imagedir = os.path.join(config.IMAGE_DIR, self.imagedir)
+        ret.imagedir = os.path.join(IMAGE_DIR, self.imagedir)
         for key, template in self.items.items():
             ret.items[key] = template.prepare_copy(search_dirs, image_names)
         return ret
@@ -1230,10 +1234,10 @@ class FXDSettings(object):
         self.prepared = True
 
         if not os.path.isdir(self.icon_dir):
-            self.icon_dir = os.path.join(config.ICON_DIR, 'themes',
+            self.icon_dir = os.path.join(ICON_DIR, 'themes',
                                          self.icon_dir)
 
-        search_dirs = self.skindirs + [ config.IMAGE_DIR, self.icon_dir, '.' ]
+        search_dirs = self.skindirs + [ IMAGE_DIR, self.icon_dir, '.' ]
 
         # prepare font objects
         self.font = {}
@@ -1381,7 +1385,7 @@ class FXDSettings(object):
         icon = util.getimage(os.path.join(self.icon_dir, name))
         if icon:
             return icon
-        return util.getimage(os.path.join(config.ICON_DIR, name), '')
+        return util.getimage(os.path.join(ICON_DIR, name), '')
 
 
     def load(self, file):

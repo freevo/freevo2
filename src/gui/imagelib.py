@@ -40,7 +40,7 @@ import logging
 # mevas imagelib
 import kaa.mevas
 
-from freevo.ui import config
+import freevo.conf
 from freevo.ui import util
 import theme
 
@@ -104,7 +104,7 @@ def load(url, size=None):
     filename = os.path.abspath(url)
     
     if not os.path.isfile(filename):
-        filename = os.path.join(config.IMAGE_DIR, url[8:])
+        filename = os.path.join(freevo.conf.SHAREDIR, 'images', url[8:])
 
     if not os.path.isfile(filename):
         log.error('Image file "%s" doesn\'t exist!' % filename)

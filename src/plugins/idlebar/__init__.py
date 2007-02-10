@@ -38,7 +38,8 @@ import logging
 import kaa.notifier
 
 # freevo imports
-from freevo.ui import config, plugin, gui, application
+from freevo.ui import plugin, gui, application
+from freevo.ui.config import config
 from freevo.ui.gui import theme, imagelib, widgets, animation
 from freevo.ui.event import *
 
@@ -46,7 +47,7 @@ from freevo.ui.event import *
 log = logging.getLogger()
 
 # get gui config object
-guicfg = config.config.gui
+guicfg = config.gui
 
 class PluginInterface(plugin.Plugin):
     """
