@@ -43,5 +43,5 @@ class PluginInterface(InputPlugin):
     """
     def __init__(self):
         InputPlugin.__init__(self)
-        kaa.input.lirc.init('freevo', config.LIRCRC)
+        kaa.input.lirc.init('freevo', config.input.plugin.lirc.lircrc)
         kaa.input.lirc.signal.connect(self.post_key)
