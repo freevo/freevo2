@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<config name="input.plugin">
+    <group name="lirc" plugin="false">
+        <desc>
+            Support remote control using the lirc daemon.
+        </desc>
+        <var name="lircrc" default="/etc/freevo/lircrc">
+            <desc>
+                Location of the freevo lircrc file. This file needs to map the
+                lirc events into Freevo event names.
+                begin
+                    prog = freevo
+                    button = select
+                    config = SELECT
+                end
+            </desc>
+        </var>
+        <code>
+            if os.path.isfile(config.input.plugin.lirc.lircrc):
+                config.input.plugin.lirc.activate = True
+        </code>
+    </group>
+
+    <group name="joystick" plugin="true">
+        <desc>
+            Joystick plugin. This plugin defines a fixed mapping. If someone
+            needs more, please send a patch using a config here.
+        </desc>
+    </group>
+
+</config>

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config name="idlebar.plugin">
+    <group name="logo" plugin="10">
+        <desc>Show freevo logo</desc>
+    </group>
+    <group name="clock" plugin="90">
+        <desc>Display date and time in the idlebar</desc>
+    </group>
+</config>

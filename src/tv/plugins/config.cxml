@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config name="tv.plugin">
+    <desc lang="en">tv plugins</desc>
+
+    <group name="genre" plugin="10">
+        <desc>Add item to browse the EPG by genre</desc>
+    </group>
+
+</config>

@@ -36,8 +36,9 @@ import pygame
 import logging
 
 # Freevo imports
-from freevo.ui import config, gui
-
+from freevo.ui import gui
+from freevo.ui.input import KEYBOARD_MAP
+from freevo.ui.config import config
 from freevo.ui.menu import Item
 from freevo.ui.event import *
 from interface import InputPlugin
@@ -49,20 +50,25 @@ class PluginInterface(InputPlugin):
     """
     Plugin for pygame input events
     """
-    def __init__(self):
-        InputPlugin.__init__(self)
 
+    def plugin_activate(self, level):
+        """
+        Create eventmap on activate. FIXME: changing the setting during
+        runtime has no effect.
+        """
+        InputPlugin.plugin_activate(self, level)
         # define the keymap
         self.keymap = {}
-        for key in config.KEYBOARD_MAP:
-            if hasattr(pygame.locals, 'K_%s' % key):
-                code = getattr(pygame.locals, 'K_%s' % key)
-                self.keymap[code] = config.KEYBOARD_MAP[key]
-            elif hasattr(pygame.locals, 'K_%s' % key.lower()):
-                code = getattr(pygame.locals, 'K_%s' % key.lower())
-                self.keymap[code] = config.KEYBOARD_MAP[key]
-            else:
-                log.error('unable to find key code for %s' % key)
+        for mapdict in (KEYBOARD_MAP, config.input.keyboardmap):
+            for key, mapping in mapdict.items():
+                if hasattr(pygame.locals, 'K_%s' % key):
+                    code = getattr(pygame.locals, 'K_%s' % key)
+                    self.keymap[code] = mapping
+                elif hasattr(pygame.locals, 'K_%s' % key.lower()):
+                    code = getattr(pygame.locals, 'K_%s' % key.lower())
+                    self.keymap[code] = mapping
+                else:
+                    log.error('unable to find key code for %s' % key)
 
         # set mouse hiding on
         gui.get_display()._window.hide_mouse = True

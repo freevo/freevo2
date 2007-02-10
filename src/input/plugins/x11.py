@@ -31,13 +31,15 @@
 # -----------------------------------------------------------------------------
 
 # python imports
+import copy
 import logging
 
 # freevo imports
-from freevo.ui import config, gui
+from freevo.ui import gui
+from freevo.ui.config import config
 
 # input imports
-from freevo.ui.input import linux_input
+from freevo.ui.input import KEYBOARD_MAP
 from interface import InputPlugin
 
 # get logging object
@@ -49,11 +51,19 @@ class PluginInterface(InputPlugin):
     """
     Plugin for x11 keys.
     """
-    def __init__(self):
-        InputPlugin.__init__(self)
+
+    def plugin_activate(self, level):
+        """
+        Create eventmap on activate. FIXME: changing the setting during
+        runtime has no effect.
+        """
+        InputPlugin.plugin_activate(self, level)
         gui.get_display()._window.signals["key_press_event"].connect(self.handle)
+        self.keymap = copy.deepcopy(KEYBOARD_MAP)
+        for key, mapping in config.input.keyboardmap:
+            self.keymap[key] = mapping.upper()
 
-
+        
     def handle( self, keycode ):
         """
         Callback to handle the x11 keys.
@@ -69,8 +79,8 @@ class PluginInterface(InputPlugin):
         if isinstance(keycode, int):
             log.debug('Bad keycode %s' % keycode)
             return True
-        if config.KEYBOARD_MAP.has_key(keycode.upper()):
-            self.post_key( config.KEYBOARD_MAP[keycode.upper()] )
+        if self.keymap.has_key(keycode.upper()):
+            self.post_key( self.keymap[keycode.upper()] )
         else:
             log.debug('No mapping for key %s' % keycode.upper())
         return True

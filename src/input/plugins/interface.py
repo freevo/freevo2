@@ -33,11 +33,13 @@ __all__ = [ 'InputPlugin' ]
 
 
 # python imports
+import copy
 import logging
 
 # freevo imports
-from freevo.ui import config
 from freevo.ui import plugin, input
+from freevo.ui.config import config
+from freevo.ui.event import Event
 
 # get logging object
 log = logging.getLogger('input')
@@ -48,6 +50,17 @@ class InputPlugin(plugin.Plugin):
     type should be in input/plugins
     """
 
+    def plugin_activate(self, level):
+        """
+        Create eventmap on activate. FIXME: changing the setting during
+        runtime has no effect.
+        """
+        self.eventmap = copy.deepcopy(input.EVENTMAP)
+        for app, mapping in config.input.eventmap.items():
+            for key, command in mapping.items():
+                self.eventmap[app][key] = Event(*command.split(' '))
+
+        
     def post_key(self, key):
         """
         Send a keyboard event to the event queue
@@ -56,11 +69,11 @@ class InputPlugin(plugin.Plugin):
             return None
 
         for c in (input.get_mapping(), 'global'):
-            if not config.EVENTS.has_key(c):
+            if not self.eventmap.has_key(c):
                 continue
-            if not config.EVENTS[c].has_key(key):
+            if not self.eventmap[c].has_key(key):
                 continue
 
-            return config.EVENTS[c][key].post()
+            return self.eventmap[c][key].post()
 
         log.warning('no event mapping for key %s in %s' % (key, input.get_mapping()))

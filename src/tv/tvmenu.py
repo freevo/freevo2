@@ -35,7 +35,7 @@ import kaa.notifier
 # freevo core imports
 import freevo.ipc
 
-from freevo.ui import config
+from freevo.ui.config import config
 from freevo.ui.mainmenu import MainMenuItem, MainMenuPlugin
 from freevo.ui.menu import Item, ActionItem, Menu
 
@@ -75,8 +75,8 @@ class TVMenu(MainMenuItem):
             # FIXME: change the tvguide into a plugin
             items.append(ActionItem(_('TV Guide'), self, self.start_tvguide))
 
-        if config.TV_RECORD_DIR:
-            items.append(DirItem(config.TV_RECORD_DIR, None,
+        if config.tv.record_dir:
+            items.append(DirItem(config.tv.record_dir, None,
                                  name = _('Recorded Shows'),
                                  type='tv'))
 

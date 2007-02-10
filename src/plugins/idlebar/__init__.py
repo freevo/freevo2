@@ -239,7 +239,9 @@ class IdleBarPlugin(plugin.Plugin):
         self.__x       = 0
         self.__y       = 0
         self.width     = 0
-
+        if not plugin.getbyname('idlebar'):
+            plugin.activate('idlebar')
+            
 
     def draw(self, width, height):
         return self.NO_CHANGE
@@ -270,6 +272,4 @@ class IdleBarPlugin(plugin.Plugin):
         """
         Force idlebar update.
         """
-        bar = plugin.getbyname('idlebar')
-        if bar:
-            bar.poll()
+        plugin.getbyname('idlebar').poll()

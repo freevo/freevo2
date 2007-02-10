@@ -68,12 +68,6 @@ MIXER_VOLUP            = Event('MIXER_VOLUP', 5)
 MIXER_VOLDOWN          = Event('MIXER_VOLDOWN', 5)
 MIXER_MUTE             = Event('MIXER_MUTE')
 
-# To change the step size, but the following code in your
-# local_conf.py (setting VOL+ step size to 2)
-#
-# EVENTS['global']['VOL+'] = Event('MIXER_VOLUP', 2)
-
-
 PLAYLIST_NEXT          = Event('PLAYLIST_NEXT')
 PLAYLIST_PREV          = Event('PLAYLIST_PREV')
 PLAYLIST_TOGGLE_REPEAT = Event('PLAYLIST_TOGGLE_REPEAT')

@@ -42,7 +42,7 @@ from kaa.strutils import unicode_to_str
 import freevo.ipc
 
 # freevo imports
-from freevo.ui import config
+from freevo.ui.config import config
 from freevo.ui import plugin
 from freevo.ui.menu import Item, Action, Menu, ActionItem
 from freevo.ui.application import MessageWindow
@@ -116,13 +116,13 @@ class ProgramItem(Item):
         return the specific attribute as string or an empty string
         """
         if key == 'start':
-            return unicode(time.strftime(config.TV_TIMEFORMAT,
+            return unicode(time.strftime(config.tv.timeformat,
                                          time.localtime(self.start)))
         if key == 'stop':
-            return unicode(time.strftime(config.TV_TIMEFORMAT,
+            return unicode(time.strftime(config.tv.timeformat,
                                          time.localtime(self.stop)))
         if key == 'date':
-            return unicode(time.strftime(config.TV_DATEFORMAT,
+            return unicode(time.strftime(config.tv.dateformat,
                                          time.localtime(self.start)))
         if key == 'time':
             return self['start'] + u' - ' + self['stop']

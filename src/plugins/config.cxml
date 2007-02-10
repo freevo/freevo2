@@ -25,4 +25,44 @@
             </var>
         </group>
     </group>
+
+    <group name="file_ops" plugin="30">
+        <desc>
+            Item plugin to add some file operations to the directory menu.
+        </desc>
+    </group>
+
+    <group name="shoppingcart" plugin="0">
+        <desc>
+            Item plugin to add items to a virtual shopping cart to move or copy
+            to a different directory.
+        </desc>
+    </group>
+
+    <group name="lcd" plugin="false">
+        <desc>
+            Show information of an external LCD using LCDproc.
+        </desc>
+    </group>
+
+    <group name="mbus" plugin="true">
+        <desc>
+            Control Freevo over mbus. This plugin only supports play and stop
+            right now and is only a proof of concept.
+        </desc>
+    </group>
+
+    <group name="osd" plugin="true">
+        <desc>
+            Small On-Screen-Display plugin to show messages from other parts of
+            Freevo.
+        </desc>
+    </group>
+
+    <group name="unpack" plugin="false">
+        <desc>
+            Support for archive files in the directory listing to make it
+            possible to unpack files.
+        </desc>
+    </group>
 </config>

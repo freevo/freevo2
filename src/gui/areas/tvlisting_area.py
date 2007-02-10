@@ -42,7 +42,7 @@ import copy
 import os
 import math
 import time
-from freevo.ui import config
+from freevo.ui.config import config
 from freevo.ui.gui import imagelib
 
 # kaa imports
@@ -194,7 +194,7 @@ class TvlistingArea(Area):
         for o in self.time_obj:
             if o:
                 o.unparent()
-        timeformat = config.TV_TIMEFORMAT
+        timeformat = config.tv.timeformat
         if not timeformat:
             timeformat = '%H:%M'
         head_val = self.all_vals[1]
@@ -326,7 +326,7 @@ class TvlistingArea(Area):
         #                        rightarrow.get_height())
 
         # Print the Date of the current list page
-        dateformat = config.TV_DATEFORMAT
+        dateformat = config.tv.dateformat
         if not dateformat:
             dateformat = '%e-%b'
 

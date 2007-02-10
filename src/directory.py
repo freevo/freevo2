@@ -262,7 +262,7 @@ class DirItem(Playlist):
             possible = [ ]
 
             for p in MediaPlugin.plugins():
-                for t in p.display_type:
+                for t in p.mediatype:
                     if not t in possible:
                         possible.append(t)
 

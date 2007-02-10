@@ -65,12 +65,6 @@ class PluginInterface(ItemPlugin):
         if item.files.delete_possible():
             a = Action(_('Delete'), self.delete, 'delete')
             actions.append(a)
-        if item.files.fxd_file and config.FILE_OPS_ALLOW_DELETE_INFO:
-            a = Action(_('Delete info'), self.delete_info, 'delete_info')
-            actions.append(a)
-        if item.files.image and config.FILE_OPS_ALLOW_DELETE_IMAGE:
-            Action(_('Delete image'), self.delete_image, 'delete_image')
-            actions.append(a)
 
         return actions
 
@@ -78,38 +72,10 @@ class PluginInterface(ItemPlugin):
     def delete(self, item):
         txt = _('Do you wish to delete\n \'%s\'?') % item.name
         box = ConfirmWindow(txt, default_choice=1)
-        box.buttons[0].connect(self.__delete, item)
+        box.buttons[0].connect(self._delete, item)
         box.show()
 
 
-    def delete_info(self, item):
-        txt = _('Delete info about\n \'%s\'?') % item.name
-        box = ConfirmWindow(txt, default_choice=1)
-        box.buttons[0].connect(self.__delete_info, item)
-        box.show()
-
-
-    def delete_image(self, item):
-        txt = _('Delete image about\n \'%s\'?') % item.name
-        box = ConfirmWindow(txt, default_choice=1)
-        box.buttons[0].connect(self.__delete_image, item)
-        box.show()
-
-
-    def __delete(self, item):
+    def _delete(self, item):
         item.files.delete()
-        item.get_menustack().delete_submenu(True, True)
-
-
-    def __delete_info(self, item):
-        util.unlink(item.files.image)
-        util.unlink(item.files.fxd_file)
-        item.get_menustack().delete_submenu(True, True)
-
-
-    def __delete_image(self, item):
-        util.unlink(item.files.image)
-        item.image = None
-        if item.parent:
-            item.image = item.parent.image
         item.get_menustack().delete_submenu(True, True)

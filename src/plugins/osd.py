@@ -88,7 +88,7 @@ class PluginInterface(plugin.Plugin):
         # get the osd from from the settings
         font = theme.font('osd')
 
-        overscan = config.display.overscan
+        overscan = config.gui.display.overscan
 
         # create the text object
         y = overscan.y + 10

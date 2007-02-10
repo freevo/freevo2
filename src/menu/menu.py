@@ -38,7 +38,7 @@ import logging
 from kaa.weakref import weakref
 
 # freevo imports
-from freevo.ui import config
+from freevo.ui.config import config
 from freevo.ui.event import *
 
 # menu imports
@@ -215,7 +215,7 @@ class Menu(object):
             return False
 
         if self.cols == 1:
-            if config.MENU_ARROW_NAVIGATION:
+            if config.menu.arrow_navigation:
                 if event == MENU_LEFT:
                     event = MENU_BACK_ONE_MENU
                 elif event == MENU_RIGHT:

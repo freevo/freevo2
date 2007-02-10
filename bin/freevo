@@ -94,8 +94,8 @@ try:
     # import ui path (ugly)
     import freevo
 
-    from freevo.ui import config
-    if config.config.gui.display.engine.lower() == 'sdl':
+    from freevo.ui.config import config
+    if config.gui.display.engine.lower() == 'sdl':
         import pygame
 
 except ImportError, i:
@@ -121,16 +121,16 @@ if len(sys.argv) == 2 and sys.argv[1] in ('-daemon', '--daemon', '-d'):
             return True
         lirc.stop()
         options = ''
-        if config.config.gui.display.engine.lower() in ( 'imlib2', ) and not \
+        if config.gui.display.engine.lower() in ( 'imlib2', ) and not \
                (os.environ.has_key('DISPLAY') and os.environ['DISPLAY']):
             options = '-fs'
         log.info('start freevo %s', options)
         os.system('%s %s >/dev/null 2>/dev/null' % (sys.argv[0], options))
-        lirc.init('freevo', config.LIRCRC)
+        lirc.init('freevo', config.input.plugin.lirc.lircrc)
         log.info('freevo stopped')
         return True
 
-    if not lirc.init('freevo', config.LIRCRC):
+    if not lirc.init('freevo', config.input.plugin.lirc.lircrc):
         log.error('Could not initialize PyLirc!')
         sys.exit(1)
 
@@ -223,7 +223,7 @@ class Splashscreen(areas.Area):
         """
         fade out
         """
-        self.engine.hide(config.config.gui.theme.fadestep)
+        self.engine.hide(config.gui.theme.fadestep)
 
 
     def destroy(self):
@@ -247,7 +247,7 @@ if len(sys.argv) >= 2:
         displays.fullscreen = True
 
 try:
-    freevo.ipc.Instance('freevo', **config.MBUS_ADDR)
+    freevo.ipc.Instance('freevo')
 
     # create gui
     displays.create()

@@ -1,74 +1,97 @@
 <?xml version="1.0"?>
 <config name="">
+    <var name="debug" default="false">
+        <desc>Print out some debug messages</desc>
+    </var>
+
     <group name="directory">
         <desc>Directory settings</desc>
 
-	<var name="sort" default="smart">
-	    <desc>
-		How to sort the items in a directory. Valid values are
-		'name' (name of the item, maybe based on metadata), 'smart'
-		(like name but ignore "The" and "A" at the beginning),
-		'filename', 'date-old-first' and 'date-new-first'.
-	    </desc>
-	    <values>
-		<value>name</value>
-		<value>smart</value>
-		<value>filename</value>
-		<value>date-old-first</value>
-		<value>date-new-first</value>
-	    </values>
-	</var>
+        <var name="sort" default="smart">
+            <desc>
+                How to sort the items in a directory. Valid values are
+                'name' (name of the item, maybe based on metadata), 'smart'
+                (like name but ignore "The" and "A" at the beginning),
+                'filename', 'date-old-first' and 'date-new-first'.
+            </desc>
+            <values>
+                <value>name</value>
+                <value>smart</value>
+                <value>filename</value>
+                <value>date-old-first</value>
+                <value>date-new-first</value>
+            </values>
+        </var>
 
-	<var name="tvsort" default="date-old-first">
-	    <desc>
-		How to sort the items in a directory in the tv menu.
-	    </desc>
-	    <values>
-		<value>name</value>
-		<value>smart</value>
-		<value>filename</value>
-		<value>date-old-first</value>
-		<value>date-new-first</value>
-	    </values>
-	</var>
+        <var name="tvsort" default="date-old-first">
+            <desc>
+                How to sort the items in a directory in the tv menu.
+            </desc>
+            <values>
+                <value>name</value>
+                <value>smart</value>
+                <value>filename</value>
+                <value>date-old-first</value>
+                <value>date-new-first</value>
+            </values>
+        </var>
 
-	<var name="autoplay-single-item" default="True">
-	    <desc>Autoplay an item if only one item is in the directory</desc>
-	</var>
+        <var name="autoplay-single-item" default="True">
+            <desc>Autoplay an item if only one item is in the directory</desc>
+        </var>
 
-	<var name="autoplay-items" type="str">
-	    <desc>
-		Make play and not brose the default action if a directory only
-		contains files and no subdirectories. The value is a comma
-		sperated list of media types.
-	    </desc>
-	</var>
+        <var name="autoplay-items" type="str">
+            <desc>
+                Make play and not brose the default action if a directory only
+                contains files and no subdirectories. The value is a comma
+                sperated list of media types.
+            </desc>
+        </var>
 
-	<var name="add-playlist-items" default="audio,image">
-	    <desc>
-		Add playlist file from the directory. The value is a comma
-		sperated list of media types.
-	    </desc>
-	</var>
+        <var name="add-playlist-items" default="audio,image">
+            <desc>
+                Add playlist file from the directory. The value is a comma
+                sperated list of media types.
+            </desc>
+        </var>
 
-	<var name="add-random-playlist" default="audio">
-	    <desc>
-		Add a random playlist item.  The value is a comma sperated
-		list of media types.
-	    </desc>
-	</var>
+        <var name="add-random-playlist" default="audio">
+            <desc>
+                Add a random playlist item.  The value is a comma sperated
+                list of media types.
+            </desc>
+        </var>
 
-	<var name="isplaylist" default="audio,image">
-	    <desc>
-		Make all items a playlist. So when one is finished, the
-		next one will start. It's also possible to browse through
-		the list with UP and DOWN. The value is a comma sperated
-		list of media types.
-	    </desc>
-	</var>
+        <var name="isplaylist" default="audio,image">
+            <desc>
+                Make all items a playlist. So when one is finished, the
+                next one will start. It's also possible to browse through
+                the list with UP and DOWN. The value is a comma sperated
+                list of media types.
+            </desc>
+        </var>
 
         <var name="use-metadata" default="True">
             <desc>Use names from metadata and not the filename</desc>
+        </var>
+    </group>
+
+    <group name="playlist">
+        <desc>Playlist settings</desc>
+
+        <var name="suffix" default="m3u">
+            <desc>Comma seperated list of playlist suffixes.</desc>
+        </var>
+    </group>
+
+    <group name="menu">
+        <desc>Menu settings</desc>
+
+        <var name="arrow-navigation" default="false">
+            <desc>
+                Use arrow keys for back and select (alternate way of
+                navigating)
+            </desc> 
         </var>
     </group>
 

@@ -42,7 +42,7 @@ from kaa.strutils import str_to_unicode, unicode_to_str
 from kaa.weakref import weakref
 
 # freevo imports
-import config
+from config import config
 import util
 import plugin
 import fxditem
@@ -52,7 +52,6 @@ from menu import Action, Item, MediaItem, Menu, MediaPlugin
 
 # get logging object
 log = logging.getLogger()
-
 
 REPEAT_OFF      = 0
 REPEAT_ITEM     = 1
@@ -464,7 +463,7 @@ class PluginInterface(MediaPlugin):
         """
         return the list of suffixes this class handles
         """
-        return config.PLAYLIST_SUFFIX
+        return config.playlist.suffix
 
 
     def get(self, parent, listing):

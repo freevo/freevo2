@@ -34,16 +34,12 @@ import sys
 import os
 import logging
 
-import kaa.strutils
 import kaa.popcorn
 
 import freevo.conf
 
 # freevo imports
-from freevo.ui import input, plugin
-
-# import event names
-from freevo.ui.event import *
+from freevo.ui import plugin
 
 # get logging object
 log = logging.getLogger('config')
@@ -64,10 +60,6 @@ if not os.path.isfile(cfgfile):
     print '%s does not exist' % cfgfile
     print 'The file is now created and Freevo will stop so you can'
     print 'adjust the config settings.'
-    print 'Note: local_conf.py is still needed for some settings and is'
-    print 'now called local_conf2.py. Please adjust the name and check'
-    print 'freevo_config.py for possible variables still used in local_conf2.py.'
-    print 'This is temporary, the local_conf2.py will be removed later.'
     print 'You should recheck freevo2.conf after every svn update. Use'
     print '\'freevo setup\' to rebuild the file without starting freevo.'
     print 'Your settings will be saved when the config file is rewritten.'
@@ -78,6 +70,9 @@ config.load(cfgfile, create=True)
 if len(sys.argv) > 1 and sys.argv[1] in ('setup', '--setup', 'config', '--config'):
     print 'wrote %s' % cfgfile
     sys.exit(0)
+
+if config.debug:
+    logging.getLogger().setLevel(logging.INFO)
     
 # plugins ist a list of known plugins
 for p in plugins:
@@ -85,41 +80,11 @@ for p in plugins:
     for attr in p.split('.'):
         c = getattr(c, attr)
     if c.activate:
-        plugin.activate(p.replace('plugin.', '').replace('..', '.'), level=c.activate)
-    
+        p = p.replace('plugin.', '').replace('..', '.')
+        if isinstance(c.activate, bool):
+            plugin.activate(p)
+        else:
+            plugin.activate(p, level=c.activate)
+
 ICON_DIR  = os.path.join(freevo.conf.SHAREDIR, 'icons')
 IMAGE_DIR = os.path.join(freevo.conf.SHAREDIR, 'images')
-
-#
-# Load old freevo_config.py:
-#
-FREEVO_CONFIG = os.path.join(freevo.conf.SHAREDIR, 'freevo_config.py')
-if os.path.isfile(FREEVO_CONFIG):
-    log.info('Loading cfg: %s' % FREEVO_CONFIG)
-    execfile(FREEVO_CONFIG, globals(), locals())
-    
-else:
-    log.critical("Error: %s: no such file" % FREEVO_CONFIG)
-    sys.exit(1)
-
-
-#
-# Search for local_conf.py:
-#
-
-has_config = False
-for a in sys.argv:
-    if has_config == True:
-        has_config = a
-    if a == '-c':
-        has_config = True
-    
-for dirname in freevo.conf.cfgfilepath:
-    if isinstance(has_config, str):
-        overridefile = has_config
-    else:
-        overridefile = dirname + '/local_conf2.py'
-    if os.path.isfile(overridefile):
-        log.info('Loading cfg overrides: %s' % overridefile)
-        execfile(overridefile, globals(), locals())
-        break
