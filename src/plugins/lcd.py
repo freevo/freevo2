@@ -112,7 +112,6 @@ class PluginInterface( plugin.Plugin ):
                     return False
         self.lines = l
         self.columns = c
-        plugin.register( self, "lcd" )
 
         kaa.notifier.EventHandler(self.eventhandler).register()
         application.signals['changed'].connect(self.set_application)
