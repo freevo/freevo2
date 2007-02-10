@@ -81,8 +81,7 @@ class MediaMenu(MainMenuItem):
     """
 
     def __init__(self, parent, title, type, items):
-        MainMenuItem.__init__(self, '', self.main_menu, type='main',
-                              parent=parent, skin_type=type)
+        MainMenuItem.__init__(self, parent, skin_type=type)
         self.force_text_view = False
         self.display_type = type
         self.item_menu = None
@@ -193,7 +192,7 @@ class MediaMenu(MainMenuItem):
         return items
 
 
-    def main_menu(self):
+    def select(self):
         """
         display the (IMAGE|VIDEO|AUDIO|GAMES) main menu
         """

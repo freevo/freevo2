@@ -52,20 +52,21 @@ class MainMenuItem(Item):
     This class is a main menu item. Items of this type can be returned by
     a MainMenuPlugin.
     """
-    def __init__( self, name=u'', action=None, arg=None, type=None, image=None,
-                  icon=None, parent=None, skin_type=None):
+    def __init__( self, parent=None, name=u'', type=None, image=None,
+                  icon=None, skin_type=None):
 
         Item.__init__(self, parent)
         self.name = name
         self.icon = icon
         self.image = image
         self.type = type
-        self.function = action, arg
 
         if not type and not parent.parent:
             # this is the first page, force type to 'main'
             self.type = 'main'
 
+        if not skin_type and hasattr(self, 'skin_type'):
+            skin_type = self.skin_type
         if not skin_type:
             return
 
@@ -89,8 +90,16 @@ class MainMenuItem(Item):
         """
         Actions for this item.
         """
-        return [ Action(self.name, self.function[0]) ]
+        return [ Action(self.name, self.select) ]
 
+
+    def select(self):
+        """
+        Select the item (default action). Need to be overloaded by the
+        inherting item or actions() need to be overloaded.
+        """
+        raise RuntimeError("no action defined for %s", self)
+    
 
 class MainMenuPlugin(plugin.Plugin):
     """

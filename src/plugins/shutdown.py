@@ -52,9 +52,7 @@ class ShutdownItem(MainMenuItem):
     """
     Item for shutdown
     """
-    def __init__(self, parent=None):
-        MainMenuItem.__init__(self, parent=parent, skin_type='shutdown')
-
+    skin_type = 'shutdown'
 
     def actions(self):
         """

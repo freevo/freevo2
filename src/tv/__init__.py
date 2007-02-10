@@ -58,11 +58,9 @@ class TVMenu(MainMenuItem):
     """
     The TV main menu.
     """
-    def __init__(self, parent):
-        MainMenuItem.__init__(self, '', self.show, parent=parent, skin_type = 'tv')
+    skin_type = 'tv'
 
-
-    def show(self):
+    def select(self):
         items = []
         plugins_list = MainMenuPlugin.plugins('tv')
         for p in plugins_list:
