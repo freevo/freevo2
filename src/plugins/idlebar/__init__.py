@@ -38,10 +38,13 @@ import logging
 import kaa.notifier
 
 # freevo imports
-from freevo.ui import plugin, gui, application
+from freevo.ui.plugin import Plugin
+from freevo.ui import gui, application
 from freevo.ui.config import config
 from freevo.ui.gui import theme, imagelib, widgets, animation
 from freevo.ui.event import *
+
+from plugin import IdleBarPlugin
 
 # get logging object
 log = logging.getLogger()
@@ -49,22 +52,13 @@ log = logging.getLogger()
 # get gui config object
 guicfg = config.gui
 
-class PluginInterface(plugin.Plugin):
+class PluginInterface(Plugin):
     """
-    To activate the idle bar, put the following in your local_conf.py:
-        plugin.activate('idlebar')
-    You can then add various plugins. Plugins inside the idlebar are
-    sorted based on the level (except the clock, it's always on the
-    right side). Use 'freevo plugins -l' to see all available plugins,
-    and 'freevo plugins -i idlebar.<plugin>' for a specific plugin.
     """
-    def __init__(self):
+    def plugin_activate(self, level):
         """
         init the idlebar
         """
-        plugin.Plugin.__init__(self)
-        plugin.register(self, 'idlebar')
-
         # register for signals
         application.signals['changed'].connect(self._app_change)
 
@@ -81,12 +75,6 @@ class PluginInterface(plugin.Plugin):
         self._timer = kaa.notifier.Timer(self.poll)
         self._timer.start(30)
 
-        # Getting current LOCALE
-        try:
-            locale.resetlocale()
-        except:
-            pass
-
 
     def update(self):
         """
@@ -102,7 +90,7 @@ class PluginInterface(plugin.Plugin):
         x2 = w - guicfg.display.overscan.x
         y2 = h
 
-        for p in plugin.get('idlebar'):
+        for p in IdleBarPlugin.plugins():
             width = p.draw(x2 - x1, y2 - y1)
             if width == p.NO_CHANGE:
                 if p.align == 'left':
@@ -227,50 +215,3 @@ class PluginInterface(plugin.Plugin):
             return
         if self.update():
             gui.get_display().update()
-
-
-
-class IdleBarPlugin(plugin.Plugin):
-    def __init__(self):
-        plugin.Plugin.__init__(self)
-        self._plugin_type = 'idlebar'
-        self.objects   = []
-        self.NO_CHANGE = -1
-        self.align     = 'left'
-        self.__x       = 0
-        self.__y       = 0
-        self.width     = 0
-        if not plugin.getbyname('idlebar'):
-            plugin.activate('idlebar')
-            
-
-    def draw(self, width, height):
-        return self.NO_CHANGE
-
-
-
-    def clear(self):
-        self.__x = 0
-        self.__y = 0
-        for o in self.objects:
-            o.unparent()
-        self.objects = []
-
-
-    def set_pos(self, (x, y)):
-        """
-        move to x position
-        """
-        if x == self.__x and y == self.__y:
-            return
-        for o in self.objects:
-            o.move_relative(((x - self.__x), (y - self.__y)))
-        self.__x = x
-        self.__y = y
-
-
-    def update(self):
-        """
-        Force idlebar update.
-        """
-        plugin.getbyname('idlebar').poll()

@@ -33,16 +33,11 @@ import time
 
 from freevo.ui import gui
 from freevo.ui.gui import theme, widgets
-from freevo.ui.plugins.idlebar import IdleBarPlugin
+from plugin import IdleBarPlugin
 
 class PluginInterface(IdleBarPlugin):
     """
     Shows the current time.
-
-    Activate with:
-    plugin.activate('idlebar.clock',   level=50)
-    Note: The clock will always be displayed on the right side of
-    the idlebar.
     """
     def __init__(self, format=''):
         IdleBarPlugin.__init__(self)

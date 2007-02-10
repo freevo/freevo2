@@ -34,7 +34,7 @@ import os
 import freevo.conf
 from freevo.ui import gui
 from freevo.ui.gui import theme, widgets
-from freevo.ui.plugins.idlebar import IdleBarPlugin
+from plugin import IdleBarPlugin
 
 class PluginInterface(IdleBarPlugin):
     """
