@@ -54,14 +54,21 @@ class Plugin(object):
     def __init__(self, name=''):
         self._plugin_type = None
         self._plugin_level  = 10
-        self._plugin_name = name
         self._plugin_special = False
 
 
     def plugin_activate(self, level):
         pass
 
-    
+
+    def plugin_register(self, name):
+        """
+        Register plugin with the given name. In most cases this is not needed
+        because the plugin will always be registered by its own name.
+        """
+        _loader.register(self, name)
+
+
 class PluginLoader(object):
     """
     Class for handling the different plugins.
@@ -286,8 +293,7 @@ class PluginLoader(object):
                     self.types[key] = []
                 self.types[key].append(p)
 
-            if p._plugin_name:
-                self.names[p._plugin_name] = p
+            self.names[name] = p
 
             p.plugin_activate(level)
             self.loaded_plugins.append(p)
@@ -306,4 +312,3 @@ deactivate = _loader.deactivate
 init = _loader.init
 get = _loader.get
 getbyname = _loader.getbyname
-register = _loader.register
