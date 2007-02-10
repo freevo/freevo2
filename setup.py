@@ -34,7 +34,19 @@ import sys
 import os
 import stat
 
-# Freevo distutils stuff
+# try to be clever and add the install prefix to the path
+# to be sure kaa.base and freevo.core can be found
+for pos, arg in enumerate(sys.argv[1:]):
+    if arg.startswith('--prefix='):
+        prefix=arg[9:]
+    elif arg.startswith('--prefix') and pos + 2 < len(sys.argv):
+        prefix=sys.argv[pos+2]
+    else:
+        continue
+    libdir = 'lib/python%s.%s/site-packages' % sys.version_info[:2]
+    sys.path.insert(0, os.path.join(prefix, libdir))
+
+# import freevo distribution utils
 from freevo.distribution import setup, VERSION
 import freevo.conf
 
