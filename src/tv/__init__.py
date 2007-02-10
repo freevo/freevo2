@@ -1,18 +1,16 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# __init__.py - Freevo tv plugin
+# tv - Freevo tv plugin
 # -----------------------------------------------------------------------------
 # $Id$
 #
-#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2007 Dirk Meyer, et al.
 #
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
-#                Rob Shortt <rob@tvcentric.com>
 #
-# Please see the file doc/CREDITS for a complete list of authors.
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,35 +31,55 @@
 # freevo core plugins
 import freevo.ipc
 
+# freevo core imports
+import freevo.ipc
+
 # freevo imports
-from freevo.ui.mainmenu import MainMenuPlugin
+from freevo.ui.mainmenu import MainMenuItem, MainMenuPlugin
+from freevo.ui.menu import Item, Menu
+
+# connect to tvserver using freevo.ipc
+mbus = freevo.ipc.Instance('freevo')
+mbus.connect('freevo.ipc.tvserver')
+
+# get tvserver interface
+tvserver = freevo.ipc.Instance('freevo').tvserver
+
+class Info(Item):
+    def __getitem__(self, key):
+        if key in ('comingup', 'running'):
+            return getattr(tvserver.recordings, key)
+        if key == 'recordserver':
+            return tvserver.recordings.server
+        return Info.__getitem__(self, key)
+
+
+class TVMenu(MainMenuItem):
+    """
+    The TV main menu.
+    """
+    def __init__(self, parent):
+        MainMenuItem.__init__(self, '', self.show, parent=parent, skin_type = 'tv')
+
+
+    def show(self):
+        items = []
+        plugins_list = MainMenuPlugin.plugins('tv')
+        for p in plugins_list:
+            items += p.items(self)
+
+        m = Menu(_('TV Main Menu'), items, type = 'tv main menu')
+        m.infoitem = Info()
+        self.pushmenu(m)
 
 
 class PluginInterface(MainMenuPlugin):
     """
     Plugin interface to integrate the tv module into Freevo
     """
-    def __init__(self):
-        """
-        init the plugin.
-        """
-        MainMenuPlugin.__init__(self)
-
-        # import here to avoid importing all this when some helpers only
-        # want to import something from iside the tv directory
-
-        from freevo.ui import config
-        
-        # connect to tvserver using freevo.ipc
-        mbus = freevo.ipc.Instance('freevo')
-        mbus.connect('freevo.ipc.tvserver')
-    
-        from tvmenu import TVMenu
-        self.TVMenu = TVMenu
-
         
     def items(self, parent):
         """
         return the tv menu
         """
-        return [ self.TVMenu(parent) ]
+        return [ TVMenu(parent) ]

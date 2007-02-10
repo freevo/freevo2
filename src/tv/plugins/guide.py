@@ -6,11 +6,11 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2007 Dirk Meyer, et al.
 #
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
-# Please see the file doc/CREDITS for a complete list of authors.
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,14 +38,35 @@ import logging
 import kaa.epg
 import kaa.notifier
 
+# freevo core imports
+import freevo.ipc
+
+# freevo imports
 from freevo.ui.event import *
-from freevo.ui.menu import Item, Menu
-from program import ProgramItem
+from freevo.ui.mainmenu import MainMenuPlugin
+from freevo.ui.menu import Menu, ActionItem
+from freevo.ui.tv.program import ProgramItem
+from freevo.ui.application import MessageWindow
+
+# get tvserver interface
+tvserver = freevo.ipc.Instance('freevo').tvserver
 
 # get logging object
 log = logging.getLogger('tv')
 
+class PluginInterface(MainMenuPlugin):
 
+    def items(self, parent):
+        return [ ActionItem(_('TV Guide'), parent, self.show) ]
+
+    def show(self, parent):
+        if not tvserver.epg.connected():
+            MessageWindow(_('TVServer not running')).show()
+            return
+        guide = TVGuide(self)
+        parent.pushmenu(guide)
+
+    
 class TVGuide(Menu):
     """
     TVGuide menu.
@@ -55,7 +76,6 @@ class TVGuide(Menu):
         self.parent = parent
         self.channel_index = 0
         self.current_time = int(time.time())
-        print time.localtime(self.current_time)
         
         # current channel is the first one
         self.channels = kaa.epg.get_channels(sort=True)
@@ -87,7 +107,6 @@ class TVGuide(Menu):
 
         if not timestamp:
             timestamp = self.current_time
-        print time.localtime(timestamp)
 
         log.info('channel: %s time %s', self.channel, timestamp)
         wait = kaa.notifier.YieldCallback()

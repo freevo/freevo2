@@ -1,9 +1,6 @@
 <?xml version="1.0"?>
 <config name="tv" plugin="10">
     <desc lang="en">tv configuration</desc>
-    <var name="record-dir" type="str">
-        <desc>Directory where the recordings are stored</desc>
-    </var>
 
     <var name="dateformat" default="%e-%b"/>
 
