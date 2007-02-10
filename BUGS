@@ -1,2 +1,3 @@
 o DVD sometimes broken
 o Directory monitoring sometimes doesn't work
+o directory items with a '.' are getting stripped like file extensions
