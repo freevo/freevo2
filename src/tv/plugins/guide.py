@@ -63,7 +63,7 @@ class PluginInterface(MainMenuPlugin):
         if not tvserver.epg.connected():
             MessageWindow(_('TVServer not running')).show()
             return
-        guide = TVGuide(self)
+        guide = TVGuide(parent)
         parent.pushmenu(guide)
 
     
