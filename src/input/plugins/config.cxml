@@ -16,6 +16,9 @@
             </desc>
         </var>
         <code>
+            if os.path.isfile(os.path.expanduser('~/.freevo/lircrc')):
+                lircrc = os.path.expanduser('~/.freevo/lircrc')
+                config.input.plugin.lirc.lircrc = lircrc
             if os.path.isfile(config.input.plugin.lirc.lircrc):
                 config.input.plugin.lirc.activate = True
         </code>
