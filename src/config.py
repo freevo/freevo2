@@ -37,6 +37,7 @@ import logging
 import kaa.popcorn
 
 import freevo.conf
+from freevo.xmlconfig import xmlconfig
 
 # freevo imports
 from freevo.ui import plugin
@@ -48,7 +49,7 @@ log = logging.getLogger('config')
 pycfgfile = freevo.conf.datafile('freevo_config.py')
 cfgdir = os.path.join(freevo.conf.SHAREDIR, 'config')
 cfgsource = [ os.path.join(cfgdir, f) for f in os.listdir(cfgdir) ]
-freevo.conf.xmlconfig(pycfgfile, cfgsource)
+xmlconfig(pycfgfile, cfgsource)
 execfile(pycfgfile)
 
 # add external stuff
