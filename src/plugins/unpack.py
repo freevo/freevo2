@@ -80,8 +80,7 @@ class ArchiveItem(Item):
         self.pop = TextWindow(text=_('unpacking...'))
         self.pop.show()
         child = kaa.notifier.Process(app)
-        child.signals["completed"].connect(self.finished)
-        child.start()
+        child.start().connect(self.finished)
 
 
     def finished(self, exit_code):
