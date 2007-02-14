@@ -35,6 +35,7 @@ import os
 import logging
 
 import kaa.popcorn
+from kaa.config import set_default
 
 import freevo.conf
 from freevo.xmlconfig import xmlconfig
