@@ -192,8 +192,7 @@ def get_items(item):
     """
     items = []
 
-    if item.filename or (item.mode in ('dvd', 'vcd') and \
-                         item.player_rating >= 20):
+    if item.filename or item.mode in ('dvd', 'vcd'):
         if item.info.has_key('audio') and len(item.info['audio']) > 1:
             a = ActionItem(_('Audio selection'), item, audio_selection)
             items.append(a)
