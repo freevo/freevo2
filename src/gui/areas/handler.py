@@ -51,6 +51,8 @@ import freevo.conf
 import logging
 log = logging.getLogger('gui')
 
+import kaa.notifier
+
 # freevo imports
 from freevo.ui import config
 from kaa.weakref import weakref
@@ -107,15 +109,22 @@ class Handler(object):
             a.set_screen(weakref(self))
             
         self.display_style['menu'] = 0
-
+        kaa.notifier.signals['shutdown'].connect_weak(self._cleanup_on_shutdown)
+        
 
     def __del__(self):
         """
         Delete an area handler
         """
+        self._cleanup_on_shutdown()
+
+
+    def _cleanup_on_shutdown(self):
+        """
+        Do nice cleanup before python itself starts deleting stuff.
+        """
         while self.areas:
-            self.areas[0].clear_all()
-            del self.areas[0]
+            self.areas.pop().clear_all()
         for l in self.layer:
             l.unparent()
         self.layer = []
