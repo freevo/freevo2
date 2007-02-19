@@ -4,29 +4,14 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# If you want to expand the fxd file with a new tag below <freevo>, you
-# can register a callback here. Create a class based on FXDItem (same
-# __init__ signature). The 'parser' is something from freevo.fxdparser, which
-# gets the real callback. After parsing, the variable 'items' from the
-# objects will be returned.
-#
-# Register your handler with the register function. 'types' is a list of
-# display types (e.g. 'audio', 'video', 'images'), handler is the class
-# (not an object of this class) which is a subclass of FXDItem.
-#
-# If the fxd files 'covers' a real item like the movie information cover
-# real movie files, please do
-# a) add the fxd file as 'fxd_file' memeber variable to the new item
-# b) add the files as list _fxd_covered_ to the item
-#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2007 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
-# Please see the file doc/CREDITS for a complete list of authors.
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,30 +35,54 @@ import copy
 import logging
 import os
 
+# freevo core imports
 import freevo.fxdparser
 
-import util
+# freevo imports
 import plugin
-
 from menu import Item, Action, Menu, MediaPlugin
 
 # get logging object
 log = logging.getLogger()
 
-# the parser for fxd nodes
-_callbacks = []
 
-def add_parser(types, node, callback):
+class Container(Item):
     """
-    Add a node parser for fxd files.
+    A simple container containing for items parsed from the fxd
     """
-    _callbacks.append((types, node, callback))
+    def __init__(self, title, image, info, parent):
+        Item.__init__(self, parent)
+        self.items = []
+        self.name = title
+        self.image = image
+        self.display_type = parent.display_type
 
-    
+
+    def actions(self):
+        """
+        Actions for this item
+        """
+        return [ Action(_('Browse list'), self.browse) ]
+
+
+    def browse(self):
+        """
+        Show all items
+        """
+        self.pushmenu(Menu(self.name, self.items, type=self.display_type))
+
+
+
 class PluginInterface(MediaPlugin):
     """
     Class to handle fxd files in directories
     """
+
+    def __init__(self):
+        MediaPlugin.__init__(self)
+        self._callbacks = []
+
+
     def get(self, parent, listing):
         """
         Return a list of items based on the listing
@@ -111,13 +120,20 @@ class PluginInterface(MediaPlugin):
         return len(self.get(parent, listing))
 
 
+    def add_parser(self, types, node, callback):
+        """
+        Add a node parser for fxd files.
+        """
+        self._callbacks.append((types, node, callback))
+
+
     def _parse(self, doc, node, parent, listing, display_type):
         """
         Internal parser function
         """
         items = []
         for c in doc.get_content(node):
-            for types, tag, handler in _callbacks:
+            for types, tag, handler in self._callbacks:
                 if display_type and types and not display_type in types:
                     # wrong type
                     continue
@@ -134,34 +150,7 @@ class PluginInterface(MediaPlugin):
 
 
 
-class Container(Item):
-    """
-    a simple container containing for items parsed from the fxd
-    """
-    def __init__(self, title, image, info, parent):
-        Item.__init__(self, parent)
-        self.items = []
-        self.name = title
-        self.image = image
-        self.display_type = parent.display_type
-        
-
-    def actions(self):
-        """
-        actions for this item
-        """
-        return [ Action(_('Browse list'), self.browse) ]
-
-
-    def browse(self):
-        """
-        show all items
-        """
-        moviemenu = Menu(self.name, self.items, type=self.display_type)
-        self.pushmenu(moviemenu)
-
-
-
 # load the MediaPlugin
 interface = PluginInterface()
+add_parser = interface.add_parser
 plugin.activate(interface, level=0)

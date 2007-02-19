@@ -58,10 +58,10 @@ class AudioItem(MediaItem):
     def __init__(self, url, parent):
         MediaItem.__init__(self, parent, type='audio')
         self.set_url(url)
-        self.start      = 0
-        self.elapsed    = 0
-        self.remain     = 0
-        self.pause      = 0
+        self.start   = 0
+        self.elapsed = 0
+        self.remain  = 0
+        self.pause   = 0
         try:
             self.length = int(self.info['length'])
         except:

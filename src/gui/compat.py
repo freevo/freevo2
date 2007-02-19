@@ -124,7 +124,9 @@ class _Videoplayer(BaseApplication):
     def get_window(self):
         return self.engine.canvas._window
     
-    
+
+_Tvplayer = _Videoplayer
+
 def Application(name):
     return eval('_' + name.capitalize())()
 

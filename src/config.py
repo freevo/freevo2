@@ -6,9 +6,9 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2007 Dirk Meyer, et al.
+# Copyright (C) 2007 Dirk Meyer, et al.
 #
-# First Edition: Krister Lagerstrom <krister-freevo@kmlager.com>
+# First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
 # Please see the file AUTHORS for a complete list of authors.
@@ -34,23 +34,24 @@ import sys
 import os
 import logging
 
+# kaa imports
 import kaa.popcorn
 from kaa.config import set_default
 
+# freevo core imports
 import freevo.conf
 from freevo.xmlconfig import xmlconfig
 
-# freevo imports
+# freevo ui imports
 from freevo.ui import plugin
-
-# get logging object
-log = logging.getLogger('config')
 
 # generate config
 pycfgfile = freevo.conf.datafile('freevo_config.py')
 cfgdir = os.path.join(freevo.conf.SHAREDIR, 'config')
 cfgsource = [ os.path.join(cfgdir, f) for f in os.listdir(cfgdir) ]
 xmlconfig(pycfgfile, cfgsource)
+
+# load config structure
 execfile(pycfgfile)
 
 # add external stuff
@@ -58,6 +59,9 @@ config.add_variable('player', kaa.popcorn.config)
 
 # load config
 cfgfile = os.path.expanduser('~/.freevo/freevo2.conf')
+if '-c' in sys.argv:
+    cfgfile = sys.argv[sys.argv.index('-c')+1]
+
 if not os.path.isfile(cfgfile):
     print '%s does not exist' % cfgfile
     print 'The file is now created and Freevo will stop so you can'
@@ -74,8 +78,11 @@ if len(sys.argv) > 1 and sys.argv[1] in ('setup', '--setup', 'config', '--config
     sys.exit(0)
 
 if config.debug:
+    # FIXME: make it possible to set debug for specific parts.
+    # Maybe use an environment variable and hock it into freevo.core
+    # or kaa.base.
     logging.getLogger().setLevel(logging.INFO)
-    
+
 # plugins ist a list of known plugins
 for p in plugins:
     c = config

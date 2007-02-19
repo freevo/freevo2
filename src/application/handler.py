@@ -198,11 +198,6 @@ class Handler(object):
                 self.applications.insert(0, self.applications.pop())
                 self.set_focus()
 
-            elif event == FUNCTION_CALL:
-                # event is a direct function call, call it and do not
-                # pass it on the the normal handling
-                event.arg()
-
             elif event.handler:
                 # event has it's own handler function, call this
                 # function and do not pass it on the the normal

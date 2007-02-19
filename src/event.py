@@ -206,10 +206,6 @@ INPUT_0                = Event('INPUT_0', 0)
 INPUT_ALL_NUMBERS = (INPUT_0, INPUT_1, INPUT_2, INPUT_3, INPUT_4, INPUT_5,
                      INPUT_6, INPUT_7, INPUT_8, INPUT_9, INPUT_0 )
 
-
-# Call the function specified in event.arg
-FUNCTION_CALL          = Event('FUNCTION_CALL')
-
 #
 # Internal events, don't map any button on them
 #
@@ -217,6 +213,3 @@ FUNCTION_CALL          = Event('FUNCTION_CALL')
 PLAY_END         = Event('PLAY_END')
 PLAY_START       = Event('PLAY_START')
 OSD_MESSAGE      = Event('OSD_MESSAGE')
-
-# FIXME: delete this
-RECORD           = Event('RECORD')
