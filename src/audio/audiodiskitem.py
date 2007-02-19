@@ -76,7 +76,7 @@ class AudioDiskItem(Playlist):
 
         # add all playable items to the playlist of the directory
         # to play one files after the other
-        self.playlist = play_items
+        self.set_playlist(play_items)
 
         # all items together
         items = []

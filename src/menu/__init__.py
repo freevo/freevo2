@@ -32,6 +32,7 @@
 # import the submodules
 from files import Files
 from item import Item
+from listing import ItemList
 from mediaitem import MediaItem
 from action import Action
 from menu import Menu

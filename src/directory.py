@@ -360,7 +360,6 @@ class DirItem(Playlist):
         """
         # FIXME: check for password
 
-        self.playlist   = []
         play_items = []
         dir_items  = []
         pl_items   = []
@@ -470,7 +469,7 @@ class DirItem(Playlist):
         # add all playable items to the playlist of the directory
         # to play one files after the other
         if self['config:isplaylist']:
-            self.playlist = play_items
+            self.set_playlist(play_items)
 
         # build a list of all items
         items = dir_items + pl_items + play_items

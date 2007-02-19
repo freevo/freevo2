@@ -43,11 +43,12 @@ from freevo.ui.event import *
 
 # menu imports
 from item import Item
+from listing import ItemList
 
 # get logging object
 log = logging.getLogger()
 
-class Menu(object):
+class Menu(ItemList):
     """
     A Menu page with Items for the MenuStack. It is not allowed to change
     the selected item or the internal choices directly, use 'select',
@@ -56,6 +57,7 @@ class Menu(object):
     next_id = 0
 
     def __init__(self, heading, choices=[], reload_func = None, type = None):
+        ItemList.__init__(self, choices)
 
         self.heading = heading
         self.stack   = None
@@ -63,15 +65,8 @@ class Menu(object):
         # unique id of the menu object
         Menu.next_id += 1
         self.id = Menu.next_id
-        # state, will increase on every item change
-        self.state = 0
         # position in the menu stack
         self.pos = -1
-
-        # set items
-        self.choices = []
-        self.selected = None
-        self.set_items(choices, False)
 
         # special items for the new skin to use in the view or info
         # area. If None, menu.selected will be taken
@@ -103,105 +98,27 @@ class Menu(object):
         Set/replace the items in this menu. If refresh is True, the menu
         stack will be refreshed and redrawn.
         """
-        # increase state variable
-        self.state += 1
-
         # delete ref to menu for old choices
         for c in self.choices:
             c.menu = None
 
         # set new choices and selection
-        self.choices = items
+        ItemList.set_items(self, items)
 
         # set menu (self) pointer to the items
         sref = weakref(self)
         for c in self.choices:
             c.menu = sref
 
-        # try to reset selection in case we had one
-        if not self.selected:
-            # no old selection
-            if len(self.choices):
-                self.select(self.choices[0])
-            else:
-                self.select(None)
-
-        elif self.selected in self.choices:
-            # item is still there, reuse it
-            self.select(self.selected)
-
-        else:
-            for c in self.choices:
-                if c.__id__() == self.selected_id:
-                    # item with the same id is there, use it
-                    self.select(c)
-                    break
-            else:
-                if self.choices:
-                    # item is gone now, try to the selection close
-                    # to the old item
-                    pos = max(0, min(self.selected_pos-1, len(self.choices)-1))
-                    self.select(self.choices[pos])
-                else:
-                    # no item in the list
-                    self.select(None)
-
         if refresh and self.stack:
             self.stack.refresh()
-
-
-    def select(self, item):
-        """
-        Set the selection to a specific item in the list. If item in an int
-        select a new item relative to current selected
-        """
-        if isinstance(item, Item):
-            # select item
-            self.selected     = item
-            try:
-                self.selected_pos = self.choices.index(item)
-                self.selected_id  = self.selected.__id__()
-            except ValueError, e:
-                log.exception('crash by select %s in %s' % (item, self.choices))
-                if self.choices:
-                    self.select(self.choices[0])
-                else:
-                    self.select(None)
-        elif item == None:
-            # nothing to select
-            self.selected     = None
-            self.selected_pos = -1
-        else:
-            # select relative
-            p = min(max(0, self.selected_pos + item), len(self.choices) - 1)
-            self.select(self.choices[p])
-
-
-    def get_items(self):
-        """
-        Return the list of items in this menu.
-        """
-        return self.choices
-
-
-    def get_selection(self):
-        """
-        Return current selected item.
-        """
-        return self.selected
 
 
     def change_item(self, old, new):
         """
         Replace the item 'old' with the 'new'.
         """
-        # increase state variable
-        self.state += 1
-
-        # change item
-        self.choices[self.choices.index(old)] = new
-        if self.selected == old:
-            self.select(new)
+        ItemList.change_item(self, old, new)
         old.menu = None
         new.menu = weakref(self)
 

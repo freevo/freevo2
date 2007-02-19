@@ -48,7 +48,7 @@ import plugin
 import fxditem
 
 from event import *
-from menu import Action, Item, MediaItem, Menu, MediaPlugin
+from menu import Action, Item, MediaItem, Menu, MediaPlugin, ItemList
 
 # get logging object
 log = logging.getLogger()
@@ -57,7 +57,7 @@ REPEAT_OFF      = 0
 REPEAT_ITEM     = 1
 REPEAT_PLAYLIST = 2
 
-class Playlist(MediaItem):
+class Playlist(MediaItem, ItemList):
     """
     Class for playlists. A playlist can be created with a list of items, a
     filename containing the playlist or a (list of) beacon query(s).
@@ -74,28 +74,30 @@ class Playlist(MediaItem):
                      3) a list (directoryname, recursive=0|1)
         """
         MediaItem.__init__(self, parent, type='playlist')
+        ItemList.__init__(self)
+
         self.name = str_to_unicode(name)
 
         # variables only for Playlist
-        self.playlist     = playlist
+        self._playlist    = playlist
         self.autoplay     = autoplay
         self.repeat       = repeat
         self.display_type = type
         self.next_pos     = None
-        self.__playlist_valid = False
+        self._playlist_valid = False
 
         self.background_playlist = None
-        self.random = random
-
-        # Listing stuff, this makes it look like a Menu to the listing
-        # widget. That needs to be cleaned up, e.g. make a List class and
-        # let the listing widget check for it.
-        self.state    = 0
-        self.selected = None
-        self.selected_pos = None
+        self._random = random
 
         # create a basic info object
         self.info = {}
+
+
+    def set_playlist(self, playlist):
+        """
+        Set a new playlist.
+        """
+        self.set_items(playlist, 0)
 
 
     def _read_m3u(self, plsname, content):
@@ -137,86 +139,88 @@ class Playlist(MediaItem):
         return playlist
 
 
-    def __create_playlist_items(self):
+    def _playlist_create_items(self):
         """
         Build the playlist. Create a list of items and filenames. This function
         will load the playlist file or expand directories
         """
-        if self.__playlist_valid:
-            # we called this function before
-            return
-        self.__playlist_valid = True
+        self._playlist_valid = True
 
         # create a basic info object
         self.info = {}
-        playlist = self.playlist
-        self.playlist = []
+        items = []
 
-        if isinstance(playlist, (str, unicode)):
+        if isinstance(self._playlist, (str, unicode)):
             # playlist is a filename, load the file and create playlist
-            self.set_url(playlist)
-            log.info('create playlist for %s' % playlist)
+            self.set_url(self._playlist)
+            log.info('create playlist for %s' % self._playlist)
             try:
-                f=open(playlist, "r")
+                f=open(self._playlist, "r")
                 content = map(lambda l: l.strip(' \n\r'), f.readlines())
                 f.close
                 if content and content[0].find("[playlist]") > -1:
-                    playlist = self._read_pls(playlist, content)
+                    self._playlist = self._read_pls(self._playlist, content)
                 else:
-                    playlist = self._read_m3u(playlist, content)
+                    self._playlist = self._read_m3u(self._playlist, content)
             except (OSError, IOError), e:
                 log.error('playlist error: %s' % e)
-                playlist = []
+                self._playlist = []
 
-        if isinstance(playlist, kaa.beacon.Query):
-            playlist = [ playlist ]
+        if isinstance(self._playlist, kaa.beacon.Query):
+            self._playlist = [ self._playlist ]
 
         # Note: playlist is a list of Items, strings (filenames) or a
         # beacon queries now.
 
         plugins = MediaPlugin.plugins(self.display_type)
-        for item in playlist:
+        for item in self._playlist:
 
             if isinstance(item, Item):
                 # Item object, correct parent
                 item = copy.copy(item)
                 item.parent = weakref(self)
-                self.playlist.append(item)
+                items.append(item)
                 continue
 
             if not isinstance(item, kaa.beacon.Query):
                 # make item a beacon query
                 item = kaa.beacon.query(filename=item)
 
-            _playlist = []
-            items = item.get(filter='extmap')
+            playlist = []
+            fitems = item.get(filter='extmap')
             for p in plugins:
-                _playlist.extend(p.get(self, items))
+                playlist.extend(p.get(self, fitems))
 
             # sort beacon query on url
-            _playlist.sort(lambda x,y: cmp(x.url, y.url))
+            playlist.sort(lambda x,y: cmp(x.url, y.url))
             # add to playlist
-            self.playlist.extend(_playlist)
+            items.extend(playlist)
+        self.set_items(items, 0)
+        self._playlist = []
 
 
-    def randomize(self):
+    def _randomize(self):
         """
         resort the playlist by random
         """
-        old = self.playlist
-        self.playlist = []
-        while old:
-            element = random.choice(old)
-            old.remove(element)
-            self.playlist += [ element ]
+        if not self._random:
+            return False
+        playlist = self.choices
+        randomized = []
+        while playlist:
+            element = random.choice(playlist)
+            playlist.remove(element)
+            randomized.append(element)
+        self.set_items(randomized, 0)
+        return True
 
 
     def __getitem__(self, attr):
         """
         return the specific attribute
         """
-        if not self.__playlist_valid:
-            self.__create_playlist_items()
+        if not self._playlist_valid:
+            self._playlist_create_items()
         return MediaItem.__getitem__(self, attr)
 
 
@@ -224,8 +228,8 @@ class Playlist(MediaItem):
         """
         return the actions for this item: play and browse
         """
-        if not self.__playlist_valid:
-            self.__create_playlist_items()
+        if not self._playlist_valid:
+            self._playlist_create_items()
 
         browse = Action(_('Browse Playlist'), self.browse)
         play = Action(_('Play'), self.play)
@@ -235,8 +239,8 @@ class Playlist(MediaItem):
         else:
             items = [ browse, play ]
 
-        if not self.random:
-            items.append(Action(_('Random play all items'), self.random_play))
+        if not self._random:
+            items.append(Action(_('Random play all items'), self._play_random))
 
         return items
 
@@ -245,65 +249,58 @@ class Playlist(MediaItem):
         """
         show the playlist in the menu
         """
-        if not self.__playlist_valid:
-            self.__create_playlist_items()
-        if self.random:
-            self.randomize()
+        if not self._playlist_valid:
+            self._playlist_create_items()
+
+        # randomize if needed
+        self._randomize()
 
         display_type = self.display_type
         if self.display_type == 'tv':
             display_type = 'video'
 
-        menu = Menu(self.name, self.playlist, type = display_type)
+        menu = Menu(self.name, self.choices, type = display_type)
         self.pushmenu(menu)
-
-
-    def random_play(self):
-        """
-        play the playlist in random order
-        """
-        Playlist(playlist=self.playlist, parent=self.parent,
-                 type=self.display_type, random=True,
-                 repeat=self.repeat).play()
 
 
     def play(self):
         """
         play the playlist
         """
-        if not self.playlist:
+        if not self._playlist_valid:
+            self._playlist_create_items()
+
+        if not self.choices:
             log.warning('empty playlist')
             return False
 
-        # First start playing. This is a bad hack and needs to
-        # be fixed when fixing the whole self.playlist stuff
-
-        if not self.__playlist_valid:
-            self.__create_playlist_items()
-
-        if self.random:
-            self.randomize()
+        # randomize if needed
+        self._randomize()
 
         if self.background_playlist:
             self.background_playlist.play()
 
-        if not self.playlist:
-            log.warning('empty playlist')
-            return False
-
-        # XXX looks like a menu now
-        self.choices = self.playlist
-
         # FIXME: add random code
         self.next_pos = 0
-        self.state += 1
 
         # Send a PLAY_START event for ourself
         PLAY_START.post(self)
         self._play_next()
 
 
+    def _play_random(self):
+        """
+        play the playlist in random order
+        """
+        Playlist(playlist=self.choices, parent=self.parent,
+                 type=self.display_type, random=True,
+                 repeat=self.repeat).play()
+
+
     def _play_next(self):
+        """
+        Play the next item (defined by self.next_pos).
+        """
         self.select(self.choices[self.next_pos])
 
         if hasattr(self.selected, 'play'):
@@ -338,23 +335,13 @@ class Playlist(MediaItem):
         """
         Select item that is playing right now.
         """
-        if not self.playlist:
-            # no need to change stuff (video dir playing)
-            return True
+        ItemList.select(self, item)
+        if self.selected is None:
+            return False
 
-        if not hasattr(self, 'choices') or self.choices != self.playlist:
-            self.choices = self.playlist
-            self.state += 1
-
-        if self.selected == item:
-            return True
-
-        self.selected_pos = self.choices.index(item)
-        self.selected = item
-
-        if item.menu and item in item.menu.choices:
+        if self.selected.menu and self.selected in self.selected.menu.choices:
             # update menu
-            item.menu.select(item)
+            self.selected.menu.select(self.selected)
 
         # get next item
         self.next_pos = (self.selected_pos+1) % len(self.choices)
@@ -373,21 +360,19 @@ class Playlist(MediaItem):
         """
         Handle playlist specific events
         """
-        if event == PLAY_START and event.arg in self.playlist:
-            # FIXME: remove this after application update
-            self.select(event.arg)
+        if event == PLAY_START:
             # a new item started playing, cache next (if supported)
             if self.next_pos is not None and \
                    hasattr(self.choices[self.next_pos], 'cache'):
                 self.choices[self.next_pos].cache()
             return True
 
-        # give the event to the next eventhandler in the list
         if not self.selected:
+            # There is no selected item. All following functions need
+            # with self.selected so pass the event to the parent now.
             if event == PLAY_END:
                 event = Event(PLAY_END, self)
             return MediaItem.eventhandler(self, event)
-
 
         if event == PLAYLIST_TOGGLE_REPEAT:
             self.repeat += 1
@@ -401,7 +386,6 @@ class Playlist(MediaItem):
             OSD_MESSAGE.post(arg)
             return True
 
-
         if event == PLAY_END:
             if self.repeat == REPEAT_ITEM:
                 # Repeat current item
@@ -410,11 +394,15 @@ class Playlist(MediaItem):
             if self.next_pos is not None:
                 # Play next item
                 self._play_next()
-            else:
-                # Nothing to play
-                self.stop()
-                # Send a PLAY_END event for ourself
-                PLAY_END.post(self)
+                return True
+            # Nothing to play
+            self.selected = None
+            # Call stop() again here. We need that to stop the bg playlist
+            # but it is not good because stop() is called from the outside
+            # and will result in this PLAY_END.
+            self.stop()
+            # Send a PLAY_END event for ourself
+            PLAY_END.post(self)
             return True
 
         if event == PLAYLIST_NEXT:
@@ -423,10 +411,8 @@ class Playlist(MediaItem):
                 # current one sends the stop event
                 self.selected.stop()
                 return True
-            else:
-                # No next item
-                OSD_MESSAGE.post(_('No Next Item In Playlist'))
-
+            # No next item
+            OSD_MESSAGE.post(_('No Next Item In Playlist'))
 
         if event == PLAYLIST_PREV:
             if self.selected_pos:
@@ -435,9 +421,8 @@ class Playlist(MediaItem):
                 self.next_pos = self.selected_pos - 1
                 self.selected.stop()
                 return True
-            else:
-                # No previous item
-                OSD_MESSAGE.post(_('no previous item in playlist'))
+            # No previous item
+            OSD_MESSAGE.post(_('no previous item in playlist'))
 
         if event == STOP:
             # Stop playing and send event to parent item
