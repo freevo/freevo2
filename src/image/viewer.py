@@ -157,7 +157,13 @@ class ImageViewer(Application):
             self.set_eventmap('image')
 
         filename      = item.filename
+        # Store item and playlist. We need to keep the playlist object
+        # here to make sure it is not deleted when player is running in
+        # the background.
         self.item = item
+        self.playlist = self.item.get_playlist()
+        if self.playlist:
+            self.playlist.select(self.item)
 
         if not self.last_item:
             # We just started, update the screen to make it
