@@ -173,11 +173,46 @@ class PluginInterface( plugin.Plugin ):
 
     def eventhandler(self, event):
         self.update()
+
         if event == PLAY_START:
             if self.running:
                 self.timer.start(0.2)
             self.playitem = event.arg
+
         elif event == PLAY_END or event == STOP:
             self.playitem = None
             self.timer.stop()
+
+        elif event == OSD_MESSAGE:
+            result = []
+            line = ''
+            for word in re.findall(u'.*?[, -.;\n\m\r]', unicode(event.arg) + u' '):
+                if len(line + word.rstrip()) <= self.width:
+                    line = line + word
+                    continue
+                line = line.rstrip()
+                while len(line) + 2 < self.width:
+                    line = u' %s ' % line
+                result.append(line)
+                line = word
+            line = line.rstrip()
+            while len(line) + 2 < self.width:
+                line = u' %s ' % line
+            result.append(line)
+            if len(result) <= self.height:
+                # fits as it is, use the full screen
+                osd = self.lcd.create_screen(priority='alert', duration=2)
+                for pos, line in enumerate(result):
+                    s = osd.widget_add('string')
+                    s.set(1, pos+1, line)
+                return True
+            # does not fit, use one line scroller, 10 seconds screentime
+            # FIXME: the scroller is a bad solution, maybe even 10 seconds
+            # are not enough and the scroller does not start with the first
+            # character
+            osd = self.lcd.create_screen(priority='alert', duration=10)
+            scroller = osd.widget_add('scroller')
+            scroller.set(1, 1, self.width, 1, 'm', 3, unicode(event.arg) + u'   ')
+            return True
+
         return True
