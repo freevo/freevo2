@@ -36,6 +36,7 @@
 import logging
 
 # kaa imports
+import kaa.notifier
 import kaa.epg
 
 # freevo imports
@@ -60,14 +61,19 @@ class GenreItem(Item):
         return [ Action(_('Browse list'), self.browse) ]
 
 
+    @kaa.notifier.yield_execution()
     def browse(self):
         """
         Find all the programs with this genre
         """
         items = []
-        for prg in kaa.epg.search():
-            if prg.genre == self.name:
-                items.append(ProgramItem(prg, self))
+        # query epg in background
+        query_data = kaa.epg.search(genre=self.name)
+        yield query_data
+        # fetch epg data from InProgress object
+        query_data = query_data()
+        for prg in query_data:
+            items.append(ProgramItem(prg, self))
         self.get_menustack().pushmenu(Menu(self.name, items, type='tv program menu'))
 
 
@@ -75,26 +81,28 @@ class GenreItem(Item):
 # the plugin is defined here
 #
 
-EXCLUDE_GENRES = ('unknown', 'none', '')
+EXCLUDE_GENRES = ('unknown', 'none', '', None)
 
 class PluginInterface(MainMenuPlugin):
     """
     Add 'Browse by Genre' to the TV menu.
     """
 
+    @kaa.notifier.yield_execution()
     def category(self, parent):
         """
         Show all category.
         """
         items = []
         genres = []
-        # find the available category/genre
-        # find a better way to do this via sqlDB ???... Because this is very intensive
-        for prg in kaa.epg.search():
-            genre = str(prg.genre).strip()
-            if prg.genre not in genres and genre.lower() not in EXCLUDE_GENRES:
-                genres.append(prg.genre)
-                items.append(GenreItem(parent, prg.genre))
+        # find the available category/genre in background
+        query_data = kaa.epg.search(attrs=['genre'], distinct=True)
+        yield query_data
+        # fetch epg data from InProgress object
+        query_data = query_data()
+        for genre, in query_data:
+            if genre not in EXCLUDE_GENRES:
+                items.append(GenreItem(parent, genre))
         parent.pushmenu(Menu(_('Genre'), items, type='tv listing'))
 
 
