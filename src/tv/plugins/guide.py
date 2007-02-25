@@ -109,10 +109,9 @@ class TVGuide(Menu):
             timestamp = self.current_time
 
         log.info('channel: %s time %s', self.channel, timestamp)
-        wait = kaa.notifier.YieldCallback()
-        kaa.epg.search(channel=self.channel, time=timestamp, callback=wait)
+        wait = kaa.epg.search(channel=self.channel, time=timestamp)
         yield wait
-        prg = wait.get()
+        prg = wait()
 
         if prg:
             # one program found, return it
@@ -120,21 +119,18 @@ class TVGuide(Menu):
         else:
             # Now we are in trouble, there is no program item. We need to create a fake
             # one between the last stop and the next start time. This is very slow!!!
-            wait = kaa.notifier.YieldCallback()
-            kaa.epg.search(channel=self.channel, time=(0, timestamp), callback=wait)
+            wait = kaa.epg.search(channel=self.channel, time=(0, timestamp))
             yield wait
-            p = wait.get()
+            p = wait()
             p.sort(lambda x,y: cmp(x.start, y.start))
             if p:
                 start = p[-1].stop
             else:
                 start = 0
 
-            wait = kaa.notifier.YieldCallback()
-            kaa.epg.search(channel=self.channel, time=(timestamp, sys.maxint),
-                           callback=wait)
+            wait = kaa.epg.search(channel=self.channel, time=(timestamp, sys.maxint))
             yield wait
-            p = wait.get()
+            p = wait()
             p.sort(lambda x,y: cmp(x.start, y.start))
             if p:
                 stop = p[0].start

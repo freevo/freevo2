@@ -199,9 +199,15 @@ class ProgramItem(Item):
         self.get_menustack().delete_submenu()
 
 
+    @kaa.notifier.yield_execution()
     def channel_details(self):
         items = []
-        for prog in kaa.epg.search(channel=self.channel):
+        # query the epg database in background
+        query_data = kaa.epg.search(channel=self.channel)
+        yield query_data
+        # get data from InProgress object
+        query_data = query_data()
+        for prog in query_data:
             items.append(ProgramItem(prog, self))
         cmenu = Menu(self.channel.name, items, type = 'tv program menu')
         # FIXME: the percent values need to be calculated

@@ -388,7 +388,8 @@ class TvlistingArea(Area):
         for channel in channel_list:
             try:
                 #for prg in channel[start_time:stop_time]:
-                for prg in kaa.epg.search(channel=channel, time=(start_time, stop_time)):
+                for prg in kaa.epg.search(channel=channel, time=(start_time, stop_time),
+                                          block = True):
                     flag_left   = 0
                     flag_right  = 0
 
