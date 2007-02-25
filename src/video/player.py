@@ -137,6 +137,7 @@ class Player(Application):
             self.player.set_property('deinterlace', True)
 
         # FIXME: set more properties
+        self.is_in_menu = False
         self.player.play()
 
 
@@ -169,6 +170,12 @@ class Player(Application):
         """
         Callback for elapsed time changes.
         """
+        if self.player.is_in_menu() != self.is_in_menu:
+            self.is_in_menu = not self.is_in_menu
+            if self.is_in_menu:
+                self.set_eventmap('dvd')
+            else:
+                self.set_eventmap('video')
         self.item.elapsed = round(self.player.get_position())
 
 
@@ -217,6 +224,10 @@ class Player(Application):
             self.item.info['interlaced'] = interlaced
             self.player.set_property('deinterlace', interlaced)
             return True
+
+        if str(event).startswith('DVDNAV_'):
+            # dvd navigation commands
+            self.player.nav_command(str(event)[7:].lower())
 
         # give it to the item
         return self.item.eventhandler(event)
