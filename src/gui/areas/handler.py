@@ -58,7 +58,7 @@ from freevo.ui import config
 from kaa.weakref import weakref
 
 # gui imports
-from freevo.ui.gui.widgets import Container
+from freevo.ui.gui.widgets import Container, Rectangle
 from freevo.ui.gui import theme as theme_engine
 from freevo.ui.gui import imagelib, animation, displays
 
@@ -111,6 +111,22 @@ class Handler(object):
         self.display_style['menu'] = 0
         kaa.notifier.signals['shutdown'].connect_weak(self._cleanup_on_shutdown)
         
+
+    def set_background(self, col):
+        a = 255 - ((col >> 24) & 0xff)
+        r = (col >> 16) & 0xff
+        g = (col >> 8) & 0xff
+        b = (col >> 0) & 0xff
+        color = (r, g, b, a)
+        if a == 255:
+            color = (r,g,b)
+        log.info('set color key %s', str(color))
+        # FIXME: this looks very very ugly. This results in fading
+        # to pure blue or pure green when starting a player. We need
+        # a good default colorkey.
+        r = Rectangle((0,0), (self.width, self.height), color, 0, color)
+        self.layer[0].add_child(r)
+
 
     def __del__(self):
         """

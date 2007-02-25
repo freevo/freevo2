@@ -114,6 +114,10 @@ class _Videoplayer(BaseApplication):
     name = 'video'
     areas = ()
 
+    def __init__(self):
+        from freevo.ui.config import config
+        BaseApplication.__init__(self)
+        self.engine.set_background(int(config.player.video.colorkey))
 
     def set_item(self, item):
         self.item = item
