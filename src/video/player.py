@@ -223,6 +223,10 @@ class Player(Application):
             interlaced = not self.player.get_property('deinterlace')
             self.item.info['interlaced'] = interlaced
             self.player.set_property('deinterlace', interlaced)
+            if interlaced:
+                Event(OSD_MESSAGE, _('Turn on deinterlacing')).post()
+            else:
+                Event(OSD_MESSAGE, _('Turn off deinterlacing')).post()
             return True
 
         if str(event).startswith('DVDNAV_'):
