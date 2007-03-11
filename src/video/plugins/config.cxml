@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<config name="video.plugin">
+    <desc lang="en">video plugins</desc>
+    <group name="resume" plugin="10">
+        <desc>
+            Add resume option to video files. The plugin will remember the
+            position when playback is stopped and add a resume option to the
+            item menu. If the plugin level is lower than 10 resume will be the
+            default option.
+        </desc>
+    </group>
+</config>
