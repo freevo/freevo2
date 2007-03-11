@@ -124,8 +124,8 @@ class Handler(object):
         # FIXME: this looks very very ugly. This results in fading
         # to pure blue or pure green when starting a player. We need
         # a good default colorkey.
-        r = Rectangle((0,0), (self.width, self.height), color, 0, color)
-        self.layer[0].add_child(r)
+        # r = Rectangle((0,0), (self.width, self.height), color, 0, color)
+        # self.layer[0].add_child(r)
 
 
     def __del__(self):
