@@ -69,6 +69,13 @@ class Plugin(object):
         _loader.register(self, name)
 
 
+    def plugin_level(self):
+        """
+        Return plugin level.
+        """
+        return self._plugin_level
+
+
 class PluginLoader(object):
     """
     Class for handling the different plugins.

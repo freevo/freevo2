@@ -161,14 +161,18 @@ class Item(object):
         override 'actions' instead.
         """
         # get actions defined by the item
-        items = self.actions()
+        post_actions = []
+        pre_actions = []
         # get actions defined by plugins
         for p in ItemPlugin.plugins(self.type):
+            actions = post_actions
+            if p.plugin_level() < 10:
+                actions = pre_actions
             for a in p.actions(self):
                 # set item for the action
                 a.item = self
-                items.append(a)
-        return items
+                actions.append(a)
+        return pre_actions + self.actions() + post_actions
 
 
     def get_menustack(self):
