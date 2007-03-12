@@ -276,12 +276,13 @@ class ImageViewer(Application):
             # position image at x/y value
             image = widgets.Image(image, (x, y))
 
+        blend_mode = config.blend_mode.upper().replace(' ', '_')
         if (self.last_image and self.last_item != item and
-            config.blend_mode != 'none'):
+            blend_mode != 'NONE'):
             # blend over to the new image
             gui.get_display().add_child(image)
             a = Transition([self.last_image], [image], 20,
-                           (gui_width, gui_height), config.blend_mode)
+                           (gui_width, gui_height), eval(blend_mode))
             # start the animation and wait until it's done
             a.start()
             a.wait()

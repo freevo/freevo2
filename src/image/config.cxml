@@ -32,12 +32,16 @@
         <var name="blend-mode" default="random">
             <desc>
                 Blend effect when switching from one image to another. Possible
-                values are random, alpha, wipe and none.
+                values are random, alpha blending, vertical wipe, horizonal wipe,
+                alpha vertical wipe, alpha horizonal wipe and none.
             </desc>
             <values>
                 <value>random</value>
-                <value>alpha</value>
-                <value>wipe</value>
+                <value>alpha blending</value>
+                <value>vertical wipe</value>
+                <value>horizonal wipe</value>
+                <value>alpha vertical wipe</value>
+                <value>alpha horizonal wipe</value>
                 <value>none</value>
             </values>
         </var>
