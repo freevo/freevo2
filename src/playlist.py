@@ -53,15 +53,16 @@ from menu import Action, Item, MediaItem, Menu, MediaPlugin, ItemList
 # get logging object
 log = logging.getLogger()
 
-REPEAT_OFF      = 0
-REPEAT_ITEM     = 1
-REPEAT_PLAYLIST = 2
-
 class Playlist(MediaItem, ItemList):
     """
     Class for playlists. A playlist can be created with a list of items, a
     filename containing the playlist or a (list of) beacon query(s).
     """
+
+    REPEAT_OFF      = 0
+    REPEAT_ITEM     = 1
+    REPEAT_PLAYLIST = 2
+
     def __init__(self, name='', playlist=[], parent=None, type=None,
                  random=False, autoplay=False, repeat=REPEAT_OFF):
         """
@@ -345,7 +346,7 @@ class Playlist(MediaItem, ItemList):
 
         # get next item
         self.next_pos = (self.selected_pos+1) % len(self.choices)
-        if self.next_pos == 0 and not self.repeat == REPEAT_PLAYLIST:
+        if self.next_pos == 0 and not self.repeat == Playlist.REPEAT_PLAYLIST:
             self.next_pos = None
 
 
@@ -376,18 +377,18 @@ class Playlist(MediaItem, ItemList):
 
         if event == PLAYLIST_TOGGLE_REPEAT:
             self.repeat += 1
-            if self.repeat == REPEAT_ITEM:
+            if self.repeat == Playlist.REPEAT_ITEM:
                 arg = _('Repeat Item')
-            elif self.repeat == REPEAT_PLAYLIST:
+            elif self.repeat == Playlist.REPEAT_PLAYLIST:
                 arg = _('Repeat Playlist')
             else:
-                self.repeat = REPEAT_OFF
+                self.repeat = Playlist.REPEAT_OFF
                 arg = _('Repeat Off')
             OSD_MESSAGE.post(arg)
             return True
 
         if event == PLAY_END:
-            if self.repeat == REPEAT_ITEM:
+            if self.repeat == Playlist.REPEAT_ITEM:
                 # Repeat current item
                 self.selected.play()
                 return True
