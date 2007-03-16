@@ -47,14 +47,17 @@ from freevo.ui.tv.program import ProgramItem
 # get logging object
 log = logging.getLogger('tv')
 
+EXCLUDE_GENRES = ('unknown', 'none', '', None)
+ALL = _('All Genre')
 
 class GenreItem(Item):
     """
     Item for the TV genre
     """
-    def __init__(self, parent, name):
+    def __init__(self, parent, name, category=None):
         Item.__init__(self, parent)
         self.name = name
+        self.cat = category
 
 
     def actions(self):
@@ -68,20 +71,70 @@ class GenreItem(Item):
         """
         items = []
         # query epg in background
-        query_data = kaa.epg.search(genre=self.name)
+        if self.cat:
+            query_data = kaa.epg.search(genre=self.name, category=self.cat)
+        else:
+            query_data = kaa.epg.search(genre=self.name)
         yield query_data
         # fetch epg data from InProgress object
         query_data = query_data()
         for prg in query_data:
             items.append(ProgramItem(prg, self))
-        self.get_menustack().pushmenu(Menu(self.name, items, type='tv program menu'))
+        # create menu for programs
+        menu = Menu(self.name, items, type='tv program menu')
+        self.get_menustack().pushmenu(menu)
+
+
+class CategoryItem(Item):
+    """
+    Item for a TV category
+    """
+    def __init__(self, parent, name):
+        Item.__init__(self, parent)
+        self.name = name
+        self.parent = parent
+
+
+    def actions(self):
+        return [ Action(_('Browse list'), self.browse)]
+        
+   
+    @kaa.notifier.yield_execution()
+    def browse(self):
+        """ 
+        Find all genres that are in this category
+        """
+        items = []
+         
+        if self.name==ALL:
+            # query epg in background for all genres
+            query_data = kaa.epg.search(attrs=['genre'], distinct=True)
+        else: 
+            # query epg in background for a specific category
+            query_data = kaa.epg.search(attrs=['genre'], category=self.name, 
+                                        distinct=True)
+        
+        yield query_data
+        # fetch epg data from InProgress object
+        query_data = query_data()
+        query_data.sort()
+        if self.name == ALL:
+            for genre, in query_data:
+                if genre not in EXCLUDE_GENRES:
+                    items.append(GenreItem(self.parent, genre))
+        else:
+            for genre, in query_data:
+                if genre not in EXCLUDE_GENRES:
+                    items.append(GenreItem(self.parent, genre, self.name))
+        # create menu
+        menu = Menu(self.name, items, type='tv listing')
+        self.get_menustack().pushmenu(menu)
+    
 
 
 #
 # the plugin is defined here
 #
-
-EXCLUDE_GENRES = ('unknown', 'none', '', None)
 
 class PluginInterface(MainMenuPlugin):
     """
@@ -94,15 +147,31 @@ class PluginInterface(MainMenuPlugin):
         Show all category.
         """
         items = []
-        genres = []
-        # find the available category/genre in background
-        query_data = kaa.epg.search(attrs=['genre'], distinct=True)
+               
+        # look if there is category data in the epg data
+        query_data = kaa.epg.search(attrs=['category'], distinct=True)
         yield query_data
         # fetch epg data from InProgress object
         query_data = query_data()
-        for genre, in query_data:
-            if genre not in EXCLUDE_GENRES:
-                items.append(GenreItem(parent, genre))
+        query_data.sort()
+        if len(query_data) > 1:
+            items.append(CategoryItem(parent, ALL))
+            # there is category data in the epg
+            for cat, in query_data:
+                if cat not in EXCLUDE_GENRES:
+                    items.append(CategoryItem(parent, cat))
+        else:
+            # maybe there is only genre data in the epg
+            query_data = kaa.epg.search(attrs=['genre'], distinct=True)
+            yield query_data
+            # fetch epg data from InProgress object
+            query_data = query_data()
+            query_data.sort()
+            for genre, in query_data:
+                if genre not in EXCLUDE_GENRES:
+                    items.append(GenreItem(parent, genre))
+        
+        # create menu
         parent.pushmenu(Menu(_('Genre'), items, type='tv listing'))
 
 
@@ -110,4 +179,4 @@ class PluginInterface(MainMenuPlugin):
         """
         Return the main menu item.
         """
-        return [ ActionItem(_('Browse by genre'), parent, self.category) ]
+        return [ ActionItem(_('Browse by Genre'), parent, self.category) ]
