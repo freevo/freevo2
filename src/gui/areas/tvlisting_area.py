@@ -47,6 +47,7 @@ from freevo.ui.gui import imagelib
 
 # kaa imports
 import kaa.epg
+import kaa.notifier
 
 # freevo core imports
 import freevo.ipc
@@ -85,12 +86,6 @@ class TvlistingArea(Area):
         self.last_items_geometry = None
         self.last_start_time = 0
         self.last_channels = None
-
-        # TODO: it is ugly keeping a list of channels everywhere
-        #       it may be best to handle this in the guide object or
-        #       in the freevo epg module (there we can use config items
-        #       to determine sort order.
-        self.channels = kaa.epg.get_channels(sort=True)
 
         # objects on the area
         self.chan_obj   = []
@@ -276,9 +271,11 @@ class TvlistingArea(Area):
         n_cols   = 4
         col_time = 30
 
-        if not self.channels:
-            # FIXME: why?
-            self.channels = kaa.epg.get_channels(sort=True)
+        self.channels = kaa.epg.get_channels(sort=True)
+        if isinstance(self.channels, kaa.notifier.InProgress):
+            while not self.channels.is_finished:
+                kaa.notifier.step()
+            self.channels = self.channels()
             
         if self.last_settings == self.settings:
             # same layout, only clean 'objects'

@@ -79,6 +79,11 @@ class TVGuide(Menu):
         
         # current channel is the first one
         self.channels = kaa.epg.get_channels(sort=True)
+        # FIXME: make it work without step()
+        if isinstance(self.channels, kaa.notifier.InProgress):
+            while not self.channels.is_finished:
+                kaa.notifier.step()
+            self.channels = self.channels()
         self.channel  = self.get_channel()
 
         # current program is the current running
