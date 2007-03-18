@@ -157,8 +157,7 @@ if len(sys.argv) == 2 and sys.argv[1] in ('-fs', '--fullscreen', '-f'):
     os.execvp('xinit', [ 'xinit', sys.argv[0], '-force-fs',  '--', ':'+str(server_num) ])
 
 # freevo imports
-from freevo import plugin
-from freevo.ui import util, beacon
+from freevo import plugin, beacon
 from freevo.ui.gui import theme, widgets, animation, displays, areas
 
 # load the fxditem to make sure it's the first in the
