@@ -39,7 +39,7 @@ import os
 from kaa.strutils import unicode_to_str
 
 # freevo core imports
-import freevo.fxdparser2
+import freevo.fxdparser
 
 # freevo imports
 import plugin
@@ -101,7 +101,7 @@ class PluginInterface(MediaPlugin):
         items = []
         for fxd_file in fxd_files:
             try:
-                doc = freevo.fxdparser2.Document(fxd_file.filename)
+                doc = freevo.fxdparser.Document(fxd_file.filename)
                 items.extend(self._parse(doc, parent, listing, type))
             except:
                 log.exception("fxd file %s corrupt" % fxd_file.filename)
