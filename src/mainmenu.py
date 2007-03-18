@@ -39,9 +39,9 @@ __all__ = [ 'MainMenuItem', 'MainMenu', 'MainMenuPlugin' ]
 import os
 
 # freevo imports
+from freevo import plugin
 import gui.theme
 import util
-import plugin
 
 from menu import Item, Action, Menu
 from application.menuw import MenuWidget

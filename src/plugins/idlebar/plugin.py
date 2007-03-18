@@ -29,7 +29,7 @@
 #
 # -----------------------------------------------------------------------------
 
-from freevo.ui import plugin
+from freevo import plugin
 
 class IdleBarPlugin(plugin.Plugin):
     def __init__(self):

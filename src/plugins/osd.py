@@ -39,7 +39,8 @@ import logging
 from kaa.notifier import OneShotTimer, EventHandler
 
 # freevo imports
-from freevo.ui import plugin, gui
+from freevo import plugin
+from freevo.ui import gui
 from freevo.ui.gui import theme, widgets
 from freevo.ui.config import config
 

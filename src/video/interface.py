@@ -41,7 +41,8 @@ import copy
 import string
 
 # freevo imports
-from freevo.ui import util, plugin, fxditem
+from freevo import plugin
+from freevo.ui import util, fxditem
 from freevo.ui.menu import Files, MediaPlugin
 from freevo.ui.config import config
 

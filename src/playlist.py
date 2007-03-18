@@ -42,9 +42,9 @@ from kaa.strutils import str_to_unicode, unicode_to_str
 from kaa.weakref import weakref
 
 # freevo imports
+from freevo import plugin
 from config import config
 import util
-import plugin
 import fxditem
 
 from event import *

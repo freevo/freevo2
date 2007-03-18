@@ -42,7 +42,7 @@ from kaa.strutils import unicode_to_str
 import freevo.fxdparser
 
 # freevo imports
-import plugin
+from freevo import plugin
 from menu import Item, Action, Menu, MediaPlugin
 
 # get logging object

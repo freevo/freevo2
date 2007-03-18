@@ -43,7 +43,6 @@ import freevo.ipc
 
 # freevo imports
 from freevo.ui.config import config
-from freevo.ui import plugin
 from freevo.ui.menu import Item, Action, Menu, ActionItem
 from freevo.ui.application import MessageWindow
 

@@ -34,7 +34,6 @@
 
 # Python imports
 import os
-from freevo.ui import plugin
 import logging
 
 # Freevo imports

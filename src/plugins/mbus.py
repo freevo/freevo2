@@ -5,9 +5,10 @@ import kaa.beacon
 
 # freevo core imports
 import freevo.ipc
+from freevo import plugin
 
 # freevo ui imports
-from freevo.ui import plugin, application
+from freevo.ui import application
 from freevo.ui.event import *
 from freevo.ui.directory import DirItem
 from freevo.ui.menu import MediaPlugin

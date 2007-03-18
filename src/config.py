@@ -41,9 +41,7 @@ from kaa.config import set_default
 # freevo core imports
 import freevo.conf
 from freevo.xmlconfig import xmlconfig
-
-# freevo ui imports
-from freevo.ui import plugin
+from freevo import plugin
 
 # generate config
 pycfgfile = freevo.conf.datafile('freevo_config.py')

@@ -32,8 +32,7 @@
 __all__ = [ 'ItemPlugin', 'MediaPlugin' ]
 
 # freevo imports
-from freevo.ui import plugin
-
+from freevo import plugin
 
 class ItemPlugin(plugin.Plugin):
     """
