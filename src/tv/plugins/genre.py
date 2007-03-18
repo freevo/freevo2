@@ -48,7 +48,8 @@ from freevo.ui.tv.program import ProgramItem
 log = logging.getLogger('tv')
 
 EXCLUDE_GENRES = ('unknown', 'none', '', None)
-ALL = _('All Genre')
+ALL_GENRE = _('All Genre')
+ALL_CAT = _('All Categories')
 
 class GenreItem(Item):
     """
@@ -72,7 +73,10 @@ class GenreItem(Item):
         items = []
         # query epg in background
         if self.cat:
-            query_data = kaa.epg.search(genre=self.name, category=self.cat)
+            if self.name==ALL_GENRE:
+                query_data = kaa.epg.search(category=self.cat)
+            else:
+                query_data = kaa.epg.search(genre=self.name, category=self.cat)
         else:
             query_data = kaa.epg.search(genre=self.name)
         yield query_data
@@ -106,7 +110,7 @@ class CategoryItem(Item):
         """
         items = []
          
-        if self.name==ALL:
+        if self.name==ALL_CAT:
             # query epg in background for all genres
             query_data = kaa.epg.search(attrs=['genre'], distinct=True)
         else: 
@@ -118,14 +122,14 @@ class CategoryItem(Item):
         # fetch epg data from InProgress object
         query_data = query_data()
         query_data.sort()
-        if self.name == ALL:
-            for genre, in query_data:
-                if genre not in EXCLUDE_GENRES:
+        if not self.name == ALL_CAT:
+            items.append(GenreItem(self.parent, ALL_GENRE, self.name))
+        for genre, in query_data:
+            if genre not in EXCLUDE_GENRES:
+                if self.name==ALL_CAT:
                     items.append(GenreItem(self.parent, genre))
-        else:
-            for genre, in query_data:
-                if genre not in EXCLUDE_GENRES:
-                    items.append(GenreItem(self.parent, genre, self.name))
+                else:    
+                    items.append(GenreItem(self.parent, genre, self.name)) 
         # create menu
         menu = Menu(self.name, items, type='tv listing')
         self.get_menustack().pushmenu(menu)
@@ -155,7 +159,7 @@ class PluginInterface(MainMenuPlugin):
         query_data = query_data()
         query_data.sort()
         if len(query_data) > 1:
-            items.append(CategoryItem(parent, ALL))
+            items.append(CategoryItem(parent, ALL_CAT))
             # there is category data in the epg
             for cat, in query_data:
                 if cat not in EXCLUDE_GENRES:
