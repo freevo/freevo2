@@ -157,7 +157,8 @@ if len(sys.argv) == 2 and sys.argv[1] in ('-fs', '--fullscreen', '-f'):
     os.execvp('xinit', [ 'xinit', sys.argv[0], '-force-fs',  '--', ':'+str(server_num) ])
 
 # freevo imports
-from freevo.ui import plugin, util, beacon
+from freevo import plugin
+from freevo.ui import util, beacon
 from freevo.ui.gui import theme, widgets, animation, displays, areas
 
 # load the fxditem to make sure it's the first in the
@@ -257,7 +258,7 @@ try:
     splash = Splashscreen(_('Starting Freevo, please wait ...'), num)
 
     # load plugins
-    plugin.init(splash.progress)
+    plugin.init(freevo.ui, splash.progress)
 
     # fade out the splash screen
     splash.hide()
