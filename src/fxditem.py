@@ -35,8 +35,11 @@ import copy
 import logging
 import os
 
+# kaa imports
+from kaa.strutils import unicode_to_str
+
 # freevo core imports
-import freevo.fxdparser
+import freevo.fxdparser2
 
 # freevo imports
 import plugin
@@ -98,8 +101,8 @@ class PluginInterface(MediaPlugin):
         items = []
         for fxd_file in fxd_files:
             try:
-                doc = freevo.fxdparser.FXD(fxd_file.filename)
-                items.extend(self._parse(doc, doc, parent, listing, type))
+                doc = freevo.fxdparser2.Document(fxd_file.filename)
+                items.extend(self._parse(doc, parent, listing, type))
             except:
                 log.exception("fxd file %s corrupt" % fxd_file.filename)
                 continue
@@ -127,12 +130,26 @@ class PluginInterface(MediaPlugin):
         self._callbacks.append((types, node, callback))
 
 
-    def _parse(self, doc, node, parent, listing, display_type):
+    def _parse(self, node, parent, listing, display_type):
         """
         Internal parser function
         """
         items = []
-        for c in doc.get_content(node):
+        dirname = node.root.dirname
+        for c in node:
+            c.dirname = dirname
+            c.title = c.getattr('title') or ''
+            c.image = None
+            c.info = {}
+            for attr in c.children:
+                if attr.name == 'cover-img' and attr.content:
+                    image = os.path.join(dirname, unicode_to_str(attr.content))
+                    if os.path.isfile(image):
+                        c.image = image
+                if attr.name == 'info':
+                    for i in attr.children:
+                        c.info[str(i.name)] = i.content
+
             for types, tag, handler in self._callbacks:
                 if display_type and types and not display_type in types:
                     # wrong type
@@ -143,7 +160,7 @@ class PluginInterface(MediaPlugin):
                         items.append(i)
             if c.name == 'container':
                 con = Container(c.title, c.image, c.info, parent)
-                con.items = self._parse(doc, c, con, listing, display_type)
+                con.items = self._parse(c, con, listing, display_type)
                 if con.items:
                     items.append(con)
         return items
