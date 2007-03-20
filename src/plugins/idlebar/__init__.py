@@ -38,7 +38,7 @@ import logging
 import kaa.notifier
 
 # freevo imports
-from freevo.ui.plugin import Plugin
+from freevo.plugin import Plugin
 from freevo.ui import gui, application
 from freevo.ui.config import config
 from freevo.ui.gui import theme, imagelib, widgets, animation
