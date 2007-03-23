@@ -20,4 +20,8 @@
         <desc>Add item to browse the EPG by genre</desc>
     </group>
 
+    <group name="scheduled" plugin="40">
+        <desc>Show scheduled recordings</desc>
+    </group>
+
 </config>
