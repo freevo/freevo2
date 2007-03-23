@@ -36,6 +36,7 @@ import time
 
 # kaa imports
 import kaa.epg
+import kaa.notifier
 from kaa.strutils import unicode_to_str
 
 # freevo core imports
@@ -178,23 +179,31 @@ class ProgramItem(Item):
         self.pushmenu(s)
 
 
+    @kaa.notifier.yield_execution()
     def schedule(self):
-        (result, msg) = tvserver.recordings.schedule(self)
-        if result:
-            MessageWindow(_('"%s" has been scheduled for recording') % \
-                       self.title).show()
+        result = tvserver.recordings.schedule(self)
+        if isinstance(result, kaa.notifier.InProgress):
+            yield result
+            result = result()
+        if result == tvserver.recordings.SUCCESS:
+            msg = _('"%s" has been scheduled for recording') % self.title
         else:
-            MessageWindow(_('Scheduling Failed')+(': %s' % msg)).show()
+            msg = _('Scheduling failed: %s') % result
+        MessageWindow(msg).show()
         self.get_menustack().delete_submenu()
 
 
+    @kaa.notifier.yield_execution()
     def remove(self):
-        (result, msg) = tvserver.recordings.remove(self.scheduled.id)
-        if result:
-            MessageWindow(_('"%s" has been removed as recording') % \
-                       self.title).show()
+        result = tvserver.recordings.remove(self.scheduled.id)
+        if isinstance(result, kaa.notifier.InProgress):
+            yield result
+            result = result()
+        if result == tvserver.recordings.SUCCESS:
+            msg = _('"%s" has been removed') % self.title
         else:
-            MessageWindow(_('Scheduling Failed')+(': %s' % msg)).show()
+            msg = _('Removing failed: %s') % result
+        MessageWindow(msg).show()
         self.get_menustack().delete_submenu()
 
 
