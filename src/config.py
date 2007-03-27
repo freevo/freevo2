@@ -43,6 +43,9 @@ import freevo.conf
 from freevo.xmlconfig import xmlconfig
 from freevo import plugin
 
+# freevo.ui imports
+import event as eventmodule
+
 # generate config
 pycfgfile = freevo.conf.datafile('freevo_config.py')
 cfgdir = os.path.join(freevo.conf.SHAREDIR, 'config')
@@ -54,6 +57,11 @@ execfile(pycfgfile)
 
 # add external stuff
 config.add_variable('player', kaa.popcorn.config)
+
+# add events defined in xml config to event.py. 'events' is defined in the
+# freevo_config.py file.
+for e in events:
+    setattr(eventmodule, e, eventmodule.Event(e))
 
 # load config
 cfgfile = os.path.expanduser('~/.freevo/freevo2.conf')
@@ -81,7 +89,7 @@ if config.debug:
     # or kaa.base.
     logging.getLogger().setLevel(logging.INFO)
 
-# plugins ist a list of known plugins
+# plugins is a list of known plugins
 for p in plugins:
     c = config
     for attr in p.split('.'):
