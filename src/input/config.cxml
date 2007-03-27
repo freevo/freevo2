@@ -1,7 +1,16 @@
 <?xml version="1.0"?>
 <config name="input">
     <desc>
-        FIMXE: add some doc about mapping.
+        This section is used for mapping keys and buttons from input devices
+        such as keyboard and remote control to Freevo events. The mapping is
+        done in two steps: the first step converts the key or remote button to
+        a unique name in Freevo and the second step maps that key based on the
+        current application inside Freevo to an event.
+        For remote control using lirc the first step is done with the lirrc
+        file mapping the codes from /etc/lird.conf to unique names. For
+        keyboard control some basic mappings are defined in input/keymap.py and
+        this can be extented with the input.keyboardmap variable.
+        The second mapping is done in the eventmap group in this config.
     </desc>
     <dict name="eventmap" type="str">
         <desc>
