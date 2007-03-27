@@ -75,6 +75,6 @@ class InputPlugin(plugin.Plugin):
             if not self.eventmap[c].has_key(key):
                 continue
 
-            return self.eventmap[c][key].post()
+            return self.eventmap[c][key].post(event_source='user')
 
         log.warning('no event mapping for key %s in %s' % (key, input.get_mapping()))

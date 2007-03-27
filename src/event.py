@@ -29,6 +29,7 @@
 #
 # -----------------------------------------------------------------------------
 
+import copy
 import kaa.notifier
 
 class Event(kaa.notifier.Event):
@@ -41,6 +42,7 @@ class Event(kaa.notifier.Event):
         self.handler = None
         if 'handler' in kwargs:
             self.handler = kwargs['handler']
+        self.source = 'system'
 
 
     def set_handler(self, handler):
@@ -58,6 +60,15 @@ class Event(kaa.notifier.Event):
         return int(self.name[-1])
 
 
+    def post(self, event_source='system', *args):
+        """
+        Post event into the queue.
+        """
+        event = copy.copy(self)
+        event.source = event_source
+        if args:
+            event._set_args(args)
+        kaa.notifier.Event.post(event)
 
 
 #
