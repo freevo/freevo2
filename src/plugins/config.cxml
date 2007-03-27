@@ -65,4 +65,32 @@
             possible to unpack files.
         </desc>
     </group>
+
+    <group name="dpms" plugin="true">
+        <event name="DPMS_BLANK_SCREEN"/>
+        <desc>
+            This plugin turns off DPMS (Energy Star) and screen blanking when
+            using Freevo with X. The program "xset" needs to be installed. On
+            Freevo shutdown the plugin turns on DPMS again.
+            The plugin defines an event called DPMS_BLANK_SCREEN which can be
+            used to turn off the monitor or tv and keep Freevo running. Every
+            key pressed after that will turn on the monitor again. The key
+            itself is also processed by Freevo, so e.g. pressing SELECT while
+            the screen is blank would result in SELECT being handled by
+            Freevo. The only exception is the DPMS_BLANK_SCREEN event itself.
+            The event can be mapped to any key, see the documentation about the
+            input selction itself. The following will send the event when
+            pressing 'b' on the keyboard or sending DPMS_BLANK_SCREEN from the
+            lircrc:
+            input.keyboardmap[B] = DPMS_BLANK_SCREEN
+            input.eventmap[global][DPMS_BLANK_SCREEN] = DPMS_BLANK_SCREEN
+        </desc>
+        <var name="timeout" default="0">
+            <desc>
+                If timeout is greater zero the screen will blank after
+                timeout minutes when in Freevo shows the menu.
+            </desc>
+        </var>
+    </group>
+
 </config>
