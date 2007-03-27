@@ -60,7 +60,7 @@ class PluginInterface(InputPlugin):
         InputPlugin.plugin_activate(self, level)
         gui.get_display()._window.signals["key_press_event"].connect(self.handle)
         self.keymap = copy.deepcopy(KEYBOARD_MAP)
-        for key, mapping in config.input.keyboardmap:
+        for key, mapping in config.input.keyboardmap.items():
             self.keymap[key] = mapping.upper()
 
         

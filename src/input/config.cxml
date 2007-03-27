@@ -19,9 +19,7 @@
 
     <dict name="keyboardmap" type="str">
         <desc>Keyboard mapping</desc>
-        <dict type="str">
-            <var type="str"/>
-        </dict>
+        <var type="str"/>
     </dict>
 
     <dict name="remotemap" type="str">
