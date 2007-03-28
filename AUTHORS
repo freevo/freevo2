@@ -3,44 +3,47 @@ Credits for Freevo
 
 $Id$
 
+Please email one the maintainer if your name happens to be missing
+here or the information is wrong!
+
+Maintainer:
+-----------
+
+Dirk Meyer <dischi@freevo.org>
 
 
-Packages/external code snippets:
---------------------------------
+Contributors Freevo 2.x
+-----------------------
 
-o mplayer: http://www.mplayerhq.hu
-o NVrec: http://www.ee.up.ac.za/~justin/v4l2/
-o mp3_id.py: http://id3-py.sourceforge.net/
-o EXIF support from Thierry Bousch <bousch@topo.math.u-psud.fr>
+Mathias Weber <mweb@gmx.ch>
+o games plugin
+
+Tanja Kotthaus <owigera@web.de>
+o tv enhancements
+
+Jose <jose4freevo@chello.nl>
+o tv enhancements
 
 
-People:
--------
-
-Please email one of the maintainers if your name happens to
-be missing here or the information is wrong!
-
-Maintainers:
+Contributors Freevo 1.x
+-----------------------
 
 Krister Lagerstrom <krister-freevo@kmlager.com>:
 o Initial implementation
-o Core developer
+o Core developer 1.x
 
 Aubin Paul <aubin@outlyer.org>:
-o Core developer
+o Core developer 1.x
 o Pseudo Interface Designer
 
-Dirk Meyer <dischi@freevo.org>:
-o Core developer
-
 Gustavo Sverzut Barbieri <gsbarbieri@yahoo.com.br>
-o Core developer
+o Core developer 1.x
 
 Rob Shortt <rob@tvcentric.com>
-o Core developer
+o Core developer 1.x
 
 Michael Ruelle <mikeruelle@comcast.net>
-o Core developer
+o Core developer 1.x
 
 Jason Ball <jason.ball@ce.com.au>:
 o SDL support in the OSD
@@ -48,12 +51,6 @@ o SDL support in the OSD
 Thomas Malt <thomas@malt.no>
 o Mplayer for Audio support
 o Ogg Vorbis Tag and Playback support
-
-
-
-
-Occasional contributors:
-------------------------
 
 Dan Eriksen <eriksen@canada.com>
 o 16-bit pixel support for the X11 OSD server
@@ -89,7 +86,6 @@ o timeshift plugin, pyshift modules and mplayer timefhifting patch
 Rob Vandermeulen (rdc@kokosnoot.com)
 o fxdimdb class + rewrite of the plugin & helper
 o the df plugin
-
 
 
 Special Copyright Notice:
