@@ -42,13 +42,13 @@ from subprocess import Popen, PIPE
 import kaa.utils
 
 # Freevo imports
-from freevo.ui.mainmenu import MainMenuPlugin
 from freevo.ui.menu import ActionItem, Menu, Action
 from freevo.ui.config import config
 
 # games imports
-from pcgames import PcGamePlayer, PcGameItem
+from freevo.ui.games.emulator import EmulatorPlugin
 import freevo.ui.games.player as gameplayer
+from pcgames import PcGamePlayer, PcGameItem
 
 # get logging object
 log = logging.getLogger('games')
@@ -91,7 +91,7 @@ class ScummvmItem(PcGameItem):
         gameplayer.play(self, ScummvmPlayer())
 
 
-class PluginInterface(MainMenuPlugin):
+class PluginInterface(EmulatorPlugin):
     """
     Add Scummvm games to the games menu
     """

@@ -33,6 +33,8 @@
 #
 # -----------------------------------------------------------------------------
 
+__all__ = [ 'EmulatorPlugin', 'EmulatorItem', 'EmulatorPlayer', 'EmulatorMenuItem' ]
+
 # python imports
 import logging
 import os
@@ -57,7 +59,7 @@ import player as gameplayer
 log = logging.getLogger('games')
 
 
-class Plugin(MainMenuPlugin):
+class EmulatorPlugin(MainMenuPlugin):
     """
     Add the emualtor items to the games menu
     """

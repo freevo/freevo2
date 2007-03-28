@@ -39,12 +39,11 @@
 import logging
 
 # Freevo imports
-from freevo.ui.mainmenu import MainMenuPlugin
 from freevo.ui.menu import ActionItem, Menu, Action
 from freevo.ui.config import config
 
 # games imports
-from freevo.ui.games.emulator import EmulatorItem, EmulatorPlayer
+from freevo.ui.games.emulator import *
 import freevo.ui.games.player as gameplayer
 
 # get logging object
@@ -114,7 +113,7 @@ class PcGameItem(EmulatorItem):
         gameplayer.play(self, PcGamePlayer())
 
 
-class PluginInterface(MainMenuPlugin):
+class PluginInterface(EmulatorPlugin):
     """
     Add PC game to games menu
     """

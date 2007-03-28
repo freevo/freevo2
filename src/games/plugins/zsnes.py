@@ -35,12 +35,12 @@
 from freevo.ui.config import config
 
 # games imports
-from freevo.ui.games import emulator
+from freevo.ui.games.emulator import *
 
 # get config object
 config = config.games.plugin.zsnes
 
-class PluginInterface(emulator.Plugin):
+class PluginInterface(EmulatorPlugin):
     """
     Add the zsnes items to the games menu
     """
@@ -52,5 +52,5 @@ class PluginInterface(emulator.Plugin):
         if not config.path:
             # no items defined
             return []
-        return [ emulator.EmulatorMenuItem(parent, config.name, config.path,
-                                           self.roms, config) ]
+        return [ EmulatorMenuItem(parent, config.name, config.path,
+                                  self.roms, config) ]
