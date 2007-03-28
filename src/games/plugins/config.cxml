@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<config name="games.plugin">
+    <desc lang="en">games plugins</desc>
+    <group name="zsnes" plugin="0">
+        <desc>
+            Set the parameters for the zsnes emulator.
+            games.plugin.zsnes.activate = 0
+            games.plugin.zsnes.path[0].path = $(HOME)/snes
+            games.plugin.zsnes.path[0].name = Main Roms
+            games.plugin.zsnes.name = SNes Games
+            games.plugin.zsnes.bin = /usr/local/bin/zsnes
+            games.plugin.zsnes.parameters = -m -r 3 -k 100
+            games.plugin.zsnes.suffix = smc,zip
+        </desc>
+        <list name="path">
+            <var name="name" type="unicode">
+                <desc>Name for the path to the roms</desc>
+            </var>
+            <var name="path" type="str">
+                <desc>The path to find the roms</desc>
+            </var>
+        </list>
+        <var name="name" type="unicode">
+            <desc>Name in the games menu</desc>
+        </var>
+        <var name="bin" type="str">
+            <desc>The binary for the zsnes emulator</desc>
+        </var>
+        <var name="parameters" type="str">
+            <desc>The parameters to give to the zsnes emulator on start</desc>
+        </var>
+        <var name="suffix" default="zip,scm">
+            <desc>The suffix of the roms</desc>
+        </var>
+    </group>
+
+    <group name="pcgames" plugin="0">
+        <desc>
+            Set the parameters for the PC games.
+            games.plugin.pcgames.activate = 20
+            games.plugin.pcgames.name = PC Games
+            games.plugin.pcgames.items[0].bin = /usr/games/bin/einstein
+            games.plugin.pcgames.items[0].parameters =
+            games.plugin.pcgames.items[0].name = Einstein
+        </desc>
+        <var name="name" type="unicode">
+            <desc>Name in the games menu</desc>
+        </var>
+        <list name="items">
+            <var name="name" type="unicode">
+                <desc>Name of the game</desc>
+            </var>
+            <var name="bin" type="str">
+                <desc>The binary for the emulator</desc>
+            </var>
+            <var name="parameters" type="str">
+                <desc>The parameters to give to the emulator on start</desc>
+            </var>
+        </list>
+    </group>
+
+    <group name="scummvm" plugin="0">
+        <desc>
+            Set the parameters for the scummvm.
+        </desc>
+        <var name="name" default="ScummVM">
+            <desc>Name in the games menu</desc>
+        </var>
+        <var name="bin" default="scummvm">
+            <desc>The binary of the scummvm (searched in PATH)</desc>
+        </var>
+        <var name="parameters" type="str">
+            <desc>The parameters to start the scummvm</desc>
+        </var>
+
+    </group>
+
+</config>

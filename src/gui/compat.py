@@ -129,6 +129,11 @@ class _Videoplayer(BaseApplication):
         return self.engine.canvas._window
     
 
+class _Gamesplayer(BaseApplication):
+    name = 'games'
+    areas = ()
+
+
 _Tvplayer = _Videoplayer
 
 def Application(name):
