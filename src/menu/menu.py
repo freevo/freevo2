@@ -186,7 +186,12 @@ class Menu(ItemList):
             if not actions:
                 OSD_MESSAGE.post(_('No action defined for this choice!'))
             else:
-                actions[0]()
+                result = actions[0]()
+                if result:
+                    # action handed this event and returned either True or
+                    # an InProgress object
+                    return result
+            # in any case, return True because this event is handled here
             return True
 
         if event == MENU_SUBMENU:
@@ -219,8 +224,7 @@ class Menu(ItemList):
             log.info('calling action %s' % event.arg)
             for action in self.selected.get_actions():
                 if action.shortcut == event.arg:
-                    action()
-                    return True
+                    return action() or True
             log.info('action %s not found' % event.arg)
             return True
 

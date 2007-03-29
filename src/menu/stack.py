@@ -177,9 +177,12 @@ class MenuStack(object):
         """
         menu = self.menustack[-1]
 
-        if menu.eventhandler(event):
+        result = menu.eventhandler(event)
+        if result:
+            # menu handed this event and returned either True or
+            # an InProgress object
             self.refresh()
-            return True
+            return result
 
         if event == MENU_GOTO_MAINMENU:
             while len(self.menustack) > 1:
@@ -217,11 +220,12 @@ class MenuStack(object):
                 self.back_one_menu()
                 return True
             selected = getattr(self.menustack[-2], 'selected', None)
-            if selected and selected.eventhandler(event):
-                return True
+            if selected:
+                return selected.eventhandler(event)
             return False
 
-        if menu.selected and menu.selected.eventhandler(event):
-            return True
+        # pass to selected eventhandler
+        if menu.selected:
+            return menu.selected.eventhandler(event)
 
         return False

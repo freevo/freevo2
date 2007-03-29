@@ -39,7 +39,6 @@ __all__ = [ 'handler' ]
 
 # python imports
 import sys
-import time
 import logging
 
 # kaa imports
@@ -51,9 +50,6 @@ from freevo.ui.event import *
 
 # the logging object
 log = logging.getLogger()
-
-# debug stuff
-_TIME_DEBUG = False
 
 # the global object
 handler = None
@@ -188,40 +184,38 @@ class Handler(object):
         Event handling function.
         """
         log.debug('handling event %s' % str(event))
-        if _TIME_DEBUG:
-            t1 = time.clock()
 
-        try:
-            if event == TOGGLE_APPLICATION and len(self.applications) > 1 and \
-                   self.applications[-1].has_capability(CAPABILITY_TOGGLE):
-                log.info('Toggle application')
-                self.applications.insert(0, self.applications.pop())
-                self.set_focus()
-
-            elif event.handler:
-                # event has it's own handler function, call this
-                # function and do not pass it on the the normal
-                # handling.
-                event.handler(event=event)
-
-            elif len(self.windows) and self.windows[-1].eventhandler(event=event):
-                # handled by the current popup
-                pass
-
-            else:
-                # handle by the current appliaction
-                self.applications[-1].eventhandler(event=event)
-
-            if _TIME_DEBUG:
-                print time.clock() - t1
+        if event == TOGGLE_APPLICATION and len(self.applications) > 1 and \
+               self.applications[-1].has_capability(CAPABILITY_TOGGLE):
+            log.info('Toggle application')
+            self.applications.insert(0, self.applications.pop())
+            self.set_focus()
             return True
 
-        except (SystemExit, KeyboardInterrupt):
-            sys.exit(0)
+        result = None
 
-        except Exception, e:
-            log.exception('application.handler')
-            sys.exit(1)
+        if event.handler:
+            # event has it's own handler function, call this
+            # function and do not pass it on the the normal
+            # handling.
+            result = event.handler(event=event) or True
+
+        if not result and len(self.windows):
+            # maybe handled by the current popup
+            result = self.windows[-1].eventhandler(event=event)
+
+        if not result:
+            # handle by the current application
+            result = self.applications[-1].eventhandler(event=event)
+
+        # This function has to return True or it will be deleted from
+        # the kaa.notifier eventhandler. The kaa.notifier event code
+        # is not aware of InProgress objects so if result is an InProgress
+        # object we wait here using step(). This is ugly and needs to be
+        # fixed.
+        if isinstance(result, kaa.notifier.InProgress):
+            while not result.is_finished:
+                kaa.notifier.step()
 
 # create the global object
 handler = Handler()
