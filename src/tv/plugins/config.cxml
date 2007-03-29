@@ -24,4 +24,8 @@
         <desc>Show scheduled recordings</desc>
     </group>
 
+    <group name="favorites" plugin="50">
+        <desc>Show favorites</desc>
+    </group>
+
 </config>
