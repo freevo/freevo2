@@ -31,29 +31,60 @@
 #
 # -----------------------------------------------------------------------------
 
+# python imports
+import time
+
+# kaa imports
+import kaa.epg
+from kaa.strutils import unicode_to_str
+
+# freevo ui imports
+from freevo.ui.config import config
+
 # freevo core imports
 import freevo.ipc
 
 # freevo imports
-from freevo.ui.menu import Item, Action, Menu
+from freevo.ui.gui.windows.inputbox import InputBox
+from freevo.ui.menu import Item, Action, ActionItem, Menu
 from freevo.ui.application import MessageWindow
 
 # get tvserver interface
 tvserver = freevo.ipc.Instance('freevo').tvserver
 
+DAY_NAMES = (_('Sun'), _('Mon'), _('Tue'), _('Wed'), _('Thu'), _('Fri'), _('Sat'))
+
 class FavoriteItem(Item):
     """
     A favorite item to add/delete/change a favorite for the recordserver.
     """
-    def __init__(self, name, start, parent):
-        Item.__init__(self, parent)
-        self.name  = self.title = name
-        self.start = start
 
-        # FIXME: create correct informations here
-        self.channel = 'ANY'
-        self.days    = 'ANY'
-        self.time    = 'ANY'
+    def __init__(self, parent, fav):
+        Item.__init__(self, parent)
+
+        self.new = True
+        self.id = 0
+        if isinstance(fav, kaa.epg.Program):
+            # created with Program object
+            # Convert to 0=Sunday - 6=Saterday
+            day = min(time.localtime(fav.start)[6] + 1, 6)
+            self.days = [ day ]
+            self.name = self.title = fav.title
+            self.channels = [ fav.channel.name ]
+            #check if already a favorite
+            for f in tvserver.favorites.list():
+                if fav.title == f.title:
+                    if fav.channel.name in f.channels:
+                        if day in f.days:
+                            self.new = False
+                            self.id = f.id
+        else:
+            # created with ipc Favorite object
+            self.name = self.title = fav.title
+            self.days = fav.days
+            self.channels = fav.channels
+            self.new = False
+            self.id = fav.id
 
 
     def __getitem__(self, key):
@@ -61,11 +92,17 @@ class FavoriteItem(Item):
         return the specific attribute as string or an empty string
         """
         if key == 'date':
-            return self.days
+            if self.days == 'ANY':
+                return 'ANY'
+            else:
+                days = ', '.join(['%s' % DAY_NAMES[d] for d in self.days])
+                return days
         if key == 'channel':
-            if self.channel == 'ANY':
-                return self.channel
-            return self.channel.name
+            if self.channels == 'ANY':
+                return 'ANY'
+            else:
+                channels = ', '.join(['%s' % chan for chan in self.channels])
+                return channels
         return Item.__getitem__(self, key)
 
 
@@ -73,7 +110,7 @@ class FavoriteItem(Item):
         """
         return a list of possible actions on this item.
         """
-        return [ Action(_('Add as favorite'), self.add) ]
+        return [ Action(_('Show favorite menu'), self.submenu) ]
 
 
     def submenu(self):
@@ -81,15 +118,40 @@ class FavoriteItem(Item):
         show a submenu for this item
         """
         items = []
-        for action in self.actions():
-            items.append(Item(self, action))
+        
+        if self.new:
+            items.append(ActionItem(_('Add favorite'), self, self.add))
+        else:
+            items.append(ActionItem(_('Remove favorite'), self, self.remove))
+        
         s = Menu(self, items, type = 'tv favorite menu')
         s.submenu = True
         s.infoitem = self
         self.pushmenu(s)
 
 
+    @kaa.notifier.yield_execution()
     def add(self):
-        tvserver.favorites.add(self)
-        txt = _('"%s" has been scheduled as favorite') % self.title
-        MessageWindow(txt).show()
+        result = tvserver.favorites.add(self.title, self.channels, self.days,
+                                        'ANY', 50, False)
+        if isinstance(result, kaa.notifier.InProgress):
+            yield result
+            result = result()
+        if result != tvserver.favorites.SUCCESS:
+            text = _('Adding favorite Failed')+(': %s' % result)
+        else:
+            text = _('"%s" has been scheduled as favorite') % self.title
+        MessageWindow(text).show()
+        self.get_menustack().delete_submenu()
+
+
+    @kaa.notifier.yield_execution()
+    def remove(self):
+        result = tvserver.favorites.remove(self.id)
+        if isinstance(result, kaa.notifier.InProgress):
+            yield result
+            result = result()
+        if result != tvserver.favorites.SUCCESS:
+            text = _('Remove favorite Failed')+(': %s' % result)
+            MessageWindow(text).show()
+        self.get_menustack().delete_submenu()

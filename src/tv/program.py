@@ -146,7 +146,6 @@ class ProgramItem(Item):
         items = []
         if self.scheduled and not self.scheduled.status in \
            ('deleted', 'missed'):
-            print self.scheduled.status
             if self.start < time.time() + 10 and \
                    self.scheduled.status in ('recording', 'saved'):
                 items.append(ActionItem(_('Watch recording'), self,
@@ -170,8 +169,7 @@ class ProgramItem(Item):
             txt = _('Search for programs with a similar name')
             items.append(ActionItem(txt, self, self.search_similar))
 
-        items.append(ActionItem(_('Add to favorites'), self,
-                                self.create_favorite))
+        items.append(ActionItem(_('Favorite...'), self, self.create_favorite))
 
         s = Menu(self, items, type = 'tv program menu')
         s.submenu = True
@@ -236,8 +234,7 @@ class ProgramItem(Item):
 
 
     def create_favorite(self):
-        fav = favorite.FavoriteItem(self.name, self.start, self)
-        fav.submenu()
+        favorite.FavoriteItem(self, self.program).submenu()
 
 
     def remove_favorite(self):
