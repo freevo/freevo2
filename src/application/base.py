@@ -42,6 +42,7 @@ from freevo.ui import gui
 
 # application imports
 from handler import handler
+from resources import get_resources, free_resources
 
 # get logging object
 log = logging.getLogger()
@@ -59,9 +60,6 @@ class Application(object):
     """
     A basic application
     """
-
-    _global_resources = {}
-
     def __init__(self, name, eventmap, capabilities=[]):
         """
         Init the Application object.
@@ -186,17 +184,7 @@ class Application(object):
         reserved, the whole operation fails. The function will return the
         list of failed resources with the application having this resource.
         """
-        blocked = {}
-        for r in resources:
-            if r in self._global_resources:
-                blocked[r] = self._global_resources[r]
-        if blocked:
-            # failed to reserve
-            return blocked
-        # reserve all resources
-        for r in resources:
-            self._global_resources[r] = self
-        return {}
+        return get_resources(self, *resources)
 
 
     def free_resources(self, *resources):
@@ -204,9 +192,7 @@ class Application(object):
         Free all resources blocked by this application. If not resources are
         provided, free all resources.
         """
-        for res, app in self._global_resources.items()[:]:
-            if app == self and (not resources or res in resources):
-                del self._global_resources[res]
+        return free_resources(self, *resources)
 
 
     def __repr__(self):

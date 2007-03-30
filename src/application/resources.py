@@ -1,12 +1,12 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# application - Application Submodule
+# resources.py - Ressource Management
 # -----------------------------------------------------------------------------
 # $Id$
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2005-2007 Dirk Meyer, et al.
+# Copyright (C) 2007 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -29,19 +29,32 @@
 #
 # -----------------------------------------------------------------------------
 
-from resources import get_resources, free_resources
-from base import Application, STATUS_RUNNING, STATUS_STOPPING, \
-     STATUS_STOPPED, STATUS_IDLE, CAPABILITY_TOGGLE, CAPABILITY_PAUSE, \
-     CAPABILITY_FULLSCREEN
+_resources = {}
 
-from handler import handler as _handler
-from window import *
-
-def get_active():
+def get_resources(instance, *resources):
     """
-    Get active application.
+    Reserve a list of resources. If one or more resources can not be
+    reserved, the whole operation fails. The function will return the
+    list of failed resources with the instance having this resource.
     """
-    return _handler.get_active()
+    blocked = {}
+    for r in resources:
+        if r in _resources:
+            blocked[r] = _resources[r]
+    if blocked:
+        # failed to reserve
+        return blocked
+    # reserve all resources
+    for r in resources:
+        _resources[r] = instance
+    return {}
 
-# signals defined by the application base code
-signals = _handler.signals
+
+def free_resources(instance, *resources):
+    """
+    Free all resources blocked by the instance. If not resources are
+    provided, free all resources.
+    """
+    for res, app in _resources.items()[:]:
+        if app == instance and (not resources or res in resources):
+            del _resources[res]
