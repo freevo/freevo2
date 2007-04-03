@@ -60,12 +60,12 @@ class Event(kaa.notifier.Event):
         return int(self.name[-1])
 
 
-    def post(self, event_source='system', *args):
+    def post(self, *args, **kwargs):
         """
         Post event into the queue.
         """
         event = copy.copy(self)
-        event.source = event_source
+        event.source = kwargs.get('event_source', 'system')
         if args:
             event._set_args(args)
         kaa.notifier.Event.post(event)
