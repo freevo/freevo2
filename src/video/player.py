@@ -159,44 +159,6 @@ class Player(Application):
         self.item.elapsed = round(self.player.get_position())
 
 
-    def can_suspend(self):
-        """
-        Return true since the video player can be suspended. It is more likely
-        to be stoped, but still it will release the resource.
-        """
-        return True
-
-    @kaa.notifier.yield_execution()
-    def suspend(self):
-        """
-        Release the audio and video resource.
-        """
-        if not self.status == STATUS_RUNNING:
-            yield False
-        if self.player.get_state == kaa.popcorn.STATE_PAUSED:
-            yield False
-        self.player.stop()
-        self.status = STATUS_STOPPING
-        yield kaa.notifier.YieldCallback(self.player.signals['stop'])
-        self.free_resources()
-        yield True
-
-
-    def resume(self):
-        """
-        Resume video. At the moment do nothing so video is only stoped, but
-        does not restart. TODO
-        """
-        if not self.status == STATUS_RUNNING:
-            return False
-        if self.player.get_state == kaa.popcorn.STATUS_RUNNING:
-            return False
-        # since we don't pause the video player we stop it restart everything
-        # that was running before.
-        self.resume_all()
-        return True
-
-
     def eventhandler(self, event):
         """
         React on some events or send them to the real player or the
