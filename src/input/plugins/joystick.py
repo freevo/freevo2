@@ -31,51 +31,56 @@
 #
 # -----------------------------------------------------------------------------
 
-import kaa.notifier
-
+# python imports
 import sys
 import os
 import select
 import struct
 from time import sleep
 
-from freevo.ui import config
+# kaa imports
+import kaa.notifier
+
+# freevo imports
+from freevo.resources import ResourceHandler
+from freevo.ui import config, application
 from interface import InputPlugin
+from freevo.ui.config import config
 
 import logging
 log = logging.getLogger('input')
 
-class PluginInterface(InputPlugin):
+class PluginInterface(InputPlugin, ResourceHandler):
 
     # Hardcoded for now to make it work at the CeBIT. This needs to
     # be a config variable.
-    
-    KEYMAP = {
-        'button 1' : 'PLAY',
-        'button 3' : 'STOP',
-        'button 5' : 'EXIT',
-        'button 7' : 'EXIT',
-        'button 8' : 'SELECT',
-        'button 6' : 'ENTER',
-        'up 2'     : 'UP',
-        'down 2'   : 'DOWN',
-        'left 2'   : 'LEFT',
-        'right 2'  : 'RIGHT' }
-
+    KEYMAP = {}
 
     def __init__(self):
         InputPlugin.__init__(self)
 
-        # TODO: this needs to be a parameter to the plugin
-        self.device_name = '/dev/input/js0'
+        self.config = config.input.plugin.joystick
 
+        self.device_name = self.config.device
+
+        blocked = self.get_resources('JOYSTICK')
+        if len(blocked) != 0:
+            # FIXME maybe different joysticks possible?
+            log.error("Joystick is allready used, can't start joystick plugin")
+            return
+
+        for mapping in self.config.events:
+            self.KEYMAP[mapping.input] = mapping.event
         try:
             self.joyfd = os.open(self.device_name, os.O_RDONLY|os.O_NONBLOCK)
         except OSError:
-            reason = 'Unable to open %s' % self.device_name
+#            reason = 'Unable to open %s' % self.device_name
+            log.error('Could not open joystick interface (%s)'%self.device_name)
+            self.free_resources()
             return
 
-        kaa.notifier.SocketDispatcher(self.handle).register(self.joyfd)
+        self.socket_dispatcher = kaa.notifier.SocketDispatcher(self.handle)
+        self.socket_dispatcher.register(self.joyfd)
         self.timer = kaa.notifier.OneShotTimer(self.axis)
         self.movement = {}
         self.events = {}
@@ -118,7 +123,7 @@ class PluginInterface(InputPlugin):
             if button in self.KEYMAP:
                 self.post_key(self.KEYMAP[button])
             return True
-        
+
         if data[2] == 2:
             # stick, this is all very ugly!!!
 
@@ -145,3 +150,53 @@ class PluginInterface(InputPlugin):
             self.events[button].append(data[1])
             self.timer.start(0.1)
         return True
+    
+
+    def can_suspend(self):
+        """
+        Return true since the plugin can be suspended.
+        """
+        return True
+
+
+    def suspend(self):
+        """
+        Release the joystick that it can be used by others.
+        """
+        try:
+            self.timer.stop()
+            self.socket_dispatcher.unregister()
+            os.close(self.joyfd)
+            self.free_resources()
+        except OSError:
+            log.error('Could not close Filedescriptor for joystick')
+            return False
+        return True
+        log.info('Joystick plugin suspended.')
+
+
+
+    def resume(self):
+        """
+        Acquire Joystick to be used as a remote.
+        """
+        blocked = self.get_resources('JOYSTICK')
+        if blocked == False:
+            return False
+        elif len(blocked) != 0:
+            # FIXME maybe different joysticks possible?
+            log.error("Joystick is allready used, can't start joystick plugin")
+            return False
+
+        try:
+            self.joyfd = os.open(self.device_name, os.O_RDONLY|os.O_NONBLOCK)
+        except OSError:
+            log.error('Could not open joystick interface (%s)'%self.device_name)
+            return
+
+        self.socket_dispatcher.register(self.joyfd)
+        self.movement = {}
+        self.events = {}
+        self.timer.start(0.1)
+        log.info('Jostick plugin resumed')
+

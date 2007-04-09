@@ -26,9 +26,25 @@
 
     <group name="joystick" plugin="true">
         <desc>
-            Joystick plugin. This plugin defines a fixed mapping. If someone
-            needs more, please send a patch using a config here.
+            Joystick plugin.
         </desc>
+        <var name="device" type="str">
+            <desc>The Joystick input device for example /dev/input/js0</desc>
+        </var>
+        <list name="events">
+            <var name="event" type="str">
+                <desc>The event to send on this button/axis event. For
+                example EXIT, SELECT, UP, DOWN,...</desc>
+            </var>
+            <var name="input" type="str">
+                <desc>The input that raises the event. Example:
+                      button 1 (for the first button no the joystick)
+                      button 2 ...
+                      up 0 (the first axis up)
+                      down 1 (the second axis down)
+                </desc>
+            </var>
+        </list>
     </group>
 
 </config>
