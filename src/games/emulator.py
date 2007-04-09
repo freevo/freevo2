@@ -47,9 +47,11 @@ import kaa.beacon
 
 # freevo imports
 import freevo.conf
+from freevo.resources import ResourceHandler
 from freevo.ui.mainmenu import MainMenuItem, MainMenuPlugin
 from freevo.ui.directory import DirItem
 from freevo.ui.event import *
+from freevo.ui import plugin, application
 from freevo.ui.menu import Item, Action, Menu
 from freevo.ui.plugins.mediamenu import MediaMenu
 
@@ -135,7 +137,7 @@ class EmulatorItem(Item):
                 Action(_('Remove %s') % self.name, self.remove)]
 
 
-class EmulatorPlayer(object):
+class EmulatorPlayer(ResourceHandler):
     """
     Generic game player.
     """
@@ -165,7 +167,6 @@ class EmulatorPlayer(object):
         Play game. Should work with most emulators. Will start
         [command_name] [parameters] [url]
         """
-        self._releaseJoystick()
         params = "%s %s" % (self.parameters, self.url)
         log.info('Start playing EmulatorItem (%s %s)' % \
                 (self.command_name, params))
@@ -191,7 +192,6 @@ class EmulatorPlayer(object):
         The game was quit. Send stop event to get back to the menu.
         """
         Event(STOP, handler=gameplayer.player.eventhandler).post()
-        self._acquireJoystick()
         log.info('emulator completed')
 
 
@@ -201,22 +201,6 @@ class EmulatorPlayer(object):
         """
         if self.child:
             self.child.stop()
-
-
-    def _releaseJoystick(self):
-        """
-        Release Joystick that it can be used by the game/emulator
-        """
-        #FIXME
-        pass
-
-
-    def _acquireJoystick(self):
-        """
-        Acquire Joysitck back that it can be used by freevo
-        """
-        #FIXME
-        pass
 
 
 

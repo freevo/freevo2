@@ -65,6 +65,7 @@ class GamesPlayer(Application):
         if player == None:
             return False
         self.player = player
+        retry = kaa.notifier.Callback(self.play, item, player)
         if not self.status in (STATUS_IDLE, STATUS_STOPPED):
             # Already running, stop the current player by sending a STOP
             # event. The event will also get to the playlist behind the
@@ -83,37 +84,16 @@ class GamesPlayer(Application):
         # Try to get VIDEO and AUDIO resources. The ressouces will be freed
         # by the system when the application switches to STATUS_STOPPED or
         # STATUS_IDLE.
-        blocked = self.get_resources('AUDIO', 'VIDEO')
-        if 'VIDEO' in blocked:
-            # Something has the video resource blocked. The only application
-            # possible is the tv player right now. It would be possible to
-            # ask the user what to do with a popup but we assume the user
-            # does not care about the tv and just stop it. FIXME ask user
-            Event(STOP, handler=blocked['VIDEO'].eventhandler).post()
-            # Now connect to the 'stop' signal once to repeat this current
-            # function call without the player playing
-            blocked['VIDEO'].signals['stop'].connect_once(retry)
-            return True
-        if 'AUDIO' in blocked:
-            # AUDIO is blocked, VIDEO is not. This is most likely the audio
-            # player and we can pause it. Do this if possible.
-            if not blocked['AUDIO'].has_capability(CAPABILITY_PAUSE):
-                # Unable to pause, just stop it
-                Event(STOP, handler=blocked['AUDIO'].eventhandler).post()
-                # Now connect to the 'stop' signal once to repeat this current
-                # function call without the player playing
-                blocked['AUDIO'].signals['stop'].connect_once(retry)
+        blocked = self.get_resources('AUDIO', 'VIDEO', 'JOYSTICK')
+        if blocked == False:
+            log.error("Can't get resource AUDIO, VIDEO, JOYSTICK")
+            return False
+        if len(blocked) > 0:
+            status = self.suspend_all(blocked)
+            if isinstance(status, kaa.notifier.InProgress):
+                status.connect(retry)
                 return True
-            # Now pause the current player. On its pause signal this player can
-            # play again. And on the stop signal of this player (STATUS_IDLE)
-            # the other player can be resumed again.
-            in_progress = blocked['AUDIO'].pause()
-            if isinstance(in_progress, kaa.notifier.InProgress):
-                # takes some time, wait
-                in_progress.connect(retry).set_ignore_caller_args()
-            if in_progress is not False:
-                # we paused the application, resume on our stop
-                self.signals['stop'].connect_once(blocked['AUDIO'].resume)
+            retry()
             return True
 
         # store item
@@ -143,6 +123,40 @@ class GamesPlayer(Application):
         self.player.stop()
         self.status = STATUS_STOPPING
 
+
+    def can_suspend(self):
+        """
+        Return true since it is possible to stop the game. If it is allways the
+        best thing to just stop a game is more questionable. Maybe False would
+        be better.
+        """
+        return True
+
+
+    def suspend(self):
+        """
+        Release the audio, video, joystick resource. (Stop the game)
+        """
+        if not self.status == STATUS_RUNNING:
+            yield False
+        self.status = STATUS_STOPPING
+        self.player.stop()
+        yield kaa.notifiert.YieldCallback(self.player.signals['end'])
+        self.free_resources()
+        yield True
+
+
+    def resume(self):
+        """
+        Replay the game? At the moment this does nothing. The game won't 
+        restart.
+        """
+        # restart the handler stoped by this handler before since we don't
+        # run anymore
+        if not self.status == STATUS_RUNNING:
+            return False
+        self.resume_all()
+        return True
 
     def eventhandler(self, event):
         """

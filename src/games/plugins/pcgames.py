@@ -75,7 +75,6 @@ class PcGamePlayer(EmulatorPlayer):
         Play PcGame
         """
         log.info('Start playing PcGame (%s %s)', self.command_name, self.parameters)
-        self._releaseJoystick()
         self.child = kaa.notifier.Process(self.command_name)
         self.child.start(self.parameters).connect(self.completed)
         self.signals = self.child.signals
@@ -88,7 +87,6 @@ class PcGamePlayer(EmulatorPlayer):
         The game was quit. Send Stop event to get back to the menu.
         """
         Event(STOP, handler=gameplayer.player.eventhandler).post()
-        self._acquireJoystick()
         log.info('Game completed')
 
 

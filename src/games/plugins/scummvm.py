@@ -36,7 +36,6 @@
 
 # python imports
 import logging
-from subprocess import Popen, PIPE
 
 # kaa imports
 import kaa.utils
@@ -74,7 +73,6 @@ class ScummvmPlayer(PcGamePlayer):
         """
         log.info('Start playing PcGame (Scummvm: %s)', self.emulator_item)
         parameters = '%s %s' % (config.parameters, self.emulator_item)
-        self._releaseJoystick()
         self.child = kaa.notifier.Process(config.bin)
         self.child.start(parameters).connect(self.completed)
         self.signals = self.child.signals
@@ -97,24 +95,53 @@ class PluginInterface(EmulatorPlugin):
     """
     romlist = []
     finished = False
+    parent = None
+    items = None
+    list_started = False
+
+    def completed(self, exit_code):
+        """
+        The ScummVM returned all configured games, append them to the menu.
+        Add an entry for the ScummVM it self to configure new games or the
+        ScummVM it self.
+        """
+        if self.items == None:
+            self.items = []
+        self.items.append(ScummvmItem(self.parent, 'ScummVM', ''))
+        self.parent.pushmenu(Menu(config.name, self.items, type='games'))
+        self.parent = None
+
+
+    def get_stdout(self, data):
+        """
+        Receive updates from the stdout of the ScummVM. Wait with parsing
+        until a line that starts with '---'
+        """
+        if self.items == None:
+            if data.startswith('---'):
+                self.items = []
+            return
+        # since list was started there are now the configured games coming    
+        name = data[:data.find(' ')]
+        description = data[data.find(' '):].strip()
+        self.items.append(ScummvmItem(self.parent, description, name))        
+
 
     def roms(self, parent):
         """
         Show all games.
         """
+        # allready waiting for updated menu?
+        if self.parent != None:
+            return
+        self.parent = parent
+        self.items = None
         items = []
-        # get list of scummvm
-        pipe = Popen([config.bin, '-t'], stdout=PIPE).stdout
-        # FIXME: this blocks the notifier loop. Maybe better use
-        # kaa.notifier.Process and yield_execution.
-        for item in pipe.readlines()[2:]:
-            name = item[:item.find(' ')]
-            description = item[item.find(' '):].strip()
-            items.append(ScummvmItem(parent, description, name))
-        # append the scummvm it self, to configure new games
-        items.append(ScummvmItem(parent, 'ScummVM', ''))
-        parent.pushmenu(Menu(config.name, items, type='games'))
-
+        # get list of scummvm start a new process
+        self.child = kaa.notifier.Process(config.bin)
+        self.child.start('-t').connect(self.completed)
+        self.child.signals['stdout'].connect(self.get_stdout)
+        
 
     def items(self, parent):
         """
