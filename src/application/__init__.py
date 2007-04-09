@@ -29,7 +29,6 @@
 #
 # -----------------------------------------------------------------------------
 
-from resources import get_resources, free_resources
 from base import Application, STATUS_RUNNING, STATUS_STOPPING, \
      STATUS_STOPPED, STATUS_IDLE, CAPABILITY_TOGGLE, CAPABILITY_PAUSE, \
      CAPABILITY_FULLSCREEN

@@ -38,11 +38,11 @@ import logging
 from kaa.notifier import Signal
 
 # freevo imports
+from freevo.resources import ResourceHandler
 from freevo.ui import gui
 
 # application imports
 from handler import handler
-from resources import get_resources, free_resources
 
 # get logging object
 log = logging.getLogger()
@@ -56,7 +56,7 @@ CAPABILITY_TOGGLE     = 1
 CAPABILITY_PAUSE      = 2
 CAPABILITY_FULLSCREEN = 4
 
-class Application(object):
+class Application(ResourceHandler):
     """
     A basic application
     """
@@ -104,6 +104,7 @@ class Application(object):
             self.signals['start'].emit()
         elif status == STATUS_IDLE:
             handler.hide_application(self)
+            self.resume_all()
             self._status = status
             self.signals['stop'].emit()
         else:
@@ -176,23 +177,6 @@ class Application(object):
         Get the name of the application.
         """
         return self.__name
-
-
-    def get_resources(self, *resources):
-        """
-        Reserve a list of resources. If one or more resources can not be
-        reserved, the whole operation fails. The function will return the
-        list of failed resources with the application having this resource.
-        """
-        return get_resources(self, *resources)
-
-
-    def free_resources(self, *resources):
-        """
-        Free all resources blocked by this application. If not resources are
-        provided, free all resources.
-        """
-        return free_resources(self, *resources)
 
 
     def __repr__(self):
