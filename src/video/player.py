@@ -44,8 +44,8 @@ from freevo.ui import config
 
 from freevo.ui.event import *
 from freevo.ui.application import Application, STATUS_RUNNING, STATUS_STOPPING, \
-	 STATUS_STOPPED, STATUS_IDLE, CAPABILITY_TOGGLE, CAPABILITY_PAUSE, \
-	 CAPABILITY_FULLSCREEN
+    STATUS_STOPPED, STATUS_IDLE, CAPABILITY_TOGGLE, CAPABILITY_PAUSE, \
+    CAPABILITY_FULLSCREEN
 
 # get logging object
 log = logging.getLogger('video')
@@ -68,6 +68,7 @@ class Player(Application):
         play an item
         """
         retry = kaa.notifier.Callback(self.play, item, player)
+        retry.set_ignore_caller_args(True)
         if not self.status in (STATUS_IDLE, STATUS_STOPPED):
             # Already running, stop the current player by sending a STOP
             # event. The event will also get to the playlist behind the
@@ -87,38 +88,17 @@ class Player(Application):
         # by the system when the application switches to STATUS_STOPPED or
         # STATUS_IDLE.
         blocked = self.get_resources('AUDIO', 'VIDEO')
-        if 'VIDEO' in blocked:
-            # Something has the video resource blocked. The only application
-            # possible is the tv player right now. It would be possible to
-            # ask the user what to do with a popup but we assume the user
-            # does not care about the tv and just stop it.
-            Event(STOP, handler=blocked['VIDEO'].eventhandler).post()
-            # Now connect to the 'stop' signal once to repeat this current
-            # function call without the player playing
-            blocked['VIDEO'].signals['stop'].connect_once(retry)
-            return True
-        if 'AUDIO' in blocked:
-            # AUDIO is blocked, VIDEO is not. This is most likely the audio
-            # player and we can pause it. Do this if possible.
-            if not blocked['AUDIO'].has_capability(CAPABILITY_PAUSE):
-                # Unable to pause, just stop it
-                Event(STOP, handler=blocked['AUDIO'].eventhandler).post()
-                # Now connect to the 'stop' signal once to repeat this current
-                # function call without the player playing
-                blocked['AUDIO'].signals['stop'].connect_once(retry)
+        if blocked == False:
+            log.error("Can't get resource AUDIO, VIDEO")
+            return False
+        if len(blocked) > 0:
+            status = self.suspend_all(blocked)
+            if isinstance(status, kaa.notifier.InProgress):
+                status.connect(retry)
                 return True
-            # Now pause the current player. On its pause signal this player can
-            # play again. And on the stop signal of this player (STATUS_IDLE)
-            # the other player can be resumed again.
-            in_progress = blocked['AUDIO'].pause()
-            if isinstance(in_progress, kaa.notifier.InProgress):
-                # takes some time, wait
-                in_progress.connect(retry).set_ignore_caller_args()
-            if in_progress is not False:
-                # we paused the application, resume on our stop
-                self.signals['stop'].connect_once(blocked['AUDIO'].resume)
+            retry()
             return True
-
+        
         # store item and playlist
         self.item = item
         self.playlist = self.item.get_playlist()
@@ -177,6 +157,44 @@ class Player(Application):
             else:
                 self.set_eventmap('video')
         self.item.elapsed = round(self.player.get_position())
+
+
+    def can_suspend(self):
+        """
+        Return true since the video player can be suspended. It is more likely
+        to be stoped, but still it will release the resource.
+        """
+        return True
+
+    @kaa.notifier.yield_execution()
+    def suspend(self):
+        """
+        Release the audio and video resource.
+        """
+        if not self.status == STATUS_RUNNING:
+            yield False
+        if self.player.get_state == kaa.popcorn.STATE_PAUSED:
+            yield False
+        self.player.stop()
+        self.status = STATUS_STOPPING
+        yield kaa.notifier.YieldCallback(self.player.signals['stop'])
+        self.free_resources()
+        yield True
+
+
+    def resume(self):
+        """
+        Resume video. At the moment do nothing so video is only stoped, but
+        does not restart. TODO
+        """
+        if not self.status == STATUS_RUNNING:
+            return False
+        if self.player.get_state == kaa.popcorn.STATUS_RUNNING:
+            return False
+        # since we don't pause the video player we stop it restart everything
+        # that was running before.
+        self.resume_all()
+        return True
 
 
     def eventhandler(self, event):
