@@ -124,40 +124,6 @@ class GamesPlayer(Application):
         self.status = STATUS_STOPPING
 
 
-    def can_suspend(self):
-        """
-        Return true since it is possible to stop the game. If it is allways the
-        best thing to just stop a game is more questionable. Maybe False would
-        be better.
-        """
-        return True
-
-
-    def suspend(self):
-        """
-        Release the audio, video, joystick resource. (Stop the game)
-        """
-        if not self.status == STATUS_RUNNING:
-            yield False
-        self.status = STATUS_STOPPING
-        self.player.stop()
-        yield kaa.notifiert.YieldCallback(self.player.signals['end'])
-        self.free_resources()
-        yield True
-
-
-    def resume(self):
-        """
-        Replay the game? At the moment this does nothing. The game won't 
-        restart.
-        """
-        # restart the handler stoped by this handler before since we don't
-        # run anymore
-        if not self.status == STATUS_RUNNING:
-            return False
-        self.resume_all()
-        return True
-
     def eventhandler(self, event):
         """
         React on events and do the right command with the game.
