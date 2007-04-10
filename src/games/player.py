@@ -84,16 +84,12 @@ class GamesPlayer(Application):
         # Try to get VIDEO and AUDIO resources. The ressouces will be freed
         # by the system when the application switches to STATUS_STOPPED or
         # STATUS_IDLE.
-        blocked = self.get_resources('AUDIO', 'VIDEO', 'JOYSTICK')
+        blocked = self.get_resources('AUDIO', 'VIDEO', 'JOYSTICK', force=True)
         if blocked == False:
             log.error("Can't get resource AUDIO, VIDEO, JOYSTICK")
             return False
-        if len(blocked) > 0:
-            status = self.suspend_all(blocked)
-            if isinstance(status, kaa.notifier.InProgress):
-                status.connect(retry)
-                return True
-            retry()
+        if isinstance(blocked, kaa.notifier.InProgress):
+            blocked.connect(retry)
             return True
 
         # store item

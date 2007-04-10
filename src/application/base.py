@@ -104,7 +104,7 @@ class Application(ResourceHandler):
             self.signals['start'].emit()
         elif status == STATUS_IDLE:
             handler.hide_application(self)
-            self.resume_all()
+            self.free_resources(resume=True)
             self._status = status
             self.signals['stop'].emit()
         else:

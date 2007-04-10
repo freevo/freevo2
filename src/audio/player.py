@@ -84,16 +84,12 @@ class Player(Application):
 
         # Try to get AUDIO resource. The ressouce will be freed by the system
         # when the application switches to STATUS_STOPPED or STATUS_IDLE.
-        blocked = self.get_resources('AUDIO')
+        blocked = self.get_resources('AUDIO', force=True)
         if blocked == False:
             log.error("Can't get Audio resource.")
             return False
-        if len(blocked) != 0:
-            status = self.suspend_all(blocked)
-            if isinstance(status, kaa.notifier.InProgress):
-                status.connect(retry)
-                return True
-            retry()
+        if isinstance(blocked, kaa.notifier.InProgress):
+            blocked.connect(retry)
             return True
 
         # Store item and playlist. We need to keep the playlist object
@@ -237,8 +233,8 @@ class Player(Application):
             # FIXME: what to do in this case?
             log.error('unable to get AUDIO ressource')
             yield False
-        elif len(blocked) > 0:
-            yield self.suspend_all(blocked)
+        if isinstance(blocked, kaa.notifier.InProgress):
+            yield blocked
         self.player.resume()
         yield kaa.notifier.YieldCallback(self.player.signals['play'])
 
