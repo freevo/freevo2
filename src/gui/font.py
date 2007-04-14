@@ -38,8 +38,7 @@ import logging
 import kaa.mevas
 
 # freevo imports
-import freevo.conf
-from freevo.ui import config
+from freevo.ui import config, SHAREDIR
 
 # get logging object
 log = logging.getLogger('gui')
@@ -109,7 +108,7 @@ class Font(object):
 
 
 # init mevas font (imlib2)
-FONT_DIR = os.path.join(freevo.conf.SHAREDIR, 'fonts')
+FONT_DIR = os.path.join(SHAREDIR, 'fonts')
 kaa.mevas.imagelib.add_font_path(FONT_DIR)
 DEFAULT_FONT = os.path.join(FONT_DIR, fontcfg.default)
 

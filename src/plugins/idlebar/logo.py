@@ -31,8 +31,7 @@
 
 import os
 
-import freevo.conf
-from freevo.ui import gui
+from freevo.ui import gui, SHAREDIR
 from freevo.ui.gui import theme, widgets
 from plugin import IdleBarPlugin
 
@@ -50,7 +49,7 @@ class PluginInterface(IdleBarPlugin):
         if not self.image:
             image = theme.image('logo')
         else:
-            image = os.path.join(freevo.conf.SHAREDIR, 'images', self.image)
+            image = os.path.join(SHAREDIR, 'images', self.image)
 
         if self.objects and self.file == image:
             return self.NO_CHANGE

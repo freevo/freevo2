@@ -40,9 +40,6 @@ import logging
 import kaa.beacon
 from kaa.weakref import weakref
 
-# freevo imports
-import freevo.conf
-
 from freevo.ui.event import EJECT
 from freevo.ui.directory import DirItem
 from freevo.ui.mainmenu import MainMenuItem, MainMenuPlugin
@@ -154,14 +151,6 @@ class MediaMenu(MainMenuItem):
                     continue
 
                 # normal file
-                if not os.path.isfile(filename) and \
-                       filename.startswith(os.getcwd()):
-                    # file is in share dir
-                    filename = filename[len(os.getcwd()):]
-                    if filename[0] == '/':
-                        filename = filename[1:]
-                    filename = os.path.join(freevo.conf.SHAREDIR, filename)
-
                 query = kaa.beacon.query(filename=filename)
                 listing = query.get(filter='extmap')
                 for p in MediaPlugin.plugins(self.display_type):

@@ -5,8 +5,6 @@
 # $Id$
 #
 # This file handles the lirc input device and maps it to freevo events.
-# If /dev/lirc is present, this plugin will be actiavted by
-# freevo_config.py.
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

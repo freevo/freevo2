@@ -55,9 +55,8 @@ import kaa.notifier
 import kaa.strutils
 
 # freevo imports
-import freevo.conf
 from freevo import plugin
-from freevo.ui import config
+from freevo.ui import config, SHAREDIR
 from freevo.ui import util
 
 # gui imports
@@ -71,8 +70,8 @@ log = logging.getLogger('gui')
 FXD_FORMAT_VERSION = 2
 
 # internal variables
-ICON_DIR  = os.path.join(freevo.conf.SHAREDIR, 'icons')
-IMAGE_DIR = os.path.join(freevo.conf.SHAREDIR, 'images')
+ICON_DIR  = os.path.join(SHAREDIR, 'icons')
+IMAGE_DIR = os.path.join(SHAREDIR, 'images')
 
 # signals
 signals = { 'theme change': kaa.notifier.Signal() }
@@ -1140,7 +1139,7 @@ class FXDSettings(object):
         self.box_under_icon   = 0
 
         # load plugin skin files:
-        pdir = os.path.join(freevo.conf.SHAREDIR, 'skins/plugins')
+        pdir = os.path.join(SHAREDIR, 'skins/plugins')
         if os.path.isdir(pdir):
             for p in util.match_files(pdir, [ 'fxd' ]):
                 self.load(p)
@@ -1403,7 +1402,7 @@ class FXDSettings(object):
         """
         self.prepared = False
 
-        skin_dir = os.path.join(freevo.conf.SHAREDIR, 'skins')
+        skin_dir = os.path.join(SHAREDIR, 'skins')
         if not os.path.isfile(file):
             if os.path.isfile(file+".fxd"):
                 file += ".fxd"
@@ -1443,15 +1442,6 @@ def set_base_fxd(name):
         # (if not, Freevo is broken)
         log.exception('XML file %s corrupt, using default skin' % name)
         settings = FXDSettings('basic.fxd')
-
-    # search for personal skin settings additions
-    # (this feature needs more doc outside this file)
-    for dir in freevo.conf.cfgfilepath:
-        local_skin = '%s/local_skin.fxd' % dir
-        if os.path.isfile(local_skin):
-            log.debug('add local config %s to skin' % local_skin)
-            settings.load(local_skin)
-            break
 
     # prepare the skin for usage
     settings.prepare()

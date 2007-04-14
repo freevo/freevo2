@@ -46,8 +46,6 @@ import os
 import traceback
 import time
 
-import freevo.conf
-
 import logging
 log = logging.getLogger('gui')
 

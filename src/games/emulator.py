@@ -46,8 +46,8 @@ from kaa.weakref import weakref
 import kaa.beacon
 
 # freevo imports
-import freevo.conf
 from freevo.resources import ResourceHandler
+from freevo.ui import SHAREDIR
 from freevo.ui.mainmenu import MainMenuItem, MainMenuPlugin
 from freevo.ui.directory import DirItem
 from freevo.ui.event import EJECT
@@ -280,7 +280,7 @@ class EmulatorMenuItem(MainMenuItem):
                     filename = filename[len(os.getcwd()):]
                     if filename[0] == '/':
                         filename = filename[1:]
-                    filename = os.path.join(freevo.conf.SHAREDIR, filename)
+                    filename = os.path.join(SHAREDIR, filename)
 
                 query = kaa.beacon.query(filename=filename)
                 listing = query.get()

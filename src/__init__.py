@@ -39,9 +39,12 @@ import freevo.xmlconfig
 # freevo.ui imports
 import event
 
+# expose SHAREDIR to other modules
+SHAREDIR = freevo.conf.SHAREDIR
+
 # generate config
 pycfgfile = freevo.conf.datafile('freevo_config.py')
-cfgdir = os.path.join(freevo.conf.SHAREDIR, 'config')
+cfgdir = os.path.join(SHAREDIR, 'config')
 cfgsource = [ os.path.join(cfgdir, f) for f in os.listdir(cfgdir) ]
 freevo.xmlconfig.xmlconfig(pycfgfile, cfgsource)
 

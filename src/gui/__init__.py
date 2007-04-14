@@ -49,7 +49,7 @@
 #               the display on runtime and get some basic display informations.
 #
 # Submodule:    import gui.windows
-# Dependencies: freevo config, gui.widgets
+# Dependencies: gui.widgets
 # Content:      The different windows and popup boxes
 # Description:  This module includes different popup boxes and a basic window
 #
