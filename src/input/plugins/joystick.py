@@ -43,7 +43,7 @@ import kaa.notifier
 
 # freevo imports
 from freevo.resources import ResourceHandler
-from freevo.ui import config, application
+from freevo.ui import application
 from interface import InputPlugin
 from freevo.ui.config import config
 

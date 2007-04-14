@@ -40,8 +40,6 @@ import kaa.popcorn
 import kaa.notifier
 
 # Freevo imports
-from freevo.ui import config
-
 from freevo.ui.event import *
 from freevo.ui.application import Application, STATUS_RUNNING, STATUS_STOPPING, \
     STATUS_STOPPED, STATUS_IDLE, CAPABILITY_TOGGLE, CAPABILITY_PAUSE, \

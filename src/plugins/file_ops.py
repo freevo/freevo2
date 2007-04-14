@@ -35,7 +35,6 @@ import logging
 from kaa.notifier import Callback
 
 # freevo imports
-from freevo.ui import config, util
 from freevo.ui.menu import Action, ItemPlugin
 from freevo.ui.application import ConfirmWindow
 

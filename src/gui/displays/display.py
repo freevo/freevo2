@@ -33,9 +33,6 @@
 #
 # -----------------------------------------------------------------------------
 
-# Freevo imports
-from freevo.ui import config
-
 class Display(object):
     """
     Template for Freevo based displays. A real display needs to inherit

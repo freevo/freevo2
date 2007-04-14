@@ -38,10 +38,6 @@ import os
 import re
 import copy
 
-# freevo imports
-from freevo.ui import config
-from freevo.ui import util
-
 import logging
 log = logging.getLogger('video')
 

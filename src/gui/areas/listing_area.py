@@ -44,10 +44,6 @@ import weakref
 # kaa imports
 from kaa.notifier import Timer
 
-# freevo imports
-from freevo.ui import config
-from freevo.ui import util
-
 # gui import
 from area import Area
 from freevo.ui.gui.widgets import Image

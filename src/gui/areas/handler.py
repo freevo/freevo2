@@ -54,7 +54,6 @@ log = logging.getLogger('gui')
 import kaa.notifier
 
 # freevo imports
-from freevo.ui import config
 from kaa.weakref import weakref
 
 # gui imports
