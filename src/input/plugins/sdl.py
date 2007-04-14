@@ -40,7 +40,6 @@ from freevo.ui import gui
 from freevo.ui.input import KEYBOARD_MAP
 from freevo.ui import config
 from freevo.ui.menu import Item
-from freevo.ui.event import *
 from interface import InputPlugin
 
 # get logging object

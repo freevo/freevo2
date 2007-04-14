@@ -9,7 +9,7 @@ from freevo import plugin
 
 # freevo ui imports
 from freevo.ui import application
-from freevo.ui.event import *
+from freevo.ui.event import PLAY_START, PLAY_END
 from freevo.ui.directory import DirItem
 from freevo.ui.menu import MediaPlugin
 

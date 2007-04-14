@@ -230,8 +230,6 @@ GAMES_EVENTS = {
     'STOP'      : STOP,
     'SELECT'    : STOP,
     'MENU'      : MENU,
-    'DISPLAY'   : GAMES_CONFIG,
-    'ENTER'     : GAMES_RESET
 }
 
 GLOBAL_EVENTS = {

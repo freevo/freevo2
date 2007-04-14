@@ -156,14 +156,6 @@ PREV                   = Event('PREV')
 
 
 #
-# Audio module
-#
-
-AUDIO_SEND_MPLAYER_CMD = Event('AUDIO_SEND_MPLAYER_CMD')
-AUDIO_LOG              = Event('AUDIO_LOG')
-
-
-#
 # Image module
 #
 
@@ -183,15 +175,6 @@ IMAGE_ROTATE           = Event('IMAGE_ROTATE')
 IMAGE_SAVE             = Event('IMAGE_SAVE')
 
 IMAGE_MOVE             = Event('IMAGE_MOVE')
-
-#
-# Games module
-#
-
-GAMES_CONFIG           = Event('GAMES_CONFIG')
-GAMES_RESET            = Event('GAMES_RESET')
-GAMES_SNAPSHOT         = Event('GAMES_SNAPSHOT')
-
 
 #
 # Input boxes

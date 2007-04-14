@@ -32,7 +32,7 @@ import kaa.notifier
 
 from freevo import plugin
 from freevo.ui import application
-from freevo.ui.event import *
+from freevo.ui.event import PLAY_START, PLAY_END, STOP, OSD_MESSAGE
 
 import logging
 log = logging.getLogger()

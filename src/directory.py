@@ -51,7 +51,8 @@ import fxditem
 
 from menu import Item, Files, Action, ActionItem, MediaPlugin
 from playlist import Playlist
-from event import *
+from event import OSD_MESSAGE, DIRECTORY_CHANGE_DISPLAY_TYPE, \
+     DIRECTORY_TOGGLE_HIDE_PLAYED
 
 from application import MessageWindow
 

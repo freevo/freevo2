@@ -50,7 +50,7 @@ import freevo.conf
 from freevo.resources import ResourceHandler
 from freevo.ui.mainmenu import MainMenuItem, MainMenuPlugin
 from freevo.ui.directory import DirItem
-from freevo.ui.event import *
+from freevo.ui.event import EJECT
 from freevo.ui import plugin, application
 from freevo.ui.menu import Item, Action, Menu
 from freevo.ui.plugins.mediamenu import MediaMenu

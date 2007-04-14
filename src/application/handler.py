@@ -46,7 +46,7 @@ import kaa.notifier
 
 # freevo imports
 from freevo.ui.input import set_mapping
-from freevo.ui.event import *
+from freevo.ui.event import TOGGLE_APPLICATION
 
 # the logging object
 log = logging.getLogger()

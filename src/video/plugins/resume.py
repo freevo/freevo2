@@ -37,7 +37,7 @@ import kaa.beacon
 import freevo.conf
 
 from freevo.ui.menu import Action, Menu, ItemPlugin
-from freevo.ui.event import *
+from freevo.ui.event import PLAY_START, PLAY_END, STOP
 
 # the logging object
 log = logging.getLogger()
