@@ -39,7 +39,7 @@ import logging
 # freevo imports
 from freevo import plugin
 from freevo.ui import input
-from freevo.ui.config import config
+from freevo.ui import config
 from freevo.ui.event import Event
 
 # get logging object

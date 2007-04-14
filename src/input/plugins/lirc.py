@@ -34,7 +34,7 @@
 # -----------------------------------------------------------------------------
 
 import kaa.input.lirc
-from freevo.ui.config import config
+from freevo.ui import config
 from interface import InputPlugin
 
 class PluginInterface(InputPlugin):

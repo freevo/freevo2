@@ -40,7 +40,7 @@ import kaa.notifier
 # freevo imports
 from freevo.plugin import Plugin
 from freevo.ui import gui, application
-from freevo.ui.config import config
+from freevo.ui import config
 from freevo.ui.gui import theme, imagelib, widgets, animation
 from freevo.ui.event import *
 

@@ -36,7 +36,7 @@ import logging
 
 # freevo imports
 from freevo.ui import gui
-from freevo.ui.config import config
+from freevo.ui import config
 
 # input imports
 from freevo.ui.input import KEYBOARD_MAP

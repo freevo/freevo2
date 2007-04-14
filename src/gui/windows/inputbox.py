@@ -35,7 +35,7 @@ import math
 import logging
 
 # freevo imports
-from freevo.ui.config import config
+from freevo.ui import config
 from freevo.ui.event import *
 
 # gui imports

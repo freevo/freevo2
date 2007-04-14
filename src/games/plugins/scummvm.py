@@ -42,7 +42,7 @@ import kaa.utils
 
 # Freevo imports
 from freevo.ui.menu import ActionItem, Menu, Action
-from freevo.ui.config import config
+from freevo.ui import config
 
 # games imports
 from freevo.ui.games.emulator import EmulatorPlugin

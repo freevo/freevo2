@@ -39,7 +39,7 @@ import kaa.epg
 from kaa.strutils import unicode_to_str
 
 # freevo ui imports
-from freevo.ui.config import config
+from freevo.ui import config
 
 # freevo core imports
 import freevo.ipc

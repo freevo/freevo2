@@ -43,7 +43,7 @@ __all__ = [ 'PluginInterface' ]
 from freevo import plugin
 from freevo.ui import fxditem
 from freevo.ui.menu import MediaPlugin
-from freevo.ui.config import config
+from freevo.ui import config
 
 # ImageItem
 from imageitem import ImageItem

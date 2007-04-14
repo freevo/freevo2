@@ -44,7 +44,7 @@ import string
 from freevo import plugin
 from freevo.ui import util, fxditem
 from freevo.ui.menu import Files, MediaPlugin
-from freevo.ui.config import config
+from freevo.ui import config
 
 # video imports
 from videoitem import VideoItem

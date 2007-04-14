@@ -39,7 +39,7 @@ import kaa.mevas
 
 # freevo imports
 import freevo.conf
-from freevo.ui.config import config
+from freevo.ui import config
 
 # get logging object
 log = logging.getLogger('gui')

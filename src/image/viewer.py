@@ -43,7 +43,7 @@ from kaa.strutils import to_unicode
 from freevo import plugin
 from freevo.ui import gui
 from freevo.ui.gui import theme, imagelib, widgets
-from freevo.ui.config import config
+from freevo.ui import config
 
 # cache for loading images
 from freevo.ui.util import ObjectCache

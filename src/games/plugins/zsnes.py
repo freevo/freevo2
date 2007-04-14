@@ -32,7 +32,7 @@
 # -----------------------------------------------------------------------------
 
 # freevo imports
-from freevo.ui.config import config
+from freevo.ui import config
 
 # games imports
 from freevo.ui.games.emulator import *

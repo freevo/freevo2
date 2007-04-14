@@ -43,7 +43,7 @@ import kaa.notifier
 
 # Freevo imports
 from freevo.ui.menu import ActionItem, Menu, Action
-from freevo.ui.config import config
+from freevo.ui import config
 from freevo.ui.event import Event, STOP
 
 # games imports

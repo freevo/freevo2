@@ -40,7 +40,7 @@ import kaa.notifier
 from freevo.plugin import Plugin
 
 # freevo.ui imports
-from freevo.ui.config import config
+from freevo.ui import config
 from freevo.ui.event import Event, DPMS_BLANK_SCREEN
 from freevo.ui.application import signals as app_signals
 

@@ -54,7 +54,7 @@ import os
 
 # freevo imports
 from freevo.ui import util
-from freevo.ui.config import config
+from freevo.ui import config
 
 # gui imports
 from freevo.ui.gui.widgets import Rectangle, Text, Textbox, Image

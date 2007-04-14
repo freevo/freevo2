@@ -42,7 +42,7 @@ import copy
 import os
 import math
 import time
-from freevo.ui.config import config
+from freevo.ui import config
 from freevo.ui.gui import imagelib
 
 # kaa imports

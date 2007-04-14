@@ -41,7 +41,7 @@ __all__ = [ 'Display' ]
 from kaa.mevas.displays.directfbcanvas import DirectFBCanvas
 
 # freevo imports
-from freevo.ui.config import config
+from freevo.ui import config
 
 # display imports
 from display import Display as Base

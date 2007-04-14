@@ -43,7 +43,7 @@ from kaa.weakref import weakref
 
 # freevo imports
 from freevo import plugin
-from config import config
+from freevo.ui import config
 import util
 import fxditem
 

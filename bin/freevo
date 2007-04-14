@@ -94,7 +94,7 @@ try:
     # import ui path (ugly)
     import freevo
 
-    from freevo.ui.config import config
+    from freevo.ui import config
     if config.gui.display.engine.lower() == 'sdl':
         import pygame
 

@@ -45,7 +45,7 @@ import kaa.notifier
 from freevo.resources import ResourceHandler
 from freevo.ui import application
 from interface import InputPlugin
-from freevo.ui.config import config
+from freevo.ui import config
 
 import logging
 log = logging.getLogger('input')

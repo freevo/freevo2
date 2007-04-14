@@ -43,7 +43,7 @@ from freevo.ui.menu import Action
 from freevo.ui.application import ConfirmWindow
 from freevo.ui.mainmenu import MainMenuItem, MainMenuPlugin
 from freevo.ui.gui import theme, widgets
-from freevo.ui.config import config
+from freevo.ui import config
 
 # get shutdown config
 config = config.plugin.shutdown

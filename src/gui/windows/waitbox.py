@@ -39,7 +39,7 @@ import math
 import logging
 
 # freevo imports
-from freevo.ui.config import config
+from freevo.ui import config
 
 # gui imports
 from freevo.ui.gui import displays

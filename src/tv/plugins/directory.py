@@ -33,7 +33,7 @@
 import kaa.beacon
 
 # freevo imports
-from freevo.ui.config import config
+from freevo.ui import config
 from freevo.ui.mainmenu import MainMenuPlugin
 from freevo.ui.menu import ActionItem
 from freevo.ui.directory import DirItem

@@ -34,7 +34,7 @@ class BaseApplication(object):
     
     def __init__(self):
         from freevo.ui.gui.areas import Handler
-        from freevo.ui.config import config
+        from freevo.ui import config
         self._fade_steps = config.gui.theme.fadestep
         self.engine = Handler(self.name, self.areas)
 
@@ -115,7 +115,7 @@ class _Videoplayer(BaseApplication):
     areas = ()
 
     def __init__(self):
-        from freevo.ui.config import config
+        from freevo.ui import config
         BaseApplication.__init__(self)
         self.engine.set_background(int(config.player.video.colorkey))
 
