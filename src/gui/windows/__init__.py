@@ -33,6 +33,3 @@ from window      import *
 from waitbox     import *
 from messagebox  import *
 from confirmbox  import *
-
-# from progressbox import *
-# from inputbox    import *
