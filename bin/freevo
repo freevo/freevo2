@@ -86,15 +86,55 @@ try:
         from xml.utils import qp_xml
         from xml.dom import minidom
     except ImportError:
-        raise ImportError('No module named pyxml')
+        pass
 
     # now load other modules to check if all requirements are installed
     import pysqlite2
 
-    # import ui path (ugly)
     import freevo
+    import freevo.plugin
+    import freevo.ui
 
-    from freevo.ui import config
+    config = freevo.ui.config
+
+    # load config file
+    cfgfile = os.path.expanduser('~/.freevo/freevo2.conf')
+    if '-c' in sys.argv:
+        cfgfile = sys.argv[sys.argv.index('-c')+1]
+
+    if not os.path.isfile(cfgfile):
+        print '%s does not exist' % cfgfile
+        print 'The file is now created and Freevo will stop so you can'
+        print 'adjust the config settings.'
+        print 'You should recheck freevo2.conf after every svn update. Use'
+        print '\'freevo setup\' to rebuild the file without starting freevo.'
+        print 'Your settings will be saved when the config file is rewritten.'
+        config.load(cfgfile, create=True)
+        sys.exit(0)
+
+    config.load(cfgfile, create=True)
+    if len(sys.argv) > 1 and sys.argv[1] in ('setup', '--setup', 'config', '--config'):
+        print 'wrote %s' % cfgfile
+        sys.exit(0)
+
+    if config.debug:
+        # FIXME: make it possible to set debug for specific parts.
+        # Maybe use an environment variable and hock it into freevo.core
+        # or kaa.base.
+        logging.getLogger().setLevel(logging.INFO)
+
+    # plugins is a list of known plugins
+    for p in freevo.ui.plugins:
+        c = config
+        for attr in p.split('.'):
+            c = getattr(c, attr)
+        if c.activate:
+            p = p.replace('plugin.', '').replace('..', '.')
+            if isinstance(c.activate, bool):
+                freevo.plugin.activate(p)
+            else:
+                freevo.plugin.activate(p, level=c.activate)
+    
     if config.gui.display.engine.lower() == 'sdl':
         import pygame
 
@@ -157,7 +197,7 @@ if len(sys.argv) == 2 and sys.argv[1] in ('-fs', '--fullscreen', '-f'):
     os.execvp('xinit', [ 'xinit', sys.argv[0], '-force-fs',  '--', ':'+str(server_num) ])
 
 # freevo imports
-from freevo import plugin, beacon
+from freevo import beacon
 from freevo.ui.gui import theme, widgets, animation, displays, areas
 
 # load the fxditem to make sure it's the first in the
@@ -253,11 +293,11 @@ try:
     displays.create()
 
     # Fire up splashscreen and load the plugins
-    num = len(plugin.get(None))-1
+    num = len(freevo.plugin.get(None))-1
     splash = Splashscreen(_('Starting Freevo, please wait ...'), num)
 
     # load plugins
-    plugin.init(freevo.ui, splash.progress)
+    freevo.plugin.init(freevo.ui, splash.progress)
 
     # fade out the splash screen
     splash.hide()
