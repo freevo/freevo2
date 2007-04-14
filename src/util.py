@@ -175,23 +175,6 @@ class ObjectCache(object):
         del self.cache[key]
         del self.lru[self.lru.index(key)]
         
-#
-# misc file ops
-#
-
-def unlink(filename):
-    try:
-        if os.path.isdir(filename) or \
-               os.stat(filename)[stat.ST_SIZE] > 1000000:
-            base = '.' + os.path.basename(filename) + '.freevo~'
-            name = os.path.join(os.path.dirname(filename), base)
-            os.rename(filename, name)
-            kaa.notifier.Process(['rm', '-rf', name]).start()
-        else:
-            os.unlink(filename)
-    except (OSError, IOError), e:
-        log.error('can\'t delete %s: %s' % (filename, e))
-        
 
 #
 # find files by pattern or suffix

@@ -33,8 +33,12 @@ __all__ = [ 'Files' ]
 
 # python imports
 import os
+import stat
 import shutil
 import logging
+
+# kaa imports
+import kaa.notifier
 
 # freevo imports
 from freevo.ui import util
@@ -117,4 +121,14 @@ class Files(object):
         for f in self.files + [ self.fxd_file, self.image ]:
             if not f:
                 continue
-            util.unlink(f)
+        try:
+            if os.path.isdir(filename) or \
+                   os.stat(filename)[stat.ST_SIZE] > 1000000:
+                base = '.' + os.path.basename(filename) + '.freevo~'
+                name = os.path.join(os.path.dirname(filename), base)
+                os.rename(filename, name)
+                kaa.notifier.Process(['rm', '-rf', name]).start()
+            else:
+                os.unlink(filename)
+        except (OSError, IOError), e:
+            log.error('can\'t delete %s: %s' % (filename, e))
