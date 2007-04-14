@@ -45,7 +45,6 @@ from kaa.strutils import str_to_unicode
 
 # freevo imports
 from freevo.ui import config
-import util
 
 import menu
 import fxditem
@@ -116,6 +115,27 @@ def remove_start_string(string, start):
         string = string[1:].lstrip(' -_,:.')
 
     return string[0].upper() + string[1:]
+
+
+def freespace(path):
+    """
+    freespace(path) -> integer
+    Return the number of bytes available to the user on the file system
+    pointed to by path.
+    """
+    s = os.statvfs(path)
+    return s[statvfs.F_BAVAIL] * long(s[statvfs.F_BSIZE])
+
+
+def totalspace(path):
+    """
+    totalspace(path) -> integer
+    Return the number of total bytes available on the file system
+    pointed to by path.
+    """
+
+    s = os.statvfs(path)
+    return s[statvfs.F_BLOCKS] * long(s[statvfs.F_BSIZE])
 
 
 class DirItem(Playlist):
@@ -204,7 +224,7 @@ class DirItem(Playlist):
                 return num_items[2]
 
         if key in ( 'freespace', 'totalspace' ):
-            space = getattr(util, key)(self.dir) / 1000000
+            space = eval(key)(self.dir) / 1000000
             if space > 1000:
                 space='%s,%s' % (space / 1000, space % 1000)
             return space

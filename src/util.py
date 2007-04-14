@@ -179,27 +179,6 @@ class ObjectCache(object):
 # misc file ops
 #
 
-def freespace(path):
-    """
-    freespace(path) -> integer
-    Return the number of bytes available to the user on the file system
-    pointed to by path.
-    """
-    s = os.statvfs(path)
-    return s[statvfs.F_BAVAIL] * long(s[statvfs.F_BSIZE])
-
-
-def totalspace(path):
-    """
-    totalspace(path) -> integer
-    Return the number of total bytes available on the file system
-    pointed to by path.
-    """
-
-    s = os.statvfs(path)
-    return s[statvfs.F_BLOCKS] * long(s[statvfs.F_BSIZE])
-
-
 def unlink(filename):
     try:
         if os.path.isdir(filename) or \
