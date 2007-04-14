@@ -37,9 +37,6 @@ __all__ = [ 'ConfirmBox' ]
 # python imports
 import logging
 
-# freevo imports
-from freevo.ui.event import *
-
 # gui imports
 from freevo.ui.gui.widgets.textbox import Textbox
 from freevo.ui.gui.widgets.button import Button
@@ -54,8 +51,7 @@ log = logging.getLogger()
 class ConfirmBox(WaitBox):
     """
     A box with two buttons: Yes and No. It can have additional handles what
-    function should be called if Yes is selected. INPUT_EXIT will be close
-    the box like pressing No.
+    function should be called if Yes is selected.
     """
     def __init__(self, obj):
         WaitBox.__init__(self, obj)

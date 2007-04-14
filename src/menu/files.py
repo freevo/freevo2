@@ -40,9 +40,6 @@ import logging
 # kaa imports
 import kaa.notifier
 
-# freevo imports
-from freevo.ui import util
-
 # get logging object
 log = logging.getLogger()
 

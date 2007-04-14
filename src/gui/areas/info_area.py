@@ -38,9 +38,6 @@ __all__ = [ 'InfoArea' ]
 # python imports
 import time
 
-# freevo imports
-from freevo.ui import util
-
 # gui imports
 from area import Area
 from freevo.ui.gui.widgets import InfoText

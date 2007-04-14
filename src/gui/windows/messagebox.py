@@ -37,9 +37,6 @@ __all__ = [ 'MessageBox' ]
 # python imports
 import logging
 
-# freevo imports
-from freevo.ui.event import *
-
 # gui imports
 from freevo.ui.gui.widgets.button import Button
 

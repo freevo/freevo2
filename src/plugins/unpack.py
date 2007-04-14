@@ -41,7 +41,6 @@ import os
 import kaa.notifier
 
 # freevo imports
-from freevo.ui import util
 from freevo.ui.menu import Item, Action, MediaPlugin
 from freevo.ui.application import TextWindow
 

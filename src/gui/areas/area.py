@@ -53,7 +53,6 @@ import copy
 import os
 
 # freevo imports
-from freevo.ui import util
 from freevo.ui import config
 
 # gui imports

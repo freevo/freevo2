@@ -41,7 +41,6 @@ import logging
 import kaa.mevas
 
 import freevo.conf
-from freevo.ui import util
 import theme
 
 # get logging object

@@ -41,7 +41,6 @@ import os
 # freevo imports
 from freevo import plugin
 import gui.theme
-import util
 
 from menu import Item, Action, Menu
 from application.menuw import MenuWidget
