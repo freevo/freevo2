@@ -156,6 +156,15 @@ def icon(name):
     return current_theme.get_icon(name)
 
 
+def getimage(base, default=None):
+    """
+    return the image base+'.png' or base+'.jpg' if one of them exists.
+    If not return the default
+    """
+    for suffix in ('.png', '.jpg', '.gif'):
+        if os.path.isfile(base+suffix):
+            return base+suffix
+    return default
 
 
 # -------------- Private classes and functions ------------------------------

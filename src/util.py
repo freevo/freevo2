@@ -116,18 +116,6 @@ def unique(s):
     return u
 
 
-def getimage(base, default=None):
-    """
-    return the image base+'.png' or base+'.jpg' if one of them exists.
-    If not return the default
-    """
-    for suffix in ('.png', '.jpg', '.gif'):
-        if os.path.isfile(base+suffix):
-            return base+suffix
-    return default
-
-
-
 class ObjectCache(object):
     """
     Provides a cache for objects indexed by a string. It should

@@ -83,7 +83,7 @@ class MainMenuItem(Item):
         imagedir = theme.mainmenu.imagedir
         if not self.image and imagedir:
             # find a nice image based on skin type
-            self.image = util.getimage(os.path.join(imagedir, skin_type))
+            self.image = gui.theme.getimage(os.path.join(imagedir, skin_type))
 
 
     def actions(self):
