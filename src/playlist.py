@@ -86,8 +86,10 @@ class Playlist(MediaItem, ItemList):
         self.repeat       = repeat
         self.display_type = type
         self.next_pos     = None
-        self._playlist_valid = False
-
+        # if playlist is empty (like for directory items) the playlist
+        # is always valid. The inheriting class has to make sure when
+        # it calls set_playlist
+        self._playlist_valid = playlist == []
         self.background_playlist = None
         self._random = random
 
@@ -149,7 +151,6 @@ class Playlist(MediaItem, ItemList):
         self._playlist_valid = True
 
         # create a basic info object
-        self.info = {}
         items = []
 
         if isinstance(self._playlist, (str, unicode)):

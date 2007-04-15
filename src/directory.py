@@ -49,7 +49,7 @@ from freevo.ui import config
 import menu
 import fxditem
 
-from menu import Item, Files, Action, ActionItem, MediaPlugin
+from menu import Files, Action, ActionItem, MediaPlugin
 from playlist import Playlist
 from event import OSD_MESSAGE, DIRECTORY_CHANGE_DISPLAY_TYPE, \
      DIRECTORY_TOGGLE_HIDE_PLAYED
@@ -168,13 +168,11 @@ class DirItem(Playlist):
             display_type = self.display_type
             if self.display_type == 'tv':
                 display_type = 'video'
-
             # get number of items info from beacon
             num_items_all = self.info.get('freevo_num_items') or {}
             num_items = num_items_all.get(display_type)
             if num_items and num_items[0] != self.info.get('mtime'):
                 num_items = None
-
             if not num_items:
                 log.info('create metainfo for %s', self.filename)
                 listing = kaa.beacon.query(parent=self.info).get(filter='extmap')
@@ -185,13 +183,10 @@ class DirItem(Playlist):
                 if self.info.scanned():
                     num_items_all[display_type] = num_items
                     self.info['freevo_num_items'] = copy.copy(num_items_all)
-
             if key == 'num_items':
                 return num_items[1] + num_items[2]
-
             if key == 'num_play_items':
                 return num_items[1]
-
             if key == 'num_dir_items':
                 return num_items[2]
 
@@ -206,26 +201,7 @@ class DirItem(Playlist):
                 space='%s,%s' % (space / 1000, space % 1000)
             return space
 
-        if key == 'length':
-            try:
-                length = int(self.info['length'])
-            except ValueError:
-                return self.info['length']
-            except:
-                try:
-                    length = int(self.length)
-                except:
-                    return ''
-            if length == 0:
-                return ''
-            if length / 3600:
-                return '%d:%02d:%02d' % ( length / 3600, (length % 3600) / 60,
-                                          length % 60)
-            else:
-                return '%d:%02d' % (length / 60, length % 60)
-
         if key.startswith('config:'):
-
             value = self.info.get('tmp:%s' % key[7:])
             if value is not None:
                 return value
@@ -246,7 +222,7 @@ class DirItem(Playlist):
                 return 'video' in value.split(',')
             return self.display_type in value.split(',')
 
-        return Item.__getitem__(self, key)
+        return Playlist.__getitem__(self, key)
 
 
     # eventhandler for this item
