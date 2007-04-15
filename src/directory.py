@@ -118,27 +118,6 @@ def remove_start_string(string, start):
     return string[0].upper() + string[1:]
 
 
-def freespace(path):
-    """
-    freespace(path) -> integer
-    Return the number of bytes available to the user on the file system
-    pointed to by path.
-    """
-    s = os.statvfs(path)
-    return s[statvfs.F_BAVAIL] * long(s[statvfs.F_BSIZE])
-
-
-def totalspace(path):
-    """
-    totalspace(path) -> integer
-    Return the number of total bytes available on the file system
-    pointed to by path.
-    """
-
-    s = os.statvfs(path)
-    return s[statvfs.F_BLOCKS] * long(s[statvfs.F_BSIZE])
-
-
 class DirItem(Playlist):
     """
     class for handling directories
@@ -217,7 +196,12 @@ class DirItem(Playlist):
                 return num_items[2]
 
         if key in ( 'freespace', 'totalspace' ):
-            space = eval(key)(self.filename) / 1000000
+            s = os.statvfs(self.filename)
+            if key == 'freespace':
+                space = s[statvfs.F_BAVAIL] * long(s[statvfs.F_BSIZE])
+            else:
+                space = s[statvfs.F_BLOCKS] * long(s[statvfs.F_BSIZE])
+            space = space / 1000000
             if space > 1000:
                 space='%s,%s' % (space / 1000, space % 1000)
             return space
