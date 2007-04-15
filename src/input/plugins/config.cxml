@@ -18,9 +18,9 @@
         <code>
             if os.path.isfile(os.path.expanduser('~/.freevo/lircrc')):
                 lircrc = os.path.expanduser('~/.freevo/lircrc')
-                set_default(config.input.plugin.lirc, 'lircrc', lircrc)
+                set_default(config.input.plugin.lirc.lircrc, lircrc)
             if os.path.isfile(config.input.plugin.lirc.lircrc):
-                set_default(config.input.plugin.lirc, 'activate', True)
+                set_default(config.input.plugin.lirc.activate, True)
         </code>
     </group>
 
