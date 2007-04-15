@@ -274,10 +274,10 @@
 	      </if>
 	    </if>
 
-	    <if expression="runtime">
+	    <if expression="length:min">
 	      <text width="140" font="info label">Runtime:</text>
 	      <goto_pos x="10" mode="relative"/>
-	      <text font="info value" expression="runtime"/>
+	      <text font="info value" expression="length:min"/>
 	      <newline/>
 	    </if>
 	    <text width="140" font="info label">Type:</text>
@@ -478,10 +478,10 @@
 	    <goto_pos y="10" mode="relative"/>
 	  </if>
 
-	  <if expression="runtime">
+	  <if expression="length:min">
 	    <text width="140" align="right" font="info value">Runtime:</text>
 	    <goto_pos x="10" mode="relative"/>
-	    <text font="info value" expression="runtime"/>
+	    <text font="info value" expression="length:min"/>
 	    <newline/>
 	  </if>
 

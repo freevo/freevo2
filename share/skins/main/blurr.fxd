@@ -157,9 +157,9 @@
                         <text font="info value" expression="year"/>
                         <text font="info value">)</text>
                     </if>
-                    <if expression="runtime">
+                    <if expression="length:min">
                         <goto_pos x="30" mode="relative"/>
-                        <text font="info value" expression="runtime"/>
+                        <text font="info value" expression="length:min"/>
                         <newline/>
                     </if>
                 </item>

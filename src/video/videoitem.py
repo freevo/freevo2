@@ -183,31 +183,6 @@ class VideoItem(MediaItem):
             else:
                 return '%d:%02d' % (int(elapsed / 60), int(elapsed % 60))
 
-        if key == 'runtime':
-            length = None
-
-            if self.info['runtime'] and self.info['runtime'] != 'None':
-                length = self.info['runtime']
-            elif self.info['length'] and self.info['length'] != 'None':
-                length = self.info['length']
-            if not length and hasattr(self, 'length'):
-                length = self.length
-            if not length:
-                return ''
-
-            if isinstance(length, int) or isinstance(length, float) or \
-                   isinstance(length, long):
-                length = str(int(round(length) / 60))
-            if length.find('min') == -1:
-                length = '%s min' % length
-            if length.find('/') > 0:
-                length = length[:length.find('/')].rstrip()
-            if length.find(':') > 0:
-                length = length[length.find(':')+1:]
-            if length == '0 min':
-                return ''
-            return length
-
         return MediaItem.__getitem__(self, key)
 
 
