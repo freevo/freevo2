@@ -45,7 +45,6 @@ from freevo.ui import config
 import freevo.ipc
 
 # freevo imports
-from freevo.ui.gui.windows.inputbox import InputBox
 from freevo.ui.menu import Item, Action, ActionItem, Menu
 from freevo.ui.application import MessageWindow
 
