@@ -55,6 +55,8 @@ class Item(object):
     Item class. This is the base class for all items in the menu. It's a
     template for other info items like VideoItem, AudioItem and ImageItem
     """
+    type = None
+    
     def __init__(self, parent=None, action=None, type=None):
         """
         Init the item. Sets all needed variables, if parent is given also
@@ -63,7 +65,8 @@ class Item(object):
         self.icon = None
         self.info = {}
         self.menu = None
-        self.type = type
+        if type is not None:
+            self.type = type
         self._image = None
 
         self.action = action

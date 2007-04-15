@@ -62,7 +62,9 @@ class Playlist(MediaItem, ItemList):
     REPEAT_ITEM     = 1
     REPEAT_PLAYLIST = 2
 
-    def __init__(self, name='', playlist=[], parent=None, type=None,
+    type = 'playlist'
+    
+    def __init__(self, name='', playlist=[], parent=None,
                  random=False, autoplay=False, repeat=REPEAT_OFF):
         """
         Init the playlist

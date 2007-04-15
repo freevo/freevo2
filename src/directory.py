@@ -143,9 +143,10 @@ class DirItem(Playlist):
     """
     class for handling directories
     """
+    type = 'dir'
+
     def __init__(self, directory, parent, name = '', type = None):
         Playlist.__init__(self, parent=parent, type=type)
-        self.type = 'dir'
         self.item_menu  = None
 
         if not isinstance(directory, kaa.beacon.Item):
