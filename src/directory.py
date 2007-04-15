@@ -143,8 +143,7 @@ class DirItem(Playlist):
     """
     class for handling directories
     """
-    def __init__(self, directory, parent, name = '', type = None,
-                 add_args = None):
+    def __init__(self, directory, parent, name = '', type = None):
         Playlist.__init__(self, parent=parent, type=type)
         self.type = 'dir'
         self.item_menu  = None
@@ -162,10 +161,6 @@ class DirItem(Playlist):
 
         if name:
             self.name = str_to_unicode(name)
-
-        if add_args == None and hasattr(parent, 'add_args'):
-            add_args = parent.add_args
-        self.add_args = add_args
 
         if self['show_all_items']:
             # FIXME: no way to set this

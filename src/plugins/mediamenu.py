@@ -93,8 +93,6 @@ class MediaMenu(MainMenuItem):
             if hasattr(filename, 'path'):
                 # kaa.config object
                 filename = filename.path.replace('$(HOME)', os.environ.get('HOME'))
-            if not isinstance(filename, (str, unicode)):
-                filename = filename[1]
             filename = os.path.abspath(filename)
             if os.path.isdir(filename) and \
                    not os.environ.get('NO_CRAWLER') and \
@@ -116,43 +114,25 @@ class MediaMenu(MainMenuItem):
         # add default items
         for item in self._items:
             try:
-                # split the list on dir/file, title and add_args
-                add_args = None
+                # split the list on dir/file and title
                 if hasattr(item, 'path'):
                     # kaa.config object
                     title = unicode(item.name)
                     filename = item.path.replace('$(HOME)', os.environ.get('HOME'))
-                elif isinstance(item, (str, unicode)):
+                else:
                     # only a filename is given
                     title, filename = u'', item
-                elif self.display_type == 'games':
-                    # has to be handled specially
-                    if item[0] is 'USER':
-                        title, filename = item[1], item[2][0]
-                    # GAMES code:
-                    # else:
-                    #     title, filename = machine.title(item[0]), item[2][0]
-
-                    add_args = item[3:]
-                else:
-                    # title and filename are given
-                    (title, filename) = item[:2]
-                    if len(item) > 2:
-                        # ... and add_args
-                        add_args = item[2:]
 
                 filename = os.path.abspath(filename)
+                listing = kaa.beacon.query(filename=filename).get(filter='extmap')
+
                 if os.path.isdir(filename):
-                    query = kaa.beacon.query(filename=filename)
-                    for d in query.get(filter='extmap').get('beacon:dir'):
-                        items.append(DirItem(d, self, name = title,
-                                             type = self.display_type,
-                                             add_args = add_args))
+                    for d in listing.get('beacon:dir'):
+                        d = DirItem(d, self, name = title, type = self.display_type)
+                        items.append(d)
                     continue
 
                 # normal file
-                query = kaa.beacon.query(filename=filename)
-                listing = query.get(filter='extmap')
                 for p in MediaPlugin.plugins(self.display_type):
                     p_items = p.get(self, listing)
                     if title:
