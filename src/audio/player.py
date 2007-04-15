@@ -98,11 +98,6 @@ class Player(Application):
         if self.playlist:
             self.playlist.select(self.item)
 
-        # Calculate some new values
-        self.item.remain = 0
-        if self.item.length:
-            self.item.remain = self.item.length - self.item.elapsed
-
         # Set the current item to the gui engine
         self.engine.set_item(self.item)
         self.status = STATUS_RUNNING
@@ -144,9 +139,6 @@ class Player(Application):
         Callback for elapsed time changes.
         """
         self.item.elapsed = round(self.player.get_position())
-        self.item.remain = 0
-        if self.item.length:
-            self.item.remain = self.item.length - self.item.elapsed
         self.engine.update()
 
 

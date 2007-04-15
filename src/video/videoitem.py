@@ -66,15 +66,16 @@ VIDEO_SHOW_REGEXP_MATCH = re.compile("^.*" + regexp).match
 VIDEO_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + regexp + "[\.\- ]*").split
 
 class VideoItem(MediaItem):
+    type = 'video'
+    
     def __init__(self, url, parent):
-        MediaItem.__init__(self, parent, type='video')
+        MediaItem.__init__(self, parent)
 
         self.subtitle_file     = {}         # text subtitles
         self.audio_file        = {}         # audio dubbing
 
         self.selected_subtitle = None
         self.selected_audio    = None
-        self.elapsed           = 0
 
         # set url and parse the name
         self.set_url(url)
@@ -171,18 +172,6 @@ class VideoItem(MediaItem):
             aspect = str(self.info['aspect'])
             return aspect[:aspect.find(' ')].replace('/', ':')
 
-        if key  == 'elapsed':
-            elapsed = self.elapsed
-            if self.info['start']:
-                # FIXME: overflow
-                elapsed = elapsed - self.info['start']
-            if elapsed / 3600:
-                return '%d:%02d:%02d' % ( elapsed / 3600,
-                                          (elapsed % 3600) / 60,
-                                          elapsed % 60)
-            else:
-                return '%d:%02d' % (int(elapsed / 60), int(elapsed % 60))
-
         return MediaItem.__getitem__(self, key)
 
 
@@ -235,6 +224,7 @@ class VideoItem(MediaItem):
         Play the item.
         """
         # call the player to play the item
+        self.elapsed = 0
         videoplayer.play(self, **kwargs)
 
 

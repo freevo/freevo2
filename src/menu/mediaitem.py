@@ -61,7 +61,8 @@ class MediaItem(Item):
         self.url = 'null://'
         self.filename = None
         self.fxdinfo = {}
-
+        self.elapsed = 0
+        
 
     def set_url(self, url):
         """
@@ -116,61 +117,49 @@ class MediaItem(Item):
                 self.name = str_to_unicode(self.url)
 
 
+    def format_time(self, time, hours=False):
+        """
+        Format time string
+        """
+        if int(time / 3600) or hours:
+            return '%d:%02d:%02d' % ( time / 3600, (time % 3600) / 60, time % 60)
+        return '%02d:%02d' % (time / 60, time % 60)
+
+        
     def __getitem__(self, attr):
         """
         return the specific attribute
         """
         if attr == 'length':
             try:
-                length = int(self.info.get('length'))
+                return self.format_time(self.info.get('length'))
             except ValueError:
-                return self.info.get('length')
-            except:
-                try:
-                    length = int(self.length)
-                except:
-                    return ''
-            if length == 0:
                 return ''
-            if length / 3600:
-                return '%d:%02d:%02d' % ( length / 3600, (length % 3600) / 60,
-                                          length % 60)
-            else:
-                return '%d:%02d' % (length / 60, length % 60)
-
 
         if attr == 'length:min':
             try:
-                length = int(self.info.get('length'))
+                return '%d min' % (int(self.info.get('length')) / 60)
             except ValueError:
-                return self.info.get('length')
-            except:
-                try:
-                    length = int(self.length)
-                except:
-                    return ''
-            if length == 0:
                 return ''
-            return '%d min' % (length / 60)
 
+        if attr  == 'elapsed':
+            # FIXME: handle elapsed > length
+            return self.format_time(self.elapsed)
 
         if attr == 'elapsed:percent':
             if not hasattr(self, 'elapsed'):
                 return 0
-
             try:
                 length = int(self.info.get('length'))
             except ValueError:
-                try:
-                    length = int(self.length)
-                except:
-                    return 0
+                return 0
             if not length:
                 return 0
-            return 100 * self.elapsed / length
-
+            return min(100 * self.elapsed / length, 100)
 
         if attr in self.fxdinfo:
+            # FIXME: remove this variable and try to make it work using tmp
+            # variables in beacon (see video/fxdhandler.py)
             return self.fxdinfo.get(attr)
 
         return Item.__getitem__(self, attr)

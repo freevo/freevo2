@@ -150,6 +150,9 @@ class Player(Application):
                 self.set_eventmap('dvd')
             else:
                 self.set_eventmap('video')
+        # FIXME: if item does not start at position 0 the start time
+        # must be taken into consideration for elapsed. This happens for
+        # TS files from DVB sources.
         self.item.elapsed = round(self.player.get_position())
 
 

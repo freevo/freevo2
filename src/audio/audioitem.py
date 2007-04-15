@@ -54,17 +54,11 @@ class AudioItem(MediaItem):
     """
     This is the common class to get information about audiofiles.
     """
+    type = 'audio'
+    
     def __init__(self, url, parent):
-        MediaItem.__init__(self, parent, type='audio')
+        MediaItem.__init__(self, parent)
         self.set_url(url)
-        self.start   = 0
-        self.elapsed = 0
-        self.remain  = 0
-        self.pause   = 0
-        try:
-            self.length = int(self.info['length'])
-        except:
-            self.length = 0
 
 
     def sort(self, mode='name'):
@@ -89,24 +83,6 @@ class AudioItem(MediaItem):
         MediaItem.set_url(self, url)
         if self.url.startswith('cdda://'):
             self.network_play = False
-
-
-    def __getitem__(self, key):
-        """
-        return the specific attribute as string or an empty string
-        """
-        if key  == 'length':
-            if self.length:
-                # maybe the length was wrong
-                if self.length < self.elapsed:
-                    self.length = self.elapsed
-                return '%d:%02d' % (int(self.length / 60), \
-                                    int(self.length % 60))
-
-        if key  == 'elapsed':
-            return '%d:%02d' % (int(self.elapsed / 60), int(self.elapsed % 60))
-
-        return MediaItem.__getitem__(self, key)
 
 
     def actions(self):
