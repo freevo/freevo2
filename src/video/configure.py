@@ -70,15 +70,6 @@ def start_chapter(item, chapter):
     play_movie(item, chapter=chapter)
 
 
-def start_subitem(item, pos):
-    """
-    Handle subitem selection.
-    """
-    item.conf_select_this_item = item.subitems[pos]
-    item.show_menu(False)
-    play_movie(item)
-
-
 def audio_selection(item):
     """
     Submenu for audio selection.
@@ -150,18 +141,6 @@ def player_selection(item):
     item.pushmenu(Menu(_('Player Selection'), menu_items))
 
     
-def subitem_selection(item):
-    """
-    Submenu for subitem selection.
-    """
-    menu_items = []
-    for pos in range(len(item.subitems)):
-        a = ActionItem(_('Play chapter %s') % (pos+1), item, start_subitem)
-        a.parameter(pos)
-        menu_items.append(a)
-    item.pushmenu(Menu(_('Chapter Menu'), menu_items))
-
-
 def toggle(item, name, variable):
     """
     Basic toggle function.
@@ -203,10 +182,6 @@ def get_items(item):
         # if item.info.has_key('chapters') and item.info['chapters'] > 1:
         #   a = ActionItem(_('Chapter selection'), item, chapter_selection)
         #   items.append(a)
-    if item.subitems:
-        # show subitems as chapter
-        a = ActionItem(_('Chapter selection'), item, subitem_selection)
-        items.append(a)
 
     items.append(add_toggle(item, _('deinterlacing'), 'interlaced'))
     items.append(ActionItem(_('Select player'), item, player_selection))

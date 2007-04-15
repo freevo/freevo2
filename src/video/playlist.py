@@ -1,20 +1,15 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# __init__.py - interface to video
+# playlist.py - VideoItem with more than one url
 # -----------------------------------------------------------------------------
-# $Id$
+# $Id: videoitem.py 9443 2007-04-14 19:48:49Z dmeyer $
 #
-# This file imports everything needed to use this video module.
-# There is  only one class provided for video files, the PluginInterface
-# from interface.py. It is a MediaPlugin that can be accessed
-# from menu.MediaPlugin.plugins(). It will also register an fxd handler for the
-# <movie> and <disc-set> tags.
-#
-# Video plugins are also allowed to use VideoItem to create a new VideoItem
+# Note: this is not tested yet because there is no working code right now
+# that supports subitems for video items.
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2007 Krister Lagerstrom, Dirk Meyer, et al.
+# Copyright (C) 2007 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -37,8 +32,15 @@
 #
 # -----------------------------------------------------------------------------
 
-from interface import *
+# freevo imports
+from freevo.ui.playlist import Playlist
 
-# used by video plugins
-from videoitem import VideoItem
-from playlist import VideoPlaylist
+class VideoPlaylist(Playlist):
+    type = 'video'
+
+    def __id__(self):
+        """
+        Return a unique id of the item. This id should be the same when the
+        item is rebuild later with the same informations
+        """
+        return ''.join([ c.__id__() for c in self.choices ])

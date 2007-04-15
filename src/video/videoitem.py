@@ -5,11 +5,9 @@
 # $Id$
 #
 # This file contains a VideoItem. A VideoItem can not only hold a simple
-# video file, it can also store subitems if the video is splitted into several
-# files. DVD and VCD are also VideoItems.
+# video file. DVD and VCD are also VideoItems.
 #
 # TODO: o maybe split this file into file/vcd/dvd or
-#         move subitem to extra file
 #       o create better 'arg' handling in play
 #
 # -----------------------------------------------------------------------------
@@ -70,9 +68,6 @@ VIDEO_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + regexp + "[\.\- ]*").split
 class VideoItem(MediaItem):
     def __init__(self, url, parent):
         MediaItem.__init__(self, parent, type='video')
-
-        self.subitems          = []         # more than one file/track to play
-        self.current_subitem   = None
 
         self.subtitle_file     = {}         # text subtitles
         self.audio_file        = {}         # audio dubbing
@@ -165,18 +160,6 @@ class VideoItem(MediaItem):
         return c
     
 
-    def __id__(self):
-        """
-        Return a unique id of the item. This id should be the same when the
-        item is rebuild later with the same informations
-        """
-        ret = self.url
-        if self.subitems:
-            for s in self.subitems:
-                ret += s.__id__()
-        return ret
-
-
     def __getitem__(self, key):
         """
         return the specific attribute
@@ -228,48 +211,6 @@ class VideoItem(MediaItem):
         return MediaItem.__getitem__(self, key)
 
 
-    def __set_next_available_subitem(self):
-        """
-        select the next available subitem. Loops on each subitem and checks if
-        the needed media is really there.
-        If the media is there, sets self.current_subitem to the given subitem
-        and returns 1.
-        If no media has been found, we set self.current_subitem to None.
-          If the search for the next available subitem did start from the
-            beginning of the list, then we consider that no media at all was
-            available for any subitem: we return 0.
-          If the search for the next available subitem did not start from the
-            beginning of the list, then we consider that at least one media
-            had been found in the past: we return 1.
-        """
-        if hasattr(self, 'conf_select_this_item'):
-            # XXX bad hack, clean me up
-            self.current_subitem = self.conf_select_this_item
-            del self.conf_select_this_item
-            return True
-
-        cont = 1
-        from_start = 0
-        si = self.current_subitem
-        while cont:
-            if not si:
-                # No subitem selected yet: take the first one
-                si = self.subitems[0]
-                from_start = 1
-            else:
-                pos = self.subitems.index(si)
-                # Else take the next one
-                if pos < len(self.subitems)-1:
-                    # Let's get the next subitem
-                    si = self.subitems[pos+1]
-                else:
-                    # No next subitem
-                    si = None
-                    cont = 0
-        self.current_subitem = None
-        return not from_start
-
-
     # ------------------------------------------------------------------------
     # actions:
 
@@ -318,42 +259,6 @@ class VideoItem(MediaItem):
         """
         Play the item.
         """
-        if self.subitems:
-            # if we have subitems (a movie with more than one file),
-            # we start playing the first that is physically available
-            self.error_in_subitem = 0
-            self.last_error_msg   = ''
-            self.current_subitem  = None
-
-            result = self.__set_next_available_subitem()
-            if self.current_subitem: # 'result' is always 1 in this case
-                # When playing a subitem, the menu must be hidden. If it is
-                # not, the playing will stop after the first subitem, since the
-                # PLAY_END event is not forwarded to the parent
-                # videoitem.
-                # And besides, we don't need the menu between two subitems.
-                self.last_error_msg=self.current_subitem.play()
-                if self.last_error_msg:
-                    self.error_in_subitem = 1
-                    # Go to the next playable subitem, using the loop in
-                    # eventhandler()
-                    self.eventhandler(PLAY_END)
-
-            elif not result:
-                # No media at all was found: error
-                txt = (_('No media found for "%s".\n')+
-                       _('Please insert the media.')) % self.name
-                box = ConfirmWindow(txt, (_('Retry'), _('Abort')))
-                box.buttons[0].connect(self.play)
-                box.show()
-                
-            # done, everything else is handled in 'play' of the subitem
-            return
-
-        if self.url.startswith('file://'):
-            # normal playback of one file
-            file = self.filename
-
         # call the player to play the item
         videoplayer.play(self, **kwargs)
 
@@ -363,27 +268,3 @@ class VideoItem(MediaItem):
         stop playing
         """
         videoplayer.stop()
-
-
-    def eventhandler(self, event):
-        """
-        eventhandler for this item
-        """
-        # PLAY_END: do we have to play another file?
-        if self.subitems:
-            if event == PLAY_END:
-                self.__set_next_available_subitem()
-                # Loop until we find a subitem which plays without error
-                while self.current_subitem:
-                    log.info('playing next item')
-                    error = self.current_subitem.play()
-                    if error:
-                        self.last_error_msg = error
-                        self.error_in_subitem = 1
-                        self.__set_next_available_subitem()
-                    else:
-                        return True
-                if self.error_in_subitem:
-                    # No more subitems to play, and an error occured
-                    MessageWindow(self.last_error_msg).show()
-        return MediaItem.eventhandler(self, event)

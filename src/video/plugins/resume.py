@@ -82,7 +82,7 @@ class PluginInterface(ItemPlugin):
         """
         # auto bookmark store
         if event == STOP:
-            if item.mode == 'file' and not item.subitems and item.elapsed:
+            if item.mode == 'file' and item.elapsed:
                 # this will store in kaa.beacon
                 log.info('auto-bookmark store')
                 item[RESUME]= item.elapsed
