@@ -106,10 +106,10 @@ class PluginInterface(ItemPlugin):
             # don't bother moving to current-dir
             return []
 
-        cp = os.path.commonprefix((item.parent.dir, self.from_dir))
+        cp = os.path.commonprefix((item.parent.filename, self.from_dir))
         if (self.recursive and cp == self.from_dir) \
-           or ( item.parent.dir == self.from_dir) \
-           or ( item.parent.dir == self.from_dir + '/'):
+           or ( item.parent.filename == self.from_dir) \
+           or ( item.parent.filename == self.from_dir + '/'):
                # Create Action
                name = _('Move to [%s]') % os.path.basename(self.to_dir)
                return [ Action(name, self.move_item) ]

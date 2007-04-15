@@ -160,10 +160,6 @@ class DirItem(Playlist):
             self.files.read_only = True
         self.files.append(directory)
 
-        # FIXME: remove this
-        self.dir = directory.filename
-        self.url = directory.filename
-
         if name:
             self.name = str_to_unicode(name)
 
@@ -205,7 +201,7 @@ class DirItem(Playlist):
                 num_items = None
 
             if not num_items:
-                log.info('create metainfo for %s', self.dir)
+                log.info('create metainfo for %s', self.filename)
                 listing = kaa.beacon.query(parent=self.info).get(filter='extmap')
                 num_items = [ self.info.get('mtime'), 0 ]
                 for p in MediaPlugin.plugins(display_type):
@@ -225,7 +221,7 @@ class DirItem(Playlist):
                 return num_items[2]
 
         if key in ( 'freespace', 'totalspace' ):
-            space = eval(key)(self.dir) / 1000000
+            space = eval(key)(self.filename) / 1000000
             if space > 1000:
                 space='%s,%s' % (space / 1000, space % 1000)
             return space
@@ -357,7 +353,7 @@ class DirItem(Playlist):
         play directory
         """
         # FIXME: add password checking here
-        if not os.path.exists(self.dir):
+        if not os.path.exists(self.filename):
 	    MessageWindow(_('Directory does not exist')).show()
             return
         display_type = self.display_type
@@ -395,7 +391,7 @@ class DirItem(Playlist):
             if hasattr(self.item_menu, 'skin_force_text_view'):
                 del self.item_menu.skin_force_text_view
 
-        elif not os.path.exists(self.dir):
+        elif not os.path.exists(self.filename):
             # FIXME: better handling!!!!!
 	    MessageWindow(_('Directory does not exist')).show()
             return
