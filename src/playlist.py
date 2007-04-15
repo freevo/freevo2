@@ -64,7 +64,7 @@ class Playlist(MediaItem, ItemList):
 
     type = 'playlist'
     
-    def __init__(self, name='', playlist=[], parent=None,
+    def __init__(self, name='', playlist=[], parent=None, type=type,
                  random=False, autoplay=False, repeat=REPEAT_OFF):
         """
         Init the playlist
@@ -75,7 +75,7 @@ class Playlist(MediaItem, ItemList):
                      2) filenames
                      3) a list (directoryname, recursive=0|1)
         """
-        MediaItem.__init__(self, parent, type='playlist')
+        MediaItem.__init__(self, parent)
         ItemList.__init__(self)
 
         self.name = str_to_unicode(name)
