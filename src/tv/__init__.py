@@ -31,9 +31,6 @@
 # freevo core plugins
 import freevo.ipc
 
-# freevo core imports
-import freevo.ipc
-
 # freevo imports
 from freevo.ui.mainmenu import MainMenuItem, MainMenuPlugin
 from freevo.ui.menu import Item, Menu
