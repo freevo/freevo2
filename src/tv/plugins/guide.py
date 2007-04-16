@@ -38,18 +38,12 @@ import logging
 import kaa.epg
 import kaa.notifier
 
-# freevo core imports
-import freevo.ipc
-
 # freevo imports
 from freevo.ui.event import *
 from freevo.ui.mainmenu import MainMenuPlugin
 from freevo.ui.menu import Menu, ActionItem
 from freevo.ui.tv.program import ProgramItem
 from freevo.ui.application import MessageWindow
-
-# get tvserver interface
-tvserver = freevo.ipc.Instance('freevo').tvserver
 
 # get logging object
 log = logging.getLogger('tv')
@@ -60,7 +54,7 @@ class PluginInterface(MainMenuPlugin):
         return [ ActionItem(_('TV Guide'), parent, self.show) ]
 
     def show(self, parent):
-        if not tvserver.epg.connected():
+        if not kaa.epg.is_connected():
             MessageWindow(_('TVServer not running')).show()
             return
         guide = TVGuide(parent)
@@ -109,6 +103,11 @@ class TVGuide(Menu):
         """
         # TODO: keep a cache of program objects for the current guide view
         #       unless this happens to be fast enough
+
+        if not kaa.epg.is_connected():
+            MessageWindow(_('TVServer not running')).show()
+            # FIXME: go back in menu
+            return
 
         if not timestamp:
             timestamp = self.current_time
