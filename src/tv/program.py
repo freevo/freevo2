@@ -207,6 +207,9 @@ class ProgramItem(Item):
 
     @kaa.notifier.yield_execution()
     def channel_details(self):
+        if not kaa.epg.is_connected():
+            MessageWindow(_('TVServer not running')).show()
+            return
         items = []
         # query the epg database in background
         query_data = kaa.epg.search(channel=self.channel)

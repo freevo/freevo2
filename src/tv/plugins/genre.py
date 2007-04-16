@@ -43,6 +43,7 @@ import kaa.epg
 from freevo.ui.mainmenu import MainMenuPlugin
 from freevo.ui.menu import Item, Action, ActionItem, Menu
 from freevo.ui.tv.program import ProgramItem
+from freevo.ui.application import MessageWindow
 
 # get logging object
 log = logging.getLogger('tv')
@@ -70,6 +71,9 @@ class GenreItem(Item):
         """
         Find all the programs with this genre
         """
+        if not kaa.epg.is_connected():
+            MessageWindow(_('TVServer not running')).show()
+            return
         items = []
         # query epg in background
         if self.cat:
@@ -108,6 +112,9 @@ class CategoryItem(Item):
         """ 
         Find all genres that are in this category
         """
+        if not kaa.epg.is_connected():
+            MessageWindow(_('TVServer not running')).show()
+            return
         items = []
          
         if self.name==ALL_CAT:
@@ -150,6 +157,9 @@ class PluginInterface(MainMenuPlugin):
         """
         Show all category.
         """
+        if not kaa.epg.is_connected():
+            MessageWindow(_('TVServer not running')).show()
+            return
         items = []
                
         # look if there is category data in the epg data

@@ -32,7 +32,6 @@
 import time
 
 # kaa imports
-import kaa.epg
 import kaa.notifier
 from kaa.strutils import unicode_to_str
 
