@@ -123,6 +123,8 @@ try:
         # or kaa.base.
         logging.getLogger().setLevel(logging.INFO)
 
+    config.watch()
+    
     # plugins is a list of known plugins
     for p in freevo.ui.plugins:
         c = config
