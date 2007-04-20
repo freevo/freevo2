@@ -1,7 +1,0 @@
-If you want to build your own package, you need to symlink this 'debian/' 
-folder into the root of the freevo source package. There, you can run
-debbuild as usual.
-
-Just go into $FREEVO_ROOT and type:
-ln -sf ./contrib/debian .
-debuild --rootcmd=fakeroot

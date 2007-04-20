@@ -11,7 +11,7 @@
     -->
 
     <skin geometry="800x600">
-	<iconset theme="AquaFusion"/>
+	<iconset theme="blurr"/>
 
 	<setvar name="box_under_icon" val="0"/>
 

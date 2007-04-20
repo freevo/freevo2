@@ -1,9 +1,0 @@
-diff -Naur runtime/lib/python2.2-orig/cgi.py runtime/lib/python2.2/cgi.py
---- runtime/lib/python2.2-orig/cgi.py	Fri Jan 10 12:08:05 2003
-+++ runtime/lib/python2.2/cgi.py	Wed Feb  5 17:19:53 2003
-@@ -1,4 +1,4 @@
--#! /usr/bin/python
-+#! /usr/local/freevo/runtime/apps/freevo_python
- 
- # NOTE: the above "/usr/local/bin/python" is NOT a mistake.  It is
- # intentionally NOT "/usr/bin/env python".  On many systems
