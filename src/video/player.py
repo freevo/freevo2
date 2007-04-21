@@ -206,9 +206,18 @@ class Player(Application):
                 Event(OSD_MESSAGE, _('Turn off deinterlacing')).post()
             return True
 
+        if event == VIDEO_CHANGE_ASPECT:
+            modes = [ 'bars', 'scale', 'zoom' ]
+            current = self.player.get_property('fit-method')
+            if current in modes:
+                idx = (modes.index(current) + 1) % len(modes)
+                self.player.set_property('fit-method', modes[idx])
+            return True
+                
         if str(event).startswith('DVDNAV_'):
             # dvd navigation commands
             self.player.nav_command(str(event)[7:].lower())
+            return True
 
         # give it to the item
         return self.item.eventhandler(event)
