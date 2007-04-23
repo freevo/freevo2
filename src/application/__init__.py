@@ -4,6 +4,11 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
+# Import information. This module depends on the following freevo.ui modules:
+# freevo.ui.event   for the event definitions
+# freevo.ui.menu    for the MenuWidget
+# freevo.ui.gui     for gui callbacks
+#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2005-2007 Dirk Meyer, et al.
@@ -41,6 +46,12 @@ def get_active():
     Get active application.
     """
     return _handler.get_active()
+
+def get_eventmap():
+    """
+    Return current eventmap.
+    """
+    return _handler.eventmap
 
 # signals defined by the application base code
 signals = _handler.signals

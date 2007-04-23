@@ -4,6 +4,10 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
+# Import information. This module depends on the following freevo.ui modules:
+# freevo.ui.event   for the event definitions
+# freevo.ui.config  for config.menu.arrow_navigation
+#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2005-2007 Dirk Meyer, et al.

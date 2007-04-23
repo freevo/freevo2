@@ -38,9 +38,10 @@ import logging
 
 # freevo imports
 from freevo import plugin
-from freevo.ui import input
 from freevo.ui import config
+from freevo.ui.input import EVENTMAP
 from freevo.ui.event import Event
+from freevo.ui.application import get_eventmap
 
 # get logging object
 log = logging.getLogger('input')
@@ -56,7 +57,7 @@ class InputPlugin(plugin.Plugin):
         Create eventmap on activate. FIXME: changing the setting during
         runtime has no effect.
         """
-        self.eventmap = copy.deepcopy(input.EVENTMAP)
+        self.eventmap = copy.deepcopy(EVENTMAP)
         for app, mapping in config.input.eventmap.items():
             for key, command in mapping.items():
                 self.eventmap[app][key] = Event(*command.split(' '))
@@ -69,7 +70,7 @@ class InputPlugin(plugin.Plugin):
         if not key:
             return None
 
-        for c in (input.get_mapping(), 'global'):
+        for c in (get_eventmap(), 'global'):
             if not self.eventmap.has_key(c):
                 continue
             if not self.eventmap[c].has_key(key):
@@ -77,4 +78,4 @@ class InputPlugin(plugin.Plugin):
 
             return self.eventmap[c][key].post(event_source='user')
 
-        log.warning('no event mapping for key %s in %s' % (key, input.get_mapping()))
+        log.warning('no event mapping for key %s in %s' % (key, get_eventmap()))

@@ -45,7 +45,6 @@ import logging
 import kaa.notifier
 
 # freevo imports
-from freevo.ui.input import set_mapping
 from freevo.ui.event import TOGGLE_APPLICATION
 
 # the logging object
@@ -72,6 +71,8 @@ class Handler(object):
         self.applications = []
         self.current = None
         self.windows = []
+        self.eventmap = None
+        
         # callback for events
         kaa.notifier.EventHandler(self.handle).register()
 
@@ -90,7 +91,7 @@ class Handler(object):
         if self.windows:
             focus = self.windows[-1]
         log.info('set focus to %s' % focus)
-        set_mapping(focus.eventmap)
+        self.eventmap = focus.eventmap
 
         if app == self.current:
             # same app as before
