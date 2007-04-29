@@ -31,23 +31,4 @@
         <var type="str"/>
     </dict>
 
-    <dict name="remotemap" type="str">
-        <desc>
-            Remote control mapping for event device.
-            FIXME: this needs to be moved to the plugin
-        </desc>
-        <dict type="str">
-            <var type="str"/>
-        </dict>
-    </dict>
-
-    <dict name="dfbmap" type="str">
-        <desc>
-            Keyboard mapping for DirectFB
-            FIXME: this needs to be moved to the plugin
-        </desc>
-        <dict type="str">
-            <var type="str"/>
-        </dict>
-    </dict>
 </config>
