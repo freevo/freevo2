@@ -58,6 +58,7 @@ class MenuStack(object):
     """
     def __init__(self):
         self.menustack = []
+        self._lock = False
 
 
     def back_to_menu(self, menu, refresh=True):
@@ -123,6 +124,9 @@ class MenuStack(object):
         """
         Refresh the stack and redraw it.
         """
+        if self._lock:
+            return
+        
         menu = self.menustack[-1]
 
         if menu.autoselect and len(menu.choices) == 1:
@@ -171,6 +175,14 @@ class MenuStack(object):
         return self.menustack[-1]
 
 
+    def is_locked(self):
+        """
+        Return if the menu stack is locked because it is re-building
+        itself. This should prevent wrong redraws.
+        """
+        return self._lock
+
+    
     def eventhandler(self, event):
         """
         Eventhandler for menu control
@@ -214,6 +226,25 @@ class MenuStack(object):
                     return True
             return True
 
+        if event == MENU_GOTO_MENU:
+            # TODO: add some doc, example:
+            # input.eventmap[menu][5] = MENU_GOTO_MENU /Watch a Movie/My Home Videos
+            path = ' '.join(event.arg)
+            self.menustack = [ self.menustack[0] ]
+            self._lock = True
+            for name in path.split(path[0])[1:]:
+                menu = self.get_menu()
+                for item in menu.choices:
+                    if item.name == name:
+                        menu.select(item)
+                        item.actions()[0]()
+                        break
+                else:
+                    break
+            self._lock = False
+            self.refresh()
+            
+                
         # handle empty menus
         if not menu.choices:
             if event in ( MENU_SELECT, MENU_SUBMENU, MENU_PLAY_ITEM):

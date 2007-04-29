@@ -52,6 +52,8 @@ class MenuWidget(Application, MenuStack):
 
 
     def refresh(self, reload=False):
+        if self.is_locked():
+            return
         MenuStack.refresh(self, reload)
         self.engine.update(self.menustack[-1])
 
