@@ -24,7 +24,7 @@
         </code>
     </group>
 
-    <group name="joystick" plugin="true">
+    <group name="joystick" plugin="false">
         <desc>
             Joystick plugin.
         </desc>
