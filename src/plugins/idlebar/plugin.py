@@ -34,7 +34,6 @@ from freevo import plugin
 class IdleBarPlugin(plugin.Plugin):
     def __init__(self):
         plugin.Plugin.__init__(self)
-        self._plugin_type = 'idlebar'
         self.objects   = []
         self.NO_CHANGE = -1
         self.align     = 'left'
@@ -81,6 +80,9 @@ class IdleBarPlugin(plugin.Plugin):
         """
         Static function to return all IdlebarPlugins.
         """
-        return plugin.get('idlebar')
+        return IdleBarPlugin.plugin_list
 
     plugins = staticmethod(plugins)
+
+
+plugin.register(IdleBarPlugin)

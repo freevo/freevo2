@@ -44,12 +44,6 @@ class ItemPlugin(plugin.Plugin):
     True, the event won't be passed to other eventhandlers and also not to
     the item itself.
     """
-    def __init__(self, name=''):
-        plugin.Plugin.__init__(self, name)
-        self._plugin_type = 'item'
-        self._plugin_special = True
-
-
     def actions(self, item):
         """
         return a list of actions to that item. Each action is type Action
@@ -68,11 +62,8 @@ class ItemPlugin(plugin.Plugin):
         """
         Static function to return all ItemPlugins.
         """
-        plugins = plugin.get('item')[:]
-        if subtype:
-            plugins += plugin.get('item_%s' % subtype)
-        plugins.sort(lambda l, o: cmp(l._plugin_level, o._plugin_level))
-        return plugins
+        return [ x for x in ItemPlugin.plugin_list \
+                 if x.plugin_media() in (None, subtype) ]
 
     plugins = staticmethod(plugins)
 
@@ -85,11 +76,6 @@ class MediaPlugin(plugin.Plugin):
     should be displayed, [] for always.
     """
     mediatype = []
-
-    def __init__(self, name=''):
-        plugin.Plugin.__init__(self, name)
-        self._plugin_type = 'media'
-
 
     def suffix(self):
         """
@@ -135,11 +121,16 @@ class MediaPlugin(plugin.Plugin):
         If mediatype is None, return all MediaPlugins.
         """
         if not mediatype:
-            return plugin.get('media')
+            return MediaPlugin.plugin_list
         ret = []
-        for p in plugin.get('media'):
+        for p in MediaPlugin.plugin_list:
             if not p.mediatype or mediatype in p.mediatype:
                 ret.append(p)
         return ret
 
     plugins = staticmethod(plugins)
+
+
+# register base class
+plugin.register(MediaPlugin)
+plugin.register(ItemPlugin)

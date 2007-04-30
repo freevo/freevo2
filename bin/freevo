@@ -126,12 +126,14 @@ try:
     config.watch()
     
     # plugins is a list of known plugins
+    num_plugins = 0
     for p in freevo.ui.plugins:
         c = config
         for attr in p.split('.'):
             c = getattr(c, attr)
         if c.activate:
             p = p.replace('plugin.', '').replace('..', '.')
+            num_plugins += 1
             if isinstance(c.activate, bool):
                 freevo.plugin.activate(p)
             else:
@@ -295,8 +297,7 @@ try:
     displays.create()
 
     # Fire up splashscreen and load the plugins
-    num = len(freevo.plugin.get(None))-1
-    splash = Splashscreen(_('Starting Freevo, please wait ...'), num)
+    splash = Splashscreen(_('Starting Freevo, please wait ...'), num_plugins-1)
 
     # load plugins
     freevo.plugin.init(freevo.ui, splash.progress)

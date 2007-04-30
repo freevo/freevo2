@@ -104,12 +104,6 @@ class MainMenuPlugin(plugin.Plugin):
     """
     Plugin class for plugins to add something to the main menu
     """
-    def __init__(self, name=''):
-        plugin.Plugin.__init__(self, name)
-        self._plugin_type = 'mainmenu'
-        self._plugin_special = True
-
-
     def items(self, parent):
         """
         return the list of items for the main menu
@@ -117,13 +111,11 @@ class MainMenuPlugin(plugin.Plugin):
         return []
 
 
-    def plugins(subtype=''):
+    def plugins(subtype=None):
         """
         Static function to return all MainMenuPlugins.
         """
-        if not subtype:
-            return plugin.get('mainmenu')
-        return plugin.get('mainmenu_%s' % subtype)
+        return [ x for x in MainMenuPlugin.plugin_list if x.plugin_media() == subtype ]
 
     plugins = staticmethod(plugins)
 
@@ -152,3 +144,6 @@ class MainMenu(Item):
         because it is not bound to a menupage.
         """
         return self.menuw
+
+# register base class
+plugin.register(MainMenuPlugin)
