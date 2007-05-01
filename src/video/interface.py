@@ -57,7 +57,7 @@ class PluginInterface(MediaPlugin, MainMenuPlugin):
     """
     Plugin to handle all kinds of video items
     """
-    mediatype = [ 'video' ]
+    possible_media_types = [ 'video' ]
 
     def plugin_activate(self, level):
         """

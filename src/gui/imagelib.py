@@ -132,11 +132,6 @@ def item_image(item, size, icon_dir, force=False, bg=False):
     """
     width, height = size
 
-    try:
-        type = item.display_type
-    except:
-        type = item.type
-
     image     = None
     imagefile = None
 
@@ -145,28 +140,30 @@ def item_image(item, size, icon_dir, force=False, bg=False):
         if item['rotation']:
             image.rotate(item['rotation'])
 
+    type = item.type
     if not image:
         if not force:
             return None
 
         if item.type == 'dir':
             if os.path.isfile('%s/mimetypes/folder_%s.png' % \
-                              (icon_dir, item.display_type)):
+                              (icon_dir, item.media_type)):
                 imagefile = '%s/mimetypes/folder_%s.png' % \
-                            (icon_dir, item.display_type)
+                            (icon_dir, item.media_type)
             else:
                 imagefile = '%s/mimetypes/folder.png' % icon_dir
 
         elif item.type == 'playlist':
             if item.parent and \
                    os.path.isfile('%s/mimetypes/playlist_%s.png' % \
-                                  (icon_dir, item.parent.display_type)):
+                                  (icon_dir, item.parent.media_type)):
                 imagefile = '%s/mimetypes/playlist_%s.png' % \
-                            (icon_dir, item.parent.display_type)
+                            (icon_dir, item.parent.media_type)
             else:
                 imagefile = '%s/mimetypes/playlist.png' % icon_dir
 
         else:
+
             try:
                 type = item.info['mime'].replace('/', '_')
             except:

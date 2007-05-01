@@ -72,10 +72,10 @@ class ItemPlugin(plugin.Plugin):
 class MediaPlugin(plugin.Plugin):
     """
     Plugin class for medias handled in a directory/playlist.
-    self.mediatype is a list of display types where this media
-    should be displayed, [] for always.
+    self.possible_media_types is a list of display types where this
+    media should be displayed, [] for always.
     """
-    mediatype = []
+    possible_media_types = []
 
     def suffix(self):
         """
@@ -115,16 +115,16 @@ class MediaPlugin(plugin.Plugin):
         return None
 
 
-    def plugins(mediatype=None):
+    def plugins(media_type=None):
         """
-        Static function to return all MediaPlugins for the given mediatype.
-        If mediatype is None, return all MediaPlugins.
+        Static function to return all MediaPlugins for the given media_type.
+        If media_type is None, return all MediaPlugins.
         """
-        if not mediatype:
+        if not media_type:
             return MediaPlugin.plugin_list
         ret = []
         for p in MediaPlugin.plugin_list:
-            if not p.mediatype or mediatype in p.mediatype:
+            if not p.possible_media_types or media_type in p.possible_media_types:
                 ret.append(p)
         return ret
 

@@ -77,7 +77,7 @@ def update():
     #     listing = Listing(discset)
     #     files += listing.get('fxd')
 
-    for info in fxditem.mimetype.parse(None, files, [], display_type='video'):
+    for info in fxditem.mimetype.parse(None, files, [], type='video'):
         if info.type != 'video':
             continue
         k = os.path.splitext(os.path.basename(info.files.fxd_file))[0]

@@ -57,7 +57,7 @@ class MediaMenu(MainMenuItem):
 
     def __init__(self, parent, title, type, items):
         MainMenuItem.__init__(self, parent, skin_type=type)
-        self.display_type = type
+        self.media_type = type
         self.item_menu = None
 
         kaa.beacon.signals['media.add'].connect_weak(self.media_change)
@@ -94,12 +94,12 @@ class MediaMenu(MainMenuItem):
                 # path is a directory
                 if os.path.isdir(filename):
                     for d in listing.get('beacon:dir'):
-                        d = DirItem(d, self, name = title, type = self.display_type)
+                        d = DirItem(d, self, name = title, type = self.media_type)
                         items.append(d)
                     continue
 
                 # normal file
-                for p in MediaPlugin.plugins(self.display_type):
+                for p in MediaPlugin.plugins(self.media_type):
                     p_items = p.get(self, listing)
                     if title:
                         for i in p_items:
@@ -121,11 +121,11 @@ class MediaMenu(MainMenuItem):
             if media.mountpoint == '/':
                 continue
             listing = kaa.beacon.wrap(media.root, filter='extmap')
-            for p in MediaPlugin.plugins(self.display_type):
+            for p in MediaPlugin.plugins(self.media_type):
                 items.extend(p.get(self, listing))
             for d in listing.get('beacon:dir'):
                 items.append(DirItem(d, self, name=media.label,
-                                     type = self.display_type))
+                                     type = self.media_type))
         return items
 
 
@@ -134,7 +134,7 @@ class MediaMenu(MainMenuItem):
         Generate items based on plugins
         """
         items = []
-        for p in MainMenuPlugin.plugins(self.display_type):
+        for p in MainMenuPlugin.plugins(self.media_type):
             items += p.items( self )
         return items
 
@@ -153,7 +153,7 @@ class MediaMenu(MainMenuItem):
         """
         # generate all other items
         items = self._get_all_items()
-        type = '%s main menu' % self.display_type
+        type = '%s main menu' % self.media_type
         item_menu = Menu(self.menutitle, items, type = type,
                          reload_func = self.reload)
         item_menu.autoselect = True

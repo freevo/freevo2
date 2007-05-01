@@ -95,5 +95,5 @@ class AudioDiskItem(Playlist):
         #     d.name = _('Data files on disc')
         #     items.append(d)
 
-        item_menu = Menu(self.name, items, type = self.display_type)
+        item_menu = Menu(self.name, items, type = 'audio')
         self.pushmenu(item_menu)

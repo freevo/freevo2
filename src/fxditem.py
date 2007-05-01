@@ -53,12 +53,12 @@ class Container(Item):
     """
     A simple container containing for items parsed from the fxd
     """
-    def __init__(self, title, image, info, parent):
+    def __init__(self, title, image, info, parent, type):
         Item.__init__(self, parent)
         self.items = []
         self.name = title
         self.image = image
-        self.display_type = parent.display_type
+        self.media_type = type
 
 
     def actions(self):
@@ -72,7 +72,7 @@ class Container(Item):
         """
         Show all items
         """
-        self.pushmenu(Menu(self.name, self.items, type=self.display_type))
+        self.pushmenu(Menu(self.name, self.items, type=self.media_type))
 
 
 
@@ -94,15 +94,16 @@ class PluginInterface(MediaPlugin):
         if not fxd_files:
             return []
 
-        type = parent.display_type
-        if type == 'tv':
-            type = 'video'
+        # get media_type from parent
+        media_type = getattr(parent, 'media_type', None)
+        if media_type == 'tv':
+            media_type = 'video'
 
         items = []
         for fxd_file in fxd_files:
             try:
                 doc = freevo.fxdparser.Document(fxd_file.filename)
-                items.extend(self._parse(doc, parent, listing, type))
+                items.extend(self._parse(doc, parent, listing, media_type))
             except:
                 log.exception("fxd file %s corrupt" % fxd_file.filename)
                 continue
@@ -130,7 +131,7 @@ class PluginInterface(MediaPlugin):
         self._callbacks.append((types, node, callback))
 
 
-    def _parse(self, node, parent, listing, display_type):
+    def _parse(self, node, parent, listing, media_type):
         """
         Internal parser function
         """
@@ -151,7 +152,7 @@ class PluginInterface(MediaPlugin):
                         c.info[str(i.name)] = i.content
 
             for types, tag, handler in self._callbacks:
-                if display_type and types and not display_type in types:
+                if media_type and types and not media_type in types:
                     # wrong type
                     continue
                 if tag == c.name:
@@ -159,8 +160,8 @@ class PluginInterface(MediaPlugin):
                     if i is not None:
                         items.append(i)
             if c.name == 'container':
-                con = Container(c.title, c.image, c.info, parent)
-                con.items = self._parse(c, con, listing, display_type)
+                con = Container(c.title, c.image, c.info, parent, media_type)
+                con.items = self._parse(c, con, listing, media_type)
                 if con.items:
                     items.append(con)
         return items

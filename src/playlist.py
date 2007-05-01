@@ -64,7 +64,7 @@ class Playlist(MediaItem, ItemList):
 
     type = 'playlist'
     
-    def __init__(self, name='', playlist=[], parent=None, type=type,
+    def __init__(self, name='', playlist=[], parent=None, type=None,
                  random=False, autoplay=False, repeat=REPEAT_OFF):
         """
         Init the playlist
@@ -74,17 +74,21 @@ class Playlist(MediaItem, ItemList):
                      1) Items
                      2) filenames
                      3) a list (directoryname, recursive=0|1)
+
+        type is either a media (video,audio,image) or None for all
         """
         MediaItem.__init__(self, parent)
         ItemList.__init__(self)
-
         self.name = str_to_unicode(name)
+
+        if self.type == 'tv':
+            type = 'video'
 
         # variables only for Playlist
         self._playlist    = playlist
         self.autoplay     = autoplay
         self.repeat       = repeat
-        self.display_type = type
+        self.media_type   = type
         self.next_pos     = None
         # if playlist is empty (like for directory items) the playlist
         # is always valid. The inheriting class has to make sure when
@@ -175,7 +179,7 @@ class Playlist(MediaItem, ItemList):
         # Note: playlist is a list of Items, strings (filenames) or a
         # beacon queries now.
 
-        plugins = MediaPlugin.plugins(self.display_type)
+        plugins = MediaPlugin.plugins(self.media_type)
         for item in self._playlist:
 
             if isinstance(item, Item):
@@ -258,11 +262,7 @@ class Playlist(MediaItem, ItemList):
         # randomize if needed
         self._randomize()
 
-        display_type = self.display_type
-        if self.display_type == 'tv':
-            display_type = 'video'
-
-        menu = Menu(self.name, self.choices, type = display_type)
+        menu = Menu(self.name, self.choices, type = self.media_type)
         self.pushmenu(menu)
 
 
@@ -296,7 +296,7 @@ class Playlist(MediaItem, ItemList):
         play the playlist in random order
         """
         Playlist(playlist=self.choices, parent=self.parent,
-                 type=self.display_type, random=True,
+                 type=self.media_type, random=True,
                  repeat=self.repeat).play()
 
 
@@ -459,15 +459,13 @@ class PluginInterface(MediaPlugin):
         return a list of items based on the files
         """
         items = []
-        if parent and hasattr(parent, 'display_type'):
-            display_type = parent.display_type
-        else:
-            display_type = None
 
+        # get media_type from parent
+        media_type = getattr(parent, 'media_type', None)
         for suffix in self.suffix():
             for filename in listing.get(suffix):
                 items.append(Playlist(playlist=filename.filename, parent=parent,
-                                      type=display_type))
+                                      type=media_type))
         return items
 
 
@@ -504,7 +502,8 @@ class PluginInterface(MediaPlugin):
                 items.append(query)
 
         # create playlist object
-        pl = Playlist(node.title, items, parent, parent.display_type,
+        media_type = getattr(parent, 'media_type', None)
+        pl = Playlist(node.title, items, parent, media_type,
                       random=node.getattr('random') == '1',
                       repeat=node.getattr('repeat') == '1')
         pl.image = node.image

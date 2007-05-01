@@ -51,7 +51,7 @@ import fxditem
 
 from menu import Files, Action, ActionItem, MediaPlugin
 from playlist import Playlist
-from event import OSD_MESSAGE, DIRECTORY_CHANGE_DISPLAY_TYPE, \
+from event import OSD_MESSAGE, DIRECTORY_CHANGE_MENU_TYPE, \
      DIRECTORY_TOGGLE_HIDE_PLAYED
 
 from application import MessageWindow
@@ -125,6 +125,15 @@ class DirItem(Playlist):
     type = 'dir'
 
     def __init__(self, directory, parent, name = '', type = None):
+
+        # store type as menu_type and go on handling it as media_type
+        # with tv replaced by video. Only DirItem has a difference between
+        # media_type and menu_type with the extra tv value. This is needed
+        # to show a tv based skin when browsing a dir from the tv plugin.
+        self.menu_type = type
+        if type == 'tv':
+            type = 'video'
+            
         Playlist.__init__(self, parent=parent, type=type)
         self.item_menu  = None
 
@@ -144,14 +153,10 @@ class DirItem(Playlist):
 
         if self['show_all_items']:
             # FIXME: no way to set this
-            self.display_type = None
-
-        # set tv to video now
-        if self.display_type == 'tv':
-            type = 'video'
+            self.media_type = None
 
         # Check media plugins if they want to add something
-        for p in MediaPlugin.plugins(type):
+        for p in MediaPlugin.plugins(self.media_type):
             p.dirinfo(self)
 
 
@@ -165,23 +170,20 @@ class DirItem(Playlist):
         if key.startswith('num_'):
             # special keys to get number of playable items or the
             # sum of all items in that directory
-            display_type = self.display_type
-            if self.display_type == 'tv':
-                display_type = 'video'
             # get number of items info from beacon
             num_items_all = self.info.get('freevo_num_items') or {}
-            num_items = num_items_all.get(display_type)
+            num_items = num_items_all.get(self.media_type)
             if num_items and num_items[0] != self.info.get('mtime'):
                 num_items = None
             if not num_items:
                 log.info('create metainfo for %s', self.filename)
                 listing = kaa.beacon.query(parent=self.info).get(filter='extmap')
                 num_items = [ self.info.get('mtime'), 0 ]
-                for p in MediaPlugin.plugins(display_type):
+                for p in MediaPlugin.plugins(self.media_type):
                     num_items[1] += p.count(self, listing)
                 num_items.append(len(listing.get('beacon:dir')))
                 if self.info.scanned():
-                    num_items_all[display_type] = num_items
+                    num_items_all[self.media_type] = num_items
                     self.info['freevo_num_items'] = copy.copy(num_items_all)
             if key == 'num_items':
                 return num_items[1] + num_items[2]
@@ -211,16 +213,14 @@ class DirItem(Playlist):
             if isinstance(self.parent, DirItem):
                 return self.parent[key]
             if key == 'config:sort':
-                if self.display_type == 'tv':
+                if self.menu_type == 'tv':
                     return config.tvsort
                 return config.sort
             # config does not know about hide_played
             value = getattr(config, key[7:], False)
             if isinstance(value, bool):
                 return value
-            if self.display_type == 'tv':
-                return 'video' in value.split(',')
-            return self.display_type in value.split(',')
+            return self.media_type in value.split(',')
 
         return Playlist.__getitem__(self, key)
 
@@ -231,21 +231,21 @@ class DirItem(Playlist):
         if self.item_menu == None:
             return Playlist.eventhandler(self, event)
 
-        if event == DIRECTORY_CHANGE_DISPLAY_TYPE:
+        if event == DIRECTORY_CHANGE_MENU_TYPE:
             possible = [ ]
 
             for p in MediaPlugin.plugins():
-                for t in p.mediatype:
+                for t in p.possible_media_types:
                     if not t in possible:
                         possible.append(t)
 
             try:
-                pos = possible.index(self.display_type)
+                pos = possible.index(self.media_type)
                 type = possible[(pos+1) % len(possible)]
             except (IndexError, ValueError), e:
                 return Playlist.eventhandler(self, event)
 
-            self.display_type = type
+            self.media_type = self.menu_type = type
             self['tmp:autoplay_single_item'] = False
             self.item_menu.autoselect = False
             self.browse(update=True)
@@ -312,13 +312,9 @@ class DirItem(Playlist):
         if not os.path.exists(self.filename):
 	    MessageWindow(_('Directory does not exist')).show()
             return
-        display_type = self.display_type
-        if self.display_type == 'tv':
-            display_type = 'video'
-
         query = kaa.beacon.query(parent=self.info, recursive=recursive)
         pl = Playlist(playlist = query, parent = self,
-                      type=display_type, random=random)
+                      type=self.media_type, random=random)
         pl.play()
 
         # Now this is ugly. If we do nothing 'pl' will be deleted by the
@@ -350,10 +346,6 @@ class DirItem(Playlist):
 	    MessageWindow(_('Directory does not exist')).show()
             return
 
-        display_type = self.display_type
-        if self.display_type == 'tv':
-            display_type = 'video'
-
         if not update:
             self.query = kaa.beacon.query(parent=self.info)
             self.query.signals['changed'].connect_weak(self.browse, update=True)
@@ -364,7 +356,7 @@ class DirItem(Playlist):
         # build items
         #
         # build play_items, pl_items and dir_items
-        for p in MediaPlugin.plugins(display_type):
+        for p in MediaPlugin.plugins(self.media_type):
             for i in p.get(self, listing):
                 if i.type == 'playlist':
                     pl_items.append(i)
@@ -375,7 +367,7 @@ class DirItem(Playlist):
 
         # normal DirItems
         for item in listing.get('beacon:dir'):
-            d = DirItem(item, self, type = self.display_type)
+            d = DirItem(item, self, type = self.menu_type)
             dir_items.append(d)
 
         # remember listing
@@ -412,7 +404,7 @@ class DirItem(Playlist):
         dir_items.sort(_sortfunc('name'))
 
         # sort playlist by name or delete if they should not be displayed
-        if self.display_type and not self.display_type in \
+        if self.menu_type and not self.menu_type in \
                config.add_playlist_items.split(','):
             pl_items = []
         else:
@@ -429,7 +421,7 @@ class DirItem(Playlist):
 
         # update num_items information if needed
         num_items_all = self.info.get('freevo_num_items') or {}
-        num_items = num_items_all.get(display_type)
+        num_items = num_items_all.get(self.media_type)
         if num_items and (num_items[1] != len(play_items) + len(pl_items) or \
                           num_items[2] != len(dir_items)):
             num_items[1] = len(play_items) + len(pl_items)
@@ -446,10 +438,10 @@ class DirItem(Playlist):
         items = dir_items + pl_items + play_items
 
         # random playlist (only active for audio)
-        if self.display_type and self.display_type in \
+        if self.menu_type and self.menu_type in \
                config.add_random_playlist and len(play_items) > 1:
             pl = Playlist(_('Random playlist'), play_items, self,
-                          random=True)
+                          random=True, type=self.media_type)
             pl.autoplay = True
             items = [ pl ] + items
 
@@ -464,7 +456,7 @@ class DirItem(Playlist):
             return
 
         # normal menu build
-        item_menu = menu.Menu(self.name, items, type = display_type)
+        item_menu = menu.Menu(self.name, items, type = self.menu_type)
         item_menu.autoselect = self['config:autoplay_single_item']
         self.pushmenu(item_menu)
         self.item_menu = weakref(item_menu)

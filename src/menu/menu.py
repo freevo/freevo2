@@ -209,10 +209,6 @@ class Menu(ItemList):
             for i in items:
                 if not self.selected.type == 'main':
                     i.image = self.selected.image
-                if hasattr(self.selected, 'display_type'):
-                    i.display_type = self.selected.display_type
-                else:
-                    i.display_type = self.selected.type
 
             s = Menu(self.selected.name, items)
             s.submenu = True

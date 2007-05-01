@@ -57,7 +57,7 @@ class PluginInterface(MediaPlugin, MainMenuPlugin):
     """
     Plugin to handle all kinds of image items
     """
-    mediatype = [ 'image' ]
+    possible_media_types = [ 'image' ]
 
     def plugin_activate(self, level):
         """

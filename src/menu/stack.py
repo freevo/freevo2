@@ -210,16 +210,13 @@ class MenuStack(object):
             # TODO: it would be nice to remember the current menu stack
             # but that is something we have to do inside mediamenu if it
             # is possible at all.
-            # FIXME: using display_type here is ugly
             if len(self.menustack) > 1 and \
-                   hasattr(self.menustack[0].selected, 'display_type') and \
-                   self.menustack[0].selected.display_type == event.arg:
+                   getattr(self.menustack[0].selected, 'media_type', None) == event.arg:
                 # already in that menu
                 return True
             menu = self.menustack[0]
             for item in menu.choices:
-                if hasattr(item, 'display_type') and \
-                       item.display_type == event.arg:
+                if getattr(item, 'media_type', None) == event.arg:
                     self.menustack = [ menu ]
                     menu.select(item)
                     item.actions()[0]()

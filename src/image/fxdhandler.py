@@ -142,7 +142,7 @@ def fxdhandler(node, parent, listing):
 
     if files:
         bg = Playlist(playlist=files, random = random,
-                      repeat=True, display_type='audio')
+                      repeat=True, type='audio')
         pl.background_playlist = bg
 
     # add item to list

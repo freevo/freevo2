@@ -163,13 +163,12 @@ class ListingArea(Area):
         # menu to draw correctly
         possible_types = {}
         for i in menu.choices:
-            if hasattr(i, 'display_type') and i.display_type:
-                x = i.display_type
-                if settings.types.has_key(x) and not possible_types.has_key(x):
-                    possible_types[x] = settings.types[x]
-                x = '%s selected' % i.display_type
-                if settings.types.has_key(x) and not possible_types.has_key(x):
-                    possible_types[x] = settings.types[x]
+            x = i.type
+            if settings.types.has_key(x) and not possible_types.has_key(x):
+                possible_types[x] = settings.types[x]
+            x = '%s selected' % i.type
+            if settings.types.has_key(x) and not possible_types.has_key(x):
+                possible_types[x] = settings.types[x]
         if settings.types.has_key('default'):
             possible_types['default'] = settings.types['default']
         if settings.types.has_key('selected'):

@@ -65,7 +65,7 @@ class EmulatorPlugin(MainMenuPlugin):
     """
     Add the emualtor items to the games menu
     """
-    mediatype = [ 'games' ]
+    possible_media_types = [ 'games' ]
 
     def roms(self, parent, listing, configitem):
         """
