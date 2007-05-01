@@ -56,8 +56,8 @@ class MediaItem(Item):
     This item is for a media. It's only a template for image, video
     or audio items
     """
-    def __init__(self, parent=None, type=None):
-        Item.__init__(self, parent, type=type)
+    def __init__(self, parent):
+        Item.__init__(self, parent)
         self.url = 'null://'
         self.filename = None
         self.fxdinfo = {}

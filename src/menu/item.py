@@ -33,7 +33,7 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'Item' ]
+__all__ = [ 'Item', 'ActionItem' ]
 
 # python imports
 import logging
@@ -45,6 +45,7 @@ import kaa.beacon
 
 # menu imports
 from plugin import ItemPlugin
+from action import Action
 
 # get logging object
 log = logging.getLogger()
@@ -57,24 +58,17 @@ class Item(object):
     """
     type = None
     
-    def __init__(self, parent=None, action=None, type=None):
+    def __init__(self, parent):
         """
         Init the item. Sets all needed variables, if parent is given also
         inherit some settings from there.
         """
         self.info = {}
         self.menu = None
-        if type is not None:
-            self.type = type
         self._image = None
 
-        self.action = action
-        if action:
-            self.name = action.name
-            self.description = action.description
-        else:
-            self.name = u''
-            self.description  = ''
+        self.name = u''
+        self.description  = ''
 
         if parent:
             self.parent = weakref(parent)
@@ -152,11 +146,17 @@ class Item(object):
         Returns a list of possible actions on this item. The first
         one is autoselected by pressing SELECT
         """
-        if self.action:
-            return [ self.action ]
-        return []
+        return [ Action(self.name, self.select) ]
 
 
+    def select(self):
+        """
+        Select the item (default action). Need to be overloaded by the
+        inherting item or actions() need to be overloaded.
+        """
+        raise RuntimeError("no action defined for %s", self)
+
+    
     def get_actions(self):
         """
         Get all actions for the item. Do not override this function,
@@ -264,3 +264,19 @@ class Item(object):
             r = getattr(self, attr, None)
 
         return r
+
+
+
+class ActionItem(Item, Action):
+    """
+    A simple item with one action. The first parameter of the function
+    passed to this action is always the parent item if not None.
+    """
+    def __init__(self, name, parent, function, description=''):
+        Action.__init__(self, name, function, description=description)
+        Item.__init__(self, parent)
+        self.item = parent
+
+
+    def select(self):
+        return self()

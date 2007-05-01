@@ -46,8 +46,10 @@ class ImageItem(MediaItem):
     """
     An item for image files
     """
+    type = 'image'
+    
     def __init__(self, url, parent, duration = config.image.viewer.duration):
-        MediaItem.__init__(self, parent, type='image')
+        MediaItem.__init__(self, parent)
         # set url and parse the name
         self.set_url(url)
         self.duration = duration

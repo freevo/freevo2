@@ -82,20 +82,6 @@ class MainMenuItem(Item):
             self.image = gui.theme.getimage(os.path.join(imagedir, skin_type))
 
 
-    def actions(self):
-        """
-        Actions for this item.
-        """
-        return [ Action(self.name, self.select) ]
-
-
-    def select(self):
-        """
-        Select the item (default action). Need to be overloaded by the
-        inherting item or actions() need to be overloaded.
-        """
-        raise RuntimeError("no action defined for %s", self)
-    
 
 class MainMenuPlugin(plugin.Plugin):
     """
@@ -126,7 +112,7 @@ class MainMenu(Item):
         """
         Setup the main menu and handle events (remote control, etc)
         """
-        Item.__init__(self)
+        Item.__init__(self, None)
         items = []
         for p in MainMenuPlugin.plugins():
             items += p.items(self)

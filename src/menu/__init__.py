@@ -35,20 +35,10 @@
 
 # import the submodules
 from files import Files
-from item import Item
+from item import Item, ActionItem
 from listing import ItemList
 from mediaitem import MediaItem
 from action import Action
 from menu import Menu
 from stack import MenuStack
 from plugin import ItemPlugin, MediaPlugin
-
-class ActionItem(Item, Action):
-    """
-    A simple item with one action. The first parameter of the function
-    passed to this action is always the parent item if not None.
-    """
-    def __init__(self, name, parent, function, description=''):
-        Action.__init__(self, name, function, description=description)
-        Item.__init__(self, parent, self)
-        self.item = parent
