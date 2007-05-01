@@ -96,4 +96,4 @@ class AudioDiskItem(Playlist):
         #     items.append(d)
 
         item_menu = Menu(self.name, items, type = 'audio')
-        self.pushmenu(item_menu)
+        self.get_menustack().pushmenu(item_menu)

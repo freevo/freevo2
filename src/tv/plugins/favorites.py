@@ -48,7 +48,7 @@ class PluginInterface(MainMenuPlugin):
         if items:
             self.menu = Menu(_('View Favorites'), items, type='tv favorite menu',
                              reload_func = self.reload_favorites)
-            parent.pushmenu(self.menu)
+            parent.get_menustack().pushmenu(self.menu)
         else:
             MessageWindow(_("You don't have any favorites.")).show()
 

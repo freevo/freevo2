@@ -58,7 +58,7 @@ class PluginInterface(MainMenuPlugin):
             MessageWindow(_('TVServer not running')).show()
             return
         guide = TVGuide(parent)
-        parent.pushmenu(guide)
+        parent.get_menustack().pushmenu(guide)
 
     
 class TVGuide(Menu):

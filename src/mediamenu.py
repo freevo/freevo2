@@ -158,7 +158,7 @@ class MediaMenu(MainMenuItem):
                          reload_func = self.reload)
         item_menu.autoselect = True
         self.item_menu = weakref(item_menu)
-        self.pushmenu(item_menu)
+        self.get_menustack().pushmenu(item_menu)
 
 
     def reload(self):

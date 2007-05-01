@@ -174,7 +174,7 @@ class ProgramItem(Item):
         s = Menu(self, items, type = 'tv program menu')
         s.submenu = True
         s.infoitem = self
-        self.pushmenu(s)
+        self.get_menustack().pushmenu(s)
 
 
     @kaa.notifier.yield_execution()
@@ -221,7 +221,7 @@ class ProgramItem(Item):
         cmenu = Menu(self.channel.name, items, type = 'tv program menu')
         # FIXME: the percent values need to be calculated
         # cmenu.table = (15, 15, 70)
-        self.pushmenu(cmenu)
+        self.get_menustack().pushmenu(cmenu)
 
 
     def watch_channel(self):

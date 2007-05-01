@@ -263,7 +263,7 @@ class Playlist(MediaItem, ItemList):
         self._randomize()
 
         menu = Menu(self.name, self.choices, type = self.media_type)
-        self.pushmenu(menu)
+        self.get_menustack().pushmenu(menu)
 
 
     def play(self):

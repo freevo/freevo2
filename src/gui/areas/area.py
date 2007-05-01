@@ -117,7 +117,7 @@ class Area(object):
         self.clear()
 
 
-    def draw(self, settings, obj, viewitem, infoitem, area_definitions):
+    def draw(self, settings, obj, infoitem, area_definitions):
         """
         This is the main draw function. This function draws the background
         and calls the update function for the different types of areas.
@@ -127,7 +127,6 @@ class Area(object):
             return
 
         self.menu     = obj
-        self.viewitem = viewitem
         self.infoitem = infoitem
 
         try:

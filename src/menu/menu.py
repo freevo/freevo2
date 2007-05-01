@@ -71,7 +71,6 @@ class Menu(ItemList):
         # special items for the new skin to use in the view or info
         # area. If None, menu.selected will be taken
         self.infoitem = None
-        self.viewitem = None
 
         # Called when a child menu returns. This function returns a new menu
         # or None and the old menu will be reused
@@ -80,9 +79,6 @@ class Menu(ItemList):
 
         # Menu type
         self._is_submenu = False
-
-        # Reference to the item that created this menu
-        self.item = None
 
         # Autoselect menu if it has only one item
         self.autoselect = False
@@ -204,7 +200,6 @@ class Menu(ItemList):
                 return False
             s = Menu(self.selected.name, items)
             s._is_submenu = True
-            s.item = self.selected
             self.stack.pushmenu(s)
             return True
 

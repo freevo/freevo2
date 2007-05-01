@@ -108,7 +108,7 @@ class PluginInterface(EmulatorPlugin):
         if self.items == None:
             self.items = []
         self.items.append(ScummvmItem(self.parent, 'ScummVM', ''))
-        self.parent.pushmenu(Menu(config.name, self.items, type='games'))
+        self.parent.get_menustack().pushmenu(Menu(config.name, self.items, type='games'))
         self.parent = None
 
 

@@ -78,7 +78,7 @@ class ApodMainMenuItem(Item):
         previous.description = _('Browse all previously downloaded images')
 
         # add menu
-        self.pushmenu(Menu( _( 'Apod Pictures' ), [ current, previous ]))
+        self.get_menustack().pushmenu(Menu( _( 'Apod Pictures' ), [ current, previous ]))
 
 
     def browse_pictures(self):
@@ -93,7 +93,7 @@ class ApodMainMenuItem(Item):
             items += p.get(self, listing)
 
         if items:
-            self.pushmenu(Menu(_('Apod Pictures'), items))
+            self.get_menustack().pushmenu(Menu(_('Apod Pictures'), items))
         else:
             MessageWindow(_('No Images found')).show()
 

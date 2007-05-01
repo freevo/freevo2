@@ -318,7 +318,7 @@ class EmulatorMenuItem(MainMenuItem):
         item_menu.autoselect = True
         item_menu.skin_force_view = False
         self.item_menu = item_menu
-        self.pushmenu(item_menu)
+        self.get_menustack().pushmenu(item_menu)
 
 
     def reload(self):

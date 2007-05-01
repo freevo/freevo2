@@ -207,7 +207,7 @@ class VideoItem(MediaItem):
             items.append(track)
         moviemenu = Menu(self.name, items)
         moviemenu.type = 'video'
-        self.pushmenu(moviemenu)
+        self.get_menustack().pushmenu(moviemenu)
 
 
     def play(self, **kwargs):

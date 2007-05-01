@@ -458,7 +458,7 @@ class DirItem(Playlist):
         # normal menu build
         item_menu = menu.Menu(self.name, items, type = self.menu_type)
         item_menu.autoselect = self['config:autoplay_single_item']
-        self.pushmenu(item_menu)
+        self.get_menustack().pushmenu(item_menu)
         self.item_menu = weakref(item_menu)
 
     # ======================================================================
@@ -514,4 +514,4 @@ class DirItem(Playlist):
         self.get_menustack().delete_submenu(False)
         m = menu.Menu(_('Configure'), items)
         m.table = (80, 20)
-        self.pushmenu(m)
+        self.get_menustack().pushmenu(m)

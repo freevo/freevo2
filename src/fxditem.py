@@ -72,7 +72,8 @@ class Container(Item):
         """
         Show all items
         """
-        self.pushmenu(Menu(self.name, self.items, type=self.media_type))
+        m = Menu(self.name, self.items, type=self.media_type)
+        self.get_menustack().pushmenu(m)
 
 
 
@@ -90,8 +91,8 @@ class PluginInterface(MediaPlugin):
         """
         Return a list of items based on the listing
         """
-        fxd_files = listing.get('fxd')
-        if not fxd_files:
+        files = listing.get('fxd')
+        if not files:
             return []
 
         # get media_type from parent
@@ -100,12 +101,12 @@ class PluginInterface(MediaPlugin):
             media_type = 'video'
 
         items = []
-        for fxd_file in fxd_files:
+        for fxd in files:
             try:
-                doc = freevo.fxdparser.Document(fxd_file.filename)
+                doc = freevo.fxdparser.Document(fxd.filename)
                 items.extend(self._parse(doc, parent, listing, media_type))
             except:
-                log.exception("fxd file %s corrupt" % fxd_file.filename)
+                log.exception("fxd file %s corrupt" % fxd.filename)
                 continue
         return items
 

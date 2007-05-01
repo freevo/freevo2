@@ -62,20 +62,14 @@ class Item(object):
         Init the item. Sets all needed variables, if parent is given also
         inherit some settings from there.
         """
-        self.info = {}
-        self.menu = None
-        self._image = None
-
         self.name = u''
         self.description  = ''
-
+        self.info = {}
+        self._image = None
+        self.menu = None
+        self.parent = None
         if parent:
             self.parent = weakref(parent)
-        else:
-            self.parent = None
-
-        self.fxd_file = None
-        self.__initialized = False
 
 
     def _get_image(self):
@@ -172,35 +166,6 @@ class Item(object):
         return [ SubMenuItem(self, a) for a in self._get_actions() ]
 
 
-    def pushmenu(self, menu):
-        """
-        Append the given menu to the menu stack this item is associated with
-        and set some internal variables.
-        """
-        menu.item = weakref(self)
-        stack = self.get_menustack()
-        if not stack:
-            raise AttributeError('Item is not bound to a menu stack')
-        stack.pushmenu(menu)
-
-
-    def show_menu(self, refresh=True):
-        """
-        Go back in the menu stack to the menu showing the item.
-        """
-        stack = self.get_menustack()
-        if not stack or not self.menu:
-            raise AttributeError('Item is not bound to a menu stack')
-        stack.back_to_menu(self.menu, refresh)
-
-
-    def replace(self, item):
-        """
-        Replace this item in the menu with the given one.
-        """
-        self.menu.change_item(self, item)
-
-
     def get_playlist(self):
         """
         Return playlist object.
@@ -264,6 +229,9 @@ class ActionItem(Item, Action):
 
 
     def select(self):
+        """
+        On select call self.
+        """
         return self()
 
 

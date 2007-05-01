@@ -64,4 +64,5 @@ class GamesMenu(MainMenuItem):
         items = []
         for p in MainMenuPlugin.plugins('games'):
             items += p.items(self)
-        self.pushmenu(Menu(_('Games Main Menu'), items, type = 'games main menu'))
+        m = Menu(_('Games Main Menu'), items, type = 'games main menu')
+        self.get_menustack().pushmenu(m)

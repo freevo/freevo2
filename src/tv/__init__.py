@@ -65,7 +65,7 @@ class TVMenu(MainMenuItem):
 
         m = Menu(_('TV Main Menu'), items, type = 'tv main menu')
         m.infoitem = Info(self)
-        self.pushmenu(m)
+        self.get_menustack().pushmenu(m)
 
 
 class PluginInterface(MainMenuPlugin):

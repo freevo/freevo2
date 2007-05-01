@@ -128,7 +128,7 @@ class PluginInterface(EmulatorPlugin):
         for item in config.items:
             i = PcGameItem(parent, item.name, item.bin, item.parameters)
             items.append(i)
-        parent.pushmenu(Menu(_('PC Games'), items, type='games'))
+        parent.get_menustack().pushmenu(Menu(_('PC Games'), items, type='games'))
 
 
     def items(self, parent):

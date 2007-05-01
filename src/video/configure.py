@@ -36,7 +36,7 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'get_items', 'get_menu' ]
+__all__ = [ 'get_items' ]
 
 # kaa imports
 import kaa.popcorn
@@ -49,7 +49,7 @@ def play_movie(item, **kwargs):
     """
     play the movie (again)
     """
-    item.show_menu(False)
+    item.get_menustack().back_to_menu(item.menu, False)
     item.play(**kwargs)
 
 
@@ -65,7 +65,7 @@ def start_chapter(item, chapter):
     """
     Handle chapter selection.
     """
-    item.show_menu(False)
+    item.get_menustack().back_to_menu(item.menu, False)
     # FIXME: kaa.popcorn syntax
     play_movie(item, chapter=chapter)
 
@@ -89,7 +89,7 @@ def audio_selection(item):
         action = ActionItem(name, item, set_variable)
         action.parameter('selected_audio', a['id'])
         menu_items.append(action)
-    item.pushmenu(Menu(_('Audio Menu'), menu_items))
+    item.get_menustack().pushmenu(Menu(_('Audio Menu'), menu_items))
 
 
 def subtitle_selection(item):
@@ -106,7 +106,7 @@ def subtitle_selection(item):
         action = ActionItem(name, item, set_variable)
         action.parameter('selected_subtitle', pos)
         menu_items.append(action)
-    item.pushmenu(Menu(_('Subtitle Menu'), menu_items))
+    item.get_menustack().pushmenu(Menu(_('Subtitle Menu'), menu_items))
 
 
 def chapter_selection(item):
@@ -126,7 +126,7 @@ def chapter_selection(item):
             a = ActionItem(pos, item, start_chapter)
             a.parameter('-ss %s' % c.pos)
             menu_items.append(a)
-    item.pushmenu(Menu(_('Chapter Menu'), menu_items))
+    item.get_menustack().pushmenu(Menu(_('Chapter Menu'), menu_items))
 
 
 def player_selection(item):
@@ -138,7 +138,7 @@ def player_selection(item):
         a = ActionItem(player, item, play_movie)
         a.parameter(player=player)
         menu_items.append(a)
-    item.pushmenu(Menu(_('Player Selection'), menu_items))
+    item.get_menustack().pushmenu(Menu(_('Player Selection'), menu_items))
 
     
 def toggle(item, name, variable):
@@ -148,7 +148,7 @@ def toggle(item, name, variable):
     item[variable] = not item[variable]
     # replace item
     menuitem = item.get_menustack().get_selected()
-    menuitem.replace(add_toggle(item, name, variable))
+    menuitem.menu.change_item(menuitem, add_toggle(item, name, variable))
     # update menu
     item.get_menustack().refresh()
 
@@ -186,11 +186,3 @@ def get_items(item):
     items.append(add_toggle(item, _('deinterlacing'), 'interlaced'))
     items.append(ActionItem(_('Select player'), item, player_selection))
     return items
-
-
-def get_menu(item):
-    """
-    Return a complete menu for configure options.
-    """
-    p = ActionItem(_('Play'), item, play_movie)
-    return Menu(_('Config Menu'), get_items(item) + [ p ])

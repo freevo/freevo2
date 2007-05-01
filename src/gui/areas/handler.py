@@ -303,7 +303,6 @@ class Handler(object):
             else:
                 area_definitions = area_definitions[0]
 
-            viewitem = object.viewitem or object.selected
             infoitem = object.infoitem or object.selected
                 
         else:
@@ -315,16 +314,14 @@ class Handler(object):
                 except:
                     area_definitions = area_definitions.style[0][1]
             try:
-                viewitem = object.selected
                 infoitem = object.selected
             except:
-                viewitem = object
                 infoitem = object
 
         t1 = time.time()
         try:
             for a in self.areas:
-                a.draw(theme, object, viewitem, infoitem, area_definitions)
+                a.draw(theme, object, infoitem, area_definitions)
             t2 = time.time()
             if self.visible:
                 self.canvas.update()

@@ -104,7 +104,7 @@ class ArtistItem(Item):
         items = [ AlbumItem(self.artist, None, self) ]
         for album in query:
             items.append(AlbumItem(self.artist, album, self))
-        self.pushmenu(Menu(_('Album'), items, type='audio'))
+        self.get_menustack().pushmenu(Menu(_('Album'), items, type='audio'))
 
 
     def actions(self):
@@ -127,7 +127,7 @@ class PluginInterface(MainMenuPlugin):
         items = []
         for artist in kaa.beacon.query(attr='artist', type='audio'):
             items.append(ArtistItem(artist, parent))
-        parent.pushmenu(Menu(_('Artists'), items, type='audio'))
+        parent.get_menustack().pushmenu(Menu(_('Artists'), items, type='audio'))
 
 
     def items(self, parent):

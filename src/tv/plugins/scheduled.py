@@ -144,7 +144,7 @@ class RecordingItem(Item):
         s = Menu(self, items, type = 'tv program menu')
         s.submenu = True
         s.infoitem = self
-        self.pushmenu(s)
+        self.get_menustack().pushmenu(s)
 
 
     def watch_recording(self):
@@ -176,7 +176,7 @@ class PluginInterface(MainMenuPlugin):
             self.menu = Menu(_('View scheduled recordings'), items,
                              type='tv program menu',
                              reload_func = self.reload_scheduled)
-            parent.pushmenu(self.menu)
+            parent.get_menustack().pushmenu(self.menu)
         else:
             MessageWindow(_('There are no scheduled recordings.')).show()
 

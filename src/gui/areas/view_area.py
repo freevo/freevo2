@@ -64,7 +64,7 @@ class ViewArea(Area):
         Update the view area by loading a new image or do nothing if the image
         is still the same.
         """
-        item  = self.viewitem
+        item  = self.infoitem
         image = None
         try:
             image = item.image

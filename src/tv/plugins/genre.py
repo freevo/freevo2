@@ -186,7 +186,7 @@ class PluginInterface(MainMenuPlugin):
                     items.append(GenreItem(parent, genre))
         
         # create menu
-        parent.pushmenu(Menu(_('Genre'), items, type='tv listing'))
+        parent.get_menustack().pushmenu(Menu(_('Genre'), items, type='tv listing'))
 
 
     def items(self, parent):

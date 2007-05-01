@@ -126,7 +126,7 @@ class FavoriteItem(Item):
         s = Menu(self, items, type = 'tv favorite menu')
         s.submenu = True
         s.infoitem = self
-        self.pushmenu(s)
+        self.get_menustack().pushmenu(s)
 
 
     @kaa.notifier.yield_execution()
