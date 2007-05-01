@@ -152,13 +152,8 @@ class Handler(object):
         e.g. mp3s inside a folder with cover file
         """
         try:
-            self.use_text_view = menu.skin_force_text_view
-            try:
-                self.use_images      = menu.skin_default_has_images
-                self.use_description = menu.skin_default_has_description
-            except:
-                self.use_images      = False
-                self.use_description = False
+            self.use_images      = menu.skin_default_has_images
+            self.use_description = menu.skin_default_has_description
             return
         except:
             pass
@@ -189,7 +184,6 @@ class Handler(object):
         if len(menu.choices) < 6:
             try:
                 if menu.choices[0].info_type == 'track':
-                    menu.skin_force_text_view = True
                     self.use_text_view = True
                     return
             except:
@@ -202,12 +196,10 @@ class Handler(object):
                     return
                     
                 if image and i.image != image:
-                    menu.skin_force_text_view = False
                     self.use_text_view        = False
                     return
                 image = i.image
 
-            menu.skin_force_text_view = True
             self.use_text_view        = True
             return
 
@@ -220,12 +212,10 @@ class Handler(object):
                     return
                     
             if image and i.image != image:
-                menu.skin_force_text_view = False
                 self.use_text_view        = False
                 return
             image = i.image
             
-        menu.skin_force_text_view = True
         self.use_text_view        = True
 
     

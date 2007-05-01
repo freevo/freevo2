@@ -344,8 +344,6 @@ class DirItem(Playlist):
                 del self.item_menu.skin_default_has_description
             if hasattr(self.item_menu, 'skin_default_no_images'):
                 del self.item_menu.skin_default_no_images
-            if hasattr(self.item_menu, 'skin_force_text_view'):
-                del self.item_menu.skin_force_text_view
 
         elif not os.path.exists(self.filename):
             # FIXME: better handling!!!!!

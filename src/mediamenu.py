@@ -57,7 +57,6 @@ class MediaMenu(MainMenuItem):
 
     def __init__(self, parent, title, type, items):
         MainMenuItem.__init__(self, parent, skin_type=type)
-        self.force_text_view = False
         self.display_type = type
         self.item_menu = None
 
@@ -158,7 +157,6 @@ class MediaMenu(MainMenuItem):
         item_menu = Menu(self.menutitle, items, type = type,
                          reload_func = self.reload)
         item_menu.autoselect = True
-        item_menu.skin_force_text_view = self.force_text_view
         self.item_menu = weakref(item_menu)
         self.pushmenu(item_menu)
 
