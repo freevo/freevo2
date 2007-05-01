@@ -47,11 +47,12 @@ import kaa.beacon
 
 # freevo imports
 from freevo.resources import ResourceHandler
+from freevo import plugin
 from freevo.ui import SHAREDIR
 from freevo.ui.mainmenu import MainMenuItem, MainMenuPlugin
 from freevo.ui.directory import DirItem
 from freevo.ui.event import EJECT
-from freevo.ui import plugin, application
+from freevo.ui import application
 from freevo.ui.menu import Item, Action, Menu
 from freevo.ui.mediamenu import MediaMenu
 
