@@ -44,6 +44,8 @@ from freevo import plugin
 from freevo.ui import fxditem
 from freevo.ui.menu import MediaPlugin
 from freevo.ui import config
+from freevo.ui.mediamenu import MediaMenu
+from freevo.ui.mainmenu import MainMenuPlugin
 
 # ImageItem
 from imageitem import ImageItem
@@ -51,7 +53,7 @@ from imageitem import ImageItem
 # fxdhandler for <slideshow> tags
 from fxdhandler import fxdhandler
 
-class PluginInterface(MediaPlugin):
+class PluginInterface(MediaPlugin, MainMenuPlugin):
     """
     Plugin to handle all kinds of image items
     """
@@ -63,10 +65,6 @@ class PluginInterface(MediaPlugin):
         """
         # register the callbacks
         fxditem.add_parser(['image'], 'slideshow', fxdhandler)
-
-        # activate the mediamenu for image
-        args = _('Image Main Menu'), 'image', config.image.items
-        plugin.activate('mediamenu', level=level, args=args)
 
 
     def suffix(self):
@@ -85,3 +83,10 @@ class PluginInterface(MediaPlugin):
             for file in listing.get(suffix):
                 items.append(ImageItem(file, parent))
         return items
+
+
+    def items(self, parent):
+        """
+        MainMenuPlugin.items to return the image item.
+        """
+        return [ MediaMenu(parent, _('Image Main Menu'), 'image', config.image.items) ]

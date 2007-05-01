@@ -45,36 +45,14 @@ from freevo.ui.directory import DirItem
 from freevo.ui.mainmenu import MainMenuItem, MainMenuPlugin
 from freevo.ui.menu import Menu, Item, MediaPlugin
 
-# from games import machine
-
 # get logging object
 log = logging.getLogger()
 
 
-class PluginInterface(MainMenuPlugin):
-    """
-    Plugin to integrate a mediamenu (video/audio/image/games) into
-    the Freevo main menu. This plugin is auto-loaded when you activate
-    the 'video', 'audio', 'image' or 'games' plugin.
-    """
-    def __init__(self, name, type, items):
-        if not items:
-            self.reason = 'No items defined for %s menu' % type
-            return
-        MainMenuPlugin.__init__(self)
-        self._name = name
-        self._type = type
-        self._items = items
-        
-    def items(self, parent):
-        return [ MediaMenu(parent, self._name, self._type, self._items) ]
-
-
-
 class MediaMenu(MainMenuItem):
     """
-    This is the main menu for audio, video and images. It displays the default
-    directories and the ROM_DRIVES
+    This is the main menu for different media types. It displays the default
+    directories, the beacon mountpoints and sub-plugins.
     """
 
     def __init__(self, parent, title, type, items):
@@ -83,8 +61,8 @@ class MediaMenu(MainMenuItem):
         self.display_type = type
         self.item_menu = None
 
-        kaa.beacon.signals['media.add'].connect(self.media_change)
-        kaa.beacon.signals['media.remove'].connect(self.media_change)
+        kaa.beacon.signals['media.add'].connect_weak(self.media_change)
+        kaa.beacon.signals['media.remove'].connect_weak(self.media_change)
 
         self.menutitle = title
 
@@ -101,31 +79,20 @@ class MediaMenu(MainMenuItem):
                 kaa.beacon.monitor(filename)
 
 
-    def main_menu_generate(self):
+    def _get_config_items(self):
         """
-        generate the items for the main menu. This is needed when first
-        generating the menu and if something changes by pressing the EJECT
-        button
+        Generate items based on the config settings
         """
-        # Generate the media menu, we need to create a new listing (that sucks)
-        # But with the listing we have, the order will be mixed up.
         items = []
-
-        # add default items
         for item in self._items:
             try:
-                # split the list on dir/file and title
-                if hasattr(item, 'path'):
-                    # kaa.config object
-                    title = unicode(item.name)
-                    filename = item.path.replace('$(HOME)', os.environ.get('HOME'))
-                else:
-                    # only a filename is given
-                    title, filename = u'', item
-
+                # kaa.config object
+                title = unicode(item.name)
+                filename = item.path.replace('$(HOME)', os.environ.get('HOME'))
                 filename = os.path.abspath(filename)
                 listing = kaa.beacon.query(filename=filename).get(filter='extmap')
 
+                # path is a directory
                 if os.path.isdir(filename):
                     for d in listing.get('beacon:dir'):
                         d = DirItem(d, self, name = title, type = self.display_type)
@@ -143,7 +110,14 @@ class MediaMenu(MainMenuItem):
             except:
                 log.exception('Error parsing %s' % str(item))
                 continue
+        return items
 
+    
+    def _get_beacon_items(self):
+        """
+        Generate items based on beacon mountpoints
+        """
+        items = []
         for media in kaa.beacon.media:
             if media.mountpoint == '/':
                 continue
@@ -153,21 +127,33 @@ class MediaMenu(MainMenuItem):
             for d in listing.get('beacon:dir'):
                 items.append(DirItem(d, self, name=media.label,
                                      type = self.display_type))
-        # add all plugin data
-        if self.display_type:
-            for p in MainMenuPlugin.plugins(self.display_type):
-                items += p.items( self )
-
         return items
+
+
+    def _get_plugin_items(self):
+        """
+        Generate items based on plugins
+        """
+        items = []
+        for p in MainMenuPlugin.plugins(self.display_type):
+            items += p.items( self )
+        return items
+
+
+    def _get_all_items(self):
+        """
+        Return items for the menu.
+        """
+        return self._get_config_items() + self._get_beacon_items() + \
+               self._get_plugin_items()
 
 
     def select(self):
         """
-        display the (IMAGE|VIDEO|AUDIO|GAMES) main menu
+        Display the media menu
         """
         # generate all other items
-        items = self.main_menu_generate()
-
+        items = self._get_all_items()
         type = '%s main menu' % self.display_type
         item_menu = Menu(self.menutitle, items, type = type,
                          reload_func = self.reload)
@@ -182,7 +168,7 @@ class MediaMenu(MainMenuItem):
         Reload the menu. maybe a disc changed or some other plugin.
         """
         if self.item_menu:
-            self.item_menu.set_items(self.main_menu_generate())
+            self.item_menu.set_items(self._get_all_items())
 
 
     def media_change(self, media):
@@ -190,10 +176,13 @@ class MediaMenu(MainMenuItem):
         Media change from kaa.beacon
         """
         if self.item_menu:
-            self.item_menu.set_items(self.main_menu_generate())
+            self.item_menu.set_items(self._get_all_items())
 
 
     def eventhandler(self, event):
+        """
+        Eventhandler for the media menu
+        """
         if event == EJECT and self.item_menu and \
            self.item_menu.selected.info['parent'] == \
            self.item_menu.selected.info['media']:

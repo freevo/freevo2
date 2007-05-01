@@ -49,6 +49,8 @@ from freevo import plugin
 from freevo.ui import fxditem
 from freevo.ui import config
 from freevo.ui.menu import MediaPlugin
+from freevo.ui.mediamenu import MediaMenu
+from freevo.ui.mainmenu import MainMenuPlugin
 
 # AudioItem
 from audioitem import AudioItem
@@ -57,7 +59,7 @@ from audiodiskitem import AudioDiskItem
 # fxdhandler for <audio> tags
 from fxdhandler import fxdhandler
 
-class PluginInterface(MediaPlugin):
+class PluginInterface(MediaPlugin, MainMenuPlugin):
     """
     Plugin to handle all kinds of audio items
     """
@@ -69,10 +71,6 @@ class PluginInterface(MediaPlugin):
         """
         # add fxd parser callback
         fxditem.add_parser(['audio'], 'audio', fxdhandler)
-
-        # activate the mediamenu for audio
-        args = _('Audio Main Menu'), 'audio', config.audio.items
-        plugin.activate('mediamenu', level=level, args=args)
 
 
     def suffix(self):
@@ -114,3 +112,10 @@ class PluginInterface(MediaPlugin):
             elif not p_artist and not p_album and not artist and album:
                 # parent has no info, item no artist but album (== collection)
                 diritem.name = album
+
+
+    def items(self, parent):
+        """
+        MainMenuPlugin.items to return the audio item.
+        """
+        return [ MediaMenu(parent, _('Audio Main Menu'), 'audio', config.audio.items) ]

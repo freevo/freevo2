@@ -45,13 +45,15 @@ from freevo import plugin
 from freevo.ui import fxditem
 from freevo.ui.menu import Files, MediaPlugin
 from freevo.ui import config
+from freevo.ui.mediamenu import MediaMenu
+from freevo.ui.mainmenu import MainMenuPlugin
 
 # video imports
 from videoitem import VideoItem
 import database
 import fxdhandler
 
-class PluginInterface(MediaPlugin):
+class PluginInterface(MediaPlugin, MainMenuPlugin):
     """
     Plugin to handle all kinds of video items
     """
@@ -67,10 +69,6 @@ class PluginInterface(MediaPlugin):
 
         # update the database
         database.update()
-        
-        # activate the mediamenu for video
-        args = _('Video Main Menu'), 'video', config.video.items
-        plugin.activate('mediamenu', level=level, args=args)
 
         
     def suffix(self):
@@ -103,3 +101,10 @@ class PluginInterface(MediaPlugin):
 
     def database(self):
         return database
+
+
+    def items(self, parent):
+        """
+        MainMenuPlugin.items to return the video item.
+        """
+        return [ MediaMenu(parent, _('Video Main Menu'), 'video', config.video.items) ]
