@@ -52,11 +52,10 @@ class MainMenuItem(Item):
     a MainMenuPlugin.
     """
     def __init__( self, parent=None, name=u'', type=None, image=None,
-                  icon=None, skin_type=None):
+                  skin_type=None):
 
         Item.__init__(self, parent)
         self.name = name
-        self.icon = icon
         self.image = image
         self.type = type
 
@@ -76,8 +75,6 @@ class MainMenuItem(Item):
             skin_info  = skin_info[skin_type]
             self.name  = _(skin_info.name)
             self.image = skin_info.image
-            if skin_info.icon:
-                self.icon = os.path.join(theme.icon_dir, skin_info.icon)
 
         imagedir = theme.mainmenu.imagedir
         if not self.image and imagedir:

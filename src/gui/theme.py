@@ -6,7 +6,7 @@
 #
 # This module handles the current theme for Freevo based on the fxd settings.
 # Besides getting the current theme and changing it, there are also functions
-# to get a font, an image or an icon based on the name. All functions for the
+# to get a font or an image based on the name. All functions for the
 # interface to Freevo are on the top of this file.
 #
 # TODO: o major cleanup
@@ -42,7 +42,7 @@
 # -----------------------------------------------------------------------------
 
 # list of functions this module provides
-__all__ = [ 'get', 'set', 'font', 'image', 'icon', 'set_base_fxd', 'signals' ]
+__all__ = [ 'get', 'set', 'font', 'image', 'set_base_fxd', 'signals' ]
 
 # python imports
 import os
@@ -144,15 +144,6 @@ def image(name):
     this function will return None.
     """
     return current_theme.get_image(name)
-
-
-def icon(name):
-    """
-    Get the icon filename with the given name. This function will
-    search the icon in the theme icon directory. If no icon is found
-    this function will return None.
-    """
-    return current_theme.get_icon(name)
 
 
 def getimage(base, default=None):
@@ -330,18 +321,15 @@ class MainMenuItem(object):
         if source:
             self.label   = source.label
             self.name    = source.name
-            self.icon    = source.icon
             self.image   = source.image
         else:
             self.label   = ''
             self.name    = ''
-            self.icon    = ''
             self.image   = ''
 
     def parse(self, node, scale, c_dir=''):
         self.label    = attr_str(node, "label", self.label)
         self.name     = attr_str(node, "name",  self.name)
-        self.icon     = attr_str(node, "icon",  self.icon)
         self.image    = attr_str(node, "image", self.image)
 
 
@@ -402,7 +390,6 @@ XML_types = {
     'name'     : ('str',  0),
     'visible'  : ('visible', 0),
     'border'   : ('visible', 0),
-    'icon'     : ('str', 0),
     'ellipses' : ('str', 0),
     'dim'      : ('visible', 0),
 }
@@ -695,7 +682,7 @@ class ContentItem(XMLData):
     """
     class for <item> inside content
     """
-    VARS = ('font', 'align', 'valign', 'height', 'width', 'icon')
+    VARS = ('font', 'align', 'valign', 'height', 'width')
     def __init__(self, source=None):
         XMLData.__init__(self, self.VARS, source)
         self.rectangle = None
@@ -1134,10 +1121,6 @@ class FXDSettings(object):
 
         self.fxd_files = []
 
-        # variables set by set_var
-        self.all_variables    = ('box_under_icon', )
-        self.box_under_icon   = 0
-
         # load plugin skin files:
         pdir = os.path.join(SHAREDIR, 'skins/plugins')
         if os.path.isdir(pdir):
@@ -1218,14 +1201,6 @@ class FXDSettings(object):
             elif node.name == u'popup':
                 self.__popup = attr_str(node, 'layout', self.__popup)
 
-
-            elif node.name == u'setvar':
-                for v in self.all_variables:
-                    if node.attrs[('', 'name')].upper() == v.upper():
-                        try:
-                            setattr(self, v, int(node.attrs[('', 'val')]))
-                        except ValueError:
-                            setattr(self, v, node.attrs[('', 'val')])
 
             else:
                 if node.children and node.children[0].name == 'style':
@@ -1383,17 +1358,6 @@ class FXDSettings(object):
             return self.images[name]
         except:
             return None
-
-
-    def get_icon(self, name):
-        """
-        Get the icon object 'name'. Return the icon in the theme dir if it
-        exists, else try the normal image dir. If not found, return ''
-        """
-        icon = util.getimage(os.path.join(self.icon_dir, name))
-        if icon:
-            return icon
-        return util.getimage(os.path.join(ICON_DIR, name), '')
 
 
     def load(self, file):

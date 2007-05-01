@@ -18,7 +18,7 @@
 #
 # Submodule:    import gui.theme
 # Dependencies: freevo, gui.font
-# Content:      get, set, font, image, icon, set_base_fxd
+# Content:      get, set, font, image, set_base_fxd
 # Description:  This module reads theme fxd files and provides an interface to
 #               the objects defined in the theme
 #

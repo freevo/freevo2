@@ -8,8 +8,6 @@
 # listing areas for menus. It inherits from Area (area.py) and the update
 # function will be called to update this area.
 #
-# TODO: o fix icon code which is deactivated right now
-#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
@@ -248,39 +246,27 @@ class ListingArea(Area):
         and is only used once to split the huge update function into smaller
         once.
         """
-        icon_x = 0
-        icon   = None
         align  = val.align or settings.align
         menu   = self.menu
-        x_icon = 0
-
-        icon_type = None
-        if hasattr(val, 'icon'):
-            icon_type = val.icon
 
         text = choice.name
         if not text:
             text = "unknown"
 
-        if not choice.icon and not icon_type:
-            if choice.type == 'playlist':
-                text = 'PL: %s' % text
+        if choice.type == 'playlist':
+            text = 'PL: %s' % text
 
-            if choice.type == 'dir' and choice.parent and \
+        if choice.type == 'dir' and choice.parent and \
                choice.parent.type != 'mediamenu':
-                text = '[%s]' % text
+            text = '[%s]' % text
 
         #
         # draw the rectangle below the item
         #
         if val.rectangle:
             r = val.rectangle.calculate(width, val.font.height)[2]
-            b = self.drawbox(x + hskip + r.x + x_icon - \
-                             self.settings.box_under_icon * x_icon,
-                             y + vskip + r.y,
-                             r.width - icon_x + \
-                             self.settings.box_under_icon * icon_x,
-                             r.height, r)
+            b = self.drawbox(x + hskip + r.x, y + vskip + r.y,
+                             r.width, r.height, r)
             gui_objects.append(b)
 
         #
@@ -330,13 +316,13 @@ class ListingArea(Area):
                 self.last_tvs = (sn[0], tvs_w)
 
             s = self.drawstring(' - %s' % sn[3], val.font, settings,
-                                x=x + hskip + icon_x + tvs_w,
-                                y=y + vskip, width=width-icon_x-tvs_w,
+                                x=x + hskip + tvs_w,
+                                y=y + vskip, width=width-tvs_w,
                                 height=-1, align_h='left', dim=False,
                                 mode='hard')
             gui_objects.append(s)
             s = self.drawstring(sn[2], val.font, settings,
-                                x=x + hskip + icon_x + tvs_w - 100,
+                                x=x + hskip + tvs_w - 100,
                                 y=y + vskip, width=100, height=-1,
                                 align_h='right', dim=False, mode='hard')
             gui_objects.append(s)
@@ -356,10 +342,10 @@ class ListingArea(Area):
         # item _must_ have that many tabs as the table needs!!!
         #
         if hasattr(menu, 'table'):
-            table_x = x + hskip + x_icon
+            table_x = x + hskip
             table_text = text.split('\t')
             for i in range(len(menu.table)):
-                table_w = ((width-icon_x-len(table_text)*5)*\
+                table_w = ((width-len(table_text)*5)*\
                            menu.table[i]) / 100
                 if i != len(menu.table) - 1:
                     table_w += 5
@@ -387,8 +373,8 @@ class ListingArea(Area):
             #
             # draw the text
             #
-            s = self.drawstring(text, val.font, settings, x=x + hskip + x_icon,
-                                y=y + vskip, width=width-icon_x, height=-1,
+            s = self.drawstring(text, val.font, settings, x=x + hskip,
+                                y=y + vskip, width=width, height=-1,
                                 align_h=val.align, mode='hard', dim=True)
             if s:
                 gui_objects.append(s)

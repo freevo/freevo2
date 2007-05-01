@@ -13,8 +13,6 @@
     <skin geometry="800x600">
 	<iconset theme="blurr"/>
 
-	<setvar name="box_under_icon" val="0"/>
-
 	<!-- Items of the main menu -->
 	<main>
 	    <item label="tv"    name="TV"/>

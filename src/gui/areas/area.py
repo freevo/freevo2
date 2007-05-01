@@ -156,7 +156,6 @@ class Area(object):
                 self.settings = self.__calc_geometry(area.layout.content)
                 self.settings.images = area.images
                 self.settings.changed = True
-                self.settings.box_under_icon = settings.box_under_icon
                 self.settings.icon_dir = settings.icon_dir
                 
         elif area and self.__layout != area.layout:
@@ -166,7 +165,6 @@ class Area(object):
             self.settings = self.__calc_geometry(area.layout.content)
             self.settings.images = area.images
             self.settings.changed = True
-            self.settings.box_under_icon = settings.box_under_icon
             self.settings.icon_dir = settings.icon_dir
 
         if not area.visible or not self.__layout:

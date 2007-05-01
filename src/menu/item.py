@@ -62,7 +62,6 @@ class Item(object):
         Init the item. Sets all needed variables, if parent is given also
         inherit some settings from there.
         """
-        self.icon = None
         self.info = {}
         self.menu = None
         if type is not None:
