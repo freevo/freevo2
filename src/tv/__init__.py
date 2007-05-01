@@ -64,7 +64,7 @@ class TVMenu(MainMenuItem):
             items += p.items(self)
 
         m = Menu(_('TV Main Menu'), items, type = 'tv main menu')
-        m.infoitem = Info()
+        m.infoitem = Info(self)
         self.pushmenu(m)
 
 

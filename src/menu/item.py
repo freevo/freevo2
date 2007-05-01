@@ -37,7 +37,6 @@ __all__ = [ 'Item', 'ActionItem' ]
 
 # python imports
 import logging
-import copy
 
 # kaa imports
 from kaa.weakref import weakref
@@ -57,7 +56,7 @@ class Item(object):
     template for other info items like VideoItem, AudioItem and ImageItem
     """
     type = None
-    
+
     def __init__(self, parent):
         """
         Init the item. Sets all needed variables, if parent is given also
@@ -75,7 +74,6 @@ class Item(object):
         else:
             self.parent = None
 
-        self.iscopy = False
         self.fxd_file = None
         self.__initialized = False
 
@@ -94,32 +92,10 @@ class Item(object):
     image = property(_get_image, _set_image, None, 'image object')
 
 
-    def __setitem__(self, key, value):
-        """
-        set the value of 'key' to 'val'
-        """
-        self.info[key] = value
-
-
-    def copy(self):
-        """
-        Create a copy of the item. This item can be used in submenus of an
-        item action. Items like this have self.iscopy = True and the
-        original item can be accessed with self.original.
-        """
-        c = copy.copy(self)
-        c.iscopy = True
-        if hasattr(self, 'original'):
-            c.original = self.original
-        else:
-            c.original = self
-        return c
-
-
     def __id__(self):
         """
         Return a unique id of the item. This id should be the same when the
-        item is rebuild later with the same informations
+        item is rebuild later with the same information
         """
         return self.name
 
@@ -140,7 +116,7 @@ class Item(object):
         print 'oops', mode, self
         return ''
 
-    
+
     def actions(self):
         """
         Returns a list of possible actions on this item. The first
@@ -156,8 +132,8 @@ class Item(object):
         """
         raise RuntimeError("no action defined for %s", self)
 
-    
-    def get_actions(self):
+
+    def _get_actions(self):
         """
         Get all actions for the item. Do not override this function,
         override 'actions' instead.
@@ -187,6 +163,13 @@ class Item(object):
         if self.parent:
             return self.parent.get_menustack()
         return None
+
+
+    def get_submenu(self):
+        """
+        Return submenu items.
+        """
+        return [ SubMenuItem(self, a) for a in self._get_actions() ]
 
 
     def pushmenu(self, menu):
@@ -235,11 +218,10 @@ class Item(object):
         for p in ItemPlugin.plugins(self.type):
             if p.eventhandler(self, event):
                 return True
-
         # give the event to the next eventhandler in the list
         if self.parent:
             return self.parent.eventhandler(event)
-
+        # nothing to do
         return False
 
 
@@ -249,21 +231,24 @@ class Item(object):
         """
         if attr[:7] == 'parent(' and attr[-1] == ')' and self.parent:
             return self.parent[attr[7:-1]]
-
         if attr[:4] == 'len(' and attr[-1] == ')':
             value = self[attr[4:-1]]
             if value == None or value == '':
                 return 0
             return len(value)
-
         if attr == 'name':
             return self.name
-
         r = self.info.get(attr)
         if r in (None, ''):
             r = getattr(self, attr, None)
-
         return r
+
+
+    def __setitem__(self, key, value):
+        """
+        set the value of 'key' to 'val'
+        """
+        self.info[key] = value
 
 
 
@@ -273,10 +258,30 @@ class ActionItem(Item, Action):
     passed to this action is always the parent item if not None.
     """
     def __init__(self, name, parent, function, description=''):
-        Action.__init__(self, name, function, description=description)
         Item.__init__(self, parent)
+        Action.__init__(self, name, function, description=description)
         self.item = parent
 
 
     def select(self):
         return self()
+
+
+
+class SubMenuItem(Item):
+    """
+    Item to show an action in a submenu (internal use)
+    """
+    def __init__(self, parent, action):
+        Item.__init__(self, parent)
+        self.action = action
+        self.name = action.name
+        self.description = action.description
+        self.image = parent.image
+
+
+    def actions(self):
+        """
+        Return the given action.
+        """
+        return [ self.action ]

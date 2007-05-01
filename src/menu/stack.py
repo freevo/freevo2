@@ -88,7 +88,7 @@ class MenuStack(object):
         new menu if the attributes are set to True. If osd_message is set,
         this message will be send if the current menu is no submenu
         """
-        if len(self.menustack) > 1 and self.menustack[-1].submenu:
+        if len(self.menustack) > 1 and self.menustack[-1]._is_submenu:
             self.back_one_menu(refresh)
         elif len(self.menustack) > 1 and osd_message:
             OSD_MESSAGE.post(osd_message)
@@ -113,7 +113,7 @@ class MenuStack(object):
         if menu.autoselect and len(menu.choices) == 1:
             log.info('autoselect action')
             # autoselect only item in the menu
-            menu.choices[0].get_actions()[0]()
+            menu.choices[0]._get_actions()[0]()
             return
 
         # refresh will do the update

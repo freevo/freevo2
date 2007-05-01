@@ -43,15 +43,15 @@ class Action(object):
     """
     Action for item.actions()
 
-    An action has a
-    name and a function to call. Optional parameter is a shortcut name to be
-    placed into the config for mapping an action to a button. It also has
-    an optional description.
+    An action has a name and a function to call. Optional parameter is
+    a shortcut name to be placed into the config for mapping an action
+    to a button. It also has an optional description.
 
-    To set parameters for the function call, use the parameter function of the
-    action object. The function itself has always one or two parameters. If
-    the function is defined inside the item, no extra parameters are used.
-    If it is outside the item, the first parameter is the item.
+    To set parameters for the function call, use the parameter
+    function of the action object. The function itself has always one
+    or two parameters. If the function is defined inside the item, no
+    extra parameters are used.  If it is outside the item, the first
+    parameter is the item.
     """
     def __init__(self, name, function, shortcut=None, description=None):
         self.name = name

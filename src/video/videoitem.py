@@ -152,15 +152,6 @@ class VideoItem(MediaItem):
         self.set_name(self.name)
 
 
-    def copy(self):
-        """
-        Create a copy of the VideoItem.
-        """
-        c = MediaItem.copy(self)
-        c.tv_show = False
-        return c
-    
-
     def __getitem__(self, key):
         """
         return the specific attribute

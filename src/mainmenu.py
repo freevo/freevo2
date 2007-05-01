@@ -82,7 +82,16 @@ class MainMenuItem(Item):
             self.image = gui.theme.getimage(os.path.join(imagedir, skin_type))
 
 
-
+    def get_submenu(self):
+        """
+        Return submenu items.
+        """
+        items = Item.get_submenu(self)
+        for i in items:
+            i.image = None
+        return items
+    
+        
 class MainMenuPlugin(plugin.Plugin):
     """
     Plugin class for plugins to add something to the main menu

@@ -50,9 +50,9 @@ log = logging.getLogger()
 
 class Menu(ItemList):
     """
-    A Menu page with Items for the MenuStack. It is not allowed to change
-    the selected item or the internal choices directly, use 'select',
-    'set_items' or 'change_item' to do this.
+    A Menu page with Items for the MenuStack. It is not allowed to
+    change the selected item or the internal choices directly, use
+    'select', 'set_items' or 'change_item' to do this.
     """
     next_id = 0
 
@@ -79,7 +79,7 @@ class Menu(ItemList):
         self.type = type
 
         # Menu type
-        self.submenu = False
+        self._is_submenu = False
 
         # Reference to the item that created this menu
         self.item = None
@@ -182,7 +182,7 @@ class Menu(ItemList):
             return True
 
         if event == MENU_SELECT or event == MENU_PLAY_ITEM:
-            actions = self.selected.get_actions()
+            actions = self.selected._get_actions()
             if not actions:
                 OSD_MESSAGE.post(_('No action defined for this choice!'))
             else:
@@ -195,30 +195,22 @@ class Menu(ItemList):
             return True
 
         if event == MENU_SUBMENU:
-            if self.submenu or not self.stack:
+            if self._is_submenu or not self.stack:
                 return False
 
-            actions = self.selected.get_actions()
-            if not actions or len(actions) <= 1:
+            items = self.selected.get_submenu()
+            if len(items) < 2:
+                # no submenu
                 return False
-            items = []
-            for action in actions:
-                items.append(Item(self.selected, action))
-
-            # FIXME: remove this for loop
-            for i in items:
-                if not self.selected.type == 'main':
-                    i.image = self.selected.image
-
             s = Menu(self.selected.name, items)
-            s.submenu = True
+            s._is_submenu = True
             s.item = self.selected
             self.stack.pushmenu(s)
             return True
 
         if event == MENU_CALL_ITEM_ACTION:
             log.info('calling action %s' % event.arg)
-            for action in self.selected.get_actions():
+            for action in self.selected._get_actions():
                 if action.shortcut == event.arg:
                     return action() or True
             log.info('action %s not found' % event.arg)

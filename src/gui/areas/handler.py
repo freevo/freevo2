@@ -164,9 +164,6 @@ class Handler(object):
         menu.skin_default_has_images      = False
         menu.skin_default_has_description = False
 
-        if menu.submenu:
-            menu.skin_default_has_images = True
-            
         for i in menu.choices:
             if i.image:
                 menu.skin_default_has_images = True
