@@ -44,6 +44,8 @@ from freevo.ui import config
 from freevo.ui.event import Event, DPMS_BLANK_SCREEN
 from freevo.ui.application import signals as app_signals
 
+# blanking modes
+OFF, AUTO, USER = range(3)
 
 class PluginInterface(Plugin):
 
@@ -53,7 +55,7 @@ class PluginInterface(Plugin):
         # get xset process to call
         self.xset = kaa.notifier.Process(kaa.utils.which('xset')).start
         self.counter = 0
-        self.is_blank = False
+        self._mode = OFF
         # Timer to poll and increase counter. It willbe started when the
         # menu is shown.
         self.timer = kaa.notifier.Timer(self.poll)
@@ -74,7 +76,7 @@ class PluginInterface(Plugin):
         self.counter += 1
         if self.counter == config.plugin.dpms.timeout:
             # timeout, force dpms and turn off the monitor
-            self.is_blank = True
+            self._mode = AUTO
             self.xset('dpms force off')
             # stop poll timer
             self.timer.stop()
@@ -84,7 +86,7 @@ class PluginInterface(Plugin):
         """
         Callback on application changes.
         """
-        if app.get_name() == 'menu':
+        if app.get_name() == 'menu' and self._mode == OFF:
             # menu is shown, start timer
             self.timer.start(60)
             self.counter = 0
@@ -100,16 +102,17 @@ class PluginInterface(Plugin):
         if event.source == 'user':
             # user generated event (key/button), reset timeout counter
             self.counter = 0
-            if self.is_blank:
-                # screen is blank right now, restore it
-                self.is_blank = False
-                self.xset('dpms force on s reset')
-                kaa.notifier.OneShotTimer(self.xset, '-dpms s off').start(1)
-                self.timer.start(60)
-                return
+        if (event.source == 'user' and self._mode == AUTO) or \
+               (self._mode == USER and event == DPMS_BLANK_SCREEN):
+            # screen is blank right now, restore it
+            self._mode = OFF
+            self.xset('dpms force on s reset')
+            kaa.notifier.OneShotTimer(self.xset, '-dpms s off').start(1)
+            self.timer.start(60)
+            return
 
         if event == DPMS_BLANK_SCREEN:
             # event to turn off the monitor
-            self.is_blank = True
+            self._mode = USER
             self.xset('dpms force off')
             self.timer.stop()
