@@ -100,10 +100,13 @@ VIDEO_EVENTS = {
     'MENU'      : MENU,
     'DISPLAY'   : TOGGLE_OSD,
     'REC'       : STORE_BOOKMARK,
-    '0'         : VIDEO_MANUAL_SEEK
+    '0'         : VIDEO_MANUAL_SEEK,
+    'MENU'      : DVDNAV_MENU,
+    'NEXT'      : NEXT,
+    'PREV'      : PREV
     }
 
-DVD_EVENTS = {
+DVDNAV_EVENTS = {
     'PLAY'      : PLAY,
     'PAUSE'     : PAUSE,
     'STOP'      : STOP,
@@ -115,40 +118,7 @@ DVD_EVENTS = {
     'ENTER'     : DVDNAV_SELECT,
     'SELECT'    : DVDNAV_SELECT,
     'DISPLAY'   : TOGGLE_OSD,
-    'SUBTITLE'  : VIDEO_NEXT_SUBTITLE,
-    'REW'       : Event(SEEK, -10),
-    'FFWD'      : Event(SEEK,  10),
-    'GUIDE'     : DVDNAV_TITLEMENU,
     'MENU'      : DVDNAV_MENU,
-    'LANG'      : VIDEO_NEXT_AUDIOLANG,
-    'ANGLE'     : VIDEO_NEXT_ANGLE,
-    'CH+'       : NEXT,
-    'CH-'       : PREV
-    }
-
-VCD_EVENTS = {
-    'PLAY'      : PLAY,
-    'PAUSE'     : PAUSE,
-    'STOP'      : STOP,
-    'EXIT'      : STOP,
-    'LEFT'      : Event(SEEK, -60),
-    'RIGHT'     : Event(SEEK,  60),
-    'REW'       : Event(SEEK, -10),
-    'FFWD'      : Event(SEEK,  10),
-    'MENU'      : MENU,
-    'DISPLAY'   : TOGGLE_OSD,
-    'LANG'      : VIDEO_NEXT_AUDIOLANG,
-    'SUBTITLE'  : VIDEO_NEXT_SUBTITLE,
-    'ANGLE'     : VIDEO_NEXT_ANGLE,
-    '1'         : INPUT_1,
-    '2'         : INPUT_2,
-    '3'         : INPUT_3,
-    '4'         : INPUT_4,
-    '5'         : INPUT_5,
-    '6'         : INPUT_6,
-    '7'         : INPUT_7,
-    '8'         : INPUT_8,
-    '9'         : INPUT_9
     }
 
 AUDIO_EVENTS = {
@@ -250,8 +220,7 @@ EVENTMAP = {
     'input'      : INPUT_EVENTS,
     'tv'         : TV_EVENTS,
     'video'      : VIDEO_EVENTS,
-    'dvd'        : DVD_EVENTS,             # only used by xine
-    'vcd'        : VCD_EVENTS,             # only used by xine
+    'dvdnav'     : DVDNAV_EVENTS,
     'audio'      : AUDIO_EVENTS,
     'games'      : GAMES_EVENTS,
     'image'      : IMAGE_EVENTS,

@@ -147,7 +147,7 @@ class Player(Application):
         if self.player.is_in_menu() != self.is_in_menu:
             self.is_in_menu = not self.is_in_menu
             if self.is_in_menu:
-                self.set_eventmap('dvd')
+                self.set_eventmap('dvdnav')
             else:
                 self.set_eventmap('video')
         # FIXME: if item does not start at position 0 the start time
@@ -215,6 +215,14 @@ class Player(Application):
                 self.player.set_property('scale', modes[idx])
             return True
                 
+        if event in (NEXT, PREV):
+            self.player.nav_command(str(event).lower())
+            return True
+            
+        if event == DVDNAV_MENU:
+            self.player.nav_command('menu1')
+            return True
+            
         if str(event).startswith('DVDNAV_'):
             # dvd navigation commands
             self.player.nav_command(str(event)[7:].lower())
