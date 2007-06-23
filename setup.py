@@ -69,7 +69,7 @@ if len(sys.argv) > 1 and not '--help' in sys.argv and \
        max(*[os.stat(x)[stat.ST_MTIME] for x in cxml_files ]):
         if not os.path.isdir('build'):
             os.mkdir('build')
-        xmlconfig('build/config.cxml', cxml_files)
+        xmlconfig('build/config.cxml', cxml_files, 'freevo.ui')
 
     data_files.append(('share/freevo/config', [ 'build/config.cxml' ]))
     

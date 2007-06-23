@@ -46,7 +46,7 @@ SHAREDIR = freevo.conf.SHAREDIR
 pycfgfile = freevo.conf.datafile('freevo_config.py')
 cfgdir = os.path.join(SHAREDIR, 'config')
 cfgsource = [ os.path.join(cfgdir, f) for f in os.listdir(cfgdir) ]
-freevo.xmlconfig.xmlconfig(pycfgfile, cfgsource)
+freevo.xmlconfig.xmlconfig(pycfgfile, cfgsource, 'freevo.ui')
 
 # load config structure. This will add 'config', 'plugins' and 'events'
 execfile(pycfgfile)
