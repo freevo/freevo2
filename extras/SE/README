@@ -1,0 +1,39 @@
+This directory contains a HID (Human Interface Device) file for Sony
+Ericsson phones. It is a very simple way to control Freevo with your
+phone.
+
+Install on the phone
+--------------------
+
+1. Create the hid file. It is a simple tar archive named hid. It has
+   to contain the mapping and a background image
+
+    tar -cvf Freevo.hid Freevo.png Remote.kcf
+
+2. Upload via obexftp to the root dir (!) of your phone
+
+   obexftp -b <phone-mac> -B <phone-ftp-channel> -p Freevo.hid
+
+
+Freevo Configuration
+--------------------
+
+When connected the phone will act as keyboard. You have to enable HID
+support on your computer. With Gentoo you can do it by setting
+HIDD_ENABLE=true in /etc/conf.d/bluetooth and restart the bluetooth
+service. Before you can use your phone as remote you have to connect
+it as phone with 'hidd connect <phone-mac>'
+
+
+Status
+------
+
+The remote control file only maps the joystick left, right, up, down
+and select, the left button to go back and the right button to show
+details (e). Other keys are not defined yet.
+
+
+External Documentation
+----------------------
+
+http://developer.sonyericsson.com/site/global/docstools/misc/p_misc.jsp

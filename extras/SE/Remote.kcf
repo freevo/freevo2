@@ -1,0 +1,80 @@
+<!-- Created with Sony Ericsson Bluetooth Remote Control -->
+<SONY_ERICSSON_REMOTE_CONTROL_CONFIGURATION VERSION="1.0">
+  <KEYMAP>
+    <KEY_2>
+      <ACTION>
+        <KEYBOARD MODIFIERS="00" USAGEID="52"/>
+      </ACTION>
+    </KEY_2>
+    <KEY_3>
+      <ACTION>
+        <KEYBOARD MODIFIERS="04" USAGEID="2B"/>
+      </ACTION>
+    </KEY_3>
+    <KEY_4>
+      <ACTION>
+        <KEYBOARD MODIFIERS="00" USAGEID="50"/>
+      </ACTION>
+    </KEY_4>
+    <KEY_5>
+      <ACTION>
+        <KEYBOARD MODIFIERS="00" USAGEID="28"/>
+      </ACTION>
+    </KEY_5>
+    <KEY_6>
+      <ACTION>
+        <KEYBOARD MODIFIERS="00" USAGEID="4F"/>
+      </ACTION>
+    </KEY_6>
+    <KEY_7>
+      <ACTION>
+        <KEYBOARD MODIFIERS="00" USAGEID="43"/>
+      </ACTION>
+    </KEY_7>
+    <KEY_8>
+      <ACTION>
+        <KEYBOARD MODIFIERS="00" USAGEID="51"/>
+      </ACTION>
+    </KEY_8>
+    <KEY_9>
+      <ACTION>
+        <KEYBOARD MODIFIERS="06" USAGEID="2B"/>
+      </ACTION>
+    </KEY_9>
+    <KEY_LSK>
+      <ACTION>
+        <KEYBOARD MODIFIERS="00" USAGEID="29"/>
+      </ACTION>
+    </KEY_LSK>
+    <KEY_RSK>
+      <ACTION>
+        <KEYBOARD MODIFIERS="00" USAGEID="08"/>
+      </ACTION>
+    </KEY_RSK>
+    <KEY_JOY>
+      <ACTION>
+        <KEYBOARD MODIFIERS="00" USAGEID="28"/>
+      </ACTION>
+    </KEY_JOY>
+    <KEY_LEFT>
+      <ACTION>
+        <KEYBOARD MODIFIERS="00" USAGEID="50"/>
+      </ACTION>
+    </KEY_LEFT>
+    <KEY_RIGHT>
+      <ACTION>
+        <KEYBOARD MODIFIERS="00" USAGEID="4F"/>
+      </ACTION>
+    </KEY_RIGHT>
+    <KEY_UP>
+      <ACTION>
+        <KEYBOARD MODIFIERS="00" USAGEID="52"/>
+      </ACTION>
+    </KEY_UP>
+    <KEY_DOWN>
+      <ACTION>
+        <KEYBOARD MODIFIERS="00" USAGEID="51"/>
+      </ACTION>
+    </KEY_DOWN>
+  </KEYMAP>
+</SONY_ERICSSON_REMOTE_CONTROL_CONFIGURATION>
