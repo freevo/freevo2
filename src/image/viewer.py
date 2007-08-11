@@ -454,16 +454,22 @@ class ImageViewer(Application):
         # create the osdstring to write
         osdstring = u''
         for strtag in IMAGEVIEWER_OSD[self.osd_mode-1]:
-            i = str(self.item[strtag[1]])
+            i = self.item[strtag[1]]
+            if i is None:
+                continue
+            if not isinstance(i, (str, unicode)):
+                i = str(i)
+            if isinstance(i, str):
+                i = to_unicode(i)
             if i:
-                osdstring += u' %s %s' % (to_unicode(strtag[0]), to_unicode(i))
+                osdstring += u'%s %s    ' % (to_unicode(strtag[0]), i)
 
 	if osdstring == '':
             # If after all that there is nothing then tell the users that
 	    osdstring = _('No information available')
         else:
             # remove the first space from the string
-            osdstring = osdstring[1:]
+            osdstring = osdstring.strip()
 
         gui_width = gui.get_display().width
         gui_height = gui.get_display().height
