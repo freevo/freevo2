@@ -158,7 +158,7 @@ class DirItem(Playlist):
         # Check media plugins if they want to add something
         for p in MediaPlugin.plugins(self.media_type):
             p.dirinfo(self)
-
+        
 
     def __getitem__(self, key):
         """
@@ -209,6 +209,8 @@ class DirItem(Playlist):
                 return value
             value = self.info.get('freevo_%s' % key[7:])
             if value and not value == 'auto':
+                if key == 'config:sort':
+                    return value
                 return value == 'yes'
             if isinstance(self.parent, DirItem):
                 return self.parent[key]
@@ -400,19 +402,21 @@ class DirItem(Playlist):
         def _sortfunc(m):
             return lambda l, o: cmp(l.sort(m).lower(), o.sort(m).lower())
 
+        sorttype = self['config:sort']
+
         # sort directories by name
-        dir_items.sort(_sortfunc('name'))
+        dir_items.sort(_sortfunc(sorttype))
 
         # sort playlist by name or delete if they should not be displayed
         if self.menu_type and not self.menu_type in \
                config.add_playlist_items.split(','):
             pl_items = []
         else:
-            pl_items.sort(_sortfunc('name'))
+            pl_items.sort(_sortfunc(sorttype))
 
-        sorttype = self['config:sort']
         play_items.sort(_sortfunc(sorttype))
         if sorttype == 'date-new-first':
+            # FIXME: this can never happen!
             play_items.reverse()
 
         #
@@ -471,6 +475,8 @@ class DirItem(Playlist):
         return name for the configure menu
         """
         value = self.info.get('freevo_%s' % var.lower())
+        if var == 'sort':
+            return 'ICON_RIGHT_AUTO_' + _(value)
         if value == 'yes':
             return 'ICON_RIGHT_ON_' + _('on')
         if value == 'no':
@@ -485,7 +491,13 @@ class DirItem(Playlist):
         """
         dbvar = 'freevo_%s' % var.lower()
         current = self.info.get(dbvar) or 'auto'
-        if current == 'auto':
+        if var == 'sort':
+            possible = ['auto', 'name', 'smart', 'filename', 'date']
+            if not current in possible or possible.index(current) == len(possible) - 1:
+                self.info[dbvar] = 'auto'
+            else:
+                self.info[dbvar] = possible[possible.index(current)+1]
+        elif current == 'auto':
             self.info[dbvar] = 'yes'
         elif current == 'yes':
             self.info[dbvar] = 'no'
