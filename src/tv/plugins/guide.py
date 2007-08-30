@@ -175,13 +175,13 @@ class TVGuide(Menu):
         if event == MENU_LEFT:
             if self.selected.start == 0:
                 return True
-            self.get_program(self.selected.program.start - 1)
+            self.get_program(self.selected.start - 1)
             return True
 
         if event == MENU_RIGHT:
             if self.selected.stop == sys.maxint:
                 return True
-            self.get_program(self.selected.program.stop + 1)
+            self.get_program(self.selected.stop + 1)
             return True
 
         if event == MENU_PAGEUP:
@@ -205,6 +205,7 @@ class TVGuide(Menu):
             return True
 
         if event == TV_START_RECORDING:
+            # TODO: make this schedule or remove
             self.selected.submenu(additional_items=True)
             return True
 
