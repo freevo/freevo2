@@ -34,6 +34,8 @@
 
 # python imports
 import logging
+import time
+import sys
 
 # kaa imports
 import kaa.notifier
@@ -75,14 +77,18 @@ class GenreItem(Item):
             MessageWindow(_('TVServer not running')).show()
             return
         items = []
+        # time tuple representing the future
+        future = (int(time.time()), sys.maxint)
         # query epg in background
         if self.cat:
             if self.name==ALL_GENRE:
-                query_data = kaa.epg.search(category=self.cat)
+                query_data = kaa.epg.search(category=self.cat, time=future)
             else:
-                query_data = kaa.epg.search(genre=self.name, category=self.cat)
+                query_data = kaa.epg.search(genre=self.name, 
+                                            category=self.cat,
+                                            time=future)
         else:
-            query_data = kaa.epg.search(genre=self.name)
+            query_data = kaa.epg.search(genre=self.name, time=future)
         yield query_data
         # fetch epg data from InProgress object
         query_data = query_data()
