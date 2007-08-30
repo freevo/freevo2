@@ -29,178 +29,67 @@
 # -----------------------------------------------------------------------------
 
 # python imports
-import time
 
 # kaa imports
-import kaa.notifier
-from kaa.strutils import unicode_to_str
 
 # freevo core imports
 import freevo.ipc
 
-# freevo ui imports
-from freevo.ui import config
-from freevo.ui.menu import Menu, ActionItem, Action, Item
-from freevo.ui.mainmenu import MainMenuPlugin
+# freevo imports
+from freevo.ui.mainmenu import Menu, MainMenuPlugin
+from freevo.ui.menu import ActionItem
 from freevo.ui.application import MessageWindow
+from freevo.ui.tv.program import ProgramItem
 
 # get tvserver interface
 tvserver = freevo.ipc.Instance('freevo').tvserver
-
-class RecordingItem(Item):
-    """
-    A recording item to remove/watch a scheduled recording.
-    """
-    def __init__(self, channel, start, stop, parent):
-        Item.__init__(self, parent)
-
-        self.scheduled = tvserver.recordings.get(channel, start, stop)
-        if self.scheduled.description.has_key('title'):
-            self.title = self.scheduled.description['title']
-            self.name  = self.scheduled.description['title']
-        else:
-            self.name  = self.title = ''
-        self.channel = channel
-        self.start = start
-        self.stop = stop
-
-
-    def __unicode__(self):
-        """
-        return as unicode for debug
-        """
-        bt = time.localtime(self.start)   # Beginning time tuple
-        et = time.localtime(self.stop)    # End time tuple
-        begins = '%s-%02d-%02d %02d:%02d' % (bt[0], bt[1], bt[2], bt[3], bt[4])
-        ends   = '%s-%02d-%02d %02d:%02d' % (et[0], et[1], et[2], et[3], et[4])
-        return u'%s to %s  %3s ' % (begins, ends, self.channel) + \
-               self.title
-
-
-    def __str__(self):
-        """
-        return as string for debug
-        """
-        return unicode_to_str(self.__unicode__())
-
-
-    def __cmp__(self, other):
-        """
-        compare function, return 0 if the objects are identical, 1 otherwise
-        """
-        if not isinstance(other, (RecordingItem)):
-            return 1
-
-        return self.start != other.start or \
-               self.stop  != other.stop or \
-               self.channel != other.channel
-
-
-    def __getitem__(self, key):
-        """
-        return the specific attribute as string or an empty string
-        """
-        if key == 'start':
-            return unicode(time.strftime(config.tv.timeformat,
-                                         time.localtime(self.start)))
-        if key == 'stop':
-            return unicode(time.strftime(config.tv.timeformat,
-                                         time.localtime(self.stop)))
-        if key == 'date':
-            return unicode(time.strftime(config.tv.dateformat,
-                                         time.localtime(self.start)))
-        if key == 'time':
-            return self['start'] + u' - ' + self['stop']
-        if key == 'channel':
-            return self.channel
-
-        return Item.__getitem__(self, key)
-
-
-    def actions(self):
-        """
-        return a list of possible actions on this item.
-        """
-        return [ Action(_('Show recording menu'), self.submenu) ]
-
-
-    def submenu(self):
-        """
-        show a submenu for this item
-        """
-        items = []
-        if self.start < time.time() + 10 and \
-               self.scheduled.status in ('recording', 'saved'):
-            items.append(ActionItem(_('Watch recording'), self,
-                                    self.watch_recording))
-        if self.stop > time.time():
-            if self.start < time.time():
-                items.append(ActionItem(_('Stop recording'), self,
-                                        self.remove))
-            else:
-                items.append(ActionItem(_('Remove recording'), self,
-                                        self.remove))
-
-        s = Menu(self, items, type = 'tv program menu')
-        s.submenu = True
-        s.infoitem = self
-        self.get_menustack().pushmenu(s)
-
-
-    def watch_recording(self):
-        MessageWindow('Not implemented yet').show()
-
-
-    @kaa.notifier.yield_execution()
-    def remove(self):
-        result = tvserver.recordings.remove(self.scheduled.id)
-        if isinstance(result, kaa.notifier.InProgress):
-            yield result
-            result = result()
-        if result != tvserver.recordings.SUCCESS:
-            MessageWindow(_('Scheduling Failed')+(': %s' % result)).show()
-        self.get_menustack().delete_submenu()
-
 
 class PluginInterface(MainMenuPlugin):
     """
     This plugin is used to display your scheduled recordings.
     """
-    def scheduled(self, parent):
-        """
-        Show all scheduled recordings.
+    def browse(self, parent):
+        """ 
+        Construct the menu
         """
         self.parent = parent
-        items = self.get_items(parent)
+        items = self.get_items()
         if items:
             self.menu = Menu(_('View scheduled recordings'), items,
-                             type='tv program menu',
-                             reload_func = self.reload_scheduled)
+                                 type='tv program menu',
+                                 reload_func = self.reload_scheduled)
             parent.get_menustack().pushmenu(self.menu)
         else:
             MessageWindow(_('There are no scheduled recordings.')).show()
-
-
+    
+    
     def reload_scheduled(self):
-        items = self.get_items(self.parent)
+        """
+        reload the list of scheduled recordings
+        """
+        items = self.get_items()
         if items:
             self.menu.set_items(items)
         else:
             self.parent.get_menustack().back_one_menu()
 
-    def get_items(self, parent):
+    
+    def get_items(self):
+        """
+        create the list of scheduled recordings
+        """
         items = []
         rec = tvserver.recordings.list()
-        for p in rec:
-            scheduled = tvserver.recordings.get(p.channel, p.start, p.stop)
+        for scheduled in rec:
             if scheduled and not scheduled.status in ('deleted', 'missed'):
-                items.append(RecordingItem(parent=parent, channel=p.channel,
-                                           start=p.start, stop=p.stop))
-
+                items.append(ProgramItem(scheduled, self.parent))
         return items
-
+        
+                   
     def items(self, parent):
         """
         Return the main menu item.
         """
-        return [ ActionItem(_('View scheduled recordings'), parent, self.scheduled) ]
+        return [ ActionItem(_('View scheduled recordings'), parent, self.browse) ]
+       
+    
