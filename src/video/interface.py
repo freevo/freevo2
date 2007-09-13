@@ -89,10 +89,6 @@ class PluginInterface(MediaPlugin, MainMenuPlugin):
         return items
 
 
-    def database(self):
-        return database
-
-
     def items(self, parent):
         """
         MainMenuPlugin.items to return the video item.

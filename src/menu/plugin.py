@@ -101,13 +101,6 @@ class MediaPlugin(plugin.Plugin):
         return c
 
 
-    def database(self):
-        """
-        returns a database object
-        """
-        return None
-
-
     def plugins(media_type=None):
         """
         Static function to return all MediaPlugins for the given media_type.
