@@ -101,13 +101,6 @@ class MediaPlugin(plugin.Plugin):
         return c
 
 
-    def dirinfo(self, diritem):
-        """
-        set informations for a diritem based on the content, etc.
-        """
-        pass
-
-
     def database(self):
         """
         returns a database object

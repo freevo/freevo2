@@ -154,10 +154,6 @@ class DirItem(Playlist):
         if self['show_all_items']:
             # FIXME: no way to set this
             self.media_type = None
-
-        # Check media plugins if they want to add something
-        for p in MediaPlugin.plugins(self.media_type):
-            p.dirinfo(self)
         
 
     def __getitem__(self, key):

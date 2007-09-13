@@ -96,26 +96,6 @@ class PluginInterface(MediaPlugin, MainMenuPlugin):
         return items
 
 
-    def dirinfo(self, diritem):
-        """
-        set informations for a diritem based on the content, etc.
-        """
-        if not diritem.info.has_key('title') and diritem.parent:
-            # ok, try some good name creation
-            p_album  = diritem.parent['album']
-            p_artist = diritem.parent['artist']
-            album    = diritem['album']
-            artist   = diritem['artist']
-
-            if artist and p_artist == artist and album and not p_album:
-                # parent has same artist, but no album, but item has:
-                diritem.name = album
-
-            elif not p_artist and not p_album and not artist and album:
-                # parent has no info, item no artist but album (== collection)
-                diritem.name = album
-
-
     def items(self, parent):
         """
         MainMenuPlugin.items to return the audio item.

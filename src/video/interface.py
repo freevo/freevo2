@@ -89,16 +89,6 @@ class PluginInterface(MediaPlugin, MainMenuPlugin):
         return items
 
 
-    def dirinfo(self, diritem):
-        """
-        set informations for a diritem based on the content, etc.
-        """
-        if database.tv_shows.has_key(os.path.basename(diritem.filename).lower()):
-            tvinfo = database.tv_shows[os.path.basename(diritem.filename).lower()]
-            diritem.info.set_variables(tvinfo[1])
-            if not diritem.image:
-                diritem.image = tvinfo[0]
-
     def database(self):
         return database
 
