@@ -87,7 +87,9 @@ class PluginInterface(MediaPlugin, MainMenuPlugin):
         items = []
         for suffix in self.suffix():
             for file in listing.get(suffix):
-                if not file.isfile() and not file.isdir():
+                # FIXME: better url detection
+                if not file.isfile() and not file.isdir() and \
+                       not file.url.startswith('http'):
                     items.append(AudioDiskItem(file, parent))
                 else:
                     items.append(AudioItem(file, parent))
