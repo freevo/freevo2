@@ -400,7 +400,7 @@ class DirItem(Playlist):
         #
 
         def _sortfunc(m):
-            return lambda l, o: cmp(l.sort(m).lower(), o.sort(m).lower())
+            return lambda l, o: cmp(l.sort(m), o.sort(m))
 
         sorttype = self['config:sort']
 

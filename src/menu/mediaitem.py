@@ -183,13 +183,20 @@ class MediaItem(Item):
         Returns the string how to sort this item
         """
         if mode == 'date':
-            if self.filename:
-                return u'%s%s' % (os.stat(self.filename).st_ctime, self.name)
-            return u'0%s' % self.name
+            date = self.info.get('date')
+            if date:
+                print 1, date
+                return date
+            date = self.info.get('mtime')
+            if date:
+                print 2, date
+                return date
+            print 3, date
+            return 0
         if mode == 'filename':
             if self.filename:
-                return unicode(self.filename, errors = 'replace')
-            return self.name
+                return unicode(self.filename, errors = 'replace').lower()
+            return self.name.lower()
         return Item.sort(self, mode)
 
 

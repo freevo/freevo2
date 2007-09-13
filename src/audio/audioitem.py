@@ -70,7 +70,7 @@ class AudioItem(MediaItem):
                 track = int(self.info.get('trackno'))
             except (ValueError, KeyError, TypeError):
                 track = 0
-            return u'%20d %s' % (track, self.name)
+            return u'%20d %s' % (track, self.name.lower())
         return MediaItem.sort(self, mode)
 
 

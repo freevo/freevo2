@@ -99,15 +99,15 @@ class Item(object):
         Returns the string how to sort this item
         """
         if mode == 'name':
-            return self.name
+            return self.name.lower()
         if mode == 'smart':
             name = self.name
             if name.lower().startswith('the '):
-                return name[4:]
+                return name[4:].lower()
             if name.lower().startswith('a '):
-                return name[2:]
-            return name
-        print 'oops', mode, self
+                return name[2:].lower()
+            return name.lower()
+        log.error('unsupport sort mode %s', mode)
         return ''
 
 
