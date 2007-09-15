@@ -130,7 +130,10 @@ class Menu(ItemList):
         if self.cols == 1:
             if config.menu.arrow_navigation:
                 if event == MENU_LEFT:
-                    event = MENU_BACK_ONE_MENU
+                    # event = MENU_BACK_ONE_MENU
+                    # we can not just change the event here because
+                    # stack.py processes this.
+                    self.stack.back_one_menu()
                 elif event == MENU_RIGHT:
                     event = MENU_SELECT
             else:
