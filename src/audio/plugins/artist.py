@@ -63,10 +63,10 @@ class AlbumItem(Item):
         """
         title = str_to_unicode(self.artist)
         if self.album:
-            query = kaa.beacon.query(artist=self.artist, album=self.album)
+            query = kaa.beacon.query(artist=self.artist, album=self.album, type='audio')
             title = '%s - %s' % (title, str_to_unicode(self.album))
         else:
-            query = kaa.beacon.query(artist=self.artist)
+            query = kaa.beacon.query(artist=self.artist, type='audio')
         # FIXME: monitor query for live update
         self.playlist = Playlist(title, query, self, type='audio')
         self.playlist.browse()
