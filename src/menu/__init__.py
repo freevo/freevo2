@@ -40,5 +40,6 @@ from listing import ItemList
 from mediaitem import MediaItem
 from action import Action
 from menu import Menu
+from gridmenu import GridMenu
 from stack import MenuStack
 from plugin import ItemPlugin, MediaPlugin

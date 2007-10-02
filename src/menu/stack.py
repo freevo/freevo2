@@ -45,7 +45,6 @@ from kaa.weakref import weakref
 from freevo.ui.event import *
 
 # menu imports
-from menu import Menu
 from item import Item
 
 # get logging object

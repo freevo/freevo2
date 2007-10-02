@@ -533,12 +533,12 @@ class Menu(object):
 
 class MenuSet(object):
     """
-    the complete menu with the areas screen, title, subtitle, view, listing
-    and info in it
+    the complete menu with the areas screen, title, subtitle, view, listing,
+    grid and info in it
     """
     def __init__(self):
         self.areas = [ 'screen', 'title', 'subtitle', 'view', 'listing',
-                       'info', 'progress' ]
+                       'info', 'grid', 'progress' ]
         for c in self.areas:
             setattr(self, c, Area(c))
 
@@ -567,7 +567,7 @@ class Area(XMLData):
     def __init__(self, name, source=None):
         XMLData.__init__(self, self.VARS, source)
         self.name = name
-        if name == 'listing':
+        if name == 'listing' or 'grid':
             self.images = {}
         if not source:
             self.x = -1
@@ -593,7 +593,7 @@ class Area(XMLData):
             except TypeError:
                 pass
         for subnode in node.children:
-            if subnode.name == u'image' and self.name == 'listing':
+            if subnode.name == u'image' and self.name == 'listing' or 'grid':
                 label = attr_str(subnode, 'label', '')
                 if label:
                     if not label in self.images:
@@ -1246,6 +1246,10 @@ class FXDSettings(object):
                         for image in s[i].listing.images:
                             foo = s[i].listing.images[image]
                             s[i].listing.images[image] = foo.prepare_copy(None, search_dirs, self.__images)
+                    if s[i] and hasattr(s[i], 'grid'):
+                        for image in s[i].grid.images:
+                            foo = s[i].grid.images[image]
+                            s[i].grid.images[image] = foo.prepare_copy(None, search_dirs, self.__images)
 
         # menu structures
         self.default_menu = {}
@@ -1289,6 +1293,11 @@ class FXDSettings(object):
                     for i in range(2):
                         if s[i] and hasattr(s[i], 'listing'):
                             sli = s[i].listing.images
+                            for image in sli:
+                                sli[image] = sli[image].prepare_copy(None, search_dirs,
+                                                   self.__images)
+                        if s[i] and hasattr(s[i], 'grid'):
+                            sli = s[i].grid.images
                             for image in sli:
                                 sli[image] = sli[image].prepare_copy(None, search_dirs,
                                                    self.__images)

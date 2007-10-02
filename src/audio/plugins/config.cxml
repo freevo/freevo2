@@ -4,4 +4,7 @@
     <group name="artist" plugin="10">
         <desc>Show audio files sorted by artist and album</desc>
     </group>
+    <group name="album" plugin="15">
+        <desc>Show albums sorted by artist in a grid view</desc>
+    </group>
 </config>

@@ -52,7 +52,7 @@ class BaseApplication(object):
 
 class _Menu(BaseApplication):
     name = 'menu'
-    areas = ('screen', 'title', 'subtitle', 'view', 'listing', 'info')
+    areas = ('screen', 'title', 'subtitle', 'view', 'listing', 'info', 'grid')
 
     def __init__(self):
         from freevo.ui.gui.areas import Handler

@@ -56,7 +56,7 @@ class Menu(ItemList):
     """
     next_id = 0
 
-    def __init__(self, heading, choices=[], reload_func = None, type = None):
+    def __init__(self, heading, choices=None, reload_func = None, type = None):
         ItemList.__init__(self, choices)
 
         self.heading = heading

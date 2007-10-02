@@ -16,6 +16,10 @@
         </var>
     </group>
 
+    <group name="testguide" plugin="15">
+        <desc>Add item to show the test guide</desc>
+    </group>
+
     <group name="genre" plugin="30">
         <desc>Add item to browse the EPG by genre</desc>
     </group>

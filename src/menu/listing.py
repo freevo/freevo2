@@ -49,7 +49,7 @@ class ItemList(object):
     """
     A basic listing of items.
     """
-    def __init__(self, choices=[], selected=None):
+    def __init__(self, choices=None, selected=None):
         # state, will increase on every item change
         self.state = 0
 
@@ -58,7 +58,8 @@ class ItemList(object):
         self.selected = None
         self.selected_id = None
         self.selected_pos = -1
-        self.set_items(choices, selected)
+        if choices is not None:
+            self.set_items(choices, selected)
 
 
 
