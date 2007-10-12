@@ -185,13 +185,10 @@ class MediaItem(Item):
         if mode == 'date':
             date = self.info.get('date')
             if date:
-                print 1, date
                 return date
             date = self.info.get('mtime')
             if date:
-                print 2, date
                 return date
-            print 3, date
             return 0
         if mode == 'filename':
             if self.filename:

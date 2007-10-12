@@ -48,14 +48,3 @@ class Display(BitmapCanvas, Base):
     def __init__(self, size, default=False):
         BitmapCanvas.__init__(self, size)
         Base.__init__(self)
-
-
-    def __del__(self):
-        """
-        Delete the object
-        """
-        try:
-            # __del__ can fail on shutdown
-            super(Display, self).__del__(size)
-        except:
-            pass
