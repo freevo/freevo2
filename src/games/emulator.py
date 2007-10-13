@@ -292,7 +292,7 @@ class EmulatorMenuItem(MainMenuItem):
                 log.exception('Error parsing %s' %str(item))
                 continue
         if self.isRoot:
-            for media in kaa.beacon.media:
+            for media in kaa.beacon.list_media():
                 if media.mountpoint == '/':
                     continue
                 listing = kaa.beacon.wrap(media.root, filter='extmap')

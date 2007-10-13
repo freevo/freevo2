@@ -117,7 +117,7 @@ class MediaMenu(MainMenuItem):
         Generate items based on beacon mountpoints
         """
         items = []
-        for media in kaa.beacon.media:
+        for media in kaa.beacon.list_media():
             if media.mountpoint == '/':
                 continue
             listing = kaa.beacon.wrap(media.root, filter='extmap')
