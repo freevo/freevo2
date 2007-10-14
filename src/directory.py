@@ -138,8 +138,7 @@ class DirItem(Playlist):
         self.item_menu  = None
 
         if not isinstance(directory, kaa.beacon.Item):
-            log.warning('filename as directory is deprecated')
-            directory = kaa.beacon.get(directory)
+            raise AttributeError('%s is not beacon item' % directory)
 
         self.set_url(directory)
 

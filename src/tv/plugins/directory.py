@@ -31,6 +31,7 @@
 
 # kaa imports
 import kaa.beacon
+import kaa.notifier
 
 # freevo imports
 from freevo.ui import config
@@ -45,8 +46,11 @@ class PluginInterface(MainMenuPlugin):
             return [ ActionItem(_('Recorded Shows'), parent, self.browse) ]
         return []
 
+    @kaa.notifier.yield_execution()
     def browse(self, parent):
         record_dir = kaa.beacon.get(config.tv.plugin.directory.path)
+        if isinstance(record_dir, kaa.notifier.InProgress):
+            yield record_dir
+            record_dir = record_dir.get_result()
         d = DirItem(record_dir, parent, type='tv')
         d.browse()
-        
