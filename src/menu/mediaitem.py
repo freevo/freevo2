@@ -62,7 +62,8 @@ class MediaItem(Item):
         self.filename = None
         self.fxdinfo = {}
         self.elapsed = 0
-        
+        self.user_stop = False
+
 
     def set_url(self, url):
         """
@@ -222,9 +223,10 @@ class MediaItem(Item):
         """
         eventhandler for this item
         """
-        if event == PLAY_START:
-            self['last_played'] = int(time.time())
         if event == STOP:
-            # not fully played, clear info
-            self['last_played'] = 0
+            self.user_stop = True
+        if event == PLAY_END:
+            if not self.user_stop:
+                self['last_played'] = int(time.time())
+                self.user_stop = False
         return Item.eventhandler(self, event)
