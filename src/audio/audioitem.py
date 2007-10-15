@@ -43,6 +43,7 @@ from kaa.strutils import str_to_unicode
 
 # freevo imports
 from freevo.ui.menu import MediaItem, Action
+from freevo.ui.event import PLAY_END, STOP
 
 # audio player
 import player as audioplayer
@@ -58,6 +59,7 @@ class AudioItem(MediaItem):
     
     def __init__(self, url, parent):
         MediaItem.__init__(self, parent)
+        self.user_stop = False
         self.set_url(url)
 
 
@@ -105,3 +107,16 @@ class AudioItem(MediaItem):
         Stop the current playing
         """
         audioplayer.stop()
+
+
+    def eventhandler(self, event):
+        """
+        eventhandler for this item
+        """
+        if event == STOP:
+            self.user_stop = True
+        if event == PLAY_END:
+            if not self.user_stop:
+                self['last_played'] = int(time.time())
+                self.user_stop = False
+        return MediaItem.eventhandler(self, event)

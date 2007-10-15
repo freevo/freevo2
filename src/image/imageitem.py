@@ -40,6 +40,7 @@ import time
 # freevo imports
 from freevo.ui import config
 from freevo.ui.menu import MediaItem, Action
+from freevo.ui.event import PLAY_END, STOP
 from viewer import viewer
 
 class ImageItem(MediaItem):
@@ -50,6 +51,7 @@ class ImageItem(MediaItem):
     
     def __init__(self, url, parent, duration = config.image.viewer.duration):
         MediaItem.__init__(self, parent)
+        self.user_stop = False
         # set url and parse the name
         self.set_url(url)
         self.duration = duration
@@ -99,3 +101,16 @@ class ImageItem(MediaItem):
         Stop viewing this item
         """
         viewer.stop()
+
+
+    def eventhandler(self, event):
+        """
+        eventhandler for this item
+        """
+        if event == STOP:
+            self.user_stop = True
+        if event == PLAY_END:
+            if not self.user_stop:
+                self['last_played'] = int(time.time())
+                self.user_stop = False
+        return MediaItem.eventhandler(self, event)

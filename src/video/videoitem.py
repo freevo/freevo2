@@ -49,7 +49,7 @@ from freevo.ui import config
 
 from freevo.ui.application import MessageWindow, ConfirmWindow
 from freevo.ui.menu import Menu, MediaItem, Files, Action
-from freevo.ui.event import PLAY_END
+from freevo.ui.event import PLAY_END, STOP
 
 # video imports
 import configure
@@ -70,6 +70,7 @@ class VideoItem(MediaItem):
     
     def __init__(self, url, parent):
         MediaItem.__init__(self, parent)
+        self.user_stop = False
 
         self.subtitle_file     = {}         # text subtitles
         self.audio_file        = {}         # audio dubbing
@@ -224,3 +225,16 @@ class VideoItem(MediaItem):
         stop playing
         """
         videoplayer.stop()
+
+
+    def eventhandler(self, event):
+        """
+        eventhandler for this item
+        """
+        if event == STOP:
+            self.user_stop = True
+        if event == PLAY_END:
+            if not self.user_stop:
+                self['last_played'] = int(time.time())
+                self.user_stop = False
+        return MediaItem.eventhandler(self, event)
