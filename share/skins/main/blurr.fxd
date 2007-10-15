@@ -183,7 +183,7 @@
 			    align="justified" expression="content"/>
                         <newline/>
                     </if>
-                    <if expression="not content and not plot">
+                    <if expression="not content and not plot and num_items">
                         <text font="info value" expression="num_items"/>
                         <text font="info value"> Items</text>
                         <!-- other values are num_play_items and num_dir_items -->

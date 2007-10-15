@@ -44,8 +44,9 @@ from kaa.strutils import str_to_unicode
 from freevo.ui.event import PLAY_START, STOP
 
 # menu imports
-from item import Item
+from item import Item, ActionItem
 from files import Files
+from menu import Menu
 
 # get logging object
 log = logging.getLogger()
@@ -69,22 +70,11 @@ class MediaItem(Item):
         Set a new url to the item and adjust all attributes depending
         on the url. Each MediaItem has to call this function.
         """
-        if isinstance(url, kaa.beacon.Item):
-            self.info = url
-            url = url.url
-        else:
-            log.error('FIXME: bad url %s', url)
-            self.info = {}
+        if not isinstance(url, kaa.beacon.Item):
+            raise RuntimeError('MediaItem.set_url needs a beacon item')
 
-            self.url = url              # the url itself
-            self.network_play = True    # network url, like http
-            self.filename     = ''      # filename if it's a file:// url
-            self.mode         = ''      # the type (file, http, dvd...)
-            self.files        = None    # Files
-            self.name         = u''
-            return
-
-        self.url = url
+        self.info = url
+        self.url = url.url
         self.files = Files()
         if self.info.get('read_only'):
             self.files.read_only = True
@@ -125,11 +115,28 @@ class MediaItem(Item):
             return '%d:%02d:%02d' % ( time / 3600, (time % 3600) / 60, time % 60)
         return '%02d:%02d' % (time / 60, time % 60)
 
-        
+
     def __getitem__(self, attr):
         """
         return the specific attribute
         """
+        if attr.startswith('cfg:'):
+            # freevo_config attribute in beacon
+            if not self.info.get('freevo_config'):
+                return None
+            return self['freevo_config'].get(attr[4:])
+
+        if attr.startswith('cache:'):
+            # freevo_config attribute in beacon
+            if not self.info.get('freevo_cache'):
+                return None
+            mtime, cache = self.info.get('freevo_cache')
+            if mtime == self.info.get('mtime'):
+                return cache.get(attr[6:])
+            # cache not up-to-date, delete it
+            self.info['freevo_cache'] = [ self.info.get('mtime'), {} ]
+            return
+            
         if attr == 'length':
             try:
                 return self.format_time(self.info.get('length'))
@@ -165,6 +172,36 @@ class MediaItem(Item):
         return Item.__getitem__(self, attr)
 
 
+    def __setitem__(self, attr, value):
+        """
+        Set attribute to value.
+        """
+        if attr.startswith('cfg:'):
+            # freevo_config attribute in beacon
+            key = attr[4:]
+            if not self.info.get('freevo_config'):
+                self.info['freevo_config'] = {}
+            self.info['freevo_config'][key] = value
+            if self.info.get('tmp:%s' + key):
+                # remove tmp setting
+                self.info['tmp:%s' + key] = None
+            # FIXME: work sround Beacon bug!!!
+            self.info['freevo_config'] = dict(self.info['freevo_config'])
+            return
+
+        if attr.startswith('cache:'):
+            # freevo_config attribute in beacon
+            if not self.info.get('freevo_cache') or \
+                   self.info.get('freevo_cache')[0] != self.info.get('mtime'):
+                self.info['freevo_cache'] = [ self.info.get('mtime'), {} ]
+            self.info['freevo_cache'][1][attr[6:]] = value
+            # FIXME: work sround Beacon bug!!!
+            self.info['freevo_cache'] = self.info['freevo_cache'][:]
+            return
+
+        return Item.__setitem__(self, attr, value)
+
+
     def __id__(self):
         """
         Return a unique id of the item. This id should be the same when the
@@ -176,7 +213,7 @@ class MediaItem(Item):
     def __repr__(self):
         name = str(self.__class__)
         return "<%s %s>" % (name[name.rfind('.')+1:-2], self.url)
-    
+
 
     def sort(self, mode='name'):
         """
@@ -216,3 +253,51 @@ class MediaItem(Item):
         Stop playing
         """
         pass
+
+
+    # ======================================================================
+    # configure submenu
+    # ======================================================================
+
+
+    def get_configure_items(self):
+        """
+        Return configure options for this item.
+        """
+        raise RuntimeError('item can not be configured')
+
+
+    def _set_configure_var(self, var, name, choices):
+        """
+        Update the variable update the menu.
+        """
+        # update value
+        dbvar = 'cfg:%s' % var.lower()
+        current = MediaItem.__getitem__(self, dbvar) or 'auto'
+        current = choices[(choices.index(current) + 1) % len(choices)]
+        self[dbvar] = current
+        # change name
+        item = self.get_menustack().get_selected()
+        item.name = name + '\t'  + current
+        # rebuild menu
+        self.get_menustack().refresh(True)
+
+
+    def configure(self):
+        """
+        Show the configure dialog for the item.
+        """
+        items = []
+        for i, name, values, descr in self.get_configure_items():
+            dbvar = 'cfg:%s' % i.lower()
+            current = MediaItem.__getitem__(self, dbvar) or 'auto'
+            action = ActionItem(name + '\t'  + current, self,
+                                self._set_configure_var, descr)
+            action.parameter(var=i, name=name, choices=list(values))
+            items.append(action)
+        if not items:
+            return
+        self.get_menustack().delete_submenu(False)
+        m = Menu(_('Configure'), items)
+        m.table = (80, 20)
+        self.get_menustack().pushmenu(m)

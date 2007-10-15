@@ -12,18 +12,17 @@
                 How to sort the items in a directory. Valid values are
                 'name' (name of the item, maybe based on metadata), 'smart'
                 (like name but ignore "The" and "A" at the beginning),
-                'filename', 'date-old-first' and 'date-new-first'.
+                'filename' and 'date'.
             </desc>
             <values>
                 <value>name</value>
                 <value>smart</value>
                 <value>filename</value>
-                <value>date-old-first</value>
-                <value>date-new-first</value>
+                <value>date</value>
             </values>
         </var>
 
-        <var name="tvsort" default="date-old-first">
+        <var name="tvsort" default="date">
             <desc>
                 How to sort the items in a directory in the tv menu.
             </desc>
@@ -31,8 +30,7 @@
                 <value>name</value>
                 <value>smart</value>
                 <value>filename</value>
-                <value>date-old-first</value>
-                <value>date-new-first</value>
+                <value>date</value>
             </values>
         </var>
 
