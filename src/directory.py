@@ -62,12 +62,6 @@ log = logging.getLogger()
 # get config object directory
 config = config.directory
 
-# register to beacon as string: on/off/auto
-kaa.beacon.register_file_type_attrs('dir',
-    freevo_cache  = (list, kaa.beacon.ATTR_SIMPLE),
-    freevo_config = (dict, kaa.beacon.ATTR_SIMPLE),
-)
-
 def find_start_string(s1, s2):
     """
     Find similar start in both strings
@@ -115,7 +109,7 @@ class DirItem(Playlist):
         self.menu_type = type
         if type == 'tv':
             type = 'video'
-            
+
         Playlist.__init__(self, parent=parent, type=type)
         self.item_menu  = None
         self.set_url(directory)
@@ -129,17 +123,74 @@ class DirItem(Playlist):
             # FIXME: no way to set this
             self.media_type = None
         self.query = None
-        
 
-    @kaa.notifier.yield_execution()
-    def _calculate_num_items(self):
+
+    def get_freespace(self):
         """
-        calculate the number of items in the directory.
+        Return free space in the directory in MB.
         """
-        log.info('create metainfo for %s', self.filename)
-        listing = kaa.beacon.query(parent=self.info)
-        if not listing.valid:
-            yield listing.wait()
+        s = os.statvfs(self.filename)
+        space = (s[statvfs.F_BAVAIL] * long(s[statvfs.F_BSIZE])) / 1000000
+        space = space / 1000000
+        if space > 1000:
+            return '%s,%s' % (space / 1000, space % 1000)
+        return space
+
+
+    def get_totalspace(self):
+        """
+        Return total space in the directory in MB.
+        """
+        s = os.statvfs(self.filename)
+        space = (s[statvfs.F_BLOCKS] * long(s[statvfs.F_BSIZE])) / 1000000
+        if space > 1000:
+            return '%s,%s' % (space / 1000, space % 1000)
+        return space
+
+
+    def get_type(self):
+        """
+        Return type of the item as i18n string.
+        """
+        return _('Directory')
+
+
+    def get_cfg(self, var):
+        """
+        Return config variable value based on parent and config file.
+        """
+        value = self._mem.get(var)
+        if value is not None:
+            # memory override of that value
+            return value
+        # get config value from freevo_config
+        value = Playlist.get_cfg(self, var)
+        if value not in (None, 'auto'):
+            # value is set for this item
+            if value == 'on':
+                return True
+            if value == 'off':
+                return False
+            return value
+        if isinstance(self.parent, DirItem):
+            # return the value from the parent (auto)
+            return self.parent.get_cfg(var)
+        # auto and no parent, use config file values
+        if var == 'sort':
+            if self.menu_type == 'tv':
+                return config.tvsort
+            return config.sort
+        # config files does not know about hide_played and reverse
+        value = getattr(config, var, False)
+        if isinstance(value, bool):
+            return value
+        return self.media_type in value.split(',')
+
+
+    def set_num_items(self, listing, redraw=False):
+        """
+        Set the number of items in the directory based on the listing.
+        """
         listing = listing.get(filter='extmap')
         mediatype = ''
         if self.media_type:
@@ -147,74 +198,39 @@ class DirItem(Playlist):
         num = 0
         for p in MediaPlugin.plugins(self.media_type):
             num += p.count(self, listing)
-        self['cache:num_play_items%s' % media_type] = num
-        self['cache:num_dir_items%s' % media_type] = len(listing.get('beacon:dir'))
-        self['cache:num_items%s' % media_type] = num + len(listing.get('beacon:dir'))
-        # update menu since we have the info now
-        # FIXME: what happens if a download is happening in that dir?
-        self.get_menustack().refresh()
+        self['cache:num_items_play%s' % media_type] = num
+        self['cache:num_items_dir%s' % media_type] = len(listing.get('beacon:dir'))
+        self['cache:num_items_all%s' % media_type] = num + len(listing.get('beacon:dir'))
+        if redraw:
+            # FIXME: what happens if a download is happening in that dir?
+            self.get_menustack().refresh()
 
-        
-    def __getitem__(self, key):
-        """
-        return the specific attribute
-        """
-        if key == 'type':
-            return _('Directory')
 
-        if key.startswith('num_'):
-            if self.media_type:
-                key = 'cache:' + key + '_' + self.media_type
-            num = Playlist.__getitem__(self, key)
-            if num is None:
-                self._calculate_num_items()
+    def get_num_items(self, type='all'):
+        """
+        Return number of items for the directory. Possible values
+        of type are 'all' and 'play'.
+        """
+        key = 'cache:num_items_%s' % type
+        if self.media_type:
+            key += '_' + self.media_type
+        num = Playlist.get(self, key)
+        if num is not None:
             return num
-
-        if key in ( 'freespace', 'totalspace' ):
-            s = os.statvfs(self.filename)
-            if key == 'freespace':
-                space = s[statvfs.F_BAVAIL] * long(s[statvfs.F_BSIZE])
-            else:
-                space = s[statvfs.F_BLOCKS] * long(s[statvfs.F_BSIZE])
-            space = space / 1000000
-            if space > 1000:
-                space='%s,%s' % (space / 1000, space % 1000)
-            return space
-
-        if key.startswith('cfg:'):
-            value = self.info.get('tmp:%s' % key[4:])
-            if value is not None:
-                # tmp override of that value
-                return value
-            # get config value from freevo_config
-            value = Playlist.__getitem__(self, key)
-            if value not in (None, 'auto'):
-                # value is set for this item
-                if value == 'on':
-                    return True
-                if value == 'off':
-                    return False
-                return value
-            if isinstance(self.parent, DirItem):
-                # return the value from the parent (auto)
-                return self.parent[key]
-            # auto and no parent, use config file values
-            if key == 'cfg:sort':
-                if self.menu_type == 'tv':
-                    return config.tvsort
-                return config.sort
-            # config files does not know about hide_played and reverse
-            value = getattr(config, key[4:], False)
-            if isinstance(value, bool):
-                return value
-            return self.media_type in value.split(',')
-
-        return Playlist.__getitem__(self, key)
+        log.info('create metainfo for %s', self.filename)
+        # FIXME: make sure this is only called once in each iteration and
+        listing = kaa.beacon.query(parent=self.info)
+        if not listing.valid:
+            listing.wait().connect(self.set_num_items, redraw=True)
+            return None
+        self.set_num_items(listing, redraw=False)
+        return get_num_items(type)
 
 
-    # eventhandler for this item
     def eventhandler(self, event):
-
+        """
+        Eventhandler for a directory item.
+        """
         if self.item_menu == None:
             return Playlist.eventhandler(self, event)
 
@@ -234,7 +250,7 @@ class DirItem(Playlist):
 
             self.media_type = self.menu_type = type
             # deactivate autoplay but not save it
-            self['tmp:autoplay_single_item'] = False
+            self['mem:autoplay_single_item'] = False
             self.item_menu.autoselect = False
             self.browse()
             OSD_MESSAGE.post('%s view' % type)
@@ -242,7 +258,7 @@ class DirItem(Playlist):
 
         if event == DIRECTORY_TOGGLE_HIDE_PLAYED:
             self['cfg:hide_played'] = not self['cfg:hide_played']
-            self['tmp:autoplay_single_item'] = False
+            self['mem:autoplay_single_item'] = False
             self.item_menu.autoselect = False
             self.browse()
             if self['cfg:hide_played']:
@@ -265,7 +281,7 @@ class DirItem(Playlist):
         play = Action(_('Play all files in directory'), self.play)
 
         if self['num_items']:
-            if self['cfg:autoplay_items'] and not self['num_dir_items']:
+            if self['cfg:autoplay_items'] and not self['num_items:dir']:
                 items = [ play, browse ]
             else:
                 items = [ browse, play ]
@@ -277,7 +293,7 @@ class DirItem(Playlist):
             a.parameter(random=True)
             items.append(a)
 
-        if self['num_dir_items']:
+        if self['num_items:dir']:
             a = Action(_('Recursive random play all items'), self.play)
             a.parameter(random=True, recursive=True)
             items.append(a)
@@ -341,7 +357,7 @@ class DirItem(Playlist):
                 # the changed signal will be called when the listing
                 # is ready and this will trigger browse again.
                 return
-                
+
         listing = self.query.get(filter='extmap')
 
         #

@@ -38,9 +38,9 @@ from freevo.ui.playlist import Playlist
 class VideoPlaylist(Playlist):
     type = 'video'
 
-    def __id__(self):
+    def get_id(self):
         """
         Return a unique id of the item. This id should be the same when the
         item is rebuild later with the same informations
         """
-        return ''.join([ c.__id__() for c in self.choices ])
+        return ''.join([ c.get_id() for c in self.choices ])

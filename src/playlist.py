@@ -222,13 +222,13 @@ class Playlist(MediaItem, ItemList):
         return True
 
 
-    def __getitem__(self, attr):
+    def get(self, attr):
         """
         return the specific attribute
         """
         if not self._playlist_valid:
             self._playlist_create_items()
-        return MediaItem.__getitem__(self, attr)
+        return MediaItem.get(self, attr)
 
 
     def actions(self):

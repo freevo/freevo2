@@ -65,7 +65,7 @@ class ProgramItem(Item):
         Item.__init__(self, parent)
         self.start = program.start
         self.stop  = program.stop
-        
+
         if isinstance(program, kaa.epg.Program):
             # creation form epg Program object
             self.channel = program.channel.name
@@ -79,33 +79,33 @@ class ProgramItem(Item):
             self.genre = ''
             # TODO: add ratings support
             self.ratings = ''
-            
-        
+
+
         elif isinstance(program, freevo.ipc.tvserver.Recording):
             # creation form ipc Recoring object
             self.channel = program.channel
             if program.description.has_key('title'):
                 self.title = program.description['title']
                 self.name  = program.description['title']
-            else: 
-                self.name = self.title = _(u'Unknown') 
-             
+            else:
+                self.name = self.title = _(u'Unknown')
+
             if program.description.has_key('subtitle'):
                 self.subtitle = program.description['subtitle']
-            else:               
+            else:
                 self.subtitle = ''
             if program.description.has_key('episode'):
                 self.episode = program.description['episode']
-            else:               
+            else:
                 self.episode = ''
-            # TODO: check if this is also available    
+            # TODO: check if this is also available
             self.description = ''
             # TODO: add catergory/genre support
             self.categories = ''
             self.genre = ''
             # TODO: add ratings support
-            self.rating = ''                      
-                        
+            self.rating = ''
+
     def __unicode__(self):
         """
         return as unicode for debug
@@ -132,45 +132,59 @@ class ProgramItem(Item):
             return 1
         if isinstance(other, ProgramItem) and self.channel != other.channel:
             return 1
-        if isinstance(other, kaa.epg.Program) and self.channel != other.channel.name:   
+        if isinstance(other, kaa.epg.Program) and self.channel != other.channel.name:
             return 1
-    
+
         return self.title != other.title or \
                self.start != other.start or \
-               self.stop  != other.stop 
-              
-               
+               self.stop  != other.stop
 
-    def __getitem__(self, key):
-        """
-        return the specific attribute as string or an empty string
-        """
-        if key == 'start':
-            return unicode(time.strftime(config.tv.timeformat,
-                                         time.localtime(self.start)))
-        if key == 'stop':
-            return unicode(time.strftime(config.tv.timeformat,
-                                         time.localtime(self.stop)))
-        if key == 'date':
-            return unicode(time.strftime(config.tv.dateformat,
-                                         time.localtime(self.start)))
-        if key == 'time':
-            return self['start'] + u' - ' + self['stop']
-        if key == 'channel':
-            return self.channel
 
-        return Item.__getitem__(self, key)
+
+    def get_start(self):
+        """
+        Return start time as formated unicode string.
+        """
+        return unicode(time.strftime(config.tv.timeformat, time.localtime(self.start)))
+
+
+    def get_stop(self):
+        """
+        Return stop time as formated unicode string.
+        """
+        return unicode(time.strftime(config.tv.timeformat, time.localtime(self.stop)))
+
+
+    def get_time(self):
+        """
+        Return start time and stop time as formated unicode string.
+        """
+        return self.get_start + u' - ' + self.get_stop()
+
+
+    def get_date(self):
+        """
+        Return date as formated unicode string.
+        """
+        return unicode(time.strftime(config.tv.dateformat, time.localtime(self.start)))
+
+
+    def get_channel(self):
+        """
+        Return channel object.
+        """
+        return self.channel
 
 
     ### Submenu
-    
+
     def actions(self):
         """
         return a list of possible actions on this item.
         """
         return [ Action(_('Show program menu'), self.submenu) ]
 
-    
+
     def reload_submenu(self):
         """
         reload function for the submenu
@@ -180,26 +194,26 @@ class ProgramItem(Item):
             self.get_menustack()[-1].set_items(items)
         else:
             self.get_menustack().back_one_menu()
-        
+
 
     def get_menuitems(self):
         """
         create a list of actions for the submenu
         """
-        
+
         # check if this is a recording
         self.scheduled = tvserver.recordings.get(self.channel,
-                                                 self.start, 
+                                                 self.start,
                                                  self.stop)
         # check if this is a favorite
-        self.favorite = tvserver.favorites.get(self.title, 
+        self.favorite = tvserver.favorites.get(self.title,
                                                self.channel,
                                                self.start,
-                                               self.stop)   
-        
+                                               self.stop)
+
         # empty item list
         items = []
-        
+
         # scheduled for recording
         if self.scheduled and not self.scheduled.status in ('deleted','missed'):
                 if self.start < time.time() + 10  \
@@ -215,16 +229,16 @@ class ProgramItem(Item):
                         items.append(ActionItem(txt, self, self.remove))
                     else:
                         # still in the future
-                        txt =  _('Remove recording')   
+                        txt =  _('Remove recording')
                         items.append(ActionItem(txt, self, self.remove))
-                    
+
         # not scheduled for recording
         elif self.stop > time.time():
             # not in the past, can still be scheduled
             txt = _('Schedule for recording')
             items.append(ActionItem(txt, self, self.schedule))
-        
-        
+
+
         # this items are only shown from inside the TVGuide:
         if self.additional_items:
             # Show all programm on this channel
@@ -236,7 +250,7 @@ class ProgramItem(Item):
             # Search for more of this program
             txt = _('Search for more of this program')
             items.append(ActionItem(txt, self, self.search_similar))
-        
+
         # Add the menu for handling favorites
         if self.favorite:
             txt = _('Edit favorite')
@@ -245,15 +259,15 @@ class ProgramItem(Item):
             items.append(ActionItem(txt, self, self.remove_favorite))
         else:
             txt = _('Add favorite')
-            items.append(ActionItem(txt, self, self.add_favorite))    
-        
-        return items    
-    
-    
+            items.append(ActionItem(txt, self, self.add_favorite))
+
+        return items
+
+
     def submenu(self, additional_items=False):
         """
         show a submenu for this item
-        
+
         There are some items, that are only created if 'additional_items'
         is set to TRUE, this items are useful in the TVGuide.
         """
@@ -261,8 +275,8 @@ class ProgramItem(Item):
         # get the item list
         items = self.get_menuitems()
         # create the menu
-        s = Menu(self, items, 
-                 type = 'tv program menu', 
+        s = Menu(self, items,
+                 type = 'tv program menu',
                  reload_func=self.reload_submenu)
         s.submenu = True
         s.infoitem = self
@@ -287,8 +301,8 @@ class ProgramItem(Item):
             msg = _('Scheduling failed: %s') % result
         MessageWindow(msg).show()
         self.get_menustack().back_one_menu()
-                       
-        
+
+
     @kaa.notifier.yield_execution()
     def remove(self):
         """
@@ -329,16 +343,16 @@ class ProgramItem(Item):
         # FIXME: the percent values need to be calculated
         # cmenu.table = (15, 15, 70)
         self.get_menustack().pushmenu(cmenu)
-   
-   
+
+
     def watch_channel(self):
         MessageWindow('Not implemented yet').show()
-        
+
 
     def watch_recording(self):
         MessageWindow('Not implemented yet').show()
 
-    
+
     @kaa.notifier.yield_execution()
     def search_similar(self):
         """
@@ -348,9 +362,9 @@ class ProgramItem(Item):
             # we need the tvserver for this
             MessageWindow(_('TVServer not running')).show()
             return
-        # time tuple representing the future    
+        # time tuple representing the future
         future = (int(time.time()), sys.maxint)
-        # create an empty list for ProgramItems    
+        # create an empty list for ProgramItems
         items = []
         # query the epg database in background
         query_data = kaa.epg.search(title=self.title, time=future)
@@ -361,30 +375,30 @@ class ProgramItem(Item):
         query_data.sort(lambda a,b:cmp(a.start,b.start))
         for prog in query_data:
             items.append(ProgramItem(prog, self))
-        # create the submenu from this        
+        # create the submenu from this
         resmenu = Menu(self.title, items, type = 'tv program menu')
-        self.get_menustack().pushmenu(resmenu)   
-                
+        self.get_menustack().pushmenu(resmenu)
+
 
     def add_favorite(self):
-        """ 
+        """
         Create a new FavoriteItem and open its submenu
         """
         favorite.FavoriteItem(self, self).submenu()
-        
-        
+
+
     def edit_favorite(self):
-        """ 
+        """
         Create a FavoriteItem for a existing favorite
         and open its submenu to edit this item
         """
         favorite.FavoriteItem(self, self.favorite).submenu()
-            
-    
+
+
     def remove_favorite(self):
         """
-        Create a FavoriteItem for a existing favorite 
+        Create a FavoriteItem for a existing favorite
         and delete this favorite.
         """
         favorite.FavoriteItem(self, self.favorite).remove()
-        
+

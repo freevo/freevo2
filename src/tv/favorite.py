@@ -71,7 +71,7 @@ class FavoriteItem(Item):
         self.id = 0
         self.start = float(0)
         self.stop = float(1440*60)-1
-        
+
         if isinstance(fav, ProgramItem):
             #check if already a favorite
             f = tvserver.favorites.get(fav.title, fav.channel, fav.start, fav.stop)
@@ -82,9 +82,9 @@ class FavoriteItem(Item):
                 self.days = [ day ]
                 self.name = self.title = fav.title
                 self.channels = [ fav.channel]
-            else:  
-                # there is already a existing ipc Favorite object 
-                fav = f      
+            else:
+                # there is already a existing ipc Favorite object
+                fav = f
         if isinstance(fav, freevo.ipc.tvserver.Favorite):
             # created with ipc Favorite object
             self.name = self.title = fav.title
@@ -96,31 +96,43 @@ class FavoriteItem(Item):
                 self.start, self.stop = self._str_to_time(t)
 
 
-    def __getitem__(self, key):
+    def get_start(self):
         """
-        return the specific attribute as string or an empty string
+        Return start time as formated unicode string.
         """
-        if key == 'date':
-            if self.days == 'ANY':
-                return 'ANY'
-            else:
-                days = ', '.join(['%s' % DAY_NAMES[d] for d in self.days])
-                return days
-        if key == 'channel':
-            if self.channels == 'ANY':
-                return 'ANY'
-            else:
-                channels = ', '.join(['%s' % chan for chan in self.channels])
-                return channels
-        if key == 'time':
-                return self['start'] + u' - ' + self['stop']
-        if key == 'start':
-            return unicode(time.strftime(config.tv.timeformat,
-                                         time.gmtime(self.start)))
-        if key == 'stop':
-            return unicode(time.strftime(config.tv.timeformat,
-                                         time.gmtime(self.stop)))
-        return Item.__getitem__(self, key)
+        return unicode(time.strftime(config.tv.timeformat, time.localtime(self.start)))
+
+
+    def get_stop(self):
+        """
+        Return stop time as formated unicode string.
+        """
+        return unicode(time.strftime(config.tv.timeformat, time.localtime(self.stop)))
+
+
+    def get_time(self):
+        """
+        Return start time and stop time as formated unicode string.
+        """
+        return self.get_start + u' - ' + self.get_stop()
+
+
+    def get_date(self):
+        """
+        Return day(s) of week as formated unicode string.
+        """
+        if self.days == 'ANY':
+            return _('ANY')
+        return ', '.join(['%s' % DAY_NAMES[d] for d in self.days])
+
+
+    def get_channel(self):
+        """
+        Return channel(s) for this favorite.
+        """
+        if self.channels == 'ANY':
+            return _('ANY')
+        return ', '.join(['%s' % chan for chan in self.channels])
 
 
     def actions(self):
@@ -135,12 +147,12 @@ class FavoriteItem(Item):
         show a submenu for this item
         """
         items = []
-        
+
         if self.new:
             items.append(ActionItem(_('Add favorite'), self, self.add))
         else:
             items.append(ActionItem(_('Remove favorite'), self, self.remove))
-        
+
         items.append(ActionItem(_('Change day'), self, self.change_days))
         items.append(ActionItem(_('Change channel'), self, self.change_channels))
         action = ActionItem(_('Change start time'), self, self.change_time)
@@ -180,8 +192,8 @@ class FavoriteItem(Item):
         if result != tvserver.favorites.SUCCESS:
             text = _('Remove favorite Failed')+(': %s' % result)
         else:
-            text = _('"%s" has been removed from you favorites') % self.title    
-            MessageWindow(text).show()    
+            text = _('"%s" has been removed from you favorites') % self.title
+            MessageWindow(text).show()
         self.get_menustack().back_one_menu()
 
     @kaa.notifier.yield_execution()
@@ -203,7 +215,7 @@ class FavoriteItem(Item):
             action = ActionItem(dayname, self, self.handle_change)
             action.parameter('days', dayname)
             items.append(action)
-            
+
         s = Menu(self, items, type = 'tv favorite menu')
         s.submenu = True
         s.infoitem = self
@@ -214,13 +226,13 @@ class FavoriteItem(Item):
         action = ActionItem('ANY', self, self.handle_change)
         action.parameter('channels', 'ANY')
         items.append(action)
-        
+
         list = kaa.epg.get_channels(sort=True)
         for chan in list:
             action = ActionItem(chan.name, self, self.handle_change)
             action.parameter('channels', chan.name)
             items.append(action)
-            
+
         s = Menu(self, items, type = 'tv favorite menu')
         s.submenu = True
         s.infoitem = self
@@ -242,14 +254,14 @@ class FavoriteItem(Item):
             action = ActionItem(showtime, self, self.handle_change)
             action.parameter(startstop, newtime)
             items.append(action)
-            
+
         s = Menu(self, items, type = 'tv favorite menu')
         s.submenu = True
         s.infoitem = self
         self.get_menustack().pushmenu(s)
 
     def handle_change(self, item, value):
-        
+
         info = None
         infovalue = None
         if item == 'days':
@@ -288,7 +300,7 @@ class FavoriteItem(Item):
 
         if not self.new:
             self.modify([(info, infovalue)])
-            
+
         self.get_menustack().back_one_menu()
 
     def _time_to_str(self):
@@ -299,7 +311,7 @@ class FavoriteItem(Item):
     def _str_to_time(self, t):
         # internal regexp for time format
         _time_re = re.compile('([0-9]*):([0-9]*)-([0-9]*):([0-9]*)')
-        
+
         m = _time_re.match(t).groups()
         start = float(m[0])*3600 + float(m[1])*60
         stop  = float(m[2])*3600 + float(m[3])*60

@@ -76,17 +76,6 @@ class AudioItem(MediaItem):
         return MediaItem.sort(self, mode)
 
 
-    def set_url(self, url):
-        """
-        Sets a new url to the item. Always use this function and not set 'url'
-        directly because this functions also changes other attributes, like
-        filename, mode and network_play
-        """
-        MediaItem.set_url(self, url)
-        if self.url.startswith('cdda://'):
-            self.network_play = False
-
-
     def actions(self):
         """
         return a list of possible actions on this item

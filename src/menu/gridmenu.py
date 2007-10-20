@@ -148,7 +148,7 @@ class GridMenu(Menu):
             else:
                 self.selected = self.choices[self.selected_row][self.selected_col]
 
-        self.selected_id  = self.selected.__id__()
+        self.selected_id  = self.selected.get_id()
 
         # Find Which columns/rows to draw, the next update
         if self.selected_col-self.base_col > self.cols-1:

@@ -43,12 +43,27 @@ mbus.connect('freevo.ipc.tvserver')
 tvserver = freevo.ipc.Instance('freevo').tvserver
 
 class Info(Item):
-    def __getitem__(self, key):
-        if key in ('comingup', 'running'):
-            return getattr(tvserver.recordings, key)
-        if key == 'recordserver':
-            return tvserver.recordings.server
-        return Info.__getitem__(self, key)
+
+    def get_comingup(self):
+        """
+        Return list of recordings scheduled.
+        """
+        return tvserver.recordings.comingup
+
+
+    def get_running(self):
+        """
+        Return list of recordings currently running.
+        """
+        return tvserver.recordings.running
+
+
+    def get_recordserver(self):
+        """
+        Return recordserver ipc connection.
+        """
+        return tvserver.recordings.server
+
 
 
 class TVMenu(MainMenuItem):
@@ -72,7 +87,7 @@ class PluginInterface(MainMenuPlugin):
     """
     Plugin interface to integrate the tv module into Freevo
     """
-        
+
     def items(self, parent):
         """
         return the tv menu

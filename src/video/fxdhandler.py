@@ -111,7 +111,7 @@ def parse_movie(node, parent, listing):
         return None
 
     item = VideoItem(files[0], parent)
-    # Bad hack but works. We can't use the tmp: variables in beacon because
+    # Bad hack but works. We can't use the mem: variables in beacon because
     # multiple items based n the same file can have different info. Or maybe
     # we just ignore this. In that case, the fxdinfo code will be replaced by
     # an in beacon solution.

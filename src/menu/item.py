@@ -65,6 +65,7 @@ class Item(object):
         self.name = u''
         self.description  = ''
         self.info = {}
+        self._mem = {}
         self._image = None
         self.menu = None
         self.parent = None
@@ -86,7 +87,7 @@ class Item(object):
     image = property(_get_image, _set_image, None, 'image object')
 
 
-    def __id__(self):
+    def get_id(self):
         """
         Return a unique id of the item. This id should be the same when the
         item is rebuild later with the same information
@@ -190,29 +191,110 @@ class Item(object):
         return False
 
 
-    def __getitem__(self, attr):
+    def get_name(self):
+        """
+        Return name of the item.
+        """
+        return self.name
+
+
+    def get_cfg(self, var):
+        """
+        Return stored config variable value.
+        """
+        cfg = self.info.get('freevo_config', {})
+        return cfg.get(var)
+
+
+    def get_cache(self, var):
+        """
+        Return stored cache variable value.
+        """
+        # freevo_config attribute in beacon
+        mtime, cache = self.info.get('freevo_cache', ( 0, {} ))
+        if mtime == self.info.get('mtime'):
+            return cache.get(var)
+        # cache not up-to-date, delete it
+        self.info['freevo_cache'] = [ self.info.get('mtime'), {} ]
+        return None
+
+
+    def get(self, attr):
         """
         Return the specific attribute
         """
         if attr[:7] == 'parent(' and attr[-1] == ')' and self.parent:
             return self.parent[attr[7:-1]]
+
         if attr[:4] == 'len(' and attr[-1] == ')':
             value = self[attr[4:-1]]
             if value == None or value == '':
                 return 0
             return len(value)
-        if attr == 'name':
-            return self.name
+
+        if attr in self._mem:
+            # temp memory override
+            return self._mem.get(attr)
+
+        if attr.find(':') > 0:
+            # get function with parameter
+            keys = attr.split(':')
+            func = getattr(self, 'get_' + keys[0], None)
+            if func is not None:
+                return func(*keys[1:])
+        else:
+            # get function without parameter
+            func = getattr(self, 'get_' + attr, None)
+            if func is not None:
+                return func()
+
+        # try beacon
         r = self.info.get(attr)
-        if r in (None, ''):
-            r = getattr(self, attr, None)
-        return r
+        if r not in (None, ''):
+            return r
+        # try item attribute
+        # TODO: is this needed?
+        return getattr(self, attr, None)
+
+
+    def __getitem__(self, attr):
+        """
+        Return the specific attribute
+        """
+        return self.get(attr)
 
 
     def __setitem__(self, key, value):
         """
         set the value of 'key' to 'val'
         """
+        if key.startswith('mem:'):
+            # temp setting only in memory
+            self._mem[key[4:]] = value
+            return
+
+        if key.startswith('cfg:'):
+            # freevo_config attribute in beacon
+            key = key[4:]
+            cfg = self.info.get('freevo_config', {})
+            cfg[key] = value
+            if key in self._mem:
+                # remove mem setting
+                del self._mem[key]
+            # set again to notify beacon
+            self.info['freevo_config'] = cfg
+            return
+
+        if key.startswith('cache:'):
+            # freevo_config attribute in beacon
+            mtime, cache = self.info.get('freevo_cache', ( 0, {} ))
+            if mtime != self.info.get('mtime'):
+                cache = {}
+            cache[key[6:]] = value
+            # set again to notify beacon
+            self.info['freevo_cache'] = [ mtime, cache ]
+            return
+
         self.info[key] = value
 
 

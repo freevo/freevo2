@@ -84,8 +84,7 @@ class MediaItem(Item):
         if self.mode == 'file':
             # The url is based on a file. We can search for images
             # and extra attributes here
-            self.network_play = False
-            self.filename     = self.url[7:]
+            self.filename = self.url[7:]
             self.files.append(self.filename)
 
             # FIXME: this is slow. Maybe handle this in the gui code
@@ -99,15 +98,14 @@ class MediaItem(Item):
         else:
             # Mode is not file, it has to be a network url. Other
             # types like dvd are handled inside the derivated class
-            self.network_play = True
-            self.filename     = ''
+            self.filename = ''
             if not self.name:
                 self.name = self.info.get('title')
             if not self.name:
                 self.name = str_to_unicode(self.url)
 
 
-    def format_time(self, time, hours=False):
+    def _format_time(self, time, hours=False):
         """
         Format time string
         """
@@ -116,93 +114,43 @@ class MediaItem(Item):
         return '%02d:%02d' % (time / 60, time % 60)
 
 
-    def __getitem__(self, attr):
+    def get_length(self, style='clock'):
         """
-        return the specific attribute
+        Return the length of the item as formated unicode string.
         """
-        if attr.startswith('cfg:'):
-            # freevo_config attribute in beacon
-            if not self.info.get('freevo_config'):
-                return None
-            return self['freevo_config'].get(attr[4:])
-
-        if attr.startswith('cache:'):
-            # freevo_config attribute in beacon
-            if not self.info.get('freevo_cache'):
-                return None
-            mtime, cache = self.info.get('freevo_cache')
-            if mtime == self.info.get('mtime'):
-                return cache.get(attr[6:])
-            # cache not up-to-date, delete it
-            self.info['freevo_cache'] = [ self.info.get('mtime'), {} ]
-            return
-            
-        if attr == 'length':
-            try:
-                return self.format_time(self.info.get('length'))
-            except ValueError:
-                return ''
-
-        if attr == 'length:min':
-            try:
+        try:
+            if style == 'clock':
+                return self._format_time(self.info.get('length'))
+            if style == 'min':
                 return '%d min' % (int(self.info.get('length')) / 60)
+            raise AttributeError('unknown length style %s' % style)
+        except ValueError:
+            return ''
+
+
+    def get_elapsed(self, style='clock'):
+        """
+        Return the elapsed time of the item. If style is percent the
+        return value is an integer.
+        """
+        # FIXME: handle elapsed > length
+        if style == 'clock':
+            try:
+                return self._format_time(self.elapsed)
             except ValueError:
-                return ''
-
-        if attr  == 'elapsed':
-            # FIXME: handle elapsed > length
-            return self.format_time(self.elapsed)
-
-        if attr == 'elapsed:percent':
-            if not hasattr(self, 'elapsed'):
-                return 0
+                return None
+        if style == 'percent':
             try:
                 length = int(self.info.get('length'))
+                if not hasattr(self, 'elapsed') or not lengt:
+                    return 0
+                return min(100 * self.elapsed / length, 100)
             except ValueError:
                 return 0
-            if not length:
-                return 0
-            return min(100 * self.elapsed / length, 100)
-
-        if attr in self.fxdinfo:
-            # FIXME: remove this variable and try to make it work using tmp
-            # variables in beacon (see video/fxdhandler.py)
-            return self.fxdinfo.get(attr)
-
-        return Item.__getitem__(self, attr)
+        raise AttributeError('unknown length style %s' % style)
 
 
-    def __setitem__(self, attr, value):
-        """
-        Set attribute to value.
-        """
-        if attr.startswith('cfg:'):
-            # freevo_config attribute in beacon
-            key = attr[4:]
-            if not self.info.get('freevo_config'):
-                self.info['freevo_config'] = {}
-            self.info['freevo_config'][key] = value
-            if self.info.get('tmp:%s' + key):
-                # remove tmp setting
-                self.info['tmp:%s' + key] = None
-            # FIXME: work sround Beacon bug!!!
-            self.info['freevo_config'] = dict(self.info['freevo_config'])
-            return
-
-        if attr.startswith('cache:'):
-            # freevo_config attribute in beacon
-            if not self.info.get('freevo_cache') or \
-                   self.info.get('freevo_cache')[0] != self.info.get('mtime'):
-                self.info['freevo_cache'] = [ self.info.get('mtime'), {} ]
-            self.info['freevo_cache'][1][attr[6:]] = value
-            # FIXME: work sround Beacon bug!!!
-            self.info['freevo_cache'] = self.info['freevo_cache'][:]
-            return
-
-        return Item.__setitem__(self, attr, value)
-
-
-    def __id__(self):
+    def get_id(self):
         """
         Return a unique id of the item. This id should be the same when the
         item is rebuild later with the same informations
@@ -273,7 +221,7 @@ class MediaItem(Item):
         """
         # update value
         dbvar = 'cfg:%s' % var.lower()
-        current = MediaItem.__getitem__(self, dbvar) or 'auto'
+        current = MediaItem.get_cfg(self, var.lower()) or 'auto'
         current = choices[(choices.index(current) + 1) % len(choices)]
         self[dbvar] = current
         # change name
@@ -289,8 +237,7 @@ class MediaItem(Item):
         """
         items = []
         for i, name, values, descr in self.get_configure_items():
-            dbvar = 'cfg:%s' % i.lower()
-            current = MediaItem.__getitem__(self, dbvar) or 'auto'
+            current = MediaItem.get_cfg(self, i.lower()) or 'auto'
             action = ActionItem(name + '\t'  + current, self,
                                 self._set_configure_var, descr)
             action.parameter(var=i, name=name, choices=list(values))

@@ -67,7 +67,7 @@ VIDEO_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + regexp + "[\.\- ]*").split
 
 class VideoItem(MediaItem):
     type = 'video'
-    
+
     def __init__(self, url, parent):
         MediaItem.__init__(self, parent)
         self.user_stop = False
@@ -98,7 +98,7 @@ class VideoItem(MediaItem):
             # get informations for recordings
             show_name = (self.name, '', self.info['episode'], \
                          self.info['subtitle'])
-        elif VIDEO_SHOW_REGEXP_MATCH(self.name) and not self.network_play:
+        elif VIDEO_SHOW_REGEXP_MATCH(self.name):
             # split tv show files based on regexp
             show_name = VIDEO_SHOW_REGEXP_SPLIT(self.name)
             if show_name[0] and show_name[1] and show_name[2] and show_name[3]:
@@ -126,11 +126,10 @@ class VideoItem(MediaItem):
         """
         Sets a new url to the item. Always use this function and not set 'url'
         directly because this functions also changes other attributes, like
-        filename, mode and network_play
+        filename and mode
         """
         MediaItem.set_url(self, url)
         if self.url.startswith('dvd://') or self.url.startswith('vcd://'):
-            self.network_play = False
             if self.info.filename:
                 # dvd on harddisc, add '/' for xine
                 self.url = self.url + '/'
@@ -148,23 +147,28 @@ class VideoItem(MediaItem):
             # dvd iso
             self.mode     = 'dvd'
             self.url      = 'dvd' + self.url[4:] + '/'
-            
+
         # start name parser by setting name to itself
         self.set_name(self.name)
 
 
-    def __getitem__(self, key):
+    def get_geometry(self):
         """
-        return the specific attribute
+        Return width x height of the image or None
         """
-        if key == 'geometry' and self.info['width'] and self.info['height']:
-            return '%sx%s' % (self.info['width'], self.info['height'])
+        if self.get('width') and self.get('height'):
+            return '%sx%s' % (self.get('width'), self.get('height'))
+        return None
 
-        if key == 'aspect' and self.info['aspect']:
-            aspect = str(self.info['aspect'])
+
+    def get_aspect(self):
+        """
+        Return aspect as string or None if unknown
+        """
+        if key == 'aspect' and self.info.get('aspect'):
+            aspect = str(self.info.get('aspect'))
             return aspect[:aspect.find(' ')].replace('/', ':')
-
-        return MediaItem.__getitem__(self, key)
+        return None
 
 
     # ------------------------------------------------------------------------

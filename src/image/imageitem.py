@@ -48,7 +48,7 @@ class ImageItem(MediaItem):
     An item for image files
     """
     type = 'image'
-    
+
     def __init__(self, url, parent, duration = config.image.viewer.duration):
         MediaItem.__init__(self, parent)
         self.user_stop = False
@@ -57,19 +57,13 @@ class ImageItem(MediaItem):
         self.duration = duration
 
 
-    def __getitem__(self, key):
+    def get_geometry(self):
         """
-        Return the specific attribute as string or an empty string
+        Return width x height of the image or None
         """
-        if key == 'geometry':
-            if self['width'] and self['height']:
-                return '%sx%s' % (self['width'], self['height'])
-            return ''
-
-        # if key == 'date':
-        # date could be time.strptime(t, '%Y:%m:%d %H:%M:%S')
-
-        return MediaItem.__getitem__(self, key)
+        if self.get('width') and self.get('height'):
+            return '%sx%s' % (self.get('width'), self.get('height'))
+        return None
 
 
     def actions(self):

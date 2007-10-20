@@ -82,7 +82,7 @@ class InfoText(CanvasContainer):
 
     def __getattr(self, attr):
         """
-        wrapper for __getitem__ to return the attribute as string or
+        wrapper for item.get to return the attribute as string or
         an empty string if the value is 'None'
         """
         if attr[:4] == 'len(' and attr[-1] == ')':
