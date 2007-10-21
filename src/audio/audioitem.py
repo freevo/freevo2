@@ -37,6 +37,7 @@ __all__ = [ 'AudioItem' ]
 # python imports
 import os
 import logging
+import time
 
 # kaa imports
 from kaa.strutils import str_to_unicode

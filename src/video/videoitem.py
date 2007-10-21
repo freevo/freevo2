@@ -40,6 +40,7 @@ import os
 import copy
 import logging
 import re
+import time
 
 # kaa imports
 from kaa.strutils import unicode_to_str, str_to_unicode
