@@ -104,8 +104,10 @@ class Player(Application):
 
         # Open media item and start playback
         self.player.open(self.item.url)
-        self.player.signals['end'].connect_once(PLAY_END.post, self.item)
-        self.player.signals['start'].connect_once(PLAY_START.post, self.item)
+        event = Event(PLAY_END, handler=self.eventhandler)
+        self.player.signals['end'].connect_once(event.post, self.item)
+        event = Event(PLAY_START, handler=self.eventhandler)
+        self.player.signals['start'].connect_once(event.post, self.item)
         self.player.play()
 
 
