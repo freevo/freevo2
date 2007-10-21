@@ -327,6 +327,7 @@ class DirItem(Playlist):
         return
 
 
+    @kaa.notifier.yield_execution()
     def browse(self):
         """
         build the items for the directory
@@ -351,12 +352,10 @@ class DirItem(Playlist):
 
         if self.query is None:
             self.query = kaa.beacon.query(parent=self.info)
+            if not self.query.valid:
+                yield self.query.wait()
             self.query.signals['changed'].connect_weak(self.browse)
             self.query.monitor()
-            if not self.query.valid:
-                # the changed signal will be called when the listing
-                # is ready and this will trigger browse again.
-                return
 
         listing = self.query.get(filter='extmap')
 
