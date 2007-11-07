@@ -105,6 +105,17 @@ class ProgramItem(Item):
             self.genre = ''
             # TODO: add ratings support
             self.rating = ''
+            
+        # check if this is a recording
+        self.scheduled = tvserver.recordings.get(self.channel,
+                                                 self.start,
+                                                 self.stop)
+        # check if this is a favorite
+        self.favorite = tvserver.favorites.get(self.title,
+                                               self.channel,
+                                               self.start,
+                                               self.stop)
+       
 
     def __unicode__(self):
         """
@@ -159,7 +170,7 @@ class ProgramItem(Item):
         """
         Return start time and stop time as formated unicode string.
         """
-        return self.get_start + u' - ' + self.get_stop()
+        return self.get_start() + u' - ' + self.get_stop()
 
 
     def get_date(self):
@@ -200,16 +211,6 @@ class ProgramItem(Item):
         """
         create a list of actions for the submenu
         """
-
-        # check if this is a recording
-        self.scheduled = tvserver.recordings.get(self.channel,
-                                                 self.start,
-                                                 self.stop)
-        # check if this is a favorite
-        self.favorite = tvserver.favorites.get(self.title,
-                                               self.channel,
-                                               self.start,
-                                               self.stop)
 
         # empty item list
         items = []
@@ -297,6 +298,10 @@ class ProgramItem(Item):
             result = result()
         if result == tvserver.recordings.SUCCESS:
             msg = _('"%s" has been scheduled for recording') % self.title
+            #reload scheduled
+            self.scheduled = tvserver.recordings.get(self.channel,
+                                                     self.start,
+                                                     self.stop)
         else:
             msg = _('Scheduling failed: %s') % result
         MessageWindow(msg).show()
@@ -314,6 +319,10 @@ class ProgramItem(Item):
             result = result()
         if result == tvserver.recordings.SUCCESS:
             msg = _('"%s" has been removed') % self.title
+            #reload scheduled
+            self.scheduled = tvserver.recordings.get(self.channel,
+                                                     self.start,
+                                                     self.stop)
         else:
             msg = _('Removing failed: %s') % result
         MessageWindow(msg).show()
@@ -385,6 +394,11 @@ class ProgramItem(Item):
         Create a new FavoriteItem and open its submenu
         """
         favorite.FavoriteItem(self, self).submenu()
+        # Reload favorite
+        self.favorite = tvserver.favorites.get(self.title,
+                                               self.channel,
+                                               self.start,
+                                               self.stop)
 
 
     def edit_favorite(self):
@@ -393,6 +407,11 @@ class ProgramItem(Item):
         and open its submenu to edit this item
         """
         favorite.FavoriteItem(self, self.favorite).submenu()
+        # Reload favorite
+        self.favorite = tvserver.favorites.get(self.title,
+                                               self.channel,
+                                               self.start,
+                                               self.stop)
 
 
     def remove_favorite(self):
@@ -401,4 +420,9 @@ class ProgramItem(Item):
         and delete this favorite.
         """
         favorite.FavoriteItem(self, self.favorite).remove()
+        # Reload favorite
+        self.favorite = tvserver.favorites.get(self.title,
+                                               self.channel,
+                                               self.start,
+                                               self.stop)
 

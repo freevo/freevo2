@@ -178,6 +178,21 @@ class GridMenu(Menu):
         except (IndexError, KeyError):
             return None
 
+    def get_item_state(self, row, col):
+        """
+        Return the state for this item.
+        """
+        if self.advanced_mode:
+            if self.selected == self.get_item(row, col)[1]:
+                return 'selected'
+            else:
+                return 'default'
+        else:
+            if self.selected == self.get_item(row, col):
+                return 'selected'
+            else:
+                return 'default'
+            
 
     def get_column_name(self, col):
         """

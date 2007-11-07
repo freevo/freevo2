@@ -597,7 +597,7 @@
             <screen layout="screen" x="0" y="0" width="800" height="600"/>
             <title visible="no"/>
             <info layout="tv info" x="10" y="90" width="780" height="140"/>
-            <grid layout="grid" x="10" y="240" width="780" height="350">
+            <grid layout="tv grid" x="10" y="240" width="780" height="350">
                 <image x="765" y="240" width="32" height="32" label="uparrow"
 	            filename="up.png"/>
                 <image x="765" y="max-32" width="32" height="32" label="downarrow" 
@@ -606,6 +606,36 @@
                 <image width="16" height="16" label="rightarrow" filename="right.png"/>
             </grid>
         </menuset>
+
+        <!-- default tv grid area -->
+		<layout label="tv grid">
+		    <content type="text" spacing="0">
+			<item type="row" font="item" width="80">
+			    <rectangle bgcolor="0x88000066" size="1" color="0x000000" x="-5" y="-5"
+				width="max+10" height="max+10"/>
+			</item>
+			<item type="column" font="item" width="175">
+			    <rectangle bgcolor="0x88000066" size="1" color="0x000000" x="-5" y="-5"
+				width="max+10" height="max+10"/>
+			</item>
+			<item type="default" font="item">
+			    <rectangle bgcolor="0xff000000" size="1" color="0x000000" x="-5"
+				y="-5" width="max+10" height="max+10"/>
+			</item>
+			<item type="selected" font="selected">
+			    <rectangle bgcolor="selection" size="1" color="0x000000" x="-5"
+				y="-5" width="max+10" height="max+10"/>
+			</item>
+			<item type="scheduled" font="selected">
+			    <rectangle bgcolor="0x14ba05" size="1" color="0x000000" x="-5"
+				y="-5" width="max+10" height="max+10"/>
+			</item>
+			<item type="recording" font="selected">
+			    <rectangle bgcolor="0xba1405" size="1" color="0x000000" x="-5"
+				y="-5" width="max+10" height="max+10"/>
+			</item>
+		    </content>
+		</layout>
 
         <!-- GUIDE  -->
 

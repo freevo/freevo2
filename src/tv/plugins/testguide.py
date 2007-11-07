@@ -103,11 +103,27 @@ class TVGuide2(GridMenu):
         Return the data for that col, row.
         """
         try:
-            item = self.grid[self.base_row+row][col]
+            item = self.choices[self.base_row+row][col]
         except:
             return None
         return item
 
+    def get_item_state(self, row, col):
+        """
+        Return the state for this item
+        """
+        item = self.get_item(row, col)[1]
+        if self.selected == item:
+            return 'selected'
+        elif item.scheduled:
+            if item.scheduled.status in ('conflict', 'scheduled'):
+                return 'scheduled'
+            elif item.scheduled.status == 'recording':
+                return 'recording'
+            else:
+                return 'default'
+        else:
+            return 'default'
         
     @kaa.notifier.yield_execution()
     def update(self):
@@ -192,10 +208,10 @@ class TVGuide2(GridMenu):
         """
         Select program for the new row
         """
-        for program in self.grid[self.selected_row]:
+        for program in self.choices[self.selected_row]:
             size, data = program
             if data.start <= self.selected_start_time and data.stop > self.selected_start_time:
-                self.select(row=self.selected_row, col=self.grid[self.selected_row].index(program))
+                self.select(row=self.selected_row, col=self.choices[self.selected_row].index(program))
 
     def eventhandler(self, event):
         handled = False

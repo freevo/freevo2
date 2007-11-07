@@ -247,6 +247,16 @@ class GridArea(Area):
         menu     = self.menu
         settings = self.settings
 
+        if not len(menu.choices):
+            if not self.objects:
+                self.clear()
+                t = _('This directory is empty')
+                self.objects.append(self.drawstring(t, settings.font,
+                                                     settings,
+                                                     settings.x + settings.spacing,
+                                                     settings.y + settings.spacing))
+            return
+
         if menu.update_view:
             menu.update_view = False
             # layout change, clean everything
@@ -317,10 +327,13 @@ class GridArea(Area):
                         else:
                             data = item
                             width = self.col_width
+                        #Item layout
                         val = self.default_val
-                        #is the item selected?
-                        if data == menu.selected:
+                        layout = self.menu.get_item_state(draw_row, draw_col)
+                        if layout == 'selected':
                             val = self.selected_val
+                        elif self.settings.types.has_key(layout):
+                            val = self.settings.types[layout]
                         str = data.name
                         if x0 == col_x:
                             # draw left arrow
