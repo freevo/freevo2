@@ -330,13 +330,9 @@ class DirItem(Playlist):
     @kaa.notifier.yield_execution()
     def browse(self):
         """
-        build the items for the directory
+        Show the items in the directory in the menu
         """
         # FIXME: check for password
-
-        play_items = []
-        dir_items  = []
-        pl_items   = []
 
         # Delete possible skin settings
         # FIXME: This is a very bad handling, maybe signals?
@@ -350,12 +346,39 @@ class DirItem(Playlist):
 	    MessageWindow(_('Directory does not exist')).show()
             return
 
-        if self.query is None:
-            self.query = kaa.beacon.query(parent=self.info)
-            if not self.query.valid:
-                yield self.query.wait()
-            self.query.signals['changed'].connect_weak(self.browse)
-            self.query.monitor()
+        self.item_menu = None
+        self.query = kaa.beacon.query(parent=self.info)
+        if not self.query.valid:
+            yield self.query.wait()
+        self.query.signals['changed'].connect_weak(self._update_listing)
+        self.query.monitor()
+
+        items = self._get_items()
+        item_menu = menu.Menu(self.name, items, type = self.menu_type)
+        item_menu.autoselect = self['cfg:autoplay_single_item']
+        self.get_menustack().pushmenu(item_menu)
+        self.item_menu = weakref(item_menu)
+
+
+    def _update_listing(self):
+        """
+        Update the listing.
+        """
+        if self.item_menu:
+            # not in the stack anymore
+            self.query = None
+        else:
+            # update menu
+            self.item_menu.set_items(self._get_items())
+
+
+    def _get_items(self):
+        """
+        Build the items for the directory
+        """
+        play_items = []
+        dir_items  = []
+        pl_items   = []
 
         listing = self.query.get(filter='extmap')
 
@@ -378,6 +401,7 @@ class DirItem(Playlist):
             dir_items.append(d)
 
         # remember listing
+        # FIXME: WHY?
         self.listing = listing
 
         # handle hide_played
@@ -446,26 +470,7 @@ class DirItem(Playlist):
             pl.autoplay = True
             items = [ pl ] + items
 
-
-        #
-        # action
-        #
-
-        if self.item_menu is not None:
-            # we could update it
-            if self.item_menu:
-                # still in the stack
-                self.item_menu.set_items(items)
-                return
-            # weakref is gone
-            self.query = None
-            return
-
-        # normal menu build
-        item_menu = menu.Menu(self.name, items, type = self.menu_type)
-        item_menu.autoselect = self['cfg:autoplay_single_item']
-        self.get_menustack().pushmenu(item_menu)
-        self.item_menu = weakref(item_menu)
+        return items
 
 
     def get_configure_items(self):
