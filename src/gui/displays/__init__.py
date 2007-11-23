@@ -110,9 +110,7 @@ def remove(screen):
     global display_stack
     animation.render().killall()
     if screen != display_stack[-1]:
-        log.error('removing screen not on top')
-        print screen
-        print display_stack
+        log.error('removing screen not on top: %s of %s', screen, display_stack)
         raise AttributeError
 
     display_stack = display_stack[:-1]

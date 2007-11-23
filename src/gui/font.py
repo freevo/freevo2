@@ -100,8 +100,8 @@ class Font(object):
                 except IOError:
                     # not good
                     if not name in font_warning:
-                        print 'WARNING: No alternate found in the alias list!'
-                        print 'Falling back to default font, this looks ugly'
+                        log.error('WARNING: No alternate found in the alias list!')
+                        log.error('Falling back to default font, this looks ugly')
                         font_warning.append(name)
                     name = DEFAULT_FONT
                     return kaa.mevas.imagelib.load_font(name, ptsize)
