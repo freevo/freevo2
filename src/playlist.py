@@ -124,15 +124,6 @@ class Playlist(MediaItem, ItemList):
         return playlist
 
 
-    def __len__(self):
-        """
-        Return length of playlist.
-        """
-        if not self._playlist_valid:
-            self._playlist_create_items()
-        return len(self.choices)
-
-
     def _read_pls(self, plsname, content):
         """
         This is the (pls) playlist reading function.

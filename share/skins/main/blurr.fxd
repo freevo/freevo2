@@ -193,12 +193,12 @@
                 <item type="playlist">
                     <text font="info label">Playlist</text>
                     <newline/>
-                    <if expression="len(playlist)>0">
-                        <text font="info value" expression="len(playlist)"/>
+                    <if expression="len(choices)>0">
+                        <text font="info value" expression="len(choices)"/>
                         <text font="info value"> items in this playlist</text>
                         <newline/>
                     </if>
-                    <if expression="len(playlist)==0">
+                    <if expression="len(choices)==0">
                         <text font="info value">This playlist is empty!</text>
                         <newline/>
                     </if>
@@ -321,11 +321,11 @@
             <content x="0" y="0" type="text" spacing="20" font="default">
                 <!-- audio dir -->
                 <item type="default">
-                    <if expression="display_type == 'audio' and artist">
+                    <if expression="artist">
                         <text font="info tagline" expression="artist"/>
                         <newline/>
                     </if>
-                    <if expression="display_type == 'audio' and album">
+                    <if expression="album">
                         <text font="info value" expression="album" mode="soft" />
                         <newline/>
                     </if>
@@ -334,18 +334,18 @@
                         <newline/>
                     </if>
 		    
-                    <if expression="display_type == 'audio' and year">
+                    <if expression="year">
                         <if expression="album or artist">
                             <text font="info value" expression="year"/>
                             <newline/>
                         </if>
                     </if>
-                    <if expression="display_type == 'audio' and length">
+                    <if expression="length">
                         <text font="info value" expression="length"/>
                         <newline/>
                     </if>
                     <if expression="type == 'playlist'">
-                        <text font="info value" expression="len(playlist)"/>
+                        <text font="info value" expression="len(choices)"/>
                         <text font="info value"> Items</text>
                         <newline/>
                     </if>
@@ -484,7 +484,7 @@
                 <item type="playlist">
                     <text font="info tagline" width="max" expression="name"/>
                     <newline/>
-                    <text font="info value" expression="len(playlist)"/>
+                    <text font="info value" expression="len(choices)"/>
                     <text font="info value"> Items</text>
                     <!-- other values are num_play_items and num_dir_items -->
                 </item>
