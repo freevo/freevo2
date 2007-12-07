@@ -37,5 +37,5 @@
 #
 # -----------------------------------------------------------------------------
 
-from keymap import KEYBOARD_MAP, REMOTE_MAP, DIRECTFB_MAP
+from keymap import KEYBOARD_MAP
 from eventmap import EVENTMAP

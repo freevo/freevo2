@@ -54,8 +54,7 @@ class PluginInterface(InputPlugin):
 
     def plugin_activate(self, level):
         """
-        Create eventmap on activate. FIXME: changing the setting during
-        runtime has no effect.
+        Active X11 input layer
         """
         InputPlugin.plugin_activate(self, level)
         gui.get_display()._window.signals["key_press_event"].connect(self.handle)

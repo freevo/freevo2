@@ -52,8 +52,7 @@ class PluginInterface(InputPlugin):
 
     def plugin_activate(self, level):
         """
-        Create eventmap on activate. FIXME: changing the setting during
-        runtime has no effect.
+        Active SDL input layer
         """
         InputPlugin.plugin_activate(self, level)
         # define the keymap
