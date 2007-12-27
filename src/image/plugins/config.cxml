@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<config name="image.plugin">
+    <desc lang="en">image plugins</desc>
+    <group name="calendar" plugin="10">
+        <desc>Show image files by date</desc>
+    </group>
+</config>
