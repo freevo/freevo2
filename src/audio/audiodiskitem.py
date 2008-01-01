@@ -35,6 +35,7 @@ __all__ = [ 'AudioDiskItem' ]
 
 # Python imports
 import os
+import logging
 
 # Freevo imports
 from freevo.ui import config
@@ -44,6 +45,8 @@ from audioitem import AudioItem
 from freevo.ui.playlist import Playlist
 from freevo.ui.directory import DirItem
 
+# get logging object
+log = logging.getLogger('audio')
 
 class AudioDiskItem(Playlist):
     """
@@ -82,7 +85,7 @@ class AudioDiskItem(Playlist):
         items = []
 
         # random playlist (only active for audio)
-        if 'audio' in config.directory.playlist.random and len(play_items) > 1:
+        if config.directory.add_random_playlist and len(play_items) > 1:
             pl = Playlist(_('Random playlist'), play_items, self, random=True)
             pl.autoplay = True
             items += [ pl ]
