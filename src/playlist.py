@@ -113,12 +113,11 @@ class Playlist(MediaItem, ItemList):
         This is the (m3u) playlist reading function.
         """
         pl_lines = [ l for l in content if not l.startswith('#') ]
-        curdir = os.path.split(plsname)[0]
+        curdir = os.path.dirname(plsname)
 
         playlist = []
         for line in pl_lines:
-            if line.endswith('\r\n'):
-                line = line.replace('\\', '/') # Fix MSDOS slashes
+            line = line.replace('\\', '/').strip()
             if os.path.exists(os.path.join(curdir,line)):
                 playlist.append(os.path.join(curdir,line))
         return playlist
@@ -131,17 +130,16 @@ class Playlist(MediaItem, ItemList):
         Arguments: plsname  - the playlist filename
         Returns:   The list of interesting lines in the playlist
         """
-        pl_lines = filter(lambda l: l[0:4] == 'File', content)
+        pl_lines = [ l for l in content if l.startswith('File') ]
         for pos, line in enumerate(pl_lines):
             numchars=line.find("=")+1
             if numchars > 0:
                 pl_lines[pos] = line[numchars:]
-        curdir = os.path.split(plsname)[0]
+        curdir = os.path.dirname(plsname)
 
         playlist = []
         for line in pl_lines:
-            if line.endswith('\r\n'):
-                line = line.replace('\\', '/') # Fix MSDOS slashes
+            line = line.replace('\\', '/').strip()
             if os.path.exists(os.path.join(curdir,line)):
                 playlist.append(os.path.join(curdir,line))
         return playlist
@@ -162,9 +160,9 @@ class Playlist(MediaItem, ItemList):
             self.set_url(self._playlist)
             log.info('create playlist for %s' % self._playlist)
             try:
-                f=open(self._playlist, "r")
+                f = open(self._playlist)
                 content = map(lambda l: l.strip(' \n\r'), f.readlines())
-                f.close
+                f.close()
                 if content and content[0].find("[playlist]") > -1:
                     self._playlist = self._read_pls(self._playlist, content)
                 else:
