@@ -35,9 +35,9 @@ __all__ = [ 'play', 'stop' ]
 import logging
 
 # kaa imports
+import kaa
 import kaa.utils
 import kaa.popcorn
-import kaa.notifier
 
 # Freevo imports
 from freevo.ui.event import *
@@ -57,14 +57,14 @@ class Player(Application):
         Application.__init__(self, 'audioplayer', 'audio', capabilities)
         self.player = kaa.popcorn.Player()
         self.player.signals['failed'].connect_weak(self._play_failed)
-        self.elapsed_timer = kaa.notifier.WeakTimer(self.elapsed)
+        self.elapsed_timer = kaa.WeakTimer(self.elapsed)
 
 
     def play(self, item):
         """
         play an item
         """
-        retry = kaa.notifier.Callback(self.play, item)
+        retry = kaa.Callback(self.play, item)
         if not self.status in (STATUS_IDLE, STATUS_STOPPED):
             # Already running, stop the current player by sending a STOP
             # event. The event will also get to the playlist behind the
@@ -75,7 +75,7 @@ class Player(Application):
             self.signals['stop'].connect_once(retry)
             return True
 
-        if not kaa.notifier.running:
+        if not kaa.main.is_running():
             # Freevo is in shutdown mode, do not start a new player, the old
             # only stopped because of the shutdown.
             return False
@@ -86,7 +86,7 @@ class Player(Application):
         if blocked == False:
             log.error("Can't get Audio resource.")
             return False
-        if isinstance(blocked, kaa.notifier.InProgress):
+        if isinstance(blocked, kaa.InProgress):
             blocked.connect(retry)
             return True
 
@@ -193,7 +193,7 @@ class Player(Application):
         """
         return True
 
-    @kaa.notifier.yield_execution()
+    @kaa.yield_execution()
     def suspend(self):
         """
         Release the audio resource that others can use it.
@@ -206,11 +206,11 @@ class Player(Application):
         # FIXME: what happens if we send pause() the same time the file
         # is finished? This would create a race condition.
         self.player.pause()
-        yield kaa.notifier.YieldCallback(self.player.signals['pause'])
+        yield kaa.YieldCallback(self.player.signals['pause'])
         self.free_resources()
 
     
-    @kaa.notifier.yield_execution()
+    @kaa.yield_execution()
     def resume(self):
         """
         Resume playing the audio, at the position before.
@@ -225,10 +225,10 @@ class Player(Application):
             # FIXME: what to do in this case?
             log.error('unable to get AUDIO ressource')
             yield False
-        if isinstance(blocked, kaa.notifier.InProgress):
+        if isinstance(blocked, kaa.InProgress):
             yield blocked
         self.player.resume()
-        yield kaa.notifier.YieldCallback(self.player.signals['play'])
+        yield kaa.YieldCallback(self.player.signals['play'])
 
 
 # create singleton object

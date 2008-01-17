@@ -35,9 +35,9 @@ __all__ = [ 'play', 'stop' ]
 import logging
 
 # kaa imports
+import kaa
 import kaa.utils
 import kaa.popcorn
-import kaa.notifier
 
 # Freevo imports
 from freevo.ui.event import *
@@ -58,14 +58,14 @@ class Player(Application):
         self.player = kaa.popcorn.Player()
         self.player.set_window(self.engine.get_window())
         self.player.signals['failed'].connect_weak(self._play_failed)
-        self.elapsed_timer = kaa.notifier.WeakTimer(self.elapsed)
+        self.elapsed_timer = kaa.WeakTimer(self.elapsed)
 
 
     def play(self, item, player=None):
         """
         play an item
         """
-        retry = kaa.notifier.Callback(self.play, item, player)
+        retry = kaa.Callback(self.play, item, player)
         retry.set_ignore_caller_args(True)
         if not self.status in (STATUS_IDLE, STATUS_STOPPED):
             # Already running, stop the current player by sending a STOP
@@ -77,7 +77,7 @@ class Player(Application):
             self.signals['stop'].connect_once(retry)
             return True
 
-        if not kaa.notifier.running:
+        if not kaa.main.is_running():
             # Freevo is in shutdown mode, do not start a new player, the old
             # only stopped because of the shutdown.
             return False
@@ -89,7 +89,7 @@ class Player(Application):
         if blocked == False:
             log.error("Can't get resource AUDIO, VIDEO")
             return False
-        if isinstance(blocked, kaa.notifier.InProgress):
+        if isinstance(blocked, kaa.InProgress):
             blocked.connect(retry)
             return True
         

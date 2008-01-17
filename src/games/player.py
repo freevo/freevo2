@@ -38,8 +38,8 @@ __all__ = [ 'play', 'stop']
 import logging
 
 # kaa imports
+import kaa
 import kaa.utils
-import kaa.notifier
 
 # freevo imports
 from freevo.ui.event import *
@@ -65,7 +65,7 @@ class GamesPlayer(Application):
         if player == None:
             return False
         self.player = player
-        retry = kaa.notifier.Callback(self.play, item, player)
+        retry = kaa.Callback(self.play, item, player)
         if not self.status in (STATUS_IDLE, STATUS_STOPPED):
             # Already running, stop the current player by sending a STOP
             # event. The event will also get to the playlist behind the
@@ -76,7 +76,7 @@ class GamesPlayer(Application):
             self.signals['stop'].connect_once(self.play, item)
             return True
 
-        if not kaa.notifier.running:
+        if not kaa.main.is_running():
             # Freevo is in shutdown mode, do not start a new player, the old
             # only stopped because of the shutdown.
             return False
@@ -88,7 +88,7 @@ class GamesPlayer(Application):
         if blocked == False:
             log.error("Can't get resource AUDIO, VIDEO, JOYSTICK")
             return False
-        if isinstance(blocked, kaa.notifier.InProgress):
+        if isinstance(blocked, kaa.InProgress):
             blocked.connect(retry)
             return True
 
