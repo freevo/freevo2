@@ -320,7 +320,7 @@ try:
     del splash
 
     # start main loop
-    kaa.main.start()
+    kaa.main.run()
 
 except SystemExit:
     kaa.notifier.shutdown()
