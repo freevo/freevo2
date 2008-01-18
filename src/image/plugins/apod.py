@@ -107,7 +107,7 @@ class ApodMainMenuItem(Item):
 
         async = kaa.ThreadCallback(self._fetch_picture_thread)()
         async.connect(self._fetch_picture_finished, box)
-        async.exception_handler.connect(self._fetch_picture_error, box)
+        async.exception.connect(self._fetch_picture_error, box)
 
 
     def _fetch_picture_thread(self):
