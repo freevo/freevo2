@@ -36,7 +36,7 @@ import os
 import logging
 
 # kaa imports
-import kaa.notifier
+import kaa
 from kaa.strutils import to_unicode
 
 # freevo imports
@@ -109,7 +109,7 @@ class ImageViewer(Application):
         self.filename    = None
         self.rotation    = None
         self.zomm        = None
-        self.sshow_timer = kaa.notifier.OneShotTimer(self._next)
+        self.sshow_timer = kaa.OneShotTimer(self._next)
         self.signals['stop'].connect_weak(self._cleanup)
 
 

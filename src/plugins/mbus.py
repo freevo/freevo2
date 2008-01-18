@@ -1,5 +1,5 @@
 # kaa imports
-from kaa.notifier import EventHandler, Timer
+import kaa
 from kaa.strutils import unicode_to_str
 import kaa.beacon
 
@@ -19,8 +19,8 @@ log = logging.getLogger('mbus')
 class PluginInterface(plugin.Plugin):
     def __init__(self):
         plugin.Plugin.__init__(self)
-        self.__events = EventHandler(self.eventhandler)
-        self.__timer = Timer(self.update_idle_time)
+        self.__events = kaa.EventHandler(self.eventhandler)
+        self.__timer = kaa.Timer(self.update_idle_time)
         self.idle_time = 0
 
         mbus = freevo.ipc.Instance()

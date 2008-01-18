@@ -35,8 +35,8 @@ import sys
 import time
 import logging
 
+import kaa
 import kaa.epg
-import kaa.notifier
 
 # freevo imports
 from freevo.ui.event import *
@@ -83,9 +83,9 @@ class TVGuide2(GridMenu):
         # current channel is the first one
         self.channels = kaa.epg.get_channels(sort=True)
         # FIXME: make it work without step()
-        if isinstance(self.channels, kaa.notifier.InProgress):
+        if isinstance(self.channels, kaa.InProgress):
             while not self.channels.is_finished:
-                kaa.notifier.step()
+                kaa.main.step()
             self.channels = self.channels()
 
         self.query_start_time = self.viewed_time
@@ -125,7 +125,7 @@ class TVGuide2(GridMenu):
         else:
             return 'default'
         
-    @kaa.notifier.yield_execution()
+    @kaa.yield_execution()
     def update(self):
         """
         update the guide information

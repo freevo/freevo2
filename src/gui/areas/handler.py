@@ -49,7 +49,7 @@ import time
 import logging
 log = logging.getLogger('gui')
 
-import kaa.notifier
+import kaa
 
 # freevo imports
 from kaa.weakref import weakref
@@ -106,7 +106,7 @@ class Handler(object):
             a.set_screen(weakref(self))
             
         self.display_style['menu'] = 0
-        kaa.notifier.signals['shutdown'].connect_weak(self._cleanup_on_shutdown)
+        kaa.main.signals['shutdown'].connect_weak(self._cleanup_on_shutdown)
         
 
     def set_background(self, col):

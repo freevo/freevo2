@@ -36,7 +36,7 @@
 import logging
 
 # kaa imports
-from kaa.notifier import OneShotTimer, EventHandler
+import kaa
 
 # freevo imports
 from freevo import plugin
@@ -64,10 +64,10 @@ class PluginInterface(plugin.Plugin):
         init the osd
         """
         plugin.Plugin.__init__(self)
-        EventHandler(self.eventhandler).register([ OSD_MESSAGE ])
+        kaa.EventHandler(self.eventhandler).register([ OSD_MESSAGE ])
         self.message = ''
         self.gui_object = None
-        self.hide_timer = OneShotTimer(self.hide)
+        self.hide_timer = kaa.OneShotTimer(self.hide)
 
 
     def update(self):

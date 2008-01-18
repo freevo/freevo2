@@ -31,9 +31,6 @@
 # python imports
 import logging
 
-# kaa imports
-from kaa.notifier import Callback
-
 # freevo imports
 from freevo.ui.menu import Action, ItemPlugin
 from freevo.ui.application import ConfirmWindow

@@ -32,7 +32,7 @@
 __all__ = [ 'Button' ]
 
 # kaa imports
-from kaa.notifier import Signal
+import kaa
 from kaa.mevas.image import CanvasImage
 
 # gui imports
@@ -49,7 +49,7 @@ class Button(CanvasImage):
         self.text = text
         self.set_style(style)
         self.set_pos(pos)
-        self.signal = Signal()
+        self.signal = kaa.Signal()
 
     def set_style(self, style):
         """

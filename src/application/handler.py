@@ -42,7 +42,7 @@ import sys
 import logging
 
 # kaa imports
-import kaa.notifier
+import kaa
 
 # freevo imports
 from freevo.ui.event import TOGGLE_APPLICATION
@@ -74,10 +74,10 @@ class Handler(object):
         self.eventmap = None
         
         # callback for events
-        kaa.notifier.EventHandler(self.handle).register()
+        kaa.EventHandler(self.handle).register()
 
         # Signals
-        self.signals = { 'changed': kaa.notifier.Signal() }
+        self.signals = { 'changed': kaa.Signal() }
 
 
     def set_focus(self):
@@ -210,13 +210,12 @@ class Handler(object):
             result = self.applications[-1].eventhandler(event=event)
 
         # This function has to return True or it will be deleted from
-        # the kaa.notifier eventhandler. The kaa.notifier event code
-        # is not aware of InProgress objects so if result is an InProgress
-        # object we wait here using step(). This is ugly and needs to be
-        # fixed.
-        if isinstance(result, kaa.notifier.InProgress):
+        # the kaa eventhandler. The kaa event code is not aware of
+        # InProgress objects so if result is an InProgress object we wait
+        # here using step(). This is ugly and needs to be fixed.
+        if isinstance(result, kaa.InProgress):
             while not result.is_finished:
-                kaa.notifier.step()
+                kaa.main.step()
 
 # create the global object
 handler = Handler()

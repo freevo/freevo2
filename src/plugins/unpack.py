@@ -38,7 +38,7 @@
 import os
 
 # kaa imports
-import kaa.notifier
+import kaa
 
 # freevo imports
 from freevo.ui.menu import Item, Action, MediaPlugin
@@ -78,7 +78,7 @@ class ArchiveItem(Item):
                        replace('__dirname__', os.path.dirname(self.fname)))
         self.pop = TextWindow(text=_('unpacking...'))
         self.pop.show()
-        child = kaa.notifier.Process(app)
+        child = kaa.Process(app)
         child.start().connect(self.finished)
 
 

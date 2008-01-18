@@ -27,8 +27,8 @@
 
 import re
 
+import kaa
 from kaa.strutils import unicode_to_str
-import kaa.notifier
 
 from freevo import plugin
 from freevo.ui import application
@@ -83,7 +83,7 @@ class PluginInterface( plugin.Plugin ):
         self.lcd.signals['connected'].connect_once(self._connected)
         self.running = False
         self.current = []
-        self.timer = kaa.notifier.Timer(self.update)
+        self.timer = kaa.Timer(self.update)
 
 
     def _connected(self, width, height):
@@ -114,7 +114,7 @@ class PluginInterface( plugin.Plugin ):
         self.lines = l
         self.columns = c
 
-        kaa.notifier.EventHandler(self.eventhandler).register()
+        kaa.EventHandler(self.eventhandler).register()
         application.signals['changed'].connect(self.set_application)
         self.set_application(application.get_active())
 
@@ -157,7 +157,7 @@ class PluginInterface( plugin.Plugin ):
 
         item = self.playitem
 
-        cb = kaa.notifier.Callback(replace, locals())
+        cb = kaa.Callback(replace, locals())
 
         for w in self.current[2:]:
             args = []

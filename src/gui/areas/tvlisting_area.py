@@ -46,8 +46,8 @@ from freevo.ui import config
 from freevo.ui.gui import imagelib
 
 # kaa imports
+import kaa
 import kaa.epg
-import kaa.notifier
 
 # freevo core imports
 import freevo.ipc
@@ -272,9 +272,9 @@ class TvlistingArea(Area):
         col_time = 30
 
         self.channels = kaa.epg.get_channels(sort=True)
-        if isinstance(self.channels, kaa.notifier.InProgress):
+        if isinstance(self.channels, kaa.InProgress):
             while not self.channels.is_finished:
-                kaa.notifier.step()
+                kaa.main.step()
             self.channels = self.channels()
             
         if self.last_settings == self.settings:

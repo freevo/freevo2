@@ -36,8 +36,8 @@ import sys
 import time
 
 # kaa imports
+import kaa
 import kaa.epg
-import kaa.notifier
 from kaa.strutils import unicode_to_str
 
 # freevo core imports
@@ -287,13 +287,13 @@ class ProgramItem(Item):
 
     #### Actions
 
-    @kaa.notifier.yield_execution()
+    @kaa.yield_execution()
     def schedule(self):
         """
         schedule this item for recording
         """
         result = tvserver.recordings.schedule(self)
-        if isinstance(result, kaa.notifier.InProgress):
+        if isinstance(result, kaa.InProgress):
             yield result
             result = result()
         if result == tvserver.recordings.SUCCESS:
@@ -308,13 +308,13 @@ class ProgramItem(Item):
         self.get_menustack().back_one_menu()
 
 
-    @kaa.notifier.yield_execution()
+    @kaa.yield_execution()
     def remove(self):
         """
         remove this item from schedule
         """
         result = tvserver.recordings.remove(self.scheduled.id)
-        if isinstance(result, kaa.notifier.InProgress):
+        if isinstance(result, kaa.InProgress):
             yield result
             result = result()
         if result == tvserver.recordings.SUCCESS:
@@ -329,7 +329,7 @@ class ProgramItem(Item):
         self.get_menustack().back_one_menu()
 
 
-    @kaa.notifier.yield_execution()
+    @kaa.yield_execution()
     def channel_details(self):
         """
         Browse all programs on this channel
@@ -362,7 +362,7 @@ class ProgramItem(Item):
         MessageWindow('Not implemented yet').show()
 
 
-    @kaa.notifier.yield_execution()
+    @kaa.yield_execution()
     def search_similar(self):
         """
         Search the database for more of this program

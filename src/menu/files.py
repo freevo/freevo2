@@ -38,7 +38,7 @@ import shutil
 import logging
 
 # kaa imports
-import kaa.notifier
+import kaa
 
 # get logging object
 log = logging.getLogger()
@@ -124,7 +124,7 @@ class Files(object):
                     base = '.' + os.path.basename(filename) + '.freevo~'
                     name = os.path.join(os.path.dirname(filename), base)
                     os.rename(filename, name)
-                    kaa.notifier.Process(['rm', '-rf', name]).start()
+                    kaa.Process(['rm', '-rf', name]).start()
                 else:
                     os.unlink(filename)
             except (OSError, IOError), e:

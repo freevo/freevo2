@@ -35,7 +35,7 @@ __all__ = [ 'Application' ]
 import logging
 
 # kaa imports
-from kaa.notifier import Signal
+import kaa
 
 # freevo imports
 from freevo.resources import ResourceHandler
@@ -66,12 +66,9 @@ class Application(ResourceHandler):
         """
         self.__name    = name
         self._eventmap = eventmap
-
         self._visible  = False
         self.engine    = gui.Application(name)
-        self.signals   = { 'show' : Signal(), 'hide': Signal(),
-                           'start': Signal(), 'stop': Signal() }
-
+        self.signals   = kaa.Signals('show', 'hide', 'start', 'stop')
         self._status   = STATUS_IDLE
         self._capabilities = 0
         for cap in capabilities:

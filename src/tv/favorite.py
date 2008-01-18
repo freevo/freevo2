@@ -168,11 +168,11 @@ class FavoriteItem(Item):
         self.get_menustack().pushmenu(s)
 
 
-    @kaa.notifier.yield_execution()
+    @kaa.yield_execution()
     def add(self):
         result = tvserver.favorites.add(self.title, self.channels, self.days,
                                         [self._time_to_str()], 50, False)
-        if isinstance(result, kaa.notifier.InProgress):
+        if isinstance(result, kaa.InProgress):
             yield result
             result = result()
         if result != tvserver.favorites.SUCCESS:
@@ -183,10 +183,10 @@ class FavoriteItem(Item):
         self.get_menustack().back_one_menu()
 
 
-    @kaa.notifier.yield_execution()
+    @kaa.yield_execution()
     def remove(self):
         result = tvserver.favorites.remove(self.id)
-        if isinstance(result, kaa.notifier.InProgress):
+        if isinstance(result, kaa.InProgress):
             yield result
             result = result()
         if result != tvserver.favorites.SUCCESS:
@@ -196,10 +196,10 @@ class FavoriteItem(Item):
             MessageWindow(text).show()
         self.get_menustack().back_one_menu()
 
-    @kaa.notifier.yield_execution()
+    @kaa.yield_execution()
     def modify(self, info):
         result = tvserver.favorites.modify(self.id, info)
-        if isinstance(result, kaa.notifier.InProgress):
+        if isinstance(result, kaa.InProgress):
             yield result
             result = result()
         if result != tvserver.favorites.SUCCESS:

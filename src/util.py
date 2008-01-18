@@ -38,7 +38,7 @@ import stat
 import logging
 
 # kaa imports
-import kaa.notifier
+import kaa
 from kaa.strutils import str_to_unicode
 
 # get logging object

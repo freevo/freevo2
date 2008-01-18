@@ -60,7 +60,6 @@ if not __site__ in sys.path:
 #
 try:
     import kaa
-    import kaa.notifier
 except ImportError:
     d = os.path.dirname(__file__)[:-15]
     print 'The kaa module repository could not be loaded!'
@@ -178,9 +177,9 @@ if len(sys.argv) == 2 and sys.argv[1] in ('-daemon', '--daemon', '-d'):
         log.error('Could not initialize PyLirc!')
         sys.exit(1)
 
-    kaa.notifier.signals['lirc'].connect(handle_key)
+    kaa.signals['lirc'].connect(handle_key)
     log.info('daemon running')
-    kaa.main.start()
+    kaa.main.run()
     log.info('daemon done')
     sys.exit(1)
 
@@ -323,8 +322,8 @@ try:
     kaa.main.run()
 
 except SystemExit:
-    kaa.notifier.shutdown()
+    kaa.main.stop()
 
 except:
     log.exception('Crash!')
-    kaa.notifier.shutdown()
+    kaa.main.stop()

@@ -35,7 +35,7 @@
 # -----------------------------------------------------------------------------
 
 # copy and move in a thread
-import kaa.notifier
+import kaa
 
 # freevo imports
 from freevo.ui.menu import Action, ItemPlugin
@@ -64,7 +64,7 @@ class PluginInterface(ItemPlugin):
         """
         Move/Copy items to the given directory.
         """
-        kaa.notifier.Thread(self.__move_or_copy_thread, self.cart, operation,
+        kaa.Thread(self.__move_or_copy_thread, self.cart, operation,
                             item.filename).start()
         self.cart = []
         item.get_menustack().delete_submenu()

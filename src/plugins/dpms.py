@@ -34,7 +34,7 @@ import os
 
 # kaa imports
 import kaa.utils
-import kaa.notifier
+import kaa
 
 # freevo core imports
 from freevo.plugin import Plugin
@@ -53,16 +53,16 @@ class PluginInterface(Plugin):
         if not os.environ.get('DISPLAY') or not kaa.utils.which('xset'):
             return
         # get xset process to call
-        self.xset = kaa.notifier.Process(kaa.utils.which('xset')).start
+        self.xset = kaa.Process(kaa.utils.which('xset')).start
         self.counter = 0
         self._mode = OFF
         # Timer to poll and increase counter. It willbe started when the
         # menu is shown.
-        self.timer = kaa.notifier.Timer(self.poll)
+        self.timer = kaa.Timer(self.poll)
         # register to all events
-        kaa.notifier.EventHandler(self.eventhandler).register()
+        kaa.EventHandler(self.eventhandler).register()
         # turn on dpms on shutdown
-        kaa.notifier.signals['shutdown'].connect(self.xset, '+dpms')
+        kaa.main.signals['shutdown'].connect(self.xset, '+dpms')
         # register to application changes
         app_signals['changed'].connect(self.application_changed)
         # turn off dpms
@@ -107,7 +107,7 @@ class PluginInterface(Plugin):
             # screen is blank right now, restore it
             self._mode = OFF
             self.xset('dpms force on s reset')
-            kaa.notifier.OneShotTimer(self.xset, '-dpms s off').start(1)
+            kaa.OneShotTimer(self.xset, '-dpms s off').start(1)
             self.timer.start(60)
             return
 

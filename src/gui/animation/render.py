@@ -43,7 +43,7 @@ import time
 import copy
 
 # kaa imports
-from kaa.notifier import OneShotTimer, Timer, step
+import kaa
 
 # global render object
 _render = None
@@ -69,7 +69,7 @@ class Render(object):
     def __init__(self, display):
         # set the update handler to wait for osd
         self.display = display
-        self.update_timer = OneShotTimer(self.update)
+        self.update_timer = kaa.OneShotTimer(self.update)
         self.animations = []    # all animations
         self.suspended  = []    # suspended animations
 
@@ -175,4 +175,4 @@ class Render(object):
             # wait for all application show/hide animations
             anim_objects = filter(lambda a: a.application, self.animations)
         while filter(lambda a: a.running(), anim_objects):
-            step( True, False )
+            kaa.main.step( True, False )

@@ -34,7 +34,7 @@ __all__ = [ 'get', 'set', 'remove', 'shutdown', 'active' ]
 # python imports
 import copy
 import logging
-import kaa.notifier
+import kaa
 
 # freevo imports
 from freevo.ui import config
@@ -153,4 +153,4 @@ def active():
 
 
 # stop the display on shutdown
-kaa.notifier.signals['shutdown'].connect(shutdown)
+kaa.main.signals['shutdown'].connect(shutdown)

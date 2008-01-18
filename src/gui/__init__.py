@@ -36,7 +36,7 @@
 #               and not mevas directly.
 #
 # Submodule:    import gui.animation
-# Dependencies: notifier
+# Dependencies: 
 # Content:      The different animation modules
 # Description:  Animation classes in this module can be used to animate gui
 #               widgets

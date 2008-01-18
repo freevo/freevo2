@@ -35,7 +35,7 @@ import urllib
 import re
 
 # kaa imports
-from kaa.notifier import Thread, Callback
+import kaa
 import kaa.beacon
 
 # freevo imports
@@ -105,7 +105,7 @@ class ApodMainMenuItem(Item):
         box = TextWindow(text=_('Getting picture, please wait'))
         box.show()
 
-        thread = Thread(self._fetch_picture_thread)
+        thread = kaa.Thread(self._fetch_picture_thread)
         thread.signals['completed'].connect(self._fetch_picture_finished, box)
         thread.signals['exception'].connect(self._fetch_picture_error, box)
         thread.start()

@@ -32,7 +32,7 @@
 __all__ = [ 'TextWindow', 'MessageWindow', 'ConfirmWindow']
 
 # kaa imports
-from kaa.notifier import Signal
+import kaa
 
 # freevo imports
 from freevo.ui import gui
@@ -120,7 +120,7 @@ class TextWindow(Window):
         self.text = text
 
 
-class Button(Signal):
+class Button(kaa.Signal):
     """
     A button used in some windows.
     """
@@ -128,7 +128,7 @@ class Button(Signal):
     def __init__(self, name, selected=True):
         self.name = name
         self.selected = selected
-        Signal.__init__(self)
+        kaa.Signal.__init__(self)
 
 
 class MessageWindow(Window):

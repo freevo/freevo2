@@ -39,7 +39,7 @@
 import logging
 
 # kaa imports
-import kaa.notifier
+import kaa
 
 # Freevo imports
 from freevo.ui.menu import ActionItem, Menu, Action
@@ -75,10 +75,10 @@ class PcGamePlayer(EmulatorPlayer):
         Play PcGame
         """
         log.info('Start playing PcGame (%s %s)', self.command_name, self.parameters)
-        self.child = kaa.notifier.Process(self.command_name)
+        self.child = kaa.Process(self.command_name)
         self.child.start(self.parameters).connect(self.completed)
         self.signals = self.child.signals
-        stop = kaa.notifier.WeakCallback(self.stop)
+        stop = kaa.WeakCallback(self.stop)
         self.child.set_stop_command(stop)
 
 

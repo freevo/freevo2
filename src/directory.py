@@ -38,7 +38,6 @@ import time
 
 # kaa imports
 import kaa
-import kaa.notifier
 import kaa.beacon
 from kaa.weakref import weakref
 from kaa.strutils import str_to_unicode
@@ -327,7 +326,7 @@ class DirItem(Playlist):
         return
 
 
-    @kaa.notifier.yield_execution()
+    @kaa.yield_execution()
     def browse(self):
         """
         Show the items in the directory in the menu

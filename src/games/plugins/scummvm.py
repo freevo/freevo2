@@ -73,10 +73,10 @@ class ScummvmPlayer(PcGamePlayer):
         """
         log.info('Start playing PcGame (Scummvm: %s)', self.emulator_item)
         parameters = '%s %s' % (config.parameters, self.emulator_item)
-        self.child = kaa.notifier.Process(config.bin)
+        self.child = kaa.Process(config.bin)
         self.child.start(parameters).connect(self.completed)
         self.signals = self.child.signals
-        stop = kaa.notifier.WeakCallback(self.stop)
+        stop = kaa.WeakCallback(self.stop)
         self.child.set_stop_command(stop)
 
 
@@ -138,7 +138,7 @@ class PluginInterface(EmulatorPlugin):
         self.items = None
         items = []
         # get list of scummvm start a new process
-        self.child = kaa.notifier.Process(config.bin)
+        self.child = kaa.Process(config.bin)
         self.child.start('-t').connect(self.completed)
         self.child.signals['stdout'].connect(self.get_stdout)
         

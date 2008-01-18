@@ -35,7 +35,7 @@ import sys
 import os
 
 # kaa imports
-import kaa.notifier
+import kaa
 
 # freevo imports
 from freevo.ui import gui
@@ -133,7 +133,7 @@ class ShutdownItem(MainMenuItem):
         shutdown freevo, don't shutdown the system
         """
         self.show_gui_message(_('shutting down...'))
-        kaa.notifier.OneShotTimer(sys.exit, 0).start(1)
+        kaa.OneShotTimer(sys.exit, 0).start(1)
 
 
     def shutdown_system(self):
@@ -141,7 +141,7 @@ class ShutdownItem(MainMenuItem):
         shutdown the complete system
         """
         self.show_gui_message(_('shutting down system...'))
-        kaa.notifier.OneShotTimer(os.system, config.command.halt).start(1)
+        kaa.OneShotTimer(os.system, config.command.halt).start(1)
 
 
     def shutdown_freevo_restart(self):
@@ -149,8 +149,8 @@ class ShutdownItem(MainMenuItem):
         restart freevo
         """
         self.show_gui_message(_('restart...'))
-        kaa.notifier.signals['shutdown'].connect(os.execvp, sys.argv[0], sys.argv)
-        kaa.notifier.OneShotTimer(sys.exit, 0).start(1)
+        kaa.main.signals['shutdown'].connect(os.execvp, sys.argv[0], sys.argv)
+        kaa.OneShotTimer(sys.exit, 0).start(1)
 
 
     def shutdown_sys_restart(self):
@@ -158,7 +158,7 @@ class ShutdownItem(MainMenuItem):
         restart the complete system
         """
         self.show_gui_message(_('restarting system...'))
-        kaa.notifier.OneShotTimer(os.system, config.command.restart).start(1)
+        kaa.OneShotTimer(os.system, config.command.restart).start(1)
 
 
 

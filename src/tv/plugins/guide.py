@@ -35,8 +35,8 @@ import sys
 import time
 import logging
 
+import kaa
 import kaa.epg
-import kaa.notifier
 
 # freevo imports
 from freevo.ui.event import *
@@ -74,9 +74,9 @@ class TVGuide(Menu):
         # current channel is the first one
         self.channels = kaa.epg.get_channels(sort=True)
         # FIXME: make it work without step()
-        if isinstance(self.channels, kaa.notifier.InProgress):
+        if isinstance(self.channels, kaa.InProgress):
             while not self.channels.is_finished:
-                kaa.notifier.step()
+                kaa.main.step()
             self.channels = self.channels()
         self.channel  = self.get_channel()
 
@@ -96,7 +96,7 @@ class TVGuide(Menu):
         return self.channels[co]
 
 
-    @kaa.notifier.yield_execution()
+    @kaa.yield_execution()
     def get_program(self, timestamp=None):
         """
         return a program object based on timestamp and the current channel.
@@ -150,8 +150,8 @@ class TVGuide(Menu):
         if self.selected.stop < sys.maxint:
             self.current_time = self.selected.start + 1
         if self.stack:
-            # FIXME: gui calls notifier.step()
-            kaa.notifier.OneShotTimer(self.stack.refresh).start(0)
+            # FIXME: gui calls kaa.main.step()
+            kaa.OneShotTimer(self.stack.refresh).start(0)
         
 
     def eventhandler(self, event):

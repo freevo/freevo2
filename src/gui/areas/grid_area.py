@@ -42,9 +42,6 @@ import math
 import time
 import array
 
-# kaa imports
-from kaa.notifier import Timer
-
 # gui import
 from area import Area
 from freevo.ui.gui.widgets import Image, Rectangle

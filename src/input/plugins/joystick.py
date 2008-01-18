@@ -39,7 +39,7 @@ import struct
 from time import sleep
 
 # kaa imports
-import kaa.notifier
+import kaa
 
 # freevo imports
 from freevo.resources import ResourceHandler
@@ -79,9 +79,9 @@ class PluginInterface(InputPlugin, ResourceHandler):
             self.free_resources()
             return
 
-        self.socket_dispatcher = kaa.notifier.SocketDispatcher(self.handle)
+        self.socket_dispatcher = kaa.SocketDispatcher(self.handle)
         self.socket_dispatcher.register(self.joyfd)
-        self.timer = kaa.notifier.OneShotTimer(self.axis)
+        self.timer = kaa.OneShotTimer(self.axis)
         self.movement = {}
         self.events = {}
 

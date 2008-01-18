@@ -30,15 +30,15 @@
 # -----------------------------------------------------------------------------
 
 import copy
-import kaa.notifier
+import kaa
 
-class Event(kaa.notifier.Event):
+class Event(kaa.Event):
     """
     an event is passed to the different eventhandlers in Freevo to
     activate some action.
     """
     def __init__(self, name, *args, **kwargs):
-        kaa.notifier.Event.__init__(self, name, *args)
+        kaa.Event.__init__(self, name, *args)
         self.handler = None
         if 'handler' in kwargs:
             self.handler = kwargs['handler']
@@ -68,7 +68,7 @@ class Event(kaa.notifier.Event):
         event.source = kwargs.get('event_source', 'system')
         if args:
             event._set_args(args)
-        kaa.notifier.Event.post(event)
+        kaa.Event.post(event)
 
 
 #

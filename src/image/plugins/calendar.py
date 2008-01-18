@@ -36,7 +36,7 @@
 import time
 
 # kaa imports
-import kaa.notifier
+import kaa
 import kaa.beacon
 
 # freevo imports
@@ -69,7 +69,7 @@ class BeaconQueryItem(Item):
         return kaa.beacon.query(timestamp=q, type='image', **query)
 
 
-    @kaa.notifier.yield_execution()
+    @kaa.yield_execution()
     def select(self):
         """
         Select the item and generate a new menu.
@@ -81,7 +81,7 @@ class BeaconQueryItem(Item):
             if len(result) == 1:
                 all.append((start[self.query[1]], result[0]))
         items = self.get_items(all)
-        if isinstance(items, kaa.notifier.InProgress):
+        if isinstance(items, kaa.InProgress):
             yield items
             items = items.get_result()
         menu = Menu(self.name, items, type='image')
@@ -102,7 +102,7 @@ class MonthItem(BeaconQueryItem):
         self._month = month
 
 
-    @kaa.notifier.yield_execution()
+    @kaa.yield_execution()
     def get_items(self, result):
         """
         Return days as Playlist items

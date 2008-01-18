@@ -38,7 +38,7 @@ import time
 import sys
 
 # kaa imports
-import kaa.notifier
+import kaa
 import kaa.epg
 
 # freevo imports
@@ -68,7 +68,7 @@ class GenreItem(Item):
         return [ Action(_('Browse list'), self.browse) ]
 
 
-    @kaa.notifier.yield_execution()
+    @kaa.yield_execution()
     def browse(self):
         """
         Find all the programs with this genre
@@ -113,7 +113,7 @@ class CategoryItem(Item):
         return [ Action(_('Browse list'), self.browse)]
         
    
-    @kaa.notifier.yield_execution()
+    @kaa.yield_execution()
     def browse(self):
         """ 
         Find all genres that are in this category
@@ -158,7 +158,7 @@ class PluginInterface(MainMenuPlugin):
     Add 'Browse by Genre' to the TV menu.
     """
 
-    @kaa.notifier.yield_execution()
+    @kaa.yield_execution()
     def category(self, parent):
         """
         Show all category.

@@ -40,7 +40,7 @@ import os
 import weakref
 
 # kaa imports
-from kaa.notifier import Timer
+import kaa
 
 # gui import
 from area import Area
@@ -68,7 +68,7 @@ class ListingArea(Area):
         self.empty_listing     = None
         self.arrows            = []
         self.__default_val     = None
-        self.__cache_timer     = Timer(self.__cache_next_image)
+        self.__cache_timer     = kaa.Timer(self.__cache_next_image)
 
 
     def clear(self, keep_settings=False):
@@ -452,7 +452,7 @@ class ListingArea(Area):
     def __cache_next_image(self):
         """
         Cache the next images used in image view so they are in memory when
-        the user scrolls down. This function gets called by the notifier
+        the user scrolls down. This function gets called by the mainloop
         and will only cache one image and than return. By that we make sure
         we won't use needed cpu time.
         """

@@ -40,8 +40,7 @@ import logging
 import os
 
 # kaa imports
-import kaa.notifier
-from kaa.notifier import Event
+import kaa
 from kaa.weakref import weakref
 import kaa.beacon
 
@@ -51,7 +50,7 @@ from freevo import plugin
 from freevo.ui import SHAREDIR
 from freevo.ui.mainmenu import MainMenuItem, MainMenuPlugin
 from freevo.ui.directory import DirItem
-from freevo.ui.event import EJECT
+from freevo.ui.event import EJECT, Event
 from freevo.ui import application
 from freevo.ui.menu import Item, Action, Menu
 from freevo.ui.mediamenu import MediaMenu
@@ -149,10 +148,10 @@ class EmulatorPlayer(ResourceHandler):
         self.child = None
 
         self.signals = {
-            "open": kaa.notifier.Signal(),
-            "start": kaa.notifier.Signal(),
-            "failed": kaa.notifier.Signal(),
-            "end": kaa.notifier.Signal(),
+            "open": kaa.Signal(),
+            "start": kaa.Signal(),
+            "failed": kaa.Signal(),
+            "end": kaa.Signal(),
         }
 
     def open(self, item):
@@ -171,10 +170,10 @@ class EmulatorPlayer(ResourceHandler):
         params = "%s %s" % (self.parameters, self.url)
         log.info('Start playing EmulatorItem (%s %s)' % \
                 (self.command_name, params))
-        self.child = kaa.notifier.Process(self.command_name)
+        self.child = kaa.Process(self.command_name)
         self.child.start(params).connect(self.completed)
         self.signals = self.child.signals
-        stop = kaa.notifier.WeakCallback(self.stop)
+        stop = kaa.WeakCallback(self.stop)
         self.child.set_stop_command(stop)
 
 

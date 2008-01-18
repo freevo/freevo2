@@ -51,7 +51,7 @@ import re
 import time
 
 # kaa imports
-import kaa.notifier
+import kaa
 import kaa.strutils
 
 # freevo imports
@@ -74,7 +74,7 @@ ICON_DIR  = os.path.join(SHAREDIR, 'icons')
 IMAGE_DIR = os.path.join(SHAREDIR, 'images')
 
 # signals
-signals = { 'theme change': kaa.notifier.Signal() }
+signals = { 'theme change': kaa.Signal() }
 
 # -------------- Interface for Freevo ---------------------------------------
 

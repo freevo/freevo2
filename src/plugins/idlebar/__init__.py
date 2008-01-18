@@ -35,7 +35,7 @@ import time
 import locale
 import logging
 
-import kaa.notifier
+import kaa
 
 # freevo imports
 from freevo.plugin import Plugin
@@ -72,7 +72,7 @@ class PluginInterface(Plugin):
         self.container.set_zindex(10)
         gui.get_display().add_child(self.container)
 
-        self._timer = kaa.notifier.Timer(self.poll)
+        self._timer = kaa.Timer(self.poll)
         self._timer.start(30)
 
 
