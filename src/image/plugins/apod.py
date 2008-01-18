@@ -105,10 +105,9 @@ class ApodMainMenuItem(Item):
         box = TextWindow(text=_('Getting picture, please wait'))
         box.show()
 
-        thread = kaa.Thread(self._fetch_picture_thread)
-        thread.signals['completed'].connect(self._fetch_picture_finished, box)
-        thread.signals['exception'].connect(self._fetch_picture_error, box)
-        thread.start()
+        async = kaa.ThreadCallback(self._fetch_picture_thread)()
+        async.connect(self._fetch_picture_finished, box)
+        async.exception_handler.connect(self._fetch_picture_error, box)
 
 
     def _fetch_picture_thread(self):

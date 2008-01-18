@@ -64,8 +64,8 @@ class PluginInterface(ItemPlugin):
         """
         Move/Copy items to the given directory.
         """
-        kaa.Thread(self.__move_or_copy_thread, self.cart, operation,
-                            item.filename).start()
+        kaa.ThreadCallback(self.__move_or_copy_thread, self.cart, operation,
+                           item.filename)()
         self.cart = []
         item.get_menustack().delete_submenu()
 
