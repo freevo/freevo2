@@ -214,7 +214,7 @@ class Handler(object):
         # InProgress objects so if result is an InProgress object we wait
         # here using step(). This is ugly and needs to be fixed.
         if isinstance(result, kaa.InProgress):
-            while not result.is_finished:
+            while not result.is_finished():
                 kaa.main.step()
 
 # create the global object

@@ -84,7 +84,7 @@ class TVGuide2(GridMenu):
         self.channels = kaa.epg.get_channels(sort=True)
         # FIXME: make it work without step()
         if isinstance(self.channels, kaa.InProgress):
-            while not self.channels.is_finished:
+            while not self.channels.is_finished():
                 kaa.main.step()
             self.channels = self.channels()
 

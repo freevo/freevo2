@@ -273,7 +273,7 @@ class TvlistingArea(Area):
 
         self.channels = kaa.epg.get_channels(sort=True)
         if isinstance(self.channels, kaa.InProgress):
-            while not self.channels.is_finished:
+            while not self.channels.is_finished():
                 kaa.main.step()
             self.channels = self.channels()
             
