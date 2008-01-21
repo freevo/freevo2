@@ -133,13 +133,13 @@ class ApodMainMenuItem(Item):
             raise 'Could not open %s%s: %s' % (url, ref, e)
 
 
-    def _fetch_picture_error(self, error, box):
+    def _fetch_picture_error(self, exc_type, exc_value, exc_traceback, box):
         """
         Handle error for the thread in the main loop.
         """
         box.destroy()
-        if not isinstance(error, (str, unicode)):
-            error = 'Exception: %s' % error
+        if not isinstance(exc_value, (str, unicode)):
+            error = 'Exception: %s' % exc_value
         MessageWindow(error).show()
 
 
