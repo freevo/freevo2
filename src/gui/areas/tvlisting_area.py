@@ -272,10 +272,10 @@ class TvlistingArea(Area):
         col_time = 30
 
         self.channels = kaa.epg.get_channels(sort=True)
-        if isinstance(self.channels, kaa.InProgress):
-            while not self.channels.is_finished():
-                kaa.main.step()
-            self.channels = self.channels()
+        while not self.channels.is_finished():
+            # FIXME: InProgress waiting, make it work without step()
+            kaa.main.step()
+        self.channels = self.channels.get_result()
             
         if self.last_settings == self.settings:
             # same layout, only clean 'objects'

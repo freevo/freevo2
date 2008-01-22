@@ -85,12 +85,12 @@ class GamesPlayer(Application):
         # by the system when the application switches to STATUS_STOPPED or
         # STATUS_IDLE.
         blocked = self.get_resources('AUDIO', 'VIDEO', 'JOYSTICK', force=True)
+        if not blocked.is_finished():
+            blocked.connect(retry)
+            return True
         if blocked == False:
             log.error("Can't get resource AUDIO, VIDEO, JOYSTICK")
             return False
-        if isinstance(blocked, kaa.InProgress):
-            blocked.connect(retry)
-            return True
 
         # store item
         self.item = item

@@ -48,9 +48,6 @@ class PluginInterface(MainMenuPlugin):
 
     @kaa.yield_execution()
     def browse(self, parent):
-        record_dir = kaa.beacon.get(config.tv.plugin.directory.path)
-        if isinstance(record_dir, kaa.InProgress):
-            yield record_dir
-            record_dir = record_dir.get_result()
+        record_dir = yield kaa.beacon.get(config.tv.plugin.directory.path)
         d = DirItem(record_dir, parent, type='tv')
         d.browse()

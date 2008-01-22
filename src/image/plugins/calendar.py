@@ -80,10 +80,7 @@ class BeaconQueryItem(Item):
             yield result.wait()
             if len(result) == 1:
                 all.append((start[self.query[1]], result[0]))
-        items = self.get_items(all)
-        if isinstance(items, kaa.InProgress):
-            yield items
-            items = items.get_result()
+        items = yield self.get_items(all)
         menu = Menu(self.name, items, type='image')
         menu.autoselect = True
         self.get_menustack().pushmenu(menu)

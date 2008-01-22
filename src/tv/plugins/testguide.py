@@ -82,11 +82,10 @@ class TVGuide2(GridMenu):
         
         # current channel is the first one
         self.channels = kaa.epg.get_channels(sort=True)
-        # FIXME: make it work without step()
-        if isinstance(self.channels, kaa.InProgress):
-            while not self.channels.is_finished():
-                kaa.main.step()
-            self.channels = self.channels()
+        while not self.channels.is_finished():
+            # FIXME: InProgress waiting, make it work without step()
+            kaa.main.step()
+        self.channels = self.channels.get_result()
 
         self.query_start_time = self.viewed_time
         self.query_stop_time = 0
@@ -152,10 +151,8 @@ class TVGuide2(GridMenu):
             for channel in self.channels:
                 programs = []
                 # query the epg database in background
-                wait = kaa.epg.search(channel=channel, time=(self.query_start_time, self.query_stop_time))
-                yield wait
-                # get data from InProgress object
-                query_data = wait()
+                query_data = yield kaa.epg.search(
+                    channel=channel, time=(self.query_start_time, self.query_stop_time))
                 #Sort the programs
                 query_data.sort(lambda x,y: cmp(x.start, y.start))
                 for data in query_data:

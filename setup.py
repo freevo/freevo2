@@ -34,6 +34,11 @@ import sys
 import os
 import stat
 
+# We require python 2.5 or later, so complain if that isn't satisfied.
+if sys.version.split()[0] < '2.5':
+    print "Python 2.5 or later required."
+    sys.exit(1)
+
 # try to be clever and add the install prefix to the path
 # to be sure kaa.base and freevo.core can be found
 for pos, arg in enumerate(sys.argv[1:]):

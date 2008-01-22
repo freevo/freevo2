@@ -170,11 +170,8 @@ class FavoriteItem(Item):
 
     @kaa.yield_execution()
     def add(self):
-        result = tvserver.favorites.add(self.title, self.channels, self.days,
+        result = yield tvserver.favorites.add(self.title, self.channels, self.days,
                                         [self._time_to_str()], 50, False)
-        if isinstance(result, kaa.InProgress):
-            yield result
-            result = result()
         if result != tvserver.favorites.SUCCESS:
             text = _('Adding favorite Failed')+(': %s' % result)
         else:
@@ -185,10 +182,7 @@ class FavoriteItem(Item):
 
     @kaa.yield_execution()
     def remove(self):
-        result = tvserver.favorites.remove(self.id)
-        if isinstance(result, kaa.InProgress):
-            yield result
-            result = result()
+        result = yield tvserver.favorites.remove(self.id)
         if result != tvserver.favorites.SUCCESS:
             text = _('Remove favorite Failed')+(': %s' % result)
         else:
@@ -198,10 +192,7 @@ class FavoriteItem(Item):
 
     @kaa.yield_execution()
     def modify(self, info):
-        result = tvserver.favorites.modify(self.id, info)
-        if isinstance(result, kaa.InProgress):
-            yield result
-            result = result()
+        result = yield tvserver.favorites.modify(self.id, info)
         if result != tvserver.favorites.SUCCESS:
             text = _('Modified favorite Failed')+(': %s' % result)
             MessageWindow(text).show()

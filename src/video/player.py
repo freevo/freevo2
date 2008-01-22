@@ -86,12 +86,12 @@ class Player(Application):
         # by the system when the application switches to STATUS_STOPPED or
         # STATUS_IDLE.
         blocked = self.get_resources('AUDIO', 'VIDEO', force=True)
+        if not blocked.is_finished():
+            blocked.connect(retry)
+            return True
         if blocked == False:
             log.error("Can't get resource AUDIO, VIDEO")
             return False
-        if isinstance(blocked, kaa.InProgress):
-            blocked.connect(retry)
-            return True
         
         # store item and playlist
         self.item = item

@@ -82,16 +82,13 @@ class GenreItem(Item):
         # query epg in background
         if self.cat:
             if self.name==ALL_GENRE:
-                query_data = kaa.epg.search(category=self.cat, time=future)
+                query_data = yield kaa.epg.search(category=self.cat, time=future)
             else:
-                query_data = kaa.epg.search(genre=self.name, 
-                                            category=self.cat,
-                                            time=future)
+                query_data = yield kaa.epg.search(genre=self.name, 
+                                                  category=self.cat,
+                                                  time=future)
         else:
-            query_data = kaa.epg.search(genre=self.name, time=future)
-        yield query_data
-        # fetch epg data from InProgress object
-        query_data = query_data()
+            query_data = yield kaa.epg.search(genre=self.name, time=future)
         for prg in query_data:
             items.append(ProgramItem(prg, self))
         # create menu for programs
@@ -125,15 +122,12 @@ class CategoryItem(Item):
          
         if self.name==ALL_CAT:
             # query epg in background for all genres
-            query_data = kaa.epg.search(attrs=['genre'], distinct=True)
+            query_data = yield kaa.epg.search(attrs=['genre'], distinct=True)
         else: 
             # query epg in background for a specific category
-            query_data = kaa.epg.search(attrs=['genre'], category=self.name, 
-                                        distinct=True)
+            query_data = yield kaa.epg.search(attrs=['genre'], category=self.name, 
+                                              distinct=True)
         
-        yield query_data
-        # fetch epg data from InProgress object
-        query_data = query_data()
         query_data.sort()
         if not self.name == ALL_CAT:
             items.append(GenreItem(self.parent, ALL_GENRE, self.name))
@@ -169,10 +163,7 @@ class PluginInterface(MainMenuPlugin):
         items = []
                
         # look if there is category data in the epg data
-        query_data = kaa.epg.search(attrs=['category'], distinct=True)
-        yield query_data
-        # fetch epg data from InProgress object
-        query_data = query_data()
+        query_data = yield kaa.epg.search(attrs=['category'], distinct=True)
         query_data.sort()
         if len(query_data) > 1:
             items.append(CategoryItem(parent, ALL_CAT))
@@ -182,10 +173,7 @@ class PluginInterface(MainMenuPlugin):
                     items.append(CategoryItem(parent, cat))
         else:
             # maybe there is only genre data in the epg
-            query_data = kaa.epg.search(attrs=['genre'], distinct=True)
-            yield query_data
-            # fetch epg data from InProgress object
-            query_data = query_data()
+            query_data = yield kaa.epg.search(attrs=['genre'], distinct=True)
             query_data.sort()
             for genre, in query_data:
                 if genre not in EXCLUDE_GENRES:

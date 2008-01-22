@@ -292,10 +292,7 @@ class ProgramItem(Item):
         """
         schedule this item for recording
         """
-        result = tvserver.recordings.schedule(self)
-        if isinstance(result, kaa.InProgress):
-            yield result
-            result = result()
+        result = yield tvserver.recordings.schedule(self)
         if result == tvserver.recordings.SUCCESS:
             msg = _('"%s" has been scheduled for recording') % self.title
             #reload scheduled
@@ -313,10 +310,7 @@ class ProgramItem(Item):
         """
         remove this item from schedule
         """
-        result = tvserver.recordings.remove(self.scheduled.id)
-        if isinstance(result, kaa.InProgress):
-            yield result
-            result = result()
+        result = yield tvserver.recordings.remove(self.scheduled.id)
         if result == tvserver.recordings.SUCCESS:
             msg = _('"%s" has been removed') % self.title
             #reload scheduled
@@ -342,10 +336,7 @@ class ProgramItem(Item):
         future = (int(time.time()), sys.maxint)
         # query the epg database in background
         channel = kaa.epg.get_channel(self.channel)
-        query_data = kaa.epg.search(channel=channel, time=future)
-        yield query_data
-        # get data from InProgress object
-        query_data = query_data()
+        query_data = yield kaa.epg.search(channel=channel, time=future)
         for prog in query_data:
             items.append(ProgramItem(prog, self))
         cmenu = Menu(self.channel, items, type = 'tv program menu')
@@ -376,10 +367,7 @@ class ProgramItem(Item):
         # create an empty list for ProgramItems
         items = []
         # query the epg database in background
-        query_data = kaa.epg.search(title=self.title, time=future)
-        yield query_data
-        # get data from InProgress object
-        query_data = query_data()
+        query_data = yield kaa.epg.search(title=self.title, time=future)
         # and sort is concerning its start times
         query_data.sort(lambda a,b:cmp(a.start,b.start))
         for prog in query_data:
