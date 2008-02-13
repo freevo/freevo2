@@ -65,7 +65,7 @@ import os
 import logging
 
 # kaa imports
-from kaa.strutils import unicode_to_str
+import kaa
 import kaa.beacon
 
 # freevo imports
@@ -85,7 +85,7 @@ def parse_movie(node, parent, listing):
         if c.name == 'video':
             for f in c.children:
                 if f.name == 'file':
-                    filename = unicode_to_str(f.content)
+                    filename = kaa.unicode_to_str(f.content)
 
                     # FIXME: make this faster
                     for f in listing.get('beacon:all'):

@@ -38,7 +38,6 @@ import time
 # kaa imports
 import kaa
 import kaa.epg
-from kaa.strutils import unicode_to_str
 
 # freevo core imports
 import freevo.ipc
@@ -132,7 +131,7 @@ class ProgramItem(Item):
         """
         return as string for debug
         """
-        return unicode_to_str(self.__unicode__())
+        return kaa.unicode_to_str(self.__unicode__())
 
 
     def __cmp__(self, other):

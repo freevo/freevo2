@@ -36,8 +36,8 @@
 # -----------------------------------------------------------------------------
 
 # Kaa imports
+import kaa
 import kaa.beacon
-from kaa.strutils import str_to_unicode
 
 # Freevo imports
 from freevo.ui.mainmenu import MainMenuPlugin
@@ -63,10 +63,10 @@ class AlbumItem(MediaItem):
         """
         Show all items from that artist.
         """
-        title = str_to_unicode(self.artist)
+        title = kaa.str_to_unicode(self.artist)
         if self.album:
             query = kaa.beacon.query(artist=self.artist, album=self.album, type='audio')
-            title = '%s - %s' % (title, str_to_unicode(self.album))
+            title = '%s - %s' % (title, kaa.str_to_unicode(self.album))
         else:
             query = kaa.beacon.query(artist=self.artist, type='audio')
         # FIXME: monitor query for live update
@@ -131,7 +131,7 @@ class ArtistAlbumView(GridMenu):
         artist = self.artists[self.base_row+row]
         # Work around a beacon bug
         for part in artist.split(' '):
-            artist_name += ' ' + str_to_unicode(part.capitalize())
+            artist_name += ' ' + kaa.str_to_unicode(part.capitalize())
         artist_name = artist_name.strip()
         return artist_name
 

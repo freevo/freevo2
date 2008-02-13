@@ -43,7 +43,7 @@ import re
 import time
 
 # kaa imports
-from kaa.strutils import unicode_to_str, str_to_unicode
+import kaa
 
 # freevo imports
 from freevo.ui import config
@@ -111,7 +111,7 @@ class VideoItem(MediaItem):
         if show_name:
             # This matches a tv show with a show name, an epsiode and
             # a title of the specific episode
-            sn = unicode_to_str(show_name[0].lower())
+            sn = kaa.unicode_to_str(show_name[0].lower())
             if database.tv_shows.has_key(sn):
                 tvinfo = database.tv_shows[sn]
                 self.info.set_variables(tvinfo[1])

@@ -40,7 +40,6 @@ import time
 import kaa
 import kaa.beacon
 from kaa.weakref import weakref
-from kaa.strutils import str_to_unicode
 
 # freevo imports
 from freevo.ui import config
@@ -117,7 +116,7 @@ class DirItem(Playlist):
             self.files.read_only = True
         self.files.append(directory)
         if name:
-            self.name = str_to_unicode(name)
+            self.name = kaa.str_to_unicode(name)
         if self['show_all_items']:
             # FIXME: no way to set this
             self.media_type = None

@@ -37,7 +37,6 @@ import time
 
 # kaa imports
 import kaa.epg
-from kaa.strutils import unicode_to_str
 
 # freevo ui imports
 from freevo.ui import config
@@ -171,7 +170,7 @@ class FavoriteItem(Item):
     @kaa.coroutine()
     def add(self):
         result = yield tvserver.favorites.add(self.title, self.channels, self.days,
-                                        [self._time_to_str()], 50, False)
+                                        [self._format_time()], 50, False)
         if result != tvserver.favorites.SUCCESS:
             text = _('Adding favorite Failed')+(': %s' % result)
         else:
@@ -279,7 +278,7 @@ class FavoriteItem(Item):
                 self.stop = float(1440*60)-1
             else:
                 self.start = value
-            infovalue = [self._time_to_str()]
+            infovalue = [self._format_time()]
         if item == 'stop':
             info = 'times'
             if value == 'ANY':
@@ -287,14 +286,14 @@ class FavoriteItem(Item):
                 self.stop = float(1440*60)-1
             else:
                 self.stop = value
-            infovalue = [self._time_to_str()]
+            infovalue = [self._format_time()]
 
         if not self.new:
             self.modify([(info, infovalue)])
 
         self.get_menustack().back_one_menu()
 
-    def _time_to_str(self):
+    def _format_time(self):
         start = time.strftime('%H:%M', time.gmtime(self.start))
         stop = time.strftime('%H:%M', time.gmtime(self.stop))
         return start + '-' + stop

@@ -37,8 +37,8 @@ import logging
 import time
 
 # kaa imports
+import kaa
 import kaa.beacon
-from kaa.strutils import str_to_unicode
 
 # freevo imports
 from freevo.ui.event import PLAY_START, STOP
@@ -93,7 +93,7 @@ class MediaItem(Item):
                    self.parent['config:use_metadata'] in (None, True):
                 self.name = self.info.get('title')
             if not self.name:
-                self.name = str_to_unicode(self.info.get('name'))
+                self.name = kaa.str_to_unicode(self.info.get('name'))
 
         else:
             # Mode is not file, it has to be a network url. Other
@@ -102,7 +102,7 @@ class MediaItem(Item):
             if not self.name:
                 self.name = self.info.get('title')
             if not self.name:
-                self.name = str_to_unicode(self.url)
+                self.name = kaa.str_to_unicode(self.url)
 
 
     def _format_time(self, time, hours=False):

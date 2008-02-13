@@ -37,8 +37,8 @@ import copy
 import logging
 
 # kaa imports
+import kaa
 import kaa.beacon
-from kaa.strutils import str_to_unicode, unicode_to_str
 from kaa.weakref import weakref
 
 # freevo imports
@@ -79,7 +79,7 @@ class Playlist(MediaItem, ItemList):
         """
         MediaItem.__init__(self, parent)
         ItemList.__init__(self)
-        self.name = str_to_unicode(name)
+        self.name = kaa.str_to_unicode(name)
 
         if self.type == 'tv':
             type = 'video'
@@ -491,7 +491,7 @@ class PluginInterface(MediaPlugin):
                 continue
             for file in c.children:
                 if file.name in ('file', 'directory'):
-                    f = unicode_to_str(file.content)
+                    f = kaa.unicode_to_str(file.content)
                     filename = os.path.join(node.dirname, f)
                     query = kaa.beacon.query(filename=filename)
                 if file.name == 'directory':

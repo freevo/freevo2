@@ -36,7 +36,7 @@ import logging
 import os
 
 # kaa imports
-from kaa.strutils import unicode_to_str
+import kaa
 
 # freevo core imports
 import freevo.fxdparser
@@ -145,7 +145,7 @@ class PluginInterface(MediaPlugin):
             c.info = {}
             for attr in c.children:
                 if attr.name == 'cover-img' and attr.content:
-                    image = os.path.join(dirname, unicode_to_str(attr.content))
+                    image = os.path.join(dirname, kaa.unicode_to_str(attr.content))
                     if os.path.isfile(image):
                         c.image = image
                 if attr.name == 'info':

@@ -36,7 +36,7 @@ __all__ = [ 'Text' ]
 import os
 import logging
 
-from kaa.strutils import to_str
+import kaa
 
 # mevas imports
 import kaa.mevas
@@ -250,5 +250,7 @@ class Text(CanvasImage):
             t = self.text[:20]
         else:
             t = self.text
-        return 'Text: "%s", zindex=%s' % (to_str(t), self.get_zindex())
+        if not isinstance(t, (str, unicode)):
+            t = str(t)
+        return 'Text: "%s", zindex=%s' % (kaa.unicode_to_str(t), self.get_zindex())
     

@@ -39,7 +39,6 @@ import logging
 
 # kaa imports
 import kaa
-from kaa.strutils import str_to_unicode
 
 # get logging object
 log = logging.getLogger()
@@ -134,7 +133,7 @@ class ObjectCache(object):
 
     def __getitem__(self, key):
         if isinstance(key, str):
-            key = str_to_unicode(key)
+            key = kaa.str_to_unicode(key)
 
         try:
             del self.lru[self.lru.index(key)]
@@ -146,7 +145,7 @@ class ObjectCache(object):
 
     def __setitem__(self, key, object):
         if isinstance(key, str):
-            key = str_to_unicode(key)
+            key = kaa.str_to_unicode(key)
 
         try:
             # remove old one if key is already in cache
@@ -167,7 +166,7 @@ class ObjectCache(object):
 
     def __delitem__(self, key):
         if isinstance(key, str):
-            key = str_to_unicode(key)
+            key = kaa.str_to_unicode(key)
 
         if not key in self.cache:
             return

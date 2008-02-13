@@ -28,7 +28,6 @@
 import re
 
 import kaa
-from kaa.strutils import unicode_to_str
 
 from freevo import plugin
 from freevo.ui import application
@@ -141,7 +140,7 @@ class PluginInterface( plugin.Plugin ):
                 if r == None:
                     return ''
                 if isinstance(r, unicode):
-                    return unicode_to_str(r)
+                    return kaa.unicode_to_str(r)
                 return str(r)
             except (SystemExit, KeyboardInterrupt):
                 raise SystemExit
@@ -163,7 +162,7 @@ class PluginInterface( plugin.Plugin ):
             args = []
             for a in w[1]:
                 if isinstance(a, unicode):
-                    a = unicode_to_str(a)
+                    a = kaa.unicode_to_str(a)
                 if isinstance(a, str) and a.find('%%') >= 0:
                     a = varreg.subn(cb, a)[0]
                 args.append(a)
