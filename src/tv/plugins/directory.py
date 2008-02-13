@@ -46,7 +46,7 @@ class PluginInterface(MainMenuPlugin):
             return [ ActionItem(_('Recorded Shows'), parent, self.browse) ]
         return []
 
-    @kaa.yield_execution()
+    @kaa.coroutine()
     def browse(self, parent):
         record_dir = yield kaa.beacon.get(config.tv.plugin.directory.path)
         d = DirItem(record_dir, parent, type='tv')

@@ -168,7 +168,7 @@ class FavoriteItem(Item):
         self.get_menustack().pushmenu(s)
 
 
-    @kaa.yield_execution()
+    @kaa.coroutine()
     def add(self):
         result = yield tvserver.favorites.add(self.title, self.channels, self.days,
                                         [self._time_to_str()], 50, False)
@@ -180,7 +180,7 @@ class FavoriteItem(Item):
         self.get_menustack().back_one_menu()
 
 
-    @kaa.yield_execution()
+    @kaa.coroutine()
     def remove(self):
         result = yield tvserver.favorites.remove(self.id)
         if result != tvserver.favorites.SUCCESS:
@@ -190,7 +190,7 @@ class FavoriteItem(Item):
             MessageWindow(text).show()
         self.get_menustack().back_one_menu()
 
-    @kaa.yield_execution()
+    @kaa.coroutine()
     def modify(self, info):
         result = yield tvserver.favorites.modify(self.id, info)
         if result != tvserver.favorites.SUCCESS:

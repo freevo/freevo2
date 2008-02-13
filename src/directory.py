@@ -326,7 +326,7 @@ class DirItem(Playlist):
         return
 
 
-    @kaa.yield_execution()
+    @kaa.coroutine()
     def browse(self):
         """
         Show the items in the directory in the menu

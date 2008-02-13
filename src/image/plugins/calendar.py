@@ -69,7 +69,7 @@ class BeaconQueryItem(Item):
         return kaa.beacon.query(timestamp=q, type='image', **query)
 
 
-    @kaa.yield_execution()
+    @kaa.coroutine()
     def select(self):
         """
         Select the item and generate a new menu.
@@ -99,7 +99,7 @@ class MonthItem(BeaconQueryItem):
         self._month = month
 
 
-    @kaa.yield_execution()
+    @kaa.coroutine()
     def get_items(self, result):
         """
         Return days as Playlist items

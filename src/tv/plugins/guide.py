@@ -95,7 +95,7 @@ class TVGuide(Menu):
         return self.channels[co]
 
 
-    @kaa.yield_execution()
+    @kaa.coroutine()
     def get_program(self, timestamp=None):
         """
         return a program object based on timestamp and the current channel.

@@ -287,7 +287,7 @@ class ProgramItem(Item):
 
     #### Actions
 
-    @kaa.yield_execution()
+    @kaa.coroutine()
     def schedule(self):
         """
         schedule this item for recording
@@ -305,7 +305,7 @@ class ProgramItem(Item):
         self.get_menustack().back_one_menu()
 
 
-    @kaa.yield_execution()
+    @kaa.coroutine()
     def remove(self):
         """
         remove this item from schedule
@@ -323,7 +323,7 @@ class ProgramItem(Item):
         self.get_menustack().back_one_menu()
 
 
-    @kaa.yield_execution()
+    @kaa.coroutine()
     def channel_details(self):
         """
         Browse all programs on this channel
@@ -353,7 +353,7 @@ class ProgramItem(Item):
         MessageWindow('Not implemented yet').show()
 
 
-    @kaa.yield_execution()
+    @kaa.coroutine()
     def search_similar(self):
         """
         Search the database for more of this program

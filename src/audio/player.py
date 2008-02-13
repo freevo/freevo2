@@ -192,7 +192,7 @@ class Player(Application):
         """
         return True
 
-    @kaa.yield_execution()
+    @kaa.coroutine()
     def suspend(self):
         """
         Release the audio resource that others can use it.
@@ -209,7 +209,7 @@ class Player(Application):
         self.free_resources()
 
     
-    @kaa.yield_execution()
+    @kaa.coroutine()
     def resume(self):
         """
         Resume playing the audio, at the position before.

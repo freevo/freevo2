@@ -68,7 +68,7 @@ class GenreItem(Item):
         return [ Action(_('Browse list'), self.browse) ]
 
 
-    @kaa.yield_execution()
+    @kaa.coroutine()
     def browse(self):
         """
         Find all the programs with this genre
@@ -110,7 +110,7 @@ class CategoryItem(Item):
         return [ Action(_('Browse list'), self.browse)]
         
    
-    @kaa.yield_execution()
+    @kaa.coroutine()
     def browse(self):
         """ 
         Find all genres that are in this category
@@ -152,7 +152,7 @@ class PluginInterface(MainMenuPlugin):
     Add 'Browse by Genre' to the TV menu.
     """
 
-    @kaa.yield_execution()
+    @kaa.coroutine()
     def category(self, parent):
         """
         Show all category.

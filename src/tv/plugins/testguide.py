@@ -124,7 +124,7 @@ class TVGuide2(GridMenu):
         else:
             return 'default'
         
-    @kaa.yield_execution()
+    @kaa.coroutine()
     def update(self):
         """
         update the guide information
