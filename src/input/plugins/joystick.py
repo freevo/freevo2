@@ -79,7 +79,7 @@ class PluginInterface(InputPlugin, ResourceHandler):
             self.free_resources()
             return
 
-        self.socket_dispatcher = kaa.SocketDispatcher(self.handle)
+        self.socket_dispatcher = kaa.IOMonitor(self.handle)
         self.socket_dispatcher.register(self.joyfd)
         self.timer = kaa.OneShotTimer(self.axis)
         self.movement = {}
