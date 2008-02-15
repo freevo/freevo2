@@ -205,7 +205,7 @@ class Player(Application):
         # FIXME: what happens if we send pause() the same time the file
         # is finished? This would create a race condition.
         self.player.pause()
-        yield kaa.YieldCallback(self.player.signals['pause'])
+        yield kaa.InProgressCallback(self.player.signals['pause'])
         self.free_resources()
 
     
@@ -225,7 +225,7 @@ class Player(Application):
             log.error('unable to get AUDIO ressource')
             yield False
         self.player.resume()
-        yield kaa.YieldCallback(self.player.signals['play'])
+        yield kaa.InProgressCallback(self.player.signals['play'])
 
 
 # create singleton object
