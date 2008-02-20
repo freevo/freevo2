@@ -57,41 +57,35 @@ class Player(Application):
         Application.__init__(self, 'videoplayer', 'video', capabilities)
         self.player = kaa.popcorn.Player()
         self.player.set_window(self.engine.get_window())
-        self.player.signals['failed'].connect_weak(self._play_failed)
         self.elapsed_timer = kaa.WeakTimer(self.elapsed)
 
 
+    @kaa.coroutine()
     def play(self, item, player=None):
         """
         play an item
         """
-        retry = kaa.Callback(self.play, item, player)
-        retry.set_ignore_caller_args(True)
         if not self.status in (STATUS_IDLE, STATUS_STOPPED):
             # Already running, stop the current player by sending a STOP
             # event. The event will also get to the playlist behind the
             # current item and the whole list will be stopped.
             Event(STOP, handler=self.eventhandler).post()
-            # Now connect to our own 'stop' signal once to repeat this current
-            # function call without the player playing
-            self.signals['stop'].connect_once(retry)
-            return True
-
+            # Now wait for our own 'stop' signal
+            yield kaa.InProgressCallback(self.signals['stop'])
+            if not self.status in (STATUS_IDLE, STATUS_STOPPED):
+                log.error('unable to stop current video playback')
+                yield False
         if not kaa.main.is_running():
             # Freevo is in shutdown mode, do not start a new player, the old
             # only stopped because of the shutdown.
-            return False
+            yield False
 
         # Try to get VIDEO and AUDIO resources. The ressouces will be freed
         # by the system when the application switches to STATUS_STOPPED or
         # STATUS_IDLE.
-        blocked = self.get_resources('AUDIO', 'VIDEO', force=True)
-        if not blocked.is_finished():
-            blocked.connect(retry)
-            return True
-        if blocked == False:
+        if (yield self.get_resources('AUDIO', 'VIDEO', force=True)) == False:
             log.error("Can't get resource AUDIO, VIDEO")
-            return False
+            yield False
         
         # store item and playlist
         self.item = item
@@ -102,32 +96,25 @@ class Player(Application):
         # set the current item to the gui engine
         self.engine.set_item(self.item)
         self.status = STATUS_RUNNING
-
-        self.player.open(self.item.url, player=player)
-        self.player.signals['end'].connect_once(PLAY_END.post, self.item)
-        self.player.signals['start'].connect_once(PLAY_START.post, self.item)
-
-        if item.info.get('interlaced'):
-            self.player.set_property('deinterlace', True)
-
-        # FIXME: set more properties
         self.is_in_menu = False
-        self.player.play()
 
-
-    def _play_failed(self):
-        """
-        Playing this item failed.
-        """
-        log.error('playback failed for %s', self.item)
-        # disconnect the signal handler with that item
-        self.player.signals['end'].disconnect(PLAY_END.post, self.item)
-        self.player.signals['start'].disconnect(PLAY_START.post, self.item)
-        # We should handle it here with a messge or something like that. To
-        # make playlist work, we just send start and stop. It's ugly but it
-        # should work.
-        PLAY_START.post(self.item)
-        PLAY_END.post(self.item)
+        self.player.signals['end'].connect_once(PLAY_END.post, self.item)
+        try:
+            yield self.player.open(self.item.url, player=player)
+            # FIXME: set more properties
+            if item.info.get('interlaced'):
+                self.player.set_property('deinterlace', True)
+            yield self.player.play()
+            PLAY_START.post(self.item)
+        except kaa.popcorn.PlayerError, e:
+            self.player.signals['end'].disconnect(PLAY_END.post, self.item)
+            log.exception('video playback failed')
+            # We should handle it here with a messge or something like that. To
+            # make playlist work, we just send start and stop. It's ugly but it
+            # should work.
+            PLAY_START.post(self.item)
+            PLAY_END.post(self.item)
+        yield True
 
 
     def stop(self):
@@ -153,7 +140,7 @@ class Player(Application):
         # FIXME: if item does not start at position 0 the start time
         # must be taken into consideration for elapsed. This happens for
         # TS files from DVB sources.
-        self.item.elapsed = round(self.player.get_position())
+        self.item.elapsed = round(self.player.position)
 
 
     def eventhandler(self, event):

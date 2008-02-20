@@ -56,15 +56,14 @@ class Player(Application):
         capabilities = (CAPABILITY_TOGGLE, CAPABILITY_PAUSE)
         Application.__init__(self, 'audioplayer', 'audio', capabilities)
         self.player = kaa.popcorn.Player()
-        self.player.signals['failed'].connect_weak(self._play_failed)
         self.elapsed_timer = kaa.WeakTimer(self.elapsed)
 
 
+    @kaa.coroutine()
     def play(self, item):
         """
         play an item
         """
-        retry = kaa.Callback(self.play, item)
         if not self.status in (STATUS_IDLE, STATUS_STOPPED):
             # Already running, stop the current player by sending a STOP
             # event. The event will also get to the playlist behind the
@@ -72,23 +71,21 @@ class Player(Application):
             Event(STOP, handler=self.eventhandler).post()
             # Now connect to our own 'stop' signal once to repeat this current
             # function call without the player playing
-            self.signals['stop'].connect_once(retry)
-            return True
-
+            yield kaa.InProgressCallback(self.signals['stop'])
+            if not self.status in (STATUS_IDLE, STATUS_STOPPED):
+                log.error('unable to stop current audio playback')
+                yield False
         if not kaa.main.is_running():
             # Freevo is in shutdown mode, do not start a new player, the old
             # only stopped because of the shutdown.
-            return False
+            yield False
 
         # Try to get AUDIO resource. The ressouce will be freed by the system
         # when the application switches to STATUS_STOPPED or STATUS_IDLE.
-        blocked = self.get_resources('AUDIO', force=True)
-        if not blocked.is_finished():
-            blocked.connect(retry)
-            return True
-        if blocked == False:
+        if (yield self.get_resources('AUDIO', force=True)) == False:
             log.error("Can't get Audio resource.")
-            return False
+            yield False
+
         # Store item and playlist. We need to keep the playlist object
         # here to make sure it is not deleted when player is running in
         # the background.
@@ -102,27 +99,22 @@ class Player(Application):
         self.status = STATUS_RUNNING
 
         # Open media item and start playback
-        self.player.open(self.item.url)
-        event = Event(PLAY_END, handler=self.eventhandler)
-        self.player.signals['end'].connect_once(event.post, self.item)
-        event = Event(PLAY_START, handler=self.eventhandler)
-        self.player.signals['start'].connect_once(event.post, self.item)
-        self.player.play()
-
-
-    def _play_failed(self):
-        """
-        Playing this item failed.
-        """
-        log.error('playback failed for %s', self.item)
-        # disconnect the signal handler with that item
-        self.player.signals['end'].disconnect(PLAY_END.post, self.item)
-        self.player.signals['start'].disconnect(PLAY_START.post, self.item)
-        # We should handle it here with a messge or something like that. To
-        # make playlist work, we just send start and stop. It's ugly but it
-        # should work.
-        PLAY_START.post(self.item)
-        PLAY_END.post(self.item)
+        play_start = Event(PLAY_START, handler=self.eventhandler)
+        play_end = Event(PLAY_END, handler=self.eventhandler)
+        self.player.signals['end'].connect_once(play_end.post, self.item)
+        try:
+            yield self.player.open(self.item.url)
+            yield self.player.play()
+            play_start.post(self.item)
+        except kaa.popcorn.PlayerError, e:
+            self.player.signals['end'].disconnect(play_end.post, self.item)
+            log.exception('video playback failed')
+            # We should handle it here with a messge or something like that. To
+            # make playlist work, we just send start and stop. It's ugly but it
+            # should work.
+            play_start.post(self.item)
+            play_end.post(self.item)
+        yield True
 
 
     def stop(self):
@@ -139,7 +131,7 @@ class Player(Application):
         """
         Callback for elapsed time changes.
         """
-        self.item.elapsed = round(self.player.get_position())
+        self.item.elapsed = round(self.player.position)
         self.engine.update()
 
 
