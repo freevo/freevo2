@@ -362,7 +362,7 @@ class DirItem(Playlist):
         """
         Update the listing.
         """
-        if self.item_menu:
+        if not self.item_menu:
             # not in the stack anymore
             self.query = None
         else:
