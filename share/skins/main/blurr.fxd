@@ -151,6 +151,12 @@
 			    align="justified" expression="plot"/>
                         <newline/>
                     </if>
+                    <if expression="not plot and description">
+                        <goto_pos x="20" mode="relative"/>
+                        <text font="info plot" height="120" mode="soft" 
+			    align="justified" expression="description"/>
+                        <newline/>
+                    </if>
                     <goto_pos y="190" mode="absolute"/>
                     <if expression="year">
                         <text font="info value">(</text>
