@@ -37,6 +37,14 @@
 #
 # -----------------------------------------------------------------------------
 
+"""
+Audio Plugin
+
+@group Core: audiodiskitem, audioitem, fxdhandler, interface, player
+@group Plugins: plugins
+
+"""
+
 from interface import *
 
 # used by audio plugins

@@ -29,6 +29,17 @@
 #
 # -----------------------------------------------------------------------------
 
+"""
+Freevo UI
+
+@group Core: application, event, util
+@group Menu: menu, mediamenu, mainmenu
+@group Media: directory, playlist, fxditem, audio, image, video, tv, games
+@group Plugins: input, plugins
+@group GUI Subsystem: gui
+
+"""
+
 # python imports
 import os
 

@@ -33,6 +33,19 @@
 #
 # -----------------------------------------------------------------------------
 
+"""
+Menu Core
+
+@group Item Classes: Item, ActionItem, MediaItem
+@group Menu and Action Classes: Action, Menu, GridMenu, MenuStack, ItemList, Files
+@group Plugins: ItemPlugin, MediaPlugin
+
+@requires: event, config.menu.arrow_navigation
+"""
+
+__all__ = [ 'Files', 'Item', 'ActionItem', 'ItemList', 'MediaItem', 'Action',
+            'Menu', 'GridMenu', 'MenuStack', 'ItemPlugin', 'MediaPlugin' ]
+
 # import the submodules
 from files import Files
 from item import Item, ActionItem

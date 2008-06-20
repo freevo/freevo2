@@ -34,6 +34,10 @@
 #
 # -----------------------------------------------------------------------------
 
+__all__ = [ 'Application', 'get_active', 'get_eventmap', 'signals',
+            'STATUS_RUNNING', 'STATUS_STOPPING', 'STATUS_STOPPED', 'STATUS_IDLE',
+            'CAPABILITY_TOGGLE', 'CAPABILITY_PAUSE', 'CAPABILITY_FULLSCREEN' ]
+
 import sys
 if 'epydoc' in sys.modules:
     __builtins__['_'] = lambda x: x
