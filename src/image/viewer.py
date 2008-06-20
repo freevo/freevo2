@@ -33,6 +33,7 @@ __all__ = [ 'viewer' ]
 
 # python imports
 import os
+import sys
 import logging
 
 # kaa imports
@@ -65,6 +66,10 @@ viewer = None
 overscan = config.gui.display.overscan
 # set config to image.viewer config
 config = config.image.viewer
+
+if 'epydoc' in sys.modules:
+    # make epydoc happy because gettext is not running
+    __builtins__['_'] = lambda x: x
 
 # FIXME: this belongs to the theme
 IMAGEVIEWER_OSD = [
@@ -535,4 +540,6 @@ class ImageViewer(Application):
             a.wait()
 
 # set viewer object
-viewer = ImageViewer()
+if not 'epydoc' in sys.modules:
+    global viewer
+    viewer = ImageViewer()

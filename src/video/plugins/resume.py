@@ -30,7 +30,10 @@
 # -----------------------------------------------------------------------------
 
 # python imports
+import sys
 import logging
+
+# kaa.imports
 import kaa.beacon
 
 # freevo imports
@@ -43,8 +46,9 @@ log = logging.getLogger()
 # variable to store the auto resume
 RESUME = 'autobookmark_resume'
 
-kaa.beacon.register_file_type_attrs('video',
-    autobookmark_resume = (int, kaa.beacon.ATTR_SIMPLE))
+if not 'epydoc' in sys.modules:
+    kaa.beacon.register_file_type_attrs('video',
+        autobookmark_resume = (int, kaa.beacon.ATTR_SIMPLE))
 
 
 class PluginInterface(ItemPlugin):

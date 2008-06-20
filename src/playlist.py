@@ -69,11 +69,12 @@ class Playlist(MediaItem, ItemList):
         """
         Init the playlist
 
-        playlist: a) a filename to a playlist file (e.g. m3u)
-                  b) a list of items to play, this list can include
-                     1) Items
-                     2) filenames
-                     3) a list (directoryname, recursive=0|1)
+        @param playlist:
+          - a filename to a playlist file (e.g. m3u)
+          - a list of items to play, this list can include
+             - Items
+             - filenames
+             - a list (directoryname, recursive=0|1)
 
         type is either a media (video,audio,image) or None for all
         """
@@ -469,21 +470,20 @@ class PluginInterface(MediaPlugin):
 
     def fxdhandler(self, node, parent, listing):
         """
-        parse playlist specific stuff from fxd files
-
-        <?xml version="1.0" ?>
-        <freevo>
-          <playlist title="foo" random="1|0" repeat="1|0">
-            <cover-img>foo.jpg</cover-img>
-            <files>
-              <directory recursive="1|0">path</directory>
-              <file>filename</file>
-            </files>
-            <info>
-              <description>A nice description</description>
-            </info>
-          </playlist>
-        </freevo>
+        Parse playlist specific stuff from fxd files::
+          <?xml version="1.0" ?>
+          <freevo>
+            <playlist title="foo" random="1|0" repeat="1|0">
+              <cover-img>foo.jpg</cover-img>
+              <files>
+                <directory recursive="1|0">path</directory>
+                <file>filename</file>
+              </files>
+              <info>
+                <description>A nice description</description>
+              </info>
+            </playlist>
+          </freevo>
         """
         items = []
         for c in node.children:

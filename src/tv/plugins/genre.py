@@ -50,6 +50,10 @@ from freevo.ui.application import MessageWindow
 # get logging object
 log = logging.getLogger('tv')
 
+if 'epydoc' in sys.modules:
+    # make epydoc happy because gettext is not running
+    __builtins__['_'] = lambda x: x
+
 EXCLUDE_GENRES = ('unknown', 'none', '', None)
 ALL_GENRE = _('All Genre')
 ALL_CAT = _('All Categories')

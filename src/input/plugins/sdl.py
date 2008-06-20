@@ -32,8 +32,11 @@
 
 # Python imports
 import weakref
-import pygame
+import sys
 import logging
+
+if not 'epydoc' in sys.modules:
+    import pygame
 
 # Freevo imports
 from freevo.ui import gui

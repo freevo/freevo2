@@ -33,6 +33,7 @@
 
 # python imports
 import re
+import sys
 import time
 
 # kaa imports
@@ -47,10 +48,16 @@ import freevo.ipc
 # freevo imports
 from freevo.ui.menu import Item, Action, ActionItem, Menu
 from freevo.ui.application import MessageWindow
-from freevo.ui.tv.program import ProgramItem
+
+# FIXME: recursive import
+import program
 
 # get tvserver interface
 tvserver = freevo.ipc.Instance('freevo').tvserver
+
+if 'epydoc' in sys.modules:
+    # make epydoc happy because gettext is not running
+    __builtins__['_'] = lambda x: x
 
 DAY_NAMES = [_('Sun'), _('Mon'), _('Tue'), _('Wed'), _('Thu'), _('Fri'), _('Sat')]
 
@@ -71,7 +78,7 @@ class FavoriteItem(Item):
         self.start = float(0)
         self.stop = float(1440*60)-1
 
-        if isinstance(fav, ProgramItem):
+        if isinstance(fav, program.ProgramItem):
             #check if already a favorite
             f = tvserver.favorites.get(fav.title, fav.channel, fav.start, fav.stop)
             if not f:

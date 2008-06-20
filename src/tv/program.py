@@ -48,6 +48,7 @@ from freevo.ui.menu import Item, Action, Menu, ActionItem
 from freevo.ui.application import MessageWindow
 
 # tv imports
+# FIXME: recursive import
 import favorite
 
 # get tvserver interface
