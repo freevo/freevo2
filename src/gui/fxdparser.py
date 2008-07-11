@@ -40,7 +40,7 @@ import codecs
 import re
 
 # xml support
-from xml.utils import qp_xml
+import qp_xml
 
 class XMLnode(object):
     """
