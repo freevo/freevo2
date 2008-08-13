@@ -71,7 +71,7 @@ class Player(Application):
             # current item and the whole list will be stopped.
             Event(STOP, handler=self.eventhandler).post()
             # Now wait for our own 'stop' signal
-            yield kaa.InProgressCallback(self.signals['stop'])
+            yield kaa.inprogress(self.signals['stop'])
             if not self.status in (STATUS_IDLE, STATUS_STOPPED):
                 log.error('unable to stop current video playback')
                 yield False

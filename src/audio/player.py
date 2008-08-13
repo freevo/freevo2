@@ -71,7 +71,7 @@ class Player(Application):
             Event(STOP, handler=self.eventhandler).post()
             # Now connect to our own 'stop' signal once to repeat this current
             # function call without the player playing
-            yield kaa.InProgressCallback(self.signals['stop'])
+            yield kaa.inprogress(self.signals['stop'])
             if not self.status in (STATUS_IDLE, STATUS_STOPPED):
                 log.error('unable to stop current audio playback')
                 yield False
@@ -197,7 +197,7 @@ class Player(Application):
         # FIXME: what happens if we send pause() the same time the file
         # is finished? This would create a race condition.
         self.player.pause()
-        yield kaa.InProgressCallback(self.player.signals['pause'])
+        yield kaa.inprogress(self.player.signals['pause'])
         self.free_resources()
 
     
@@ -217,7 +217,7 @@ class Player(Application):
             log.error('unable to get AUDIO ressource')
             yield False
         self.player.resume()
-        yield kaa.InProgressCallback(self.player.signals['play'])
+        yield kaa.inprogress(self.player.signals['play'])
 
 
 # create singleton object
