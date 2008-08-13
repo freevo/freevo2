@@ -85,6 +85,7 @@ class ApodMainMenuItem(Item):
         """
         Show a list of all APOD.
         """
+        # FIXME: yield beacon query
         listing = kaa.beacon.query(filename=self.imagedir).get(filter='extmap')
 
         # get items

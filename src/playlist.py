@@ -175,6 +175,8 @@ class Playlist(MediaItem, ItemList):
         if isinstance(self._playlist, kaa.beacon.Query):
             self._playlist = [ self._playlist ]
 
+        # FIXME: maybe beacon query is not finished
+
         # Note: playlist is a list of Items, strings (filenames) or a
         # beacon queries now.
 
@@ -193,6 +195,7 @@ class Playlist(MediaItem, ItemList):
                 item = kaa.beacon.query(filename=item)
 
             playlist = []
+            # FIXME: maybe beacon query is not finished
             fitems = item.get(filter='extmap')
             for p in plugins:
                 playlist.extend(p.get(self, fitems))
@@ -494,6 +497,7 @@ class PluginInterface(MediaPlugin):
                     f = kaa.unicode_to_str(file.content)
                     filename = os.path.join(node.dirname, f)
                     query = kaa.beacon.query(filename=filename)
+                # FIXME: yield beacon query first
                 if file.name == 'directory':
                     recursive = file.getattr('recursive') == '1'
                     query = query.get().list(recursive=recursive)

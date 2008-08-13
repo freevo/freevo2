@@ -66,7 +66,6 @@ import logging
 
 # kaa imports
 import kaa
-import kaa.beacon
 
 # freevo imports
 from videoitem import VideoItem

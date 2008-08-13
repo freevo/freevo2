@@ -77,10 +77,12 @@ class BeaconQueryItem(Item):
         all = []
         for start, stop in self.query[0]:
             result = self._query(start, stop, limit=1)
-            yield result.wait()
+            yield kaa.inprogress(result)
             if len(result) == 1:
                 all.append((start[self.query[1]], result[0]))
-        items = yield self.get_items(all)
+        items = self.get_items(all)
+        if isinstance(items, kaa.InProgress):
+            items = yield items
         menu = Menu(self.name, items, type='image')
         menu.autoselect = True
         self.get_menustack().pushmenu(menu)
@@ -108,7 +110,7 @@ class MonthItem(BeaconQueryItem):
         for day, sample in result:
             result = self._query((self._year, self._month, day),
                                  (self._year, self._month, day))
-            yield result.wait()
+            yield kaa.inprogress(result)
             p = Playlist(_('%s-%s-%s') % (self._year, self._month, day),
                          playlist=result, parent=self, type='image')
             p.info['thumbnail'] = result[0].get('thumbnail')

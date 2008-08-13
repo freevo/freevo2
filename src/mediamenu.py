@@ -89,6 +89,7 @@ class MediaMenu(MainMenuItem):
                 title = unicode(item.name)
                 filename = item.path.replace('$(HOME)', os.environ.get('HOME'))
                 filename = os.path.abspath(filename)
+                # FIXME: this part should use yield
                 listing = kaa.beacon.query(filename=filename).get(filter='extmap')
 
                 # path is a directory

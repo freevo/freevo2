@@ -99,6 +99,7 @@ class ArtistItem(Item):
         Show all albums from the artist.
         """
         # FIXME: monitor query for live update
+        # FIXME: yield beacon query
         query = kaa.beacon.query(attr='album', artist=self.artist, type='audio')
 
         items = [ AlbumItem(self.artist, None, self) ]
@@ -125,6 +126,7 @@ class PluginInterface(MainMenuPlugin):
         Show all artists.
         """
         items = []
+        # FIXME: yield beacon query
         for artist in kaa.beacon.query(attr='artist', type='audio'):
             items.append(ArtistItem(artist, parent))
         parent.get_menustack().pushmenu(Menu(_('Artists'), items, type='audio'))

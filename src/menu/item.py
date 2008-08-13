@@ -40,7 +40,6 @@ import logging
 
 # kaa imports
 from kaa.weakref import weakref
-import kaa.beacon
 
 # menu imports
 from plugin import ItemPlugin

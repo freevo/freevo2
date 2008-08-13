@@ -219,7 +219,8 @@ class DirItem(Playlist):
         # FIXME: make sure this is only called once in each iteration and
         listing = kaa.beacon.query(parent=self.info)
         if not listing.valid:
-            listing.wait().connect(self.set_num_items, redraw=True)
+            # FIXME: clean this up
+            kaa.inprogress(listing).connect(self.set_num_items, listing=listing, redraw=True).set_ignore_caller_args()
             return None
         self.set_num_items(listing, redraw=False)
         return get_num_items(type)
@@ -346,10 +347,11 @@ class DirItem(Playlist):
 
         self.item_menu = None
         self.query = kaa.beacon.query(parent=self.info)
-        if not self.query.valid:
-            yield self.query.wait()
+        # FIXME: yield after connect and monitor but that crashes
+        yield kaa.inprogress(self.query)
         self.query.signals['changed'].connect_weak(self._update_listing)
         self.query.monitor()
+        yield kaa.inprogress(self.query)
 
         items = self._get_items()
         item_menu = menu.Menu(self.name, items, type = self.menu_type)

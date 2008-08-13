@@ -91,7 +91,8 @@ class ArtistAlbumView(GridMenu):
         self.artists_base = 0
         self.artists = []
 
-        #Query all artists.
+        # Query all artists.
+        # FIXME: yield beacon query
         for artist in kaa.beacon.query(attr='artist', type='audio'):
             self.artists.append(artist)
 
@@ -105,6 +106,7 @@ class ArtistAlbumView(GridMenu):
         items = []
         for artist in self.artists:
             # FIXME: monitor query for live update
+            # FIXME: yield beacon query
             query = kaa.beacon.query(attr='album', artist=artist, type='audio')
     
             albums = [ AlbumItem(artist, None, self) ]
