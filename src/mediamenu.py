@@ -78,6 +78,7 @@ class MediaMenu(MainMenuItem):
                 kaa.beacon.monitor(filename)
 
 
+    @kaa.coroutine()
     def _get_config_items(self):
         """
         Generate items based on the config settings
@@ -89,9 +90,7 @@ class MediaMenu(MainMenuItem):
                 title = unicode(item.name)
                 filename = item.path.replace('$(HOME)', os.environ.get('HOME'))
                 filename = os.path.abspath(filename)
-                # FIXME: this part should use yield
-                listing = kaa.beacon.query(filename=filename).get(filter='extmap')
-
+                listing = (yield kaa.beacon.query(filename=filename)).get(filter='extmap')
                 # path is a directory
                 if os.path.isdir(filename):
                     for d in listing.get('beacon:dir'):
@@ -110,7 +109,7 @@ class MediaMenu(MainMenuItem):
             except:
                 log.exception('Error parsing %s' % str(item))
                 continue
-        return items
+        yield items
 
     
     def _get_beacon_items(self):
@@ -140,20 +139,22 @@ class MediaMenu(MainMenuItem):
         return items
 
 
+    @kaa.coroutine()
     def _get_all_items(self):
         """
         Return items for the menu.
         """
-        return self._get_config_items() + self._get_beacon_items() + \
-               self._get_plugin_items()
+        cfg = yield self._get_config_items()
+        yield cfg + self._get_beacon_items() + self._get_plugin_items()
 
 
+    @kaa.coroutine()
     def select(self):
         """
         Display the media menu
         """
         # generate all other items
-        items = self._get_all_items()
+        items = yield self._get_all_items()
         type = '%s main menu' % self.media_type
         item_menu = Menu(self.menutitle, items, type = type,
                          reload_func = self.reload)
@@ -162,20 +163,24 @@ class MediaMenu(MainMenuItem):
         self.get_menustack().pushmenu(item_menu)
 
 
+    @kaa.coroutine()
     def reload(self):
         """
         Reload the menu. maybe a disc changed or some other plugin.
         """
         if self.item_menu:
-            self.item_menu.set_items(self._get_all_items())
+            items = yield self._get_all_items()
+            self.item_menu.set_items(items)
 
 
+    @kaa.coroutine()
     def media_change(self, media):
         """
         Media change from kaa.beacon
         """
         if self.item_menu:
-            self.item_menu.set_items(self._get_all_items())
+            items = yield self._get_all_items()
+            self.item_menu.set_items(items)
 
 
     def eventhandler(self, event):

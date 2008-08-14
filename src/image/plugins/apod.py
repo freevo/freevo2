@@ -73,21 +73,19 @@ class ApodMainMenuItem(Item):
         current.description = _('Download the current picture')
 
         # previous images
-        previous = ActionItem(_('Previous Pictures'), self,
-                              self.browse_pictures)
+        previous = ActionItem(_('Previous Pictures'), self, self.browse_pictures)
         previous.description = _('Browse all previously downloaded images')
 
         # add menu
         self.get_menustack().pushmenu(Menu( _( 'Apod Pictures' ), [ current, previous ]))
 
 
+    @kaa.coroutine()
     def browse_pictures(self):
         """
         Show a list of all APOD.
         """
-        # FIXME: yield beacon query
-        listing = kaa.beacon.query(filename=self.imagedir).get(filter='extmap')
-
+        listing = (yield kaa.beacon.query(filename=self.imagedir)).get(filter='extmap')
         # get items
         items = []
         for p in MediaPlugin.plugins('image'):

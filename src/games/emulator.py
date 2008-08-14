@@ -244,6 +244,7 @@ class EmulatorMenuItem(MainMenuItem):
                 kaa.beacon.monitor(filename)
 
 
+    @kaa.coroutine()
     def main_menu_generate(self):
         """
         generate the itmes for the games menu. This is needed when first
@@ -267,10 +268,11 @@ class EmulatorMenuItem(MainMenuItem):
                     filename = item.filename
                 filename = os.path.abspath(filename)
                 if os.path.isdir(filename):
-                    query = kaa.beacon.query(filename=filename)
+                    query = yield kaa.beacon.query(filename=filename)
                     for d in query.get(filter='extmap').get('beacon:dir'):
+                        sub_d = yield d.list().get()
                         items.append(EmulatorMenuItem(self, "[%s]"%title, \
-                                d.list().get(), self.gamepluginlist, \
+                                sub_d, self.gamepluginlist, \
                                 self.configitem, root=False))
                     continue
 
@@ -282,7 +284,7 @@ class EmulatorMenuItem(MainMenuItem):
                         filename = filename[1:]
                     filename = os.path.join(SHAREDIR, filename)
 
-                query = kaa.beacon.query(filename=filename)
+                query = yield kaa.beacon.query(filename=filename)
                 listing = query.get()
                 g_items = self.gamepluginlist(self, listing, self.configitem)
                 if g_items:
@@ -299,18 +301,20 @@ class EmulatorMenuItem(MainMenuItem):
                 if g_items:
                     items += g_items
                 for d in listing.get('beacon:dir'):
+                    sub_d = yield d.list().get()
                     items.append(EmulatorMenuItem(self, "[%s]"%media.label, \
-                            d.list().get(), self.gamepluginlist, \
+                            sub_d, self.gamepluginlist, \
                             self.configitem, root=False))
 
-        return items
+        yield items
 
 
+    @kaa.coroutine()
     def select(self):
         """
         display the emulator menu
         """
-        items = self.main_menu_generate()
+        items = yield self.main_menu_generate()
 
         type = ""
         item_menu = Menu(self.menutitle, items, type=type, \
@@ -321,20 +325,24 @@ class EmulatorMenuItem(MainMenuItem):
         self.get_menustack().pushmenu(item_menu)
 
 
+    @kaa.coroutine()
     def reload(self):
         """
         Reload the menu items
         """
         if self.item_menu:
-            self.item_menu.set_items(self.main_menu_generate())
+            items = yield self.main_menu_generate()
+            self.item_menu.set_items(items)
 
 
+    @kaa.coroutine()
     def media_change(self, media):
         """
         Media change from kaa.beacon
         """
         if self.item_menu:
-            self.item_menu.set_items(self.main_menu_generate())
+            items = yield self.main_menu_generate()
+            self.item_menu.set_items(items)
 
 
     def eventhandler(self, event):

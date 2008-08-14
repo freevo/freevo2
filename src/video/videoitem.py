@@ -195,6 +195,7 @@ class VideoItem(MediaItem):
         return items
 
 
+    @kaa.coroutine()
     def dvd_vcd_title_menu(self):
         """
         Generate special menu for DVD/VCD/SVCD content
@@ -204,7 +205,7 @@ class VideoItem(MediaItem):
 
         # build a menu
         items = []
-        for track in self.info.list().get():
+        for track in (yield self.info.list()):
             if not track.get('length') or not track.get('audio'):
                 # bad track, skip it
                 continue

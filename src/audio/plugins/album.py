@@ -59,18 +59,20 @@ class AlbumItem(MediaItem):
             self.name = album
 
 
+    @kaa.coroutine()
     def browse(self):
         """
         Show all items from that artist.
         """
         title = kaa.str_to_unicode(self.artist)
         if self.album:
-            query = kaa.beacon.query(artist=self.artist, album=self.album, type='audio')
+            query = dict(artist=self.artist, album=self.album, type='audio')
             title = '%s - %s' % (title, kaa.str_to_unicode(self.album))
         else:
-            query = kaa.beacon.query(artist=self.artist, type='audio')
+            query = dict(artist=self.artist, type='audio')
         # FIXME: monitor query for live update
-        self.playlist = Playlist(title, query, self, type='audio')
+        async = kaa.beacon.query(**query)
+        self.playlist = Playlist(title, async, self, type='audio')
         self.playlist.browse()
 
 
@@ -90,24 +92,24 @@ class ArtistAlbumView(GridMenu):
         GridMenu.__init__(self, _('Artist/Albums View'), type = 'audio grid')
         self.artists_base = 0
         self.artists = []
-
-        # Query all artists.
-        # FIXME: yield beacon query
-        for artist in kaa.beacon.query(attr='artist', type='audio'):
-            self.artists.append(artist)
-
         self.col_row_swap = False
         self.update()
 
+    @kaa.coroutine()
     def update(self):
         """
         update the guide area
         """
+        self.artists = []
+        # Query all artists.
+        for artist in (yield kaa.beacon.query(attr='artist', type='audio')):
+            self.artists.append(artist)
+
         items = []
         for artist in self.artists:
             # FIXME: monitor query for live update
             # FIXME: yield beacon query
-            query = kaa.beacon.query(attr='album', artist=artist, type='audio')
+            query = yield kaa.beacon.query(attr='album', artist=artist, type='audio')
     
             albums = [ AlbumItem(artist, None, self) ]
             for album in query:

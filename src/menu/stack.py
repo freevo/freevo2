@@ -139,7 +139,8 @@ class MenuStack(object):
             # this menu. If the functions returns something, replace
             # the old menu with the returned one.
             new_menu = menu.reload_func()
-            if new_menu:
+            if new_menu and not isinstance(new_menu, kaa.InProgress):
+                # FIXME: is this special case needed?
                 self.menustack[-1] = new_menu
                 menu = new_menu
 

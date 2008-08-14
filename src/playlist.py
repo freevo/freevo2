@@ -63,7 +63,7 @@ class Playlist(MediaItem, ItemList):
     REPEAT_PLAYLIST = 2
 
     type = 'playlist'
-    
+
     def __init__(self, name='', playlist=[], parent=None, type=None,
                  random=False, autoplay=False, repeat=REPEAT_OFF):
         """
@@ -71,12 +71,10 @@ class Playlist(MediaItem, ItemList):
 
         @param playlist:
           - a filename to a playlist file (e.g. m3u)
-          - a list of items to play, this list can include
-             - Items
-             - filenames
-             - a list (directoryname, recursive=0|1)
-
-        type is either a media (video,audio,image) or None for all
+          - a list of Items, beacon Items or filenames
+          - a beacon query
+          - an inprogress object pointing to something from the above
+        @param type: either a media (video,audio,image) or None for all
         """
         MediaItem.__init__(self, parent)
         ItemList.__init__(self)
@@ -146,6 +144,7 @@ class Playlist(MediaItem, ItemList):
         return playlist
 
 
+    @kaa.coroutine(policy=kaa.POLICY_SINGLETON)
     def _playlist_create_items(self):
         """
         Build the playlist. Create a list of items and filenames. This function
@@ -155,6 +154,11 @@ class Playlist(MediaItem, ItemList):
 
         # create a basic info object
         items = []
+
+        if isinstance(self._playlist, kaa.InProgress):
+            # something not finished, wait
+            # This may happen for a beacon query
+            self._playlist = yield self._playlist
 
         if isinstance(self._playlist, (str, unicode)):
             # playlist is a filename, load the file and create playlist
@@ -175,10 +179,8 @@ class Playlist(MediaItem, ItemList):
         if isinstance(self._playlist, kaa.beacon.Query):
             self._playlist = [ self._playlist ]
 
-        # FIXME: maybe beacon query is not finished
-
         # Note: playlist is a list of Items, strings (filenames) or a
-        # beacon queries now.
+        # beacon query now.
 
         plugins = MediaPlugin.plugins(self.media_type)
         for item in self._playlist:
@@ -192,10 +194,9 @@ class Playlist(MediaItem, ItemList):
 
             if not isinstance(item, kaa.beacon.Query):
                 # make item a beacon query
-                item = kaa.beacon.query(filename=item)
+                item = yield kaa.beacon.query(filename=item)
 
             playlist = []
-            # FIXME: maybe beacon query is not finished
             fitems = item.get(filter='extmap')
             for p in plugins:
                 playlist.extend(p.get(self, fitems))
@@ -237,57 +238,46 @@ class Playlist(MediaItem, ItemList):
         """
         return the actions for this item: play and browse
         """
-        if not self._playlist_valid:
-            self._playlist_create_items()
-
         browse = Action(_('Browse Playlist'), self.browse)
         play = Action(_('Play'), self.play)
-
         if self.autoplay:
             items = [ play, browse ]
         else:
             items = [ browse, play ]
-
         if not self._random:
             items.append(Action(_('Random play all items'), self._play_random))
-
         return items
 
 
+    @kaa.coroutine()
     def browse(self):
         """
         show the playlist in the menu
         """
         if not self._playlist_valid:
-            self._playlist_create_items()
-
+            yield self._playlist_create_items()
         # randomize if needed
         self._randomize()
-
         menu = Menu(self.name, self.choices, type = self.media_type)
         self.get_menustack().pushmenu(menu)
 
 
+    @kaa.coroutine()
     def play(self):
         """
         play the playlist
         """
         if not self._playlist_valid:
-            self._playlist_create_items()
-
+            yield self._playlist_create_items()
         if not self.choices:
             log.warning('empty playlist')
-            return False
-
+            yield False
         # randomize if needed
         self._randomize()
-
         if self.background_playlist:
             self.background_playlist.play()
-
         # FIXME: add random code
         self.next_pos = 0
-
         # Send a PLAY_START event for ourself
         PLAY_START.post(self)
         self._play_next()
@@ -488,6 +478,8 @@ class PluginInterface(MediaPlugin):
             </playlist>
           </freevo>
         """
+        # FIXME: code is broken
+        return []
         items = []
         for c in node.children:
             if not c.name == 'files':
@@ -496,10 +488,11 @@ class PluginInterface(MediaPlugin):
                 if file.name in ('file', 'directory'):
                     f = kaa.unicode_to_str(file.content)
                     filename = os.path.join(node.dirname, f)
+                    # FIXME: unable to yield in fxdhandler
                     query = kaa.beacon.query(filename=filename)
-                # FIXME: yield beacon query first
                 if file.name == 'directory':
                     recursive = file.getattr('recursive') == '1'
+                    # FIXME: list returns InProgress
                     query = query.get().list(recursive=recursive)
                 items.append(query)
 

@@ -37,6 +37,9 @@ __all__ = [ 'AudioDiskItem' ]
 import os
 import logging
 
+# kaa imports
+import kaa
+
 # Freevo imports
 from freevo.ui import config
 
@@ -69,12 +72,13 @@ class AudioDiskItem(Playlist):
         return [ Action(_('Browse disc'), self.browse ) ]
 
 
+    @kaa.coroutine()
     def browse(self):
         """
         Make a menu item for each file in the directory
         """
         play_items = []
-        for track in self.info.list().get():
+        for track in (yield self.info.list()):
             play_items.append(AudioItem(track, self))
 
         # add all playable items to the playlist of the directory

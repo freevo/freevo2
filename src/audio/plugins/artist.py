@@ -63,12 +63,13 @@ class AlbumItem(Item):
         """
         title = kaa.str_to_unicode(self.artist)
         if self.album:
-            query = kaa.beacon.query(artist=self.artist, album=self.album, type='audio')
+            query = dict(artist=self.artist, album=self.album, type='audio')
             title = '%s - %s' % (title, kaa.str_to_unicode(self.album))
         else:
-            query = kaa.beacon.query(artist=self.artist, type='audio')
+            query = dict(artist=self.artist, type='audio')
         # FIXME: monitor query for live update
-        self.playlist = Playlist(title, query, self, type='audio')
+        async = kaa.beacon.query(**query)
+        self.playlist = Playlist(title, async, self, type='audio')
         self.playlist.browse()
 
 
@@ -87,21 +88,19 @@ class ArtistItem(Item):
     def __init__(self, artist, parent):
         Item.__init__(self, parent)
         self.artist = artist
-
         # Work around a beacon bug
         for part in artist.split(' '):
             self.name += ' ' + kaa.str_to_unicode(part.capitalize())
         self.name = self.name.strip()
 
 
+    @kaa.coroutine()
     def browse(self):
         """
         Show all albums from the artist.
         """
         # FIXME: monitor query for live update
-        # FIXME: yield beacon query
-        query = kaa.beacon.query(attr='album', artist=self.artist, type='audio')
-
+        query = yield kaa.beacon.query(attr='album', artist=self.artist, type='audio')
         items = [ AlbumItem(self.artist, None, self) ]
         for album in query:
             items.append(AlbumItem(self.artist, album, self))
@@ -121,13 +120,13 @@ class PluginInterface(MainMenuPlugin):
     Add 'Browse by Artist' to the audio menu.
     """
 
+    @kaa.coroutine()
     def artists(self, parent):
         """
         Show all artists.
         """
         items = []
-        # FIXME: yield beacon query
-        for artist in kaa.beacon.query(attr='artist', type='audio'):
+        for artist in (yield kaa.beacon.query(attr='artist', type='audio')):
             items.append(ArtistItem(artist, parent))
         parent.get_menustack().pushmenu(Menu(_('Artists'), items, type='audio'))
 

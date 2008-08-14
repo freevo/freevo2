@@ -185,10 +185,13 @@ class DirItem(Playlist):
         return self.media_type in value.split(',')
 
 
-    def set_num_items(self, listing, redraw=False):
+    @kaa.coroutine(policy=kaa.POLICY_SINGLETON)
+    def query_num_items(self):
         """
         Set the number of items in the directory based on the listing.
         """
+        log.info('create metainfo for %s', self.filename)
+        listing = yield kaa.beacon.query(parent=self.info)
         listing = listing.get(filter='extmap')
         mediatype = ''
         if self.media_type:
@@ -199,9 +202,8 @@ class DirItem(Playlist):
         self['cache:num_items_play%s' % media_type] = num
         self['cache:num_items_dir%s' % media_type] = len(listing.get('beacon:dir'))
         self['cache:num_items_all%s' % media_type] = num + len(listing.get('beacon:dir'))
-        if redraw:
-            # FIXME: what happens if a download is happening in that dir?
-            self.get_menustack().refresh()
+        # FIXME: what happens if a download is happening in that dir?
+        self.get_menustack().refresh()
 
 
     def get_num_items(self, type='all'):
@@ -215,15 +217,8 @@ class DirItem(Playlist):
         num = Playlist.get(self, key)
         if num is not None:
             return num
-        log.info('create metainfo for %s', self.filename)
-        # FIXME: make sure this is only called once in each iteration and
-        listing = kaa.beacon.query(parent=self.info)
-        if not listing.valid:
-            # FIXME: clean this up
-            kaa.inprogress(listing).connect(self.set_num_items, listing=listing, redraw=True).set_ignore_caller_args()
-            return None
-        self.set_num_items(listing, redraw=False)
-        return get_num_items(type)
+        self.query_num_items()
+        return None
 
 
     def eventhandler(self, event):
@@ -306,7 +301,7 @@ class DirItem(Playlist):
         return items
 
 
-
+    @kaa.coroutine()
     def play(self, random=False, recursive=False):
         """
         play directory
@@ -315,11 +310,9 @@ class DirItem(Playlist):
         if not os.path.exists(self.filename):
 	    MessageWindow(_('Directory does not exist')).show()
             return
-        query = kaa.beacon.query(parent=self.info, recursive=recursive)
-        pl = Playlist(playlist = query, parent = self,
-                      type=self.media_type, random=random)
+        items = yield kaa.beacon.query(parent=self.info, recursive=recursive)
+        pl = Playlist(playlist=items, parent=self, type=self.media_type, random=random)
         pl.play()
-
         # Now this is ugly. If we do nothing 'pl' will be deleted by the
         # garbage collector, so we have to store it somehow
         self.__pl_for_gc = pl
@@ -346,12 +339,9 @@ class DirItem(Playlist):
             return
 
         self.item_menu = None
-        self.query = kaa.beacon.query(parent=self.info)
-        # FIXME: yield after connect and monitor but that crashes
-        yield kaa.inprogress(self.query)
+        self.query = yield kaa.beacon.query(parent=self.info)
         self.query.signals['changed'].connect_weak(self._update_listing)
         self.query.monitor()
-        yield kaa.inprogress(self.query)
 
         items = self._get_items()
         item_menu = menu.Menu(self.name, items, type = self.menu_type)
