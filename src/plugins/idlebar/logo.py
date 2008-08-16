@@ -31,8 +31,10 @@
 
 import os
 
-from freevo.ui import gui, SHAREDIR
-from freevo.ui.gui import theme, widgets
+import kaa.candy
+
+# from freevo.ui import gui, SHAREDIR
+# from freevo.ui.gui import theme, widgets
 from plugin import IdleBarPlugin
 
 class PluginInterface(IdleBarPlugin):
@@ -43,21 +45,4 @@ class PluginInterface(IdleBarPlugin):
         IdleBarPlugin.__init__(self)
         self.image  = image
         self.file   = file
-
-
-    def draw(self, width, height):
-        if not self.image:
-            image = theme.image('logo')
-        else:
-            image = os.path.join(SHAREDIR, 'images', self.image)
-
-        if self.objects and self.file == image:
-            return self.NO_CHANGE
-
-        self.file = image
-        self.clear()
-
-        i = widgets.Image((image, (None, height + 10)), (0, 0))
-        self.objects.append(i)
-
-        return i.width
+        self.widget = kaa.candy.Image((0,0), (200, 100), '../../images/logo.png')

@@ -56,7 +56,7 @@ class Player(Application):
         capabilities = (CAPABILITY_FULLSCREEN, )
         Application.__init__(self, 'videoplayer', 'video', capabilities)
         self.player = kaa.popcorn.Player()
-        self.player.set_window(self.engine.get_window())
+        # self.player.set_window(self.engine.get_window())
         self.elapsed_timer = kaa.WeakTimer(self.elapsed)
 
 
@@ -94,7 +94,7 @@ class Player(Application):
             self.playlist.select(self.item)
 
         # set the current item to the gui engine
-        self.engine.set_item(self.item)
+        # self.engine.set_item(self.item)
         self.status = STATUS_RUNNING
         self.is_in_menu = False
 

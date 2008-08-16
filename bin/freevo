@@ -87,6 +87,9 @@ try:
     except ImportError:
         pass
 
+    import kaa.display
+    import kaa.candy
+
     # now load other modules to check if all requirements are installed
     import pysqlite2
 
@@ -138,9 +141,6 @@ try:
             else:
                 freevo.plugin.activate(p, level=c.activate)
     
-    if config.gui.display.engine.lower() == 'sdl':
-        import pygame
-
 except ImportError, i:
     print 'ImportError: %s' % i
     print 'Not all requirements of Freevo are installed on your system.'
@@ -156,32 +156,33 @@ except ImportError, i:
 # will wait for an ir command to start freevo
 #
 
-if len(sys.argv) == 2 and sys.argv[1] in ('-daemon', '--daemon', '-d'):
-    from kaa.input import lirc
+# CANDY-FIXME
+# if len(sys.argv) == 2 and sys.argv[1] in ('-daemon', '--daemon', '-d'):
+#     from kaa.input import lirc
 
-    def handle_key(key):
-        if not key in ( 'EXIT', 'POWER' ):
-            return True
-        lirc.stop()
-        options = ''
-        if config.gui.display.engine.lower() in ( 'imlib2', ) and not \
-               (os.environ.has_key('DISPLAY') and os.environ['DISPLAY']):
-            options = '-fs'
-        log.info('start freevo %s', options)
-        os.system('%s %s >/dev/null 2>/dev/null' % (sys.argv[0], options))
-        lirc.init('freevo', config.input.plugin.lirc.lircrc)
-        log.info('freevo stopped')
-        return True
+#     def handle_key(key):
+#         if not key in ( 'EXIT', 'POWER' ):
+#             return True
+#         lirc.stop()
+#         options = ''
+#         if config.gui.display.engine.lower() in ( 'imlib2', ) and not \
+#                (os.environ.has_key('DISPLAY') and os.environ['DISPLAY']):
+#             options = '-fs'
+#         log.info('start freevo %s', options)
+#         os.system('%s %s >/dev/null 2>/dev/null' % (sys.argv[0], options))
+#         lirc.init('freevo', config.input.plugin.lirc.lircrc)
+#         log.info('freevo stopped')
+#         return True
 
-    if not lirc.init('freevo', config.input.plugin.lirc.lircrc):
-        log.error('Could not initialize PyLirc!')
-        sys.exit(1)
+#     if not lirc.init('freevo', config.input.plugin.lirc.lircrc):
+#         log.error('Could not initialize PyLirc!')
+#         sys.exit(1)
 
-    kaa.signals['lirc'].connect(handle_key)
-    log.info('daemon running')
-    kaa.main.run()
-    log.info('daemon done')
-    sys.exit(1)
+#     kaa.signals['lirc'].connect(handle_key)
+#     log.info('daemon running')
+#     kaa.main.run()
+#     log.info('daemon done')
+#     sys.exit(1)
 
 #
 # Fullscreen X mode
@@ -189,134 +190,54 @@ if len(sys.argv) == 2 and sys.argv[1] in ('-daemon', '--daemon', '-d'):
 # Start a new X server and run Freevo as windowmanager in fullscreen mode. This
 # could require xrandr in the future to have a better effect
 #
-if len(sys.argv) == 2 and sys.argv[1] in ('-fs', '--fullscreen', '-f'):
-    # start X server and run freevo, ignore everything else for now
-    server_num = 0
-    while 1:
-        if not os.path.exists('/tmp/.X11-unix/X' + str(server_num)):
-            break
-        server_num += 1
-    sys.stdin.close()
-    os.execvp('xinit', [ 'xinit', sys.argv[0], '-force-fs',  '--', ':'+str(server_num) ])
+# CANDY-FIXME
+# if len(sys.argv) == 2 and sys.argv[1] in ('-fs', '--fullscreen', '-f'):
+#     # start X server and run freevo, ignore everything else for now
+#     server_num = 0
+#     while 1:
+#         if not os.path.exists('/tmp/.X11-unix/X' + str(server_num)):
+#             break
+#         server_num += 1
+#     sys.stdin.close()
+#     os.execvp('xinit', [ 'xinit', sys.argv[0], '-force-fs',  '--', ':'+str(server_num) ])
 
 # freevo imports
 from freevo import beacon
-from freevo.ui.gui import theme, widgets, animation, displays, areas
+import freevo.ui.gui
 
 # load the fxditem to make sure it's the first in the
 # mimetypes list
 import freevo.ui.fxditem
 
-# freevo core imports
-import freevo.ipc
-
 from freevo.ui.mainmenu import MainMenu
-
-class Splashscreen(areas.Area):
-    """
-    A simple splash screen for osd startup
-    """
-    def __init__(self, text, max_value):
-        areas.Area.__init__(self, 'content')
-        self.max_value = max_value
-        self.text      = text
-        self.bar       = None
-        self.engine    = areas.Handler('splashscreen', ('screen', self))
-        self.engine.show()
-
-
-    def clear(self):
-        """
-        clear all content objects
-        """
-        self.bar.unparent()
-        self.text.unparent()
-
-
-    def update(self):
-        """
-        update the splashscreen
-        """
-        if self.bar:
-            return
-
-        settings = self.settings
-        x0, x1 = settings.x, settings.x + settings.width
-        y = settings.y + settings.font.font.height + settings.spacing
-
-        self.text = self.drawstring(self.text, settings.font, settings,
-                                    height=-1, align_h='center')
-        self.bar = widgets.Progressbar((x0, y), (x1-x0, 20), 2, (0,0,0),
-                                       None, 0, None, (0,0,0,95), 0,
-                                       self.max_value)
-        self.layer.add_child(self.bar)
-
-
-    def progress(self):
-        """
-        set the progress position and refresh the screen
-        """
-        if self.bar:
-            self.bar.tick()
-        if self.engine:
-            self.engine.draw(None)
-
-
-    def hide(self):
-        """
-        fade out
-        """
-        self.engine.hide(config.gui.theme.fadestep)
-
-
-    def destroy(self):
-        """
-        destroy the object
-        """
-        del self.engine
-
 
 #
 # Freevo main function
 #
 
 # parse arguments
-if len(sys.argv) >= 2:
+# CANDY-FIXME
+# if len(sys.argv) >= 2:
 
-    # force fullscreen mode
-    # deactivate screen blanking and set osd to fullscreen
-    if '-force-fs' in sys.argv[1]:
-        os.system('xset -dpms s off')
-        displays.fullscreen = True
+#     # force fullscreen mode
+#     # deactivate screen blanking and set osd to fullscreen
+#     if '-force-fs' in sys.argv[1]:
+#         os.system('xset -dpms s off')
+#         displays.fullscreen = True
 
 try:
-    freevo.ipc.Instance('freevo')
-
-    # create gui
-    displays.create()
-
     # Fire up splashscreen and load the plugins
-    splash = Splashscreen(_('Starting Freevo, please wait ...'), num_plugins-1)
-
+    progress = freevo.ui.gui.show_application('splash').get_widget('plugins')
+    progress.max = num_plugins-1
+    
     # load plugins
-    freevo.plugin.init(freevo.ui, splash.progress)
-
-    # fade out the splash screen
-    splash.hide()
+    freevo.plugin.init(freevo.ui, progress.inc)
 
     # prepare again, now that all plugins are loaded
-    theme.get().prepare()
+    freevo.ui.gui.load_theme()
 
     # start menu
     MainMenu()
-
-    # Wait for the startup animation. This is a bad hack but we won't
-    # be able to remove our splashscreen otherwise. Big FIXME!
-    animation.render().wait()
-
-    # delete splash screen
-    splash.destroy()
-    del splash
 
     # start main loop
     kaa.main.run()

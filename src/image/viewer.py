@@ -42,15 +42,10 @@ from kaa.strutils import to_unicode
 
 # freevo imports
 from freevo import plugin
-from freevo.ui import gui
-from freevo.ui.gui import theme, imagelib, widgets
 from freevo.ui import config
 
 # cache for loading images
 from freevo.ui.util import ObjectCache
-
-# Transition/Move/VERTICAL
-from freevo.ui.gui.animation import *
 
 from freevo.ui.event import *
 from freevo.ui.application import Application, STATUS_RUNNING, STATUS_STOPPING, \
@@ -63,7 +58,7 @@ log = logging.getLogger('image')
 viewer = None
 
 # gui.display.overscan config
-overscan = config.gui.display.overscan
+# overscan = config.gui.display.overscan
 # set config to image.viewer config
 config = config.image.viewer
 
@@ -123,8 +118,8 @@ class ImageViewer(Application):
         Application not running anymore, free cache and remove items
         from the screen.
         """
-        if self.last_image:
-            self.last_image.unparent()
+#         if self.last_image:
+#             self.last_image.unparent()
         self.last_image = None
         self.last_item  = None
 
@@ -171,140 +166,141 @@ class ImageViewer(Application):
         if self.playlist:
             self.playlist.select(self.item)
 
-        if not self.last_item:
-            # We just started, update the screen to make it
-            # empty (all hides from the menu are updated)
-            self.engine.update()
+#         if not self.last_item:
+#             # We just started, update the screen to make it
+#             # empty (all hides from the menu are updated)
+#             self.gui_update()
 
-        self.status = STATUS_RUNNING
-
-        # only load new image when the image changed
-        if self.filename == filename and self.rotation == rotation and \
-               len(filename) > 0:
-            if self.zoom == zoom:
-                # same image, only update the osd and the timer
-                self.drawosd()
-                self.engine.update()
-                return
-            if not isinstance(zoom, int):
-                # only zoom change
-                self.last_image.set_pos((-zoom[0], -zoom[1]))
-                self.zoom = zoom
-                self.engine.update()
-                return
-            if self.zoom and zoom:
-                log.info('FIXME: do not create the complete image again')
+#         # only load new image when the image changed
+#         if self.filename == filename and self.rotation == rotation and \
+#                len(filename) > 0:
+#             if self.zoom == zoom:
+#                 # same image, only update the osd and the timer
+#                 # self.drawosd()
+#                 self.gui_update()
+#                 return
+#             if not isinstance(zoom, int):
+#                 # only zoom change
+# #                 self.last_image.set_pos((-zoom[0], -zoom[1]))
+#                 self.zoom = zoom
+#                 self.gui_update()
+#                 return
+#             if self.zoom and zoom:
+#                 log.info('FIXME: do not create the complete image again')
 
         self.filename = filename
         self.rotation = rotation
 
-        if filename and len(filename) > 0:
-            image = self.bitmapcache[filename]
-            if not image:
-                image = imagelib.load(filename)
-                self.bitmapcache[filename] = image
-        else:
-            # Using Container-Image
-            image = item.loadimage()
+#         if filename and len(filename) > 0:
+#             image = self.bitmapcache[filename]
+#             if not image:
+#                 image = imagelib.load(filename)
+#                 self.bitmapcache[filename] = image
+#         else:
+#             # Using Container-Image
+#             image = item.loadimage()
 
-        if not image:
-            # FIXME: add error message to the screen
-            return
+#         if not image:
+#             # FIXME: add error message to the screen
+#             return
 
-        width, height = image.width, image.height
-        gui_width = gui.get_display().width
-        gui_height = gui.get_display().height
+#         width, height = image.width, image.height
+#         gui_width = gui.get_display().width
+#         gui_height = gui.get_display().height
 
-        # Bounding box default values
-        bbx = bby = bbw = bbh = 0
+#         # Bounding box default values
+#         bbx = bby = bbw = bbh = 0
 
-        if self.rotation % 180:
-            height, width = width, height
+#         if self.rotation % 180:
+#             height, width = width, height
 
-        if zoom:
-            # Translate the 9-element grid to bounding boxes
-            bb = { 1:(0,0), 2:(1,0), 3:(2,0),
-                   4:(0,1), 5:(1,1), 6:(2,1),
-                   7:(0,2), 8:(1,2), 9:(2,2) }
+#         if zoom:
+#             # Translate the 9-element grid to bounding boxes
+#             bb = { 1:(0,0), 2:(1,0), 3:(2,0),
+#                    4:(0,1), 5:(1,1), 6:(2,1),
+#                    7:(0,2), 8:(1,2), 9:(2,2) }
 
-            # get bbx and bby were to start showing
-            bbx = (bb[zoom][0] * width) / 3
-            bby = (bb[zoom][1] * height) / 3
+#             # get bbx and bby were to start showing
+#             bbx = (bb[zoom][0] * width) / 3
+#             bby = (bb[zoom][1] * height) / 3
 
-            # calculate the scaling that the image is 3 times that big
-            # as the screen (3 times because we have a 3x3 grid)
-            scale_x = float(gui_width*3) / width
-            scale_y = float(gui_height*3) / height
-            scale   = min(scale_x, scale_y)
+#             # calculate the scaling that the image is 3 times that big
+#             # as the screen (3 times because we have a 3x3 grid)
+#             scale_x = float(gui_width*3) / width
+#             scale_y = float(gui_height*3) / height
+#             scale   = min(scale_x, scale_y)
 
-            # create bbx and bby were to start showing the zoomed image
-            bbx, bby = int(scale*bbx), int(scale*bby)
-            if int(width*scale) - bbx < gui_width:
-                bbx = int(width*scale) - gui_width
-            if int(height*scale) - bby < gui_height:
-                bby = int(height*scale) - gui_height
-            # calculate new width and height after scaling
-            width  = int(scale * 3 * width)
-            height = int(scale * 3 * height)
+#             # create bbx and bby were to start showing the zoomed image
+#             bbx, bby = int(scale*bbx), int(scale*bby)
+#             if int(width*scale) - bbx < gui_width:
+#                 bbx = int(width*scale) - gui_width
+#             if int(height*scale) - bby < gui_height:
+#                 bby = int(height*scale) - gui_height
+#             # calculate new width and height after scaling
+#             width  = int(scale * 3 * width)
+#             height = int(scale * 3 * height)
 
 
-        else:
-            # No zoom, scale image that it fits the screen
-            scale_x = float(gui_width) / width
-            scale_y = float(gui_height) / height
-            scale   = min(scale_x, scale_y)
-            # calculate new width and height after scaling
-            width  = int(scale * width)
-            height = int(scale * height)
+#         else:
+#             # No zoom, scale image that it fits the screen
+#             scale_x = float(gui_width) / width
+#             scale_y = float(gui_height) / height
+#             scale   = min(scale_x, scale_y)
+#             # calculate new width and height after scaling
+#             width  = int(scale * width)
+#             height = int(scale * height)
 
-        # Now we have all necessary informations about zoom yes/no and
-        # the kind of rotation
-        x = max((gui_width - width) / 2, 0)
-        y = max((gui_height - height) / 2, 0)
+#         # Now we have all necessary informations about zoom yes/no and
+#         # the kind of rotation
+#         x = max((gui_width - width) / 2, 0)
+#         y = max((gui_height - height) / 2, 0)
 
-        # copy the image because we will change it (scale, rotate)
-        image = image.copy()
+#         # copy the image because we will change it (scale, rotate)
+#         image = image.copy()
 
-        # scale to fit
-        if scale != 1 and scale != 0:
-            image.scale((int(float(image.width) * scale),
-                         int(float(image.height) * scale)))
+#         # scale to fit
+#         if scale != 1 and scale != 0:
+#             image.scale((int(float(image.width) * scale),
+#                          int(float(image.height) * scale)))
 
-        # rotate
-        if self.rotation:
-            image.rotate(self.rotation)
+#         # rotate
+#         if self.rotation:
+#             image.rotate(self.rotation)
 
-        if zoom:
-            # position image at bbx and bby
-            image = widgets.Image(image, (x-bbx, y-bby))
-            zoom = bbx, bby
-        else:
-            # position image at x/y value
-            image = widgets.Image(image, (x, y))
+#         if zoom:
+#             # position image at bbx and bby
+#             image = widgets.Image(image, (x-bbx, y-bby))
+#             zoom = bbx, bby
+#         else:
+#             # position image at x/y value
+#             image = widgets.Image(image, (x, y))
 
-        blend_mode = config.blend_mode.upper().replace(' ', '_')
-        if (self.last_image and self.last_item != item and
-            blend_mode != 'NONE'):
-            # blend over to the new image
-            gui.get_display().add_child(image)
-            a = Transition([self.last_image], [image], 20,
-                           (gui_width, gui_height), eval(blend_mode))
-            # start the animation and wait until it's done
-            a.start()
-            a.wait()
-        else:
-            # add the new image
-            gui.get_display().add_child(image)
+#         blend_mode = config.blend_mode.upper().replace(' ', '_')
+#         if (self.last_image and self.last_item != item and
+#             blend_mode != 'NONE'):
+#             # blend over to the new image
+#             gui.get_display().add_child(image)
+#             a = Transition([self.last_image], [image], 20,
+#                            (gui_width, gui_height), eval(blend_mode))
+#             # start the animation and wait until it's done
+#             a.start()
+#             a.wait()
+#         else:
+#             # add the new image
+#             gui.get_display().add_child(image)
 
-        # remove the last image if there is one
-        if self.last_image:
-            self.last_image.unparent()
+#         # remove the last image if there is one
+#         if self.last_image:
+#             self.last_image.unparent()
 
-        # draw the osd
-        self.drawosd()
+#         # draw the osd
+#         self.drawosd()
 
         # update the screen
-        self.engine.update()
+        self.gui_context['image'] = self.filename
+        self.gui_update()
+        
+        self.status = STATUS_RUNNING
 
         # start timer
         if self.item.duration and self.slideshow and \
@@ -315,10 +311,10 @@ class ImageViewer(Application):
         if self.last_item != item:
             PLAY_START.post(item)
 
-        self.last_image = image
+#         self.last_image = image
         self.last_item  = item
 
-        self.zoom = zoom
+        self.zoom = 0 #zoom
         return None
 
 
@@ -340,10 +336,11 @@ class ImageViewer(Application):
         """
         Cache the next image (most likely we need this)
         """
-        if item.filename and len(item.filename) > 0 and \
-               not self.bitmapcache[item.filename]:
-            image = imagelib.load(item.filename)
-            self.bitmapcache[item.filename] = image
+        pass
+#         if item.filename and len(item.filename) > 0 and \
+#                not self.bitmapcache[item.filename]:
+#             image = imagelib.load(item.filename)
+#             self.bitmapcache[item.filename] = image
 
 
     def eventhandler(self, event):
@@ -394,8 +391,8 @@ class ImageViewer(Application):
         if event == TOGGLE_OSD:
             # show/hide image information
             self.osd_mode = (self.osd_mode+1) % (len(IMAGEVIEWER_OSD)+1)
-            self.drawosd()
-            self.engine.update()
+            # self.drawosd()
+            self.gui_update()
             return True
 
         if str(event) in self.zoom_btns:
@@ -541,5 +538,4 @@ class ImageViewer(Application):
 
 # set viewer object
 if not 'epydoc' in sys.modules:
-    global viewer
     viewer = ImageViewer()

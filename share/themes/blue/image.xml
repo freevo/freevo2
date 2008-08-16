@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<theme geometry="800x600">
+
+    <application name="imageviewer" style="simple">
+        <properties depth="1"/>
+        <image x="0" y="0" width="800" height="600" filename="$image">
+	    <properties xalign="center" yalign="center" keep-aspect="true"/>
+	</image>
+    </application>
+
+
+</theme>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+-->

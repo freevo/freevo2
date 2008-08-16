@@ -63,7 +63,7 @@ class MediaMenu(MainMenuItem):
         kaa.beacon.signals['media.add'].connect_weak(self.media_change)
         kaa.beacon.signals['media.remove'].connect_weak(self.media_change)
 
-        self.menutitle = title
+        self.name = title
 
         self._items = items
         for filename in self._items:
@@ -156,8 +156,7 @@ class MediaMenu(MainMenuItem):
         # generate all other items
         items = yield self._get_all_items()
         type = '%s main menu' % self.media_type
-        item_menu = Menu(self.menutitle, items, type = type,
-                         reload_func = self.reload)
+        item_menu = Menu(self.name, items, type = type, reload_func = self.reload)
         item_menu.autoselect = True
         self.item_menu = weakref(item_menu)
         self.get_menustack().pushmenu(item_menu)

@@ -39,7 +39,7 @@ import kaa
 
 # freevo imports
 from freevo.resources import ResourceHandler
-from freevo.ui import gui
+from freevo.ui.gui import show_application as gui_show
 
 # application imports
 from handler import handler
@@ -67,13 +67,14 @@ class Application(ResourceHandler):
         self.__name    = name
         self._eventmap = eventmap
         self._visible  = False
-        self.engine    = gui.Application(name)
         self.signals   = kaa.Signals('show', 'hide', 'start', 'stop')
         self._status   = STATUS_IDLE
         self._capabilities = 0
+        self.__widget  = None
         for cap in capabilities:
             self._capabilities |= cap
-
+        self.gui_context = {}
+        
 
     def has_capability(self, capability):
         """
@@ -117,8 +118,7 @@ class Application(ResourceHandler):
         """
         self._visible = True
         self.signals['show'].emit()
-        self.engine.show()
-
+        self.__widget = gui_show(self.__name, self.gui_context)
 
     def _hide_app(self):
         """
@@ -127,7 +127,14 @@ class Application(ResourceHandler):
         """
         self._visible = False
         self.signals['hide'].emit()
+        self.__widget = None
 
+    def gui_update(self):
+        """
+        Update the gui
+        """
+        if self.__widget:
+            self.__widget.set_context(self.gui_context)
 
     def eventhandler(self, event):
         """

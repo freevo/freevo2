@@ -40,7 +40,7 @@ import os
 
 # freevo imports
 from freevo import plugin
-import gui.theme
+# import gui.theme
 
 from menu import Item, Action, Menu
 from application.menuw import MenuWidget
@@ -53,9 +53,9 @@ class MainMenuItem(Item):
     """
     def __init__( self, parent=None, name=u'', type=None, image=None,
                   skin_type=None):
-
         Item.__init__(self, parent)
-        self.name = name
+        if name:
+            self.name = name
         self.image = image
         self.type = type
 
@@ -69,17 +69,17 @@ class MainMenuItem(Item):
             return
 
         # load extra informations for the skin fxd file
-        theme = gui.theme.get()
-        skin_info = theme.mainmenu.items
-        if skin_info.has_key(skin_type):
-            skin_info  = skin_info[skin_type]
-            self.name  = _(skin_info.name)
-            self.image = skin_info.image
+#         theme = gui.theme.get()
+#         skin_info = theme.mainmenu.items
+#         if skin_info.has_key(skin_type):
+#             skin_info  = skin_info[skin_type]
+#             self.name  = _(skin_info.name)
+#             self.image = skin_info.image
 
-        imagedir = theme.mainmenu.imagedir
-        if not self.image and imagedir:
-            # find a nice image based on skin type
-            self.image = gui.theme.getimage(os.path.join(imagedir, skin_type))
+#         imagedir = theme.mainmenu.imagedir
+#         if not self.image and imagedir:
+#             # find a nice image based on skin type
+#             self.image = gui.theme.getimage(os.path.join(imagedir, skin_type))
 
 
     def get_submenu(self):

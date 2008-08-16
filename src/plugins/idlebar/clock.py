@@ -30,9 +30,9 @@
 # ----------------------------------------------------------------------- */
 
 import time
+import kaa
+import kaa.candy
 
-from freevo.ui import gui
-from freevo.ui.gui import theme, widgets
 from plugin import IdleBarPlugin
 
 class PluginInterface(IdleBarPlugin):
@@ -41,31 +41,20 @@ class PluginInterface(IdleBarPlugin):
     """
     def __init__(self, format=''):
         IdleBarPlugin.__init__(self)
-        if format == '': # No overiding of the default value
+        if format == '':
             if time.strftime('%P') =='':
                 format ='%a %H:%M'
             else:
                 format ='%a %I:%M %P'
-
         self.format = format
-        self.object = None
-        self.align  = 'right'
-        self.width  = 0
-        self.text   = ''
-
-    def draw(self, width, height):
-        clock  = time.strftime(self.format)
-
-        if self.objects and self.text == clock:
-            return self.NO_CHANGE
-
-        self.clear()
-
-        font  = theme.font('clock')
-        width = min(width, font.stringsize(clock))
-
-        txt = widgets.Text(clock, (0, 0), (width, height), font,
-                           align_v='center', align_h='right')
-        self.objects.append(txt)
-        self.text = clock
-        return width
+        self.widget = kaa.candy.Label((580,20), (200, 30), 'Vera', '0xffffff', '')
+        self.widget.xalign=self.widget.ALIGN_RIGHT
+        self.current = ''
+        self.update()
+        kaa.Timer(self.update).start(10)
+        
+    def update(self):
+        clock = time.strftime(self.format)
+        if clock == self.current:
+            return
+        self.widget.text = clock

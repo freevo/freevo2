@@ -40,6 +40,7 @@ import logging
 
 # kaa imports
 from kaa.weakref import weakref
+from kaa.utils import property
 
 # menu imports
 from plugin import ItemPlugin
@@ -48,7 +49,13 @@ from action import Action
 # get logging object
 log = logging.getLogger()
 
+class Properties(object):
+    def __init__(self, item):
+        self.__item = item
 
+    def __getattr__(self, attr):
+        return self.__item.get(attr)
+    
 class Item(object):
     """
     Item class. This is the base class for all items in the menu. It's a
@@ -71,6 +78,9 @@ class Item(object):
         if parent:
             self.parent = weakref(parent)
 
+    @property
+    def properties(self):
+        return Properties(self)
 
     def _get_image(self):
         if self._image:

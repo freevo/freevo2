@@ -1,17 +1,18 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# idlebar.py - IdleBar plugin
+# x11.py - X11 window key input plugin
 # -----------------------------------------------------------------------------
-# $Id$
+# $Id: x11.py 10185 2007-12-07 20:16:29Z dmeyer $
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
 #
-# First Edition: Dirk Meyer <dischi@freevo.org>
+# First Edition: Andreas Büsching <crunchy@tzi.de>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
-# Please see the file doc/CREDITS for a complete list of authors.
+# Please see the file AUTHORS for a complete list of authors.
+# Some of the work from Andreas Büsching is moved into kaa.display
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,55 +30,48 @@
 #
 # -----------------------------------------------------------------------------
 
-
 # python imports
-import time
-import locale
+import copy
 import logging
 
-import kaa
-
 # freevo imports
-from freevo.plugin import Plugin
-from freevo.ui import application
 from freevo.ui import config
-from freevo.ui.event import *
-from plugin import IdleBarPlugin
-import freevo.ui.gui
+
+# input imports
+from freevo.ui.input import KEYBOARD_MAP
+from freevo.ui.gui import window
+from interface import InputPlugin
 
 # get logging object
-log = logging.getLogger()
+log = logging.getLogger('input')
 
-# # get gui config object
-# guicfg = config.gui
+SCREENSHOT = 0
 
-class PluginInterface(Plugin):
+class PluginInterface(InputPlugin):
     """
+    Plugin for x11 keys.
     """
+
     def plugin_activate(self, level):
         """
-        init the idlebar
+        Active X11 input layer
         """
-        # register for signals
-        application.signals['changed'].connect(self._app_change)
-        self.visible = False
-        self.container = None
+        InputPlugin.plugin_activate(self, level)
+        window.signals["key-press"].connect(self.handle)
+        self.keymap = copy.deepcopy(KEYBOARD_MAP)
+        for key, mapping in config.input.keyboardmap.items():
+            self.keymap[key] = mapping.upper()
 
-
-    def _app_change(self, app):
-        if not self.container:
-            self.container = freevo.ui.gui.window.render('idlebar')
-            for p in IdleBarPlugin.plugins():
-                if p.widget:
-                    p.widget.parent = self.container
-        fullscreen = app.has_capability(application.CAPABILITY_FULLSCREEN)
-        if fullscreen == self.visible:
-            log.info('set visible %s' % (not fullscreen))
-            if not self.visible:
-                animation = self.container.animate(0.2)
-                animation.behave('opacity', 0, 255)
-            else:
-                animation = self.container.animate(0.2)
-                animation.behave('opacity', 255, 0)
-            self.visible = not fullscreen
+        
+    def handle(self, keycode):
+        """
+        Callback to handle the x11 keys.
+        """
+        if isinstance(keycode, int):
+            log.debug('Bad keycode %s' % keycode)
+            return True
+        if self.keymap.has_key(keycode.upper()):
+            self.post_key( self.keymap[keycode.upper()] )
+        else:
+            log.debug('No mapping for key %s' % keycode.upper())
         return True

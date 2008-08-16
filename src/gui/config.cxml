@@ -4,9 +4,6 @@
 
     <group name="display">
         <desc>display settings</desc>
-        <var name="engine" default="imlib2">
-            <desc>engine to use</desc>
-        </var>
         <var name="width" default="800">
             <desc>display width</desc>
         </var>
@@ -17,38 +14,10 @@
             <var name="x" default="0"/>
             <var name="y" default="0"/>
         </group>
-        <group name="dfb">
-            <desc>settings used for display.engine = dfb</desc>
-            <var name="layer" default="0"/>
-        </group>
-        <group name="fb">
-            <desc>settings used for display.engine = fb</desc>
-            <var name="norm" default="pal">
-                <values>
-                    <value>pal</value>
-                    <value>ntsc</value>
-                </values>
-            </var>
-            <var name="mga" default="False"/>
-        </group>
         <var name="fullscreen" default="False"/>
     </group>
 
-    <group name="font">
-        <var name="default" default="Vera"/>
-        <list name="path">
-            <var type="str"/>
-            <set key="0" value="/usr/X11R6/lib/X11/fonts/truetype/"/>
-        </list>
-        <dict name="alias">
-            <var type="str"/>
-            <set key="Arial_Bold" value="VeraBd"/>
-        </dict>
-    </group>
-
-    <group name="theme">
-        <var name="engine" default="blurr"/>
-        <var name="fadestep" default="10"/>
-    </group>
-
+    <var name="theme" default="blue">
+        <desc lang="en">theme</desc>
+    </var>
 </config>

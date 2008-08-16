@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<theme geometry="800x600">
+
+    <menu name="video" style="default">
+	<container x="10" y="70" width="780" height="180">
+	    <rectangle color="0xcc000000" radius="30"/>
+	    <thumbnail x="10" y="10" width="200" height="160" thumbnail="$item.thumbnail">
+		<properties xalign="center" yalign="center"/>
+	    </thumbnail>
+	    <container x="250" width="520">
+		<properties ypadding="10"/>
+		<label y="0" font="Vera:20" color="0xffffff">
+		    <properties xpadding="10"/>
+		    $item.name
+		</label>
+		<label y="0" font="Vera:20" color="0xffffff">
+		    <properties yalign="bottom" xpadding="10"/>
+		    $item.length min.
+		</label>
+	    </container>
+	</container>
+	
+        <listing style="fixed-selection" x="10" y="280" width="780" height="310" spacing="6">
+	    <label font="Vera" height="35" color="0xcccccc">
+		<properties xpadding="10" ypadding="2"/>
+		$item.name
+	    </label>
+            <selection>
+		<properties color="0xffffff"/>
+                <rectangle color="0xa0000000" radius="30"/>
+            </selection>
+        </listing>
+    </menu>
+
+    <application name="videoplayer" style="simple">
+    </application>
+
+</theme>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+-->

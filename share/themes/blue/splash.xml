@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<theme geometry="800x600">
+    <application name="splash">
+        <properties depth="1"/>
+        <!-- background image -->
+        <image filename="../../images/blurrsplash.jpg" ignore-overscan="true"/>
+        <!-- Two texts with the same value. One is text (clutter), the other -->
+        <!-- one is label (cairo). Label is much faster but more primitive. -->
+        <text x="100" y="380" width="600" font="Vera:24"
+            color="0x00ff00" align="center">
+            Starting Freevo, please wait...
+        </text>
+        <label x="100" y="380" width="600" font="Vera:24" color="0xff0000">
+	    <properties xalign="center"/>
+            Starting Freevo, please wait...
+        </label>
+        <!-- progressbar border and progressbar -->
+        <rectangle x="100" y="400" width="600" height="16" color="0xffffff" radius="20"/>
+        <rectangle x="105" y="402" width="590" height="12" color="0x000000"/>
+        <progressbar x="105" y="402" width="590" height="12">
+            <!-- set name to get the widget from ouside the gui code -->
+            <properties name="plugins"/>
+            <rectangle color="0xffffff"/>
+        </progressbar>
+    </application>
+</theme>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+-->

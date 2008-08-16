@@ -55,7 +55,10 @@ class MenuWidget(Application, MenuStack):
         if self.is_locked():
             return
         MenuStack.refresh(self, reload)
-        self.engine.update(self.menustack[-1])
+        self.gui_context['menu'] = self.menustack[-1]
+        self.gui_context['item'] = self.menustack[-1].selected.properties
+        self.gui_context['type'] = self.menustack[-1].type
+        self.gui_update()
 
 
     def eventhandler(self, event):

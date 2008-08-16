@@ -34,47 +34,9 @@ from freevo import plugin
 class IdleBarPlugin(plugin.Plugin):
     def __init__(self):
         plugin.Plugin.__init__(self)
-        self.objects   = []
-        self.NO_CHANGE = -1
-        self.align     = 'left'
-        self.__x       = 0
-        self.__y       = 0
-        self.width     = 0
         if not plugin.getbyname('idlebar'):
             plugin.activate('idlebar')
-
-
-    def draw(self, width, height):
-        return self.NO_CHANGE
-
-
-
-    def clear(self):
-        self.__x = 0
-        self.__y = 0
-        for o in self.objects:
-            o.unparent()
-        self.objects = []
-
-
-    def set_pos(self, (x, y)):
-        """
-        move to x position
-        """
-        if x == self.__x and y == self.__y:
-            return
-        for o in self.objects:
-            o.move_relative(((x - self.__x), (y - self.__y)))
-        self.__x = x
-        self.__y = y
-
-
-    def update(self):
-        """
-        Force idlebar update.
-        """
-        plugin.getbyname('idlebar').poll()
-
+        self.widget = None
 
     def plugins():
         """

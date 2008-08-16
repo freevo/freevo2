@@ -93,4 +93,4 @@ class PluginInterface(MediaPlugin, MainMenuPlugin):
         """
         MainMenuPlugin.items to return the video item.
         """
-        return [ MediaMenu(parent, _('Video Main Menu'), 'video', config.video.items) ]
+        return [ MediaMenu(parent, _('Watch a Movie'), 'video', config.video.items) ]

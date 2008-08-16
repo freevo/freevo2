@@ -35,7 +35,7 @@ __all__ = [ 'TextWindow', 'MessageWindow', 'ConfirmWindow']
 import kaa
 
 # freevo imports
-from freevo.ui import gui
+# from freevo.ui import gui
 from freevo.ui.event import *
 
 # application imports

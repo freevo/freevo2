@@ -38,11 +38,11 @@ import os
 import kaa
 
 # freevo imports
-from freevo.ui import gui
+# from freevo.ui import gui
 from freevo.ui.menu import Action
 from freevo.ui.application import ConfirmWindow
 from freevo.ui.mainmenu import MainMenuItem, MainMenuPlugin
-from freevo.ui.gui import theme, widgets
+# from freevo.ui.gui import theme, widgets
 from freevo.ui import config
 
 # get shutdown config
@@ -58,7 +58,7 @@ class ShutdownItem(MainMenuItem):
         """
         return a list of actions for this item
         """
-        if config.confirm:
+        if config.confirm and False:
             items = [ Action(_('Shutdown Freevo'), self.confirm_freevo),
                       Action(_('Shutdown system'), self.confirm_system),
                       Action(_('Restart Freevo'), self.confirm_freevo_restart),
@@ -119,13 +119,14 @@ class ShutdownItem(MainMenuItem):
         """
         Clear the screen and show the message.
         """
-        size = gui.get_display().width, gui.get_display().height
-        msg = widgets.Text(text, (0, 0), size,
-                           theme.font('default'), align_h='center',
-                           align_v='center')
-        gui.get_display().clear()
-        gui.get_display().add_child(msg)
-        gui.get_display().update()
+        pass
+#         size = gui.get_display().width, gui.get_display().height
+#         msg = widgets.Text(text, (0, 0), size,
+#                            theme.font('default'), align_h='center',
+#                            align_v='center')
+#         gui.get_display().clear()
+#         gui.get_display().add_child(msg)
+#         gui.get_display().update()
 
         
     def shutdown_freevo(self):
@@ -133,7 +134,7 @@ class ShutdownItem(MainMenuItem):
         shutdown freevo, don't shutdown the system
         """
         self.show_gui_message(_('shutting down...'))
-        kaa.OneShotTimer(sys.exit, 0).start(1)
+        kaa.OneShotTimer(sys.exit, 0).start(0.01)
 
 
     def shutdown_system(self):
@@ -174,4 +175,4 @@ class PluginInterface(MainMenuPlugin):
     """
 
     def items(self, parent):
-        return [ ShutdownItem(parent) ]
+        return [ ShutdownItem(parent, _('Shutdown')) ]

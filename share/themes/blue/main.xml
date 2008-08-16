@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<theme geometry="800x600">
+
+    <idlebar>
+        <properties depth="3"/>
+        <image height="60" filename="../../images/idlebar.png" ignore-overscan="true"/>
+    </idlebar>
+	
+    <application name="menu" style="simple">
+        <properties depth="1"/>
+        <image filename="../../images/blurrback.jpg" ignore-overscan="true"/>
+    </application>
+
+    <menu name="main" style="default">
+        <listing x="200" y="200" width="400" height="200" spacing="10">
+	    <label font="Vera" height="40" color="0xcccccc">
+		<properties xalign="center" xpadding="10" ypadding="5"/>
+		$item.name
+	    </label>
+            <selection>
+		<properties color="0xffffff"/>
+                <rectangle color="0xa0000000" radius="40"/>
+            </selection>
+        </listing>
+    </menu>
+
+    <menu name="default" style="default">
+        <listing x="20" y="100" width="600" height="480" spacing="6">
+	    <label font="Vera" height="35" color="0xcccccc">
+		<properties xpadding="10" ypadding="2"/>
+		$item.name
+	    </label>
+            <selection>
+		<properties color="0xffffff"/>
+                <rectangle color="0xa0000000" radius="20"/>
+            </selection>
+        </listing>
+    </menu>
+
+</theme>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+-->
