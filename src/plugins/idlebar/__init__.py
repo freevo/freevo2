@@ -29,55 +29,5 @@
 #
 # -----------------------------------------------------------------------------
 
-
-# python imports
-import time
-import locale
-import logging
-
-import kaa
-
-# freevo imports
-from freevo.plugin import Plugin
-from freevo.ui import application
-from freevo.ui import config
-from freevo.ui.event import *
-from plugin import IdleBarPlugin
-import freevo.ui.gui
-
-# get logging object
-log = logging.getLogger()
-
-# # get gui config object
-# guicfg = config.gui
-
-class PluginInterface(Plugin):
-    """
-    """
-    def plugin_activate(self, level):
-        """
-        init the idlebar
-        """
-        # register for signals
-        application.signals['changed'].connect(self._app_change)
-        self.visible = False
-        self.container = None
-
-
-    def _app_change(self, app):
-        if not self.container:
-            self.container = freevo.ui.gui.window.render('idlebar')
-            for p in IdleBarPlugin.plugins():
-                if p.widget:
-                    p.widget.parent = self.container
-        fullscreen = app.has_capability(application.CAPABILITY_FULLSCREEN)
-        if fullscreen == self.visible:
-            log.info('set visible %s' % (not fullscreen))
-            if not self.visible:
-                animation = self.container.animate(0.2)
-                animation.behave('opacity', 0, 255)
-            else:
-                animation = self.container.animate(0.2)
-                animation.behave('opacity', 255, 0)
-            self.visible = not fullscreen
-        return True
+# expose basic interface
+from plugin import PluginInterface, IdleBarPlugin

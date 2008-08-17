@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <theme geometry="800x600">
 
-    <idlebar>
+    <idlebar height="60">
         <properties depth="3"/>
         <image height="60" filename="../../images/idlebar.png" ignore-overscan="true"/>
+	<container>
+	    <properties xpadding="10" ypadding="10" name="content"/>
+	    <image height="80" width="200" filename="../../images/gant/logo.png">
+		<properties keep-aspect="true"/>
+	    </image>
+	    <container x="210">
+		<properties name="plugins"/>
+	    </container>
+	</container>
     </idlebar>
-	
+
     <application name="menu" style="simple">
         <properties depth="1"/>
         <image filename="../../images/blurrback.jpg" ignore-overscan="true"/>

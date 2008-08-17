@@ -47,12 +47,17 @@ class PluginInterface(IdleBarPlugin):
             else:
                 format ='%a %I:%M %P'
         self.format = format
-        self.widget = kaa.candy.Label((580,20), (200, 30), 'Vera', '0xffffff', '')
+
+    def connect(self, container):
+        self.widget = kaa.candy.Label((0, container.inner_height/4),
+              (None, container.inner_height/3*2), 'Vera', 0xffffff, '')
         self.widget.xalign=self.widget.ALIGN_RIGHT
+        self.widget.yalign=self.widget.ALIGN_CENTER
+        self.widget.parent = container
         self.current = ''
         self.update()
         kaa.Timer(self.update).start(10)
-        
+
     def update(self):
         clock = time.strftime(self.format)
         if clock == self.current:
