@@ -40,7 +40,8 @@ import freevo.ui.gui
 # get logging object
 log = logging.getLogger()
 
-guicfg = config.gui
+# display config
+guicfg = freevo.ui.gui.config
 
 class Widget(kaa.candy.Container):
     candyxml_name = 'idlebar'
@@ -53,13 +54,12 @@ class Widget(kaa.candy.Container):
         for c in element:
             if c.ignore_overscan:
                 # the idlebar background. Expand by overscan
-                c._attrs['x'] = c._attrs.get('x', 0) - guicfg.display.overscan.x
-                c._attrs['y'] = c._attrs.get('y', 0) - guicfg.display.overscan.y
-                default = guicfg.display.width - 2 * guicfg.display.overscan.x
-                value = float(c._attrs.get('width', default))
-                factor = value / default
-                c._attrs['width'] = int(value + factor * 2 * guicfg.display.overscan.x)
-                c._attrs['height'] +=  guicfg.display.overscan.y
+                c._attrs['x'] = c._attrs.get('x', 0) - guicfg.overscan_x
+                c._attrs['y'] = c._attrs.get('y', 0) - guicfg.overscan_y
+                value = float(c._attrs.get('width', guicfg.width))
+                factor = value / guicfg.width
+                c._attrs['width'] = int(value + factor * 2 * guicfg.overscan_x)
+                c._attrs['height'] += guicfg.overscan_y
         return super(Widget, cls).candyxml_parse(element)
 
 Widget.candyxml_register()
@@ -87,7 +87,7 @@ class PluginInterface(plugin.Plugin):
             else:
                 widget._obj.set_x(x0)
                 x0 += widget._obj.get_width() + spacing
-    
+
     def _app_change(self, app):
         if not self.bar:
             self.bar = freevo.ui.gui.window.render('idlebar')

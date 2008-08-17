@@ -40,12 +40,50 @@ from .. import config, SHAREDIR
 
 guicfg = config.gui
 
+# FIXME, read this information from the theme file. That is not that
+# simple as it sounds because the theme parser need this information
+# and we get it after the theme is parsed.
+aspect = 4,3
+
+class Config(object):
+    """
+    Special config for the gui geometry based on overscan and aspect
+    ratio fixes.
+    """
+    def __init__(self):
+        self.scale = 1.0
+        self.x = guicfg.display.overscan.x
+        self.y = guicfg.display.overscan.y
+        self.width = guicfg.display.width - 2 * self.x
+        self.height = guicfg.display.height - 2 * self.y
+        # check aspect ratio based on the smaller overscan based
+        # sizes. They must match the theme aspect
+        if self.width * aspect[1] != self.height * aspect[0]:
+            # adjust height based on width and aspect and scale
+            # based on the difference we just added
+            original = self.height
+            self.height = self.width * aspect[1] / aspect[0]
+            self.scale = float(original) / self.height
+        self.overscan_x = self.x
+        self.overscan_y = int(self.y / self.scale)
+
+# create config object
+config = Config()
+
 class Context(kaa.candy.Group):
     def __init__(self):
-        x, y = guicfg.display.overscan.x, guicfg.display.overscan.y
-        w, h = guicfg.display.width - 2 * x, guicfg.display.height - 2 * y
-        super(Context, self).__init__((x,y), (w,h))
+        super(Context, self).__init__((config.x, config.y), (config.width,config.height))
+        if config.scale != 1.0:
+            self._queue_sync_properties('monitor-aspect')
         self._screen = None
+
+    def _candy_sync_properties(self):
+        """
+        Set some simple properties of the clutter.Actor
+        """
+        super(Context, self)._candy_sync_properties()
+        if 'monitor-aspect' in self._sync_properties:
+            self._obj.set_scale(1.0, config.scale)
 
     def swap(self, widget):
         """
@@ -85,7 +123,6 @@ class Stage(kaa.candy.Stage):
     def __init__(self):
         super(Stage, self).__init__((guicfg.display.width, guicfg.display.height))
         self._theme_prefix = ''
-        x, y = guicfg.display.overscan.x, guicfg.display.overscan.y
         self.content = ZoomContext()
         self.content.parent = self
         self.load_theme(guicfg.theme, 'splash.xml')

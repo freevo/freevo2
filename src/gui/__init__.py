@@ -30,7 +30,7 @@
 # -----------------------------------------------------------------------------
 
 import os
-from stage import Stage
+from stage import Stage, config
 from widgets import *
 import application
 
