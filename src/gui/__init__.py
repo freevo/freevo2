@@ -30,11 +30,11 @@
 # -----------------------------------------------------------------------------
 
 import os
-from stage import Stage, config
+from stage import Window, config
 from widgets import *
 import application
 
-window = Stage()
+window = Window()
 
 def show_application(application, context=None):
     return window.show_application(application, context)

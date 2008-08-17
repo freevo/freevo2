@@ -70,9 +70,14 @@ class Config(object):
 # create config object
 config = Config()
 
-class Context(kaa.candy.Group):
+class Stage(kaa.candy.Group):
+    """
+    A stage holds all gui objects and keeps track of aspect ratio nand overscan
+    based scalling. This object is not based on a kaa.candy.Stage but is a
+    kaa.candy.Group instead.
+    """
     def __init__(self):
-        super(Context, self).__init__((config.x, config.y), (config.width,config.height))
+        super(Stage, self).__init__((config.x, config.y), (config.width,config.height))
         if config.scale != 1.0:
             self._queue_sync_properties('monitor-aspect')
         self._screen = None
@@ -81,7 +86,7 @@ class Context(kaa.candy.Group):
         """
         Set some simple properties of the clutter.Actor
         """
-        super(Context, self)._candy_sync_properties()
+        super(Stage, self)._candy_sync_properties()
         if 'monitor-aspect' in self._sync_properties:
             self._obj.set_scale(1.0, config.scale)
 
@@ -104,8 +109,11 @@ class Context(kaa.candy.Group):
             self._screen.parent = self
         return widget
 
-class ZoomContext(Context):
 
+class ZoomStage(Stage):
+    """
+    Stage showing a zoom animation on application change.
+    """
     def swap(self, widget):
         """
         Replace current widget with new one
@@ -116,15 +124,17 @@ class ZoomContext(Context):
             a = self._screen.animate(0.5, unparent=True)
             a.behave('scale', (1, 1), (1.5, 1.5)).behave('opacity', 255, 0)
 
-class Stage(kaa.candy.Stage):
+class Window(kaa.candy.Stage):
     """
-    Window main window.
+    Window main window having the stage as child
     """
     def __init__(self):
-        super(Stage, self).__init__((guicfg.display.width, guicfg.display.height))
+        super(Window, self).__init__((guicfg.display.width, guicfg.display.height))
         self._theme_prefix = ''
-        self.content = ZoomContext()
-        self.content.parent = self
+        # This is the only child we have have. Maybe we can skip having
+        # a stage based on kaa.candy.Group as extra object.
+        self.stage = ZoomStage()
+        self.stage.parent = self
         self.load_theme(guicfg.theme, 'splash.xml')
 
     def load_theme(self, name=None, part=''):
@@ -150,7 +160,7 @@ class Stage(kaa.candy.Stage):
         @param data: filename of the XML file to parse or XML data
         @returns: root element attributes and dict of parsed elements
         """
-        return kaa.candy.candyxml.parse(data, (self.content.width, self.content.height))
+        return kaa.candy.candyxml.parse(data, (self.stage.width, self.stage.height))
 
     def show_application(self, name, context=None):
         """
@@ -161,14 +171,14 @@ class Stage(kaa.candy.Stage):
             widget = widget(context)
         else:
             print 'no application', name
-        return self.content.show_application(widget)
+        return self.stage.show_application(widget)
 
     def render(self, name, style=None):
         """
         Render widget with the given name
         """
         widget = self._theme.get(name)[style]()
-        widget.parent = self.content
+        widget.parent = self.stage
         return widget
 
 # load input plugin
