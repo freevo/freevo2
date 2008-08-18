@@ -38,7 +38,7 @@ import os
 import kaa.utils
 
 # expose Application and register
-from core import Application, register
+from core import Application
 
 for app in kaa.utils.get_plugins(os.path.dirname(__file__)):
     exec('import %s' % app)

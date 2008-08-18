@@ -40,6 +40,7 @@ import kaa
 # freevo imports
 from freevo.resources import ResourceHandler
 from freevo.ui.gui import show_application as gui_show
+from freevo.ui.gui.application import Application as ApplicationWidget
 
 # application imports
 from handler import handler
@@ -60,6 +61,9 @@ class Application(ResourceHandler):
     """
     A basic application
     """
+
+    Widget = ApplicationWidget
+
     def __init__(self, name, eventmap, capabilities=[]):
         """
         Init the Application object.

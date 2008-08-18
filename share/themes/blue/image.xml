@@ -3,8 +3,8 @@
 
     <application name="imageviewer" style="simple">
         <properties depth="1"/>
-        <image x="0" y="0" width="800" height="600" filename="$image">
-	    <properties xalign="center" yalign="center" keep-aspect="true"/>
+        <image filename="$image" ignore-overscan="true">
+	    <properties name="view" xalign="center" yalign="center" keep-aspect="true"/>
 	</image>
     </application>
 

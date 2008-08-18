@@ -86,5 +86,5 @@ class MenuApplication(core.Application):
         self.set_menu(context)
         super(MenuApplication, self).set_context(context)
         
-core.register(MenuApplication)
-core.register(MenuType)
+MenuApplication.candyxml_register()
+MenuType.candyxml_register()

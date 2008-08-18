@@ -98,16 +98,12 @@ class Application(kaa.candy.Container):
         kwargs = super(Application, cls).candyxml_parse(element)
         return dict(widgets=kwargs['widgets'])
 
-
-def register(cls, name=None):
-    """
-    Register application or any other class to the core.
-    """
-    if issubclass(cls, Application):
+    @classmethod
+    def candyxml_register(cls):
         name = cls.__application__
         if hasattr(cls, 'candyxml_style'):
             name += ':%s' % cls.candyxml_style
-    return kaa.candy.candyxml.register(cls, name)
+        kaa.candy.candyxml.register(cls, name)
 
 # register default application
-register(Application)
+Application.candyxml_register()

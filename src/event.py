@@ -160,21 +160,11 @@ PREV                   = Event('PREV')
 # Image module
 #
 
-IMAGE_ZOOM_GRID1       = Event('IMAGE_ZOOM_GRID1')
-IMAGE_ZOOM_GRID2       = Event('IMAGE_ZOOM_GRID2')
-IMAGE_ZOOM_GRID3       = Event('IMAGE_ZOOM_GRID3')
-IMAGE_ZOOM_GRID4       = Event('IMAGE_ZOOM_GRID4')
-IMAGE_ZOOM_GRID5       = Event('IMAGE_ZOOM_GRID5')
-IMAGE_ZOOM_GRID6       = Event('IMAGE_ZOOM_GRID6')
-IMAGE_ZOOM_GRID7       = Event('IMAGE_ZOOM_GRID7')
-IMAGE_ZOOM_GRID8       = Event('IMAGE_ZOOM_GRID8')
-IMAGE_ZOOM_GRID9       = Event('IMAGE_ZOOM_GRID9')
-
-IMAGE_NO_ZOOM          = Event('IMAGE_NO_ZOOM')
-
+ZOOM                   = Event('ZOOM')
+ZOOM_IN                = Event('ZOOM_IN')
+ZOOM_OUT               = Event('ZOOM_OUT')
 IMAGE_ROTATE           = Event('IMAGE_ROTATE')
 IMAGE_SAVE             = Event('IMAGE_SAVE')
-
 IMAGE_MOVE             = Event('IMAGE_MOVE')
 
 #

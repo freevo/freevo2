@@ -57,30 +57,34 @@ log = logging.getLogger('image')
 # global viewer, will be set to the ImageViewer
 viewer = None
 
-# gui.display.overscan config
-# overscan = config.gui.display.overscan
-# set config to image.viewer config
 config = config.image.viewer
 
 if 'epydoc' in sys.modules:
     # make epydoc happy because gettext is not running
     __builtins__['_'] = lambda x: x
 
-# FIXME: this belongs to the theme
-IMAGEVIEWER_OSD = [
-    # First OSD info
-    [ (_('Title')+': ',      'name'),
-      (_('Description')+': ','description'),
-      (_('Author')+': ',     'author') ],
 
-    # Second OSD info
-    [ (_('Title')+': ',    'name'),
-      (_('Date')+': ' ,    'date'),
-      ('W:',               'width'),
-      ('H:',               'height'),
-      (_('Model')+': ',    'hardware'),
-      (_('Software')+': ', 'software') ]
-    ]
+class ImageViewerWidget(Application.Widget):
+    __application__ = 'imageviewer'
+    candyxml_style  = 'simple'
+
+    def __init__(self, widgets, context):
+        super(ImageViewerWidget, self).__init__(widgets, context)
+        self.zoom = 1.0
+        self.update()
+
+    def update(self):
+        image = self.get_widget('view')
+        if self.zoom != self.eval_context('zoom'):
+            self.zoom = self.eval_context('zoom')
+            image.animate(0.2).behave('scale', image.scale, (self.zoom, self.zoom))
+
+    def set_context(self, context):
+        super(ImageViewerWidget, self).set_context(context)
+        self.update()
+
+
+ImageViewerWidget.candyxml_register()
 
 class ImageViewer(Application):
     """
@@ -94,21 +98,9 @@ class ImageViewer(Application):
         Application.__init__(self, 'imageviewer', 'image', capabilities)
 
         self.osd_mode = 0    # Draw file info on the image
-        self.zoom = 0   # Image zoom
-        self.zoom_btns = { str(IMAGE_NO_ZOOM):0, str(IMAGE_ZOOM_GRID1):1,
-                           str(IMAGE_ZOOM_GRID2):2, str(IMAGE_ZOOM_GRID3):3,
-                           str(IMAGE_ZOOM_GRID4):4, str(IMAGE_ZOOM_GRID5):5,
-                           str(IMAGE_ZOOM_GRID6):6, str(IMAGE_ZOOM_GRID7):7,
-                           str(IMAGE_ZOOM_GRID8):8, str(IMAGE_ZOOM_GRID9):9 }
         self.bitmapcache = ObjectCache(3, desc='viewer')
         self.slideshow   = True
-        self.last_image  = None
-        self.last_item   = None
-        self.osd_text    = None
-        self.osd_box     = None
         self.filename    = None
-        self.rotation    = None
-        self.zomm        = None
         self.sshow_timer = kaa.OneShotTimer(self._next)
         self.signals['stop'].connect_weak(self._cleanup)
 
@@ -118,19 +110,6 @@ class ImageViewer(Application):
         Application not running anymore, free cache and remove items
         from the screen.
         """
-#         if self.last_image:
-#             self.last_image.unparent()
-        self.last_image = None
-        self.last_item  = None
-
-        # remove the osd
-        if self.osd_text:
-            self.osd_text.unparent()
-            self.osd_text = None
-        if self.osd_box:
-            self.osd_box.unparent()
-            self.osd_box = None
-
         self.osd_mode = 0
         self.filename = None
         # we don't need the signalhandler anymore
@@ -148,16 +127,14 @@ class ImageViewer(Application):
         event.post()
 
 
-    def view(self, item, zoom=0, rotation=0):
+    def view(self, item, rotation=0):
         """
         Show the image
         """
-        if zoom:
-            self.set_eventmap('image_zoom')
-        else:
-            self.set_eventmap('image')
+        self.set_eventmap('image')
+        # FIXME: switch eventmap
+        # self.set_eventmap('image_zoom')
 
-        filename      = item.filename
         # Store item and playlist. We need to keep the playlist object
         # here to make sure it is not deleted when player is running in
         # the background.
@@ -165,141 +142,15 @@ class ImageViewer(Application):
         self.playlist = self.item.get_playlist()
         if self.playlist:
             self.playlist.select(self.item)
+        self.filename = item.filename
 
-#         if not self.last_item:
-#             # We just started, update the screen to make it
-#             # empty (all hides from the menu are updated)
-#             self.gui_update()
-
-#         # only load new image when the image changed
-#         if self.filename == filename and self.rotation == rotation and \
-#                len(filename) > 0:
-#             if self.zoom == zoom:
-#                 # same image, only update the osd and the timer
-#                 # self.drawosd()
-#                 self.gui_update()
-#                 return
-#             if not isinstance(zoom, int):
-#                 # only zoom change
-# #                 self.last_image.set_pos((-zoom[0], -zoom[1]))
-#                 self.zoom = zoom
-#                 self.gui_update()
-#                 return
-#             if self.zoom and zoom:
-#                 log.info('FIXME: do not create the complete image again')
-
-        self.filename = filename
-        self.rotation = rotation
-
-#         if filename and len(filename) > 0:
-#             image = self.bitmapcache[filename]
-#             if not image:
-#                 image = imagelib.load(filename)
-#                 self.bitmapcache[filename] = image
-#         else:
-#             # Using Container-Image
-#             image = item.loadimage()
-
-#         if not image:
-#             # FIXME: add error message to the screen
-#             return
-
-#         width, height = image.width, image.height
-#         gui_width = gui.get_display().width
-#         gui_height = gui.get_display().height
-
-#         # Bounding box default values
-#         bbx = bby = bbw = bbh = 0
-
-#         if self.rotation % 180:
-#             height, width = width, height
-
-#         if zoom:
-#             # Translate the 9-element grid to bounding boxes
-#             bb = { 1:(0,0), 2:(1,0), 3:(2,0),
-#                    4:(0,1), 5:(1,1), 6:(2,1),
-#                    7:(0,2), 8:(1,2), 9:(2,2) }
-
-#             # get bbx and bby were to start showing
-#             bbx = (bb[zoom][0] * width) / 3
-#             bby = (bb[zoom][1] * height) / 3
-
-#             # calculate the scaling that the image is 3 times that big
-#             # as the screen (3 times because we have a 3x3 grid)
-#             scale_x = float(gui_width*3) / width
-#             scale_y = float(gui_height*3) / height
-#             scale   = min(scale_x, scale_y)
-
-#             # create bbx and bby were to start showing the zoomed image
-#             bbx, bby = int(scale*bbx), int(scale*bby)
-#             if int(width*scale) - bbx < gui_width:
-#                 bbx = int(width*scale) - gui_width
-#             if int(height*scale) - bby < gui_height:
-#                 bby = int(height*scale) - gui_height
-#             # calculate new width and height after scaling
-#             width  = int(scale * 3 * width)
-#             height = int(scale * 3 * height)
-
-
-#         else:
-#             # No zoom, scale image that it fits the screen
-#             scale_x = float(gui_width) / width
-#             scale_y = float(gui_height) / height
-#             scale   = min(scale_x, scale_y)
-#             # calculate new width and height after scaling
-#             width  = int(scale * width)
-#             height = int(scale * height)
-
-#         # Now we have all necessary informations about zoom yes/no and
-#         # the kind of rotation
-#         x = max((gui_width - width) / 2, 0)
-#         y = max((gui_height - height) / 2, 0)
-
-#         # copy the image because we will change it (scale, rotate)
-#         image = image.copy()
-
-#         # scale to fit
-#         if scale != 1 and scale != 0:
-#             image.scale((int(float(image.width) * scale),
-#                          int(float(image.height) * scale)))
-
-#         # rotate
-#         if self.rotation:
-#             image.rotate(self.rotation)
-
-#         if zoom:
-#             # position image at bbx and bby
-#             image = widgets.Image(image, (x-bbx, y-bby))
-#             zoom = bbx, bby
-#         else:
-#             # position image at x/y value
-#             image = widgets.Image(image, (x, y))
-
-#         blend_mode = config.blend_mode.upper().replace(' ', '_')
-#         if (self.last_image and self.last_item != item and
-#             blend_mode != 'NONE'):
-#             # blend over to the new image
-#             gui.get_display().add_child(image)
-#             a = Transition([self.last_image], [image], 20,
-#                            (gui_width, gui_height), eval(blend_mode))
-#             # start the animation and wait until it's done
-#             a.start()
-#             a.wait()
-#         else:
-#             # add the new image
-#             gui.get_display().add_child(image)
-
-#         # remove the last image if there is one
-#         if self.last_image:
-#             self.last_image.unparent()
-
-#         # draw the osd
-#         self.drawosd()
+        # FIXME: preload image
 
         # update the screen
         self.gui_context['image'] = self.filename
+        self.gui_context['rotation'] = 0
+        self.gui_context['zoom'] = 1.0
         self.gui_update()
-        
         self.status = STATUS_RUNNING
 
         # start timer
@@ -308,13 +159,7 @@ class ImageViewer(Application):
             self.sshow_timer.start(self.item.duration)
 
         # Notify everyone about the viewing
-        if self.last_item != item:
-            PLAY_START.post(item)
-
-#         self.last_image = image
-        self.last_item  = item
-
-        self.zoom = 0 #zoom
+        PLAY_START.post(item)
         return None
 
 
@@ -336,11 +181,12 @@ class ImageViewer(Application):
         """
         Cache the next image (most likely we need this)
         """
-        pass
-#         if item.filename and len(item.filename) > 0 and \
-#                not self.bitmapcache[item.filename]:
-#             image = imagelib.load(item.filename)
-#             self.bitmapcache[item.filename] = image
+        # FIXME: preload next image
+        return
+        if item.filename and len(item.filename) > 0 and \
+               not self.bitmapcache[item.filename]:
+            image = imagelib.load(item.filename)
+            self.bitmapcache[item.filename] = image
 
 
     def eventhandler(self, event):
@@ -381,160 +227,38 @@ class ImageViewer(Application):
         if event == IMAGE_ROTATE:
             # rotate image
             if event.arg == 'left':
-                rotation = (self.rotation + 270) % 360
+                rotation = (self.gui_context['rotation'] + 270) % 360
             else:
-                rotation = (self.rotation + 90) % 360
-            self.item['rotation'] = rotation
-            self.view(self.item, zoom=self.zoom, rotation=rotation)
+                rotation = (self.gui_context['rotation'] + 90) % 360
+            # FIXME: update widget
             return True
+
+        if event == ZOOM:
+            self.gui_context['zoom'] = event.arg
+            self.gui_update()
+        if event == ZOOM_IN:
+            self.gui_context['zoom'] += event.arg
+            self.gui_update()
+        if event == ZOOM_OUT:
+            self.gui_context['zoom'] = max(1.0, self.gui_context['zoom'] + event.arg)
+            self.gui_update()
 
         if event == TOGGLE_OSD:
-            # show/hide image information
-            self.osd_mode = (self.osd_mode+1) % (len(IMAGEVIEWER_OSD)+1)
-            # self.drawosd()
-            self.gui_update()
-            return True
-
-        if str(event) in self.zoom_btns:
-            # zoom to one third of the image
-            # 1 is upper left, 9 is lower right, 0 zoom off
-            zoom = self.zoom_btns[str(event)]
-            if zoom:
-                # Zoom one third of the image, don't load the next
-                # image in the list
-                self.view(self.item, zoom=zoom, rotation=self.rotation)
-            else:
-                # Display entire picture, don't load next image in case
-                # the user wants to zoom around some more.
-                self.view(self.item, zoom=0, rotation=self.rotation)
+            # FIXME: update widget
             return True
 
         if event == IMAGE_MOVE:
             # move inside a zoomed image
-            coord = event.arg   # arg are absolute x,y positions
-            zoom = self.zoom[0] + coord[0], self.zoom[1] + coord[1]
-            self.view(self.item, zoom=zoom, rotation=self.rotation)
+            coord = event.arg
+            # FIXME: update widget
             return True
 
         if event == IMAGE_SAVE:
-            # save the image with the current rotation
-            if self.rotation and os.path.splitext(self.filename)[1] == ".jpg":
-                cmd = 'jpegtran -copy all -rotate %s -outfile /tmp/fiview %s' \
-                      % ((self.rotation + 180) % 360, self.filename)
-                os.system(cmd)
-                os.system('mv /tmp/fiview %s' % self.filename)
-                self.rotation = 0
+            # FIXME
             return True
 
         # pass not handled event to the item
         return self.item.eventhandler(event)
-
-
-    def drawosd(self):
-        """
-        draw the image osd
-        """
-        if self.osd_text:
-            # if osd_text is preset, remove it
-            self.osd_text.unparent()
-            self.osd_text = None
-            newosd = False
-        else:
-            # it's a new osd, let it move in
-            newosd = True
-
-        if not self.osd_mode:
-            # remove the bar, the osd is disabled
-            if self.osd_box:
-                self.osd_box.unparent()
-                self.osd_box = None
-            # also hide the idlebar to get 'fullscreen' back
-            if plugin.getbyname('idlebar'):
-                plugin.getbyname('idlebar').hide()
-            return
-
-        # create the osdstring to write
-        osdstring = u''
-        for strtag in IMAGEVIEWER_OSD[self.osd_mode-1]:
-            i = self.item[strtag[1]]
-            if i is None:
-                continue
-            if not isinstance(i, (str, unicode)):
-                i = str(i)
-            if isinstance(i, str):
-                i = to_unicode(i)
-            if i:
-                osdstring += u'%s %s    ' % (to_unicode(strtag[0]), i)
-
-	if osdstring == '':
-            # If after all that there is nothing then tell the users that
-	    osdstring = _('No information available')
-        else:
-            # remove the first space from the string
-            osdstring = osdstring.strip()
-
-        gui_width = gui.get_display().width
-        gui_height = gui.get_display().height
-
-        # create the text widget
-        pos = (overscan.x + 10, overscan.y + 10)
-        size = (gui_width - 2 * overscan.x - 20,
-                gui_height - 2 * overscan.y - 20)
-        self.osd_text = widgets.Textbox(osdstring, pos, size,
-                                        theme.font('default'),
-                                        'left', 'bottom', mode='soft')
-        # add the text widget to the screen, make sure the zindex
-        # is 2 (== above the image and the box)
-        self.osd_text.set_zindex(2)
-        gui.get_display().add_child(self.osd_text)
-
-        # create a box around the text
-        rect = self.osd_text.get_size()
-
-        if rect[1] < 100:
-            # text too small, set to a minimum position
-            self.osd_text.set_pos((self.osd_text.get_pos()[0], gui_height - \
-                                   overscan.y - 100))
-            rect = rect[0], 100
-
-        # now draw a box around the osd
-        if self.osd_box:
-            # check if the old one is ok for us
-            if self.osd_box.get_size()[1] == rect[1] + 20:
-                # perfect match, no need to redraw
-                return
-            self.osd_box.unparent()
-
-        # build a new rectangle.
-        pos  = (0, self.osd_text.get_pos()[1] - 10)
-        size = (gui_width, rect[1] + 20)
-        background = imagelib.load('background', (gui_width, gui_height))
-        if background:
-            background.crop(pos, size)
-            self.osd_box = widgets.Image(background, pos)
-            self.osd_box.set_alpha(230)
-        if not background:
-            self.osd_box = widgets.Rectangle(pos, size, 0xaa000000L)
-
-        # put the rectangle on the screen and set the zindex to 1
-        # (between image and text)
-        self.osd_box.set_zindex(1)
-        gui.get_display().add_child(self.osd_box)
-
-        if newosd:
-            # show the idlebar but not update the screen now
-            if plugin.getbyname('idlebar'):
-                plugin.getbyname('idlebar').show(False)
-            # get y movement value
-            move_y = self.osd_box.get_size()[1]
-            # hide the widgets to let them move in
-            self.osd_box.move_relative((0, move_y))
-            self.osd_text.move_relative((0, move_y))
-            # start Move animation and wait for it to finish
-            objects = [self.osd_box, self.osd_text]
-            a = MoveAnimation(objects, VERTICAL, 20, -move_y)
-            a.start()
-            a.wait()
 
 # set viewer object
 if not 'epydoc' in sys.modules:
