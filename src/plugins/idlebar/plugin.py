@@ -99,10 +99,10 @@ class PluginInterface(plugin.Plugin):
         if fullscreen == self.visible:
             log.info('set visible %s' % (not fullscreen))
             if not self.visible:
-                animation = self.container.animate(0.2)
+                animation = self.bar.animate(0.2)
                 animation.behave('opacity', 0, 255)
             else:
-                animation = self.container.animate(0.2)
+                animation = self.bar.animate(0.2)
                 animation.behave('opacity', 255, 0)
             self.visible = not fullscreen
         return True
