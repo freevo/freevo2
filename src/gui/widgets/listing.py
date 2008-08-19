@@ -62,9 +62,8 @@ class Listing(kaa.candy.Group):
         """
         Prepare rendering
         """
-        super(Listing, self)._candy_prepare_render()
         if self.grid:
-            return
+            return super(Listing, self)._candy_prepare_render()
         # create one label to get some information we need. This widget
         # is only to get the information, it will never be used
         menu = self.eval_context('menu')
@@ -89,6 +88,7 @@ class Listing(kaa.candy.Group):
             self.grid.behave('color', content.color,
                 self._selection.properties.get('color'))
         self._set_selected(menu.selected_pos, 0)
+        super(Listing, self)._candy_prepare_render()
 
     def _set_selected(self, idx, secs):
         if not self.grid:
