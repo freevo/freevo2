@@ -45,7 +45,7 @@ class Listing(kaa.candy.Group):
         def __init__(self):
             self.widget = None
             self.properties = {}
-            
+
     candyxml_name = 'listing'
     context_sensitive = True
 
@@ -58,25 +58,27 @@ class Listing(kaa.candy.Group):
         self.page = 0
         self.selected = None
 
-    def _candy_render(self):
-        super(Listing, self)._candy_render()
+    def _candy_prepare_render(self):
+        """
+        Prepare rendering
+        """
+        super(Listing, self)._candy_prepare_render()
         if self.grid:
             return
         # create one label to get some information we need. This widget
         # is only to get the information, it will never be used
         menu = self.eval_context('menu')
         content = self._template()
-        # create bar
+        # create bar and set the height
         bar = self._selection.widget
         if kaa.candy.is_template(bar):
             bar = bar()
-            
         bar.height = content.height
-
         # create grid, the location of the bar is not 100% correct
         # because of baseline is not text_height is not label.height
         w = self.inner_width
-        h = (self.inner_height / (content.height + self.spacing)) * (content.height + self.spacing)
+        h = (self.inner_height / (content.height + self.spacing)) * \
+            (content.height + self.spacing)
         self.grid = kaa.candy.SelectionGrid(None, (w,h), (w, content.height),
               'item', menu.choices, self._template, bar, 1, (0, self.spacing))
         self.grid.parent = self
@@ -87,7 +89,7 @@ class Listing(kaa.candy.Group):
             self.grid.behave('color', content.color,
                 self._selection.properties.get('color'))
         self._set_selected(menu.selected_pos, 0)
-        
+
     def _set_selected(self, idx, secs):
         if not self.grid:
             return

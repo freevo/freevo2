@@ -82,8 +82,8 @@ class PluginInterface(plugin.Plugin):
         for widget in widgets:
             # FIXME: this code does not respect widget.padding
             if widget.xalign == widget.ALIGN_RIGHT:
-                x1 -= widget._obj.get_width() - spacing
                 widget._obj.set_x(x1)
+                x1 -= widget._obj.get_width() - spacing
             else:
                 widget._obj.set_x(x0)
                 x0 += widget._obj.get_width() + spacing

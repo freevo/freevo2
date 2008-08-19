@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2005-2007 Dirk Meyer, et al.
+# Copyright (C) 2005-2008 Dirk Meyer, et al.
 #
 # First edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -55,10 +55,9 @@ class MenuWidget(Application, MenuStack):
         if self.is_locked():
             return
         MenuStack.refresh(self, reload)
-        self.gui_context['menu'] = self.menustack[-1]
-        self.gui_context['item'] = self.menustack[-1].selected.properties
-        self.gui_context['type'] = self.menustack[-1].type
-        self.gui_update()
+        self.gui_context.menu = self.menustack[-1]
+        self.gui_context.item = self.menustack[-1].selected.properties
+        self.gui_context.type = self.menustack[-1].type
 
 
     def eventhandler(self, event):

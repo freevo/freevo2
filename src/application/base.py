@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2005-2007 Dirk Meyer, et al.
+# Copyright (C) 2005-2008 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -57,6 +57,39 @@ CAPABILITY_TOGGLE     = 1
 CAPABILITY_PAUSE      = 2
 CAPABILITY_FULLSCREEN = 4
 
+
+class WidgetContext(dict):
+
+    def __init__(self, name):
+        self._ctx = {}
+        self._name = name
+        self._app = None
+        self._changed = False
+        
+    def show(self):
+        self._app = gui_show(self._name, self._ctx)
+
+    def hide(self):
+        self._app = None
+
+    def sync(self):
+        if self._app:
+            self._app.set_context(self._ctx)
+        self._changed = False
+        
+    def __getattr__(self, attr):
+        return self._ctx.get(attr)
+
+    def __setattr__(self, attr, value):
+        if attr.startswith('_'):
+            super(WidgetContext, self).__setattr__(attr, value)
+            return
+        if not self._changed:
+            self._changed = True
+            kaa.signals['step'].connect_once(self.sync)
+        self._ctx[attr] = value
+
+
 class Application(ResourceHandler):
     """
     A basic application
@@ -74,11 +107,10 @@ class Application(ResourceHandler):
         self.signals   = kaa.Signals('show', 'hide', 'start', 'stop')
         self._status   = STATUS_IDLE
         self._capabilities = 0
-        self.__widget  = None
+        self.gui_context = WidgetContext(self.__name)
         for cap in capabilities:
             self._capabilities |= cap
-        self.gui_context = {}
-        
+
 
     def has_capability(self, capability):
         """
@@ -122,7 +154,7 @@ class Application(ResourceHandler):
         """
         self._visible = True
         self.signals['show'].emit()
-        self.__widget = gui_show(self.__name, self.gui_context)
+        self.gui_context.show()
 
     def _hide_app(self):
         """
@@ -131,14 +163,8 @@ class Application(ResourceHandler):
         """
         self._visible = False
         self.signals['hide'].emit()
-        self.__widget = None
-
-    def gui_update(self):
-        """
-        Update the gui
-        """
-        if self.__widget:
-            self.__widget.set_context(self.gui_context)
+        # FIXME: this has no effect
+        self.gui_context.hide()
 
     def eventhandler(self, event):
         """

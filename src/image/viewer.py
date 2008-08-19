@@ -38,11 +38,7 @@ import logging
 
 # kaa imports
 import kaa
-from kaa.strutils import to_unicode
-
-# freevo imports
-from freevo import plugin
-from freevo.ui import config
+import kaa.imlib2
 
 # cache for loading images
 from freevo.ui.util import ObjectCache
@@ -57,34 +53,82 @@ log = logging.getLogger('image')
 # global viewer, will be set to the ImageViewer
 viewer = None
 
-config = config.image.viewer
-
-if 'epydoc' in sys.modules:
-    # make epydoc happy because gettext is not running
-    __builtins__['_'] = lambda x: x
-
 
 class ImageViewerWidget(Application.Widget):
+    """
+    Widget for the Imageviewer. This is the kaa.candy part of the application
+    """
     __application__ = 'imageviewer'
     candyxml_style  = 'simple'
 
     def __init__(self, widgets, context):
+        """
+        Create a new widget. While the imageviewer controller is a singleton
+        an object of this class is created every time Freevo switches to
+        the image viewer.
+        """
         super(ImageViewerWidget, self).__init__(widgets, context)
-        self.zoom = 1.0
-        self.update()
+        self._view = None
 
-    def update(self):
-        image = self.get_widget('view')
-        if self.zoom != self.eval_context('zoom'):
-            self.zoom = self.eval_context('zoom')
-            image.animate(0.2).behave('scale', image.scale, (self.zoom, self.zoom))
+    def _child_replace(self, old, new):
+        """
+        Replace child with a new one. This function is a callback from
+        set_context. It is used for changing images.
+        """
+        if old.name == 'view':
+            # replace view area with a fade animation
+            old.animate(0.5, unparent=True).behave('opacity', 255, 0)
+            new.opacity = 0
+            new.animate(0.5).behave('opacity', 0, 255)
+            new.parent = self
+            return
+        super(ImageViewerWidget, self)._child_replace(old, new)
+
+    def _candy_prepare_render(self):
+        """
+        Prepare rendering
+        """
+        super(ImageViewerWidget, self)._candy_prepare_render()
+        view = self.get_widget('view')
+        if view is not self._view:
+            self._zoom = 1.0
+            self._rotation = 0
+            self._view = view
+            self._view.anchor_point = self.width / 2, self.height / 2
+            self._pos = 0, 0
+        animation = None
+        if self._zoom != self.eval_context('zoom'):
+            self._zoom = self.eval_context('zoom')
+            animation = view.animate(0.2)
+            animation.behave('scale', view.scale, (self._zoom, self._zoom))
+        if self._pos != self.eval_context('pos'):
+            if not animation:
+                animation = view.animate(0.2)
+            self._pos = self.eval_context('pos')
+            animation.behave('move', (view.x, view.y), (-self._pos[0], -self._pos[1]))
+        if self._rotation != self.eval_context('rotation'):
+            self._rotation = self.eval_context('rotation')
+            image = self.get_widget('image')
+            image.rotation = self._rotation
+            # Update image geometry. This is not a good solution but it helps
+            # keeping the image in the view area. This is why there is a container
+            # around the image widget: to keep everything working even when having
+            # a rotated image.
+            if self._rotation % 180:
+                image.x = (self.width - self.height) / 2
+                image.y = -image.x
+                image.width, image.height = self.height, self.width
+            else:
+                image.x = image.y = 0
+                image.width, image.height = self.width, self.height
 
     def set_context(self, context):
+        """
+        Set a new context.
+        """
         super(ImageViewerWidget, self).set_context(context)
-        self.update()
+        self._queue_sync(rendering=True)
 
-
-ImageViewerWidget.candyxml_register()
 
 class ImageViewer(Application):
     """
@@ -96,27 +140,21 @@ class ImageViewer(Application):
         """
         capabilities = (CAPABILITY_TOGGLE, CAPABILITY_FULLSCREEN)
         Application.__init__(self, 'imageviewer', 'image', capabilities)
-
-        self.osd_mode = 0    # Draw file info on the image
+        self.osd_mode = 0
         self.bitmapcache = ObjectCache(3, desc='viewer')
-        self.slideshow   = True
-        self.filename    = None
+        self.slideshow = True
         self.sshow_timer = kaa.OneShotTimer(self._next)
         self.signals['stop'].connect_weak(self._cleanup)
 
-
     def _cleanup(self):
         """
-        Application not running anymore, free cache and remove items
-        from the screen.
+        Application not running anymore, free cache
         """
         self.osd_mode = 0
-        self.filename = None
         # we don't need the signalhandler anymore
         self.sshow_timer.stop()
         # reset bitmap cache
         self.bitmapcache = ObjectCache(3, desc='viewer')
-
 
     def _next(self):
         """
@@ -126,15 +164,11 @@ class ImageViewer(Application):
         event.set_handler(self.eventhandler)
         event.post()
 
-
-    def view(self, item, rotation=0):
+    def view(self, item):
         """
         Show the image
         """
         self.set_eventmap('image')
-        # FIXME: switch eventmap
-        # self.set_eventmap('image_zoom')
-
         # Store item and playlist. We need to keep the playlist object
         # here to make sure it is not deleted when player is running in
         # the background.
@@ -142,26 +176,20 @@ class ImageViewer(Application):
         self.playlist = self.item.get_playlist()
         if self.playlist:
             self.playlist.select(self.item)
-        self.filename = item.filename
-
-        # FIXME: preload image
-
         # update the screen
-        self.gui_context['image'] = self.filename
-        self.gui_context['rotation'] = 0
-        self.gui_context['zoom'] = 1.0
-        self.gui_update()
+        self.cache(self.item)
+        self.gui_context.image = self.bitmapcache[self.item.filename]
+        self.gui_context.rotation = item.get('rotation') or 0
+        self.gui_context.zoom = 1.0
+        self.gui_context.pos = 0,0
         self.status = STATUS_RUNNING
-
         # start timer
         if self.item.duration and self.slideshow and \
                not self.sshow_timer.active():
             self.sshow_timer.start(self.item.duration)
-
         # Notify everyone about the viewing
         PLAY_START.post(item)
         return None
-
 
     def stop(self):
         """
@@ -176,18 +204,14 @@ class ImageViewer(Application):
         event.set_handler(self.eventhandler)
         event.post()
 
-
     def cache(self, item):
         """
         Cache the next image (most likely we need this)
         """
-        # FIXME: preload next image
-        return
         if item.filename and len(item.filename) > 0 and \
                not self.bitmapcache[item.filename]:
-            image = imagelib.load(item.filename)
+            image = kaa.imlib2.Image(item.filename)
             self.bitmapcache[item.filename] = image
-
 
     def eventhandler(self, event):
         """
@@ -227,29 +251,40 @@ class ImageViewer(Application):
         if event == IMAGE_ROTATE:
             # rotate image
             if event.arg == 'left':
-                rotation = (self.gui_context['rotation'] + 270) % 360
+                self.gui_context.rotation = (self.gui_context.rotation + 270) % 360
             else:
-                rotation = (self.gui_context['rotation'] + 90) % 360
-            # FIXME: update widget
+                self.gui_context.rotation = (self.gui_context.rotation + 90) % 360
             return True
 
-        if event == ZOOM:
-            self.gui_context['zoom'] = event.arg
-            self.gui_update()
-        if event == ZOOM_IN:
-            self.gui_context['zoom'] += event.arg
-            self.gui_update()
-        if event == ZOOM_OUT:
-            self.gui_context['zoom'] = max(1.0, self.gui_context['zoom'] + event.arg)
-            self.gui_update()
-
-        if event == TOGGLE_OSD:
-            # FIXME: update widget
+        if event in (ZOOM, ZOOM_IN, ZOOM_OUT):
+            zoom = self.gui_context.zoom
+            if event == ZOOM:
+                self.gui_context.zoom = event.arg
+            if event == ZOOM_IN:
+                self.gui_context.zoom += event.arg
+            if event == ZOOM_OUT:
+                self.gui_context.zoom = max(1.0, self.gui_context.zoom + event.arg)
+            if self.gui_context.zoom > 1.01:
+                if zoom == 1.0:
+                    self.set_eventmap('image_zoom')
+                # update position based on scaling
+                factor = float(self.gui_context.zoom) / zoom
+                x, y = self.gui_context.pos
+                self.gui_context.pos = int(x * factor), int(y * factor)
+            else:
+                if zoom > 1.0:
+                    self.set_eventmap('image')
+                self.gui_context.zoom = 1.0
+                self.gui_context.pos = 0,0
             return True
 
         if event == IMAGE_MOVE:
             # move inside a zoomed image
-            coord = event.arg
+            x, y = self.gui_context.pos
+            self.gui_context.pos = x + event.arg[0], y + event.arg[1]
+            return True
+
+        if event == TOGGLE_OSD:
             # FIXME: update widget
             return True
 
@@ -260,6 +295,9 @@ class ImageViewer(Application):
         # pass not handled event to the item
         return self.item.eventhandler(event)
 
+
+# register widget to kaa.candy
+ImageViewerWidget.candyxml_register()
+
 # set viewer object
-if not 'epydoc' in sys.modules:
-    viewer = ImageViewer()
+viewer = ImageViewer()

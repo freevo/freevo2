@@ -84,10 +84,7 @@ class ImageItem(MediaItem):
         """
         View the image
         """
-        rotation = self.info.get('rotation')
-        if rotation == None:
-            rotation = 0
-        viewer.view(self, rotation=rotation)
+        viewer.view(self)
 
 
     def stop(self):

@@ -95,8 +95,8 @@ class Player(Application):
             self.playlist.select(self.item)
 
         # Set the current item to the gui engine
-        self.gui_context['item'] = self.item.properties
-        self.gui_context['menu'] = self.playlist
+        self.gui_context.item = self.item.properties
+        self.gui_context.menu = self.playlist
         self.status = STATUS_RUNNING
 
         # Open media item and start playback
@@ -133,7 +133,7 @@ class Player(Application):
         Callback for elapsed time changes.
         """
         self.item.elapsed = round(self.player.position)
-        self.gui_update()
+        self.gui_context.sync()
 
 
     def eventhandler(self, event):
@@ -165,7 +165,7 @@ class Player(Application):
 
         if event in (PAUSE, PLAY):
             if self.player.get_state() == kaa.popcorn.STATE_PLAYING:
-                self.suspend() 
+                self.suspend()
                 return True
             if self.player.get_state() == kaa.popcorn.STATE_PAUSED:
                 self.resume()
@@ -201,7 +201,7 @@ class Player(Application):
         yield kaa.inprogress(self.player.signals['pause'])
         self.free_resources()
 
-    
+
     @kaa.coroutine()
     def resume(self):
         """
