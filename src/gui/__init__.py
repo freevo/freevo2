@@ -31,7 +31,8 @@
 
 # Note: nothing in this module does import anything from freevo
 
-from stage import Window
+from stage import *
+from window import Window
 from config import config
 from widgets import *
 

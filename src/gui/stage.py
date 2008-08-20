@@ -29,8 +29,6 @@
 #
 # -----------------------------------------------------------------------------
 
-import os
-
 # kaa imports
 import kaa
 from kaa.utils import property
@@ -44,7 +42,10 @@ class Stage(kaa.candy.Group):
     based scalling. This object is not based on a kaa.candy.Stage but is a
     kaa.candy.Group instead.
     """
-    def __init__(self):
+
+    candyxml_name = 'stage'
+
+    def __init__(self, pos=None, size=None, context=None):
         super(Stage, self).__init__((config.stage.x, config.stage.y),
              (config.stage.width, config.stage.height))
         if config.stage.scale != 1.0:
@@ -83,6 +84,9 @@ class ZoomStage(Stage):
     """
     Stage showing a zoom animation on application change.
     """
+
+    candyxml_style = 'zoom'
+
     def swap(self, widget):
         """
         Replace current widget with new one
@@ -93,59 +97,5 @@ class ZoomStage(Stage):
             a = self._screen.animate(0.5, unparent=True)
             a.behave('scale', (1, 1), (1.5, 1.5)).behave('opacity', 255, 0)
 
-class Window(kaa.candy.Stage):
-    """
-    Window main window having the stage as child
-    """
-    def __init__(self):
-        super(Window, self).__init__((config.display.width, config.display.height))
-        self._theme_prefix = ''
-        # This is the only child we have have. Maybe we can skip having
-        # a stage based on kaa.candy.Group as extra object.
-        self.stage = ZoomStage()
-        self.stage.parent = self
-        self.load_theme(config.theme, 'splash.xml')
-
-    def load_theme(self, name=None, part=''):
-        if name == None:
-            name = config.theme
-        if self._theme_prefix:
-            for path in kaa.candy.config.imagepath[:]:
-                if path.startswith(self._theme_prefix):
-                    kaa.candy.config.imagepath.remove(path)
-        self._theme_prefix = os.path.join(config.sharedir, 'themes', name)
-        kaa.candy.config.imagepath.append(self._theme_prefix)
-        self._theme = self.candyxml(self._theme_prefix + '/' + part)[1]
-        # reference theme in all widgets
-        # NOTE: this bounds all widgets created from this point to the
-        # same theme. Two displays with different themes are not possible.
-        # On the other hand setting a theme this way is fast and simple.
-        kaa.candy.Widget.theme = self._theme
-
-    def candyxml(self, data):
-        """
-        Load a candyxml file based on the given screen resolution.
-
-        @param data: filename of the XML file to parse or XML data
-        @returns: root element attributes and dict of parsed elements
-        """
-        return kaa.candy.candyxml.parse(data, (self.stage.width, self.stage.height))
-
-    def show_application(self, name, context=None):
-        """
-        Render <application> widget with the given name and the given context.
-        """
-        widget = self._theme.application.get(name)
-        if widget:
-            widget = widget(context)
-        else:
-            print 'no application', name
-        return self.stage.show_application(widget)
-
-    def render(self, name, style=None):
-        """
-        Render widget with the given name
-        """
-        widget = self._theme.get(name)[style]()
-        widget.parent = self.stage
-        return widget
+Stage.candyxml_register()
+ZoomStage.candyxml_register()

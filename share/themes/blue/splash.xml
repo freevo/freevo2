@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <theme geometry="800x600">
+
+    <stage style="zoom"/>
+
     <application name="splash">
         <properties depth="1"/>
         <!-- background image -->
         <image filename="../../images/blurrsplash.jpg" ignore-overscan="true"/>
-        <!-- Two texts with the same value. One is text (clutter), the other -->
-        <!-- one is label (cairo). Label is much faster but more primitive. -->
-        <text x="100" y="380" width="600" font="Vera:24"
-            color="0x00ff00" align="center">
-            Starting Freevo, please wait...
-        </text>
         <label x="100" y="380" width="600" font="Vera:24" color="0xff0000">
 	    <properties xalign="center"/>
             Starting Freevo, please wait...
