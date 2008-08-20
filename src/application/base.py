@@ -65,7 +65,7 @@ class WidgetContext(dict):
         self._name = name
         self._app = None
         self._changed = False
-        
+
     def show(self):
         self._app = gui_show(self._name, self._ctx)
 
@@ -76,7 +76,7 @@ class WidgetContext(dict):
         if self._app:
             self._app.set_context(self._ctx)
         self._changed = False
-        
+
     def __getattr__(self, attr):
         return self._ctx.get(attr)
 
@@ -86,7 +86,7 @@ class WidgetContext(dict):
             return
         if not self._changed:
             self._changed = True
-            kaa.signals['step'].connect_once(self.sync)
+            kaa.signals['step'].connect_first_once(self.sync)
         self._ctx[attr] = value
 
 
