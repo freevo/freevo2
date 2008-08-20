@@ -9,7 +9,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2005-2006 Dirk Meyer, et al.
+# Copyright (C) 2005-2008 Dirk Meyer, et al.
 #
 # First edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -32,16 +32,10 @@
 #
 # -----------------------------------------------------------------------------
 
-
 __all__ = [ 'MainMenuItem', 'MainMenu', 'MainMenuPlugin' ]
-
-# python imports
-import os
 
 # freevo imports
 from freevo import plugin
-# import gui.theme
-
 from menu import Item, Menu
 from application.menuw import MenuWidget
 
@@ -79,14 +73,14 @@ class MainMenuPlugin(plugin.Plugin):
     """
     def items(self, parent):
         """
-        return the list of items for the main menu
+        Return the list of items for the main menu
         """
         return []
 
     @staticmethod
     def plugins(subtype=None):
         """
-        Static function to return all MainMenuPlugins.
+        Return all MainMenuPlugins.
         """
         return [ x for x in MainMenuPlugin.plugin_list if x.plugin_media() == subtype ]
 
