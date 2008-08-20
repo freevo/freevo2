@@ -42,7 +42,7 @@ import os
 from freevo import plugin
 # import gui.theme
 
-from menu import Item, Action, Menu
+from menu import Item, Menu
 from application.menuw import MenuWidget
 
 
@@ -51,47 +51,28 @@ class MainMenuItem(Item):
     This class is a main menu item. Items of this type can be returned by
     a MainMenuPlugin.
     """
-    def __init__( self, parent=None, name=u'', type=None, image=None,
-                  skin_type=None):
-        Item.__init__(self, parent)
+    def __init__( self, parent=None, name=None, type=None, image=None):
+        super(MainMenuItem, self).__init__(parent)
         if name:
             self.name = name
+        # FIXME: add a relative path to the image/watermark
+        # of the item with the full path in the candy image path
         self.image = image
         self.type = type
-
         if not type and not parent.parent:
             # this is the first page, force type to 'main'
             self.type = 'main'
-
-        if not skin_type and hasattr(self, 'skin_type'):
-            skin_type = self.skin_type
-        if not skin_type:
-            return
-
-        # load extra informations for the skin fxd file
-#         theme = gui.theme.get()
-#         skin_info = theme.mainmenu.items
-#         if skin_info.has_key(skin_type):
-#             skin_info  = skin_info[skin_type]
-#             self.name  = _(skin_info.name)
-#             self.image = skin_info.image
-
-#         imagedir = theme.mainmenu.imagedir
-#         if not self.image and imagedir:
-#             # find a nice image based on skin type
-#             self.image = gui.theme.getimage(os.path.join(imagedir, skin_type))
-
 
     def get_submenu(self):
         """
         Return submenu items.
         """
-        items = Item.get_submenu(self)
+        items = super(MainMenuItem, self).get_submenu()
         for i in items:
             i.image = None
         return items
-    
-        
+
+
 class MainMenuPlugin(plugin.Plugin):
     """
     Plugin class for plugins to add something to the main menu
@@ -102,14 +83,12 @@ class MainMenuPlugin(plugin.Plugin):
         """
         return []
 
-
+    @staticmethod
     def plugins(subtype=None):
         """
         Static function to return all MainMenuPlugins.
         """
         return [ x for x in MainMenuPlugin.plugin_list if x.plugin_media() == subtype ]
-
-    plugins = staticmethod(plugins)
 
 
 class MainMenu(Item):
@@ -121,14 +100,13 @@ class MainMenu(Item):
         """
         Setup the main menu and handle events (remote control, etc)
         """
-        Item.__init__(self, None)
+        super(MainMenu, self).__init__(None)
         items = []
         for p in MainMenuPlugin.plugins():
             items += p.items(self)
         menu = Menu(_('Freevo Main Menu'), items, type='main')
         menu.autoselect = True
         self.menuw = MenuWidget(menu)
-
 
     def get_menustack(self):
         """

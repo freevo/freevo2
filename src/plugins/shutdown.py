@@ -52,8 +52,6 @@ class ShutdownItem(MainMenuItem):
     """
     Item for shutdown
     """
-    skin_type = 'shutdown'
-
     def actions(self):
         """
         return a list of actions for this item

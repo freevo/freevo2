@@ -56,7 +56,7 @@ class MediaMenu(MainMenuItem):
     """
 
     def __init__(self, parent, title, type, items):
-        MainMenuItem.__init__(self, parent, skin_type=type)
+        super(MediaMenu, self).__init__(parent)
         self.media_type = type
         self.item_menu = None
 
@@ -111,7 +111,7 @@ class MediaMenu(MainMenuItem):
                 continue
         yield items
 
-    
+
     def _get_beacon_items(self):
         """
         Generate items based on beacon mountpoints
