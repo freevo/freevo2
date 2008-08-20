@@ -33,7 +33,7 @@
 import kaa.candy
 
 # display config
-from .. import config as guicfg
+from .. import config
 
 class ApplicationStyles(dict):
     """
@@ -84,6 +84,7 @@ class Application(kaa.candy.Container):
         """
         Parse the XML element for parameter to create the widget.
         """
+        guicfg = config.stage
         for c in element:
             if c.ignore_overscan:
                 # adjust direct children that want to ignore the overscan

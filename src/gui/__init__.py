@@ -29,14 +29,24 @@
 #
 # -----------------------------------------------------------------------------
 
-import os
-from stage import Window, config
+# Note: nothing in this module does import anything from freevo
+
+from stage import Window
+from config import config
 from widgets import *
 
-window = Window()
+window = None
+
+def configure(cfg, sharedir):
+    config.load(cfg, sharedir)
+    global window
+    window = Window()
 
 def show_application(application, context=None):
     return window.show_application(application, context)
+
+def show_widget(name, context=None):
+    return window.render(name, context)
 
 def load_theme(theme=None):
     return window.load_theme(theme)

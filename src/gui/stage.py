@@ -36,39 +36,7 @@ import kaa
 from kaa.utils import property
 
 import kaa.candy
-from .. import config, SHAREDIR
-
-guicfg = config.gui
-
-# FIXME, read this information from the theme file. That is not that
-# simple as it sounds because the theme parser need this information
-# and we get it after the theme is parsed.
-aspect = 4,3
-
-class Config(object):
-    """
-    Special config for the gui geometry based on overscan and aspect
-    ratio fixes.
-    """
-    def __init__(self):
-        self.scale = 1.0
-        self.x = guicfg.display.overscan.x
-        self.y = guicfg.display.overscan.y
-        self.width = guicfg.display.width - 2 * self.x
-        self.height = guicfg.display.height - 2 * self.y
-        # check aspect ratio based on the smaller overscan based
-        # sizes. They must match the theme aspect
-        if self.width * aspect[1] != self.height * aspect[0]:
-            # adjust height based on width and aspect and scale
-            # based on the difference we just added
-            original = self.height
-            self.height = self.width * aspect[1] / aspect[0]
-            self.scale = float(original) / self.height
-        self.overscan_x = self.x
-        self.overscan_y = int(self.y / self.scale)
-
-# create config object
-config = Config()
+from config import config
 
 class Stage(kaa.candy.Group):
     """
@@ -77,8 +45,9 @@ class Stage(kaa.candy.Group):
     kaa.candy.Group instead.
     """
     def __init__(self):
-        super(Stage, self).__init__((config.x, config.y), (config.width,config.height))
-        if config.scale != 1.0:
+        super(Stage, self).__init__((config.stage.x, config.stage.y),
+             (config.stage.width, config.stage.height))
+        if config.stage.scale != 1.0:
             self._queue_sync_properties('monitor-aspect')
         self._screen = None
 
@@ -88,7 +57,7 @@ class Stage(kaa.candy.Group):
         """
         super(Stage, self)._candy_sync_properties()
         if 'monitor-aspect' in self._sync_properties:
-            self._obj.set_scale(1.0, config.scale)
+            self._obj.set_scale(1.0, config.stage.scale)
 
     def swap(self, widget):
         """
@@ -129,22 +98,22 @@ class Window(kaa.candy.Stage):
     Window main window having the stage as child
     """
     def __init__(self):
-        super(Window, self).__init__((guicfg.display.width, guicfg.display.height))
+        super(Window, self).__init__((config.display.width, config.display.height))
         self._theme_prefix = ''
         # This is the only child we have have. Maybe we can skip having
         # a stage based on kaa.candy.Group as extra object.
         self.stage = ZoomStage()
         self.stage.parent = self
-        self.load_theme(guicfg.theme, 'splash.xml')
+        self.load_theme(config.theme, 'splash.xml')
 
     def load_theme(self, name=None, part=''):
         if name == None:
-            name = guicfg.theme
+            name = config.theme
         if self._theme_prefix:
             for path in kaa.candy.config.imagepath[:]:
                 if path.startswith(self._theme_prefix):
                     kaa.candy.config.imagepath.remove(path)
-        self._theme_prefix = os.path.join(SHAREDIR, 'themes', name)
+        self._theme_prefix = os.path.join(config.sharedir, 'themes', name)
         kaa.candy.config.imagepath.append(self._theme_prefix)
         self._theme = self.candyxml(self._theme_prefix + '/' + part)[1]
         # reference theme in all widgets

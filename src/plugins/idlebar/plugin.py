@@ -31,38 +31,12 @@
 
 import logging
 
-import kaa.candy
-
 from freevo import plugin
 from freevo.ui import application, config
-import freevo.ui.gui
+import freevo.ui.gui as view
 
 # get logging object
 log = logging.getLogger()
-
-# display config
-guicfg = freevo.ui.gui.config
-
-class Widget(kaa.candy.Container):
-    candyxml_name = 'idlebar'
-
-    @classmethod
-    def candyxml_parse(cls, element):
-        """
-        Parse the XML element for parameter to create the widget.
-        """
-        for c in element:
-            if c.ignore_overscan:
-                # the idlebar background. Expand by overscan
-                c._attrs['x'] = c._attrs.get('x', 0) - guicfg.overscan_x
-                c._attrs['y'] = c._attrs.get('y', 0) - guicfg.overscan_y
-                value = float(c._attrs.get('width', guicfg.width))
-                factor = value / guicfg.width
-                c._attrs['width'] = int(value + factor * 2 * guicfg.overscan_x)
-                c._attrs['height'] += guicfg.overscan_y
-        return super(Widget, cls).candyxml_parse(element)
-
-Widget.candyxml_register()
 
 class PluginInterface(plugin.Plugin):
     """
@@ -73,39 +47,15 @@ class PluginInterface(plugin.Plugin):
         """
         # register for signals
         application.signals['changed'].connect(self._app_change)
-        self.visible = False
-        self.bar = None
-
-    def _candy_layout(self, widgets, spacing):
-        x0 = 0
-        x1 = self.container.inner_width + spacing
-        for widget in widgets:
-            # FIXME: this code does not respect widget.padding
-            if widget.xalign == widget.ALIGN_RIGHT:
-                widget._obj.set_x(x1)
-                x1 -= widget._obj.get_width() - spacing
-            else:
-                widget._obj.set_x(x0)
-                x0 += widget._obj.get_width() + spacing
+        self.widget = None
 
     def _app_change(self, app):
-        if not self.bar:
-            self.bar = freevo.ui.gui.window.render('idlebar')
-            self.container = self.bar.get_widget('plugins')
-            self.container.layout = self._candy_layout
+        if not self.widget:
+            self.widget = view.show_widget('idlebar')
             for p in IdleBarPlugin.plugins():
-                p.connect(self.container)
+                self.widget.connect(p)
         fullscreen = app.has_capability(application.CAPABILITY_FULLSCREEN)
-        if fullscreen == self.visible:
-            log.info('set visible %s' % (not fullscreen))
-            if not self.visible:
-                animation = self.bar.animate(0.2)
-                animation.behave('opacity', 0, 255)
-            else:
-                animation = self.bar.animate(0.2)
-                animation.behave('opacity', 255, 0)
-            self.visible = not fullscreen
-        return True
+        self.widget.visible = not fullscreen
 
 
 class IdleBarPlugin(plugin.Plugin):

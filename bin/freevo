@@ -126,7 +126,7 @@ try:
         logging.getLogger().setLevel(logging.INFO)
 
     config.watch()
-    
+
     # plugins is a list of known plugins
     num_plugins = 0
     for p in freevo.ui.plugins:
@@ -140,7 +140,7 @@ try:
                 freevo.plugin.activate(p)
             else:
                 freevo.plugin.activate(p, level=c.activate)
-    
+
 except ImportError, i:
     print 'ImportError: %s' % i
     print 'Not all requirements of Freevo are installed on your system.'
@@ -203,13 +203,11 @@ except ImportError, i:
 
 # freevo imports
 from freevo import beacon
-import freevo.ui.gui
+import freevo.ui.gui as view
 
 # load the fxditem to make sure it's the first in the
 # mimetypes list
 import freevo.ui.fxditem
-
-from freevo.ui.mainmenu import MainMenu
 
 #
 # Freevo main function
@@ -226,17 +224,20 @@ from freevo.ui.mainmenu import MainMenu
 #         displays.fullscreen = True
 
 try:
+    view.configure(config, freevo.conf.SHAREDIR)
+
     # Fire up splashscreen and load the plugins
-    progress = freevo.ui.gui.show_application('splash').get_widget('plugins')
+    progress = view.show_application('splash').get_widget('plugins')
     progress.max = num_plugins-1
-    
+
     # load plugins
     freevo.plugin.init(freevo.ui, progress.inc)
 
     # prepare again, now that all plugins are loaded
-    freevo.ui.gui.load_theme()
+    view.load_theme()
 
     # start menu
+    from freevo.ui.mainmenu import MainMenu
     MainMenu()
 
     # start main loop

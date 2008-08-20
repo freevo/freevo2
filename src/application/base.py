@@ -43,7 +43,7 @@ from freevo.resources import ResourceHandler
 
 # application imports
 from handler import handler
-from freevo.ui import gui
+from freevo.ui import gui as view
 
 # get logging object
 log = logging.getLogger()
@@ -71,7 +71,7 @@ class WidgetContext(dict):
         """
         Render the widget
         """
-        self._app = gui.show_application(self._name, self._ctx)
+        self._app = view.show_application(self._name, self._ctx)
 
     def sync(self):
         """
