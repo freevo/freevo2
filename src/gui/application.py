@@ -33,7 +33,7 @@
 import kaa.candy
 
 # display config
-from .. import config
+from config import config
 
 class ApplicationStyles(dict):
     """

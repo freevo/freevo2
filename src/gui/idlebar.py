@@ -34,7 +34,7 @@ import logging
 from kaa.utils import property
 import kaa.candy
 
-from .. import config
+from config import config
 
 # get logging object
 log = logging.getLogger()

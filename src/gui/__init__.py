@@ -31,10 +31,15 @@
 
 # Note: nothing in this module does import anything from freevo
 
-from stage import *
+import os
+import kaa.utils
+
 from window import Window
 from config import config
-from widgets import *
+
+# import all widgets
+for widget in kaa.utils.get_plugins(os.path.dirname(__file__)):
+    exec('import %s as submodule' % widget)
 
 window = None
 signals = None

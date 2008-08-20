@@ -34,7 +34,6 @@ import kaa
 
 # gui imports
 import kaa.candy
-from kaa.candy import Label
 
 class Listing(kaa.candy.Group):
     """
