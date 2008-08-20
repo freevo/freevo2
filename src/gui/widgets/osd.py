@@ -1,15 +1,12 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# osd.py - An osd for Freevo
+# osd.py - OSD Widget
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# This plugin is an OSD for freevo. It displays the message send by the
-# event OSD_MESSAGE.
-#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2003-2008 Dirk Meyer, et al.
+# Copyright (C) 2008 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -32,51 +29,29 @@
 #
 # -----------------------------------------------------------------------------
 
-# python imports
-import logging
-
 # kaa imports
-import kaa
+from kaa.utils import property
+import kaa.candy
 
-# freevo imports
-from freevo import plugin, view
-from freevo.ui.event import OSD_MESSAGE
-
-# get logging object
-log = logging.getLogger()
-
-class PluginInterface(plugin.Plugin):
+class OSD(kaa.candy.Label):
     """
-    OSD plugin.
-
-    This plugin shows messages send by other parts of Freevo on the
-    screen for 2 seconds.
+    This OSD widget is a label and it fades in and out
     """
-    def __init__(self):
-        """
-        init the osd
-        """
-        super(PluginInterface, self).__init__()
-        kaa.EventHandler(self.show).register([ OSD_MESSAGE ])
-        self.widget = None
-        self.hide_timer = kaa.OneShotTimer(self.hide)
+    candyxml_name = 'osd'
 
-    def show(self, event):
-        """
-        Catch OSD_MESSAGE and display it
-        """
-        if self.widget is not None:
-            self.widget.hide()
-        self.widget = view.show_widget('osd')
-        self.widget.message = event.arg
-        self.widget.show()
-        # Start hide timer for 2 seconds.
-        # If already active, the timer will be reset.
-        self.hide_timer.start(2)
+    @property
+    def message(self):
+        return self.text
+
+    @message.setter
+    def message(self, message):
+        self.text = message
 
     def hide(self):
-        """
-        Hide the osd
-        """
-        self.widget.hide()
-        self.widget = None
+        self.animate('0.2', unparent=True).behave('opacity', 255, 0)
+
+    def show(self):
+        self.opacity = 0
+        self.animate('0.2').behave('opacity', 0, 255)
+
+OSD.candyxml_register()

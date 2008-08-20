@@ -15,6 +15,10 @@
 	</container>
     </idlebar>
 
+    <osd y="70" height="50" font="Vera" color="0xffffff">
+        <properties depth="3" xalign="right" xpadding="10" ypadding="10"/>
+    </osd>
+
     <application name="menu" style="simple">
         <properties depth="1"/>
         <image filename="../../images/blurrback.jpg" ignore-overscan="true"/>
