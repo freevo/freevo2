@@ -58,8 +58,8 @@ class ImageViewerWidget(Application.Widget):
     """
     Widget for the Imageviewer. This is the kaa.candy part of the application
     """
-    __application__ = 'imageviewer'
-    candyxml_style  = 'simple'
+    freevo_appname = 'imageviewer'
+    candyxml_style = 'simple'
 
     def __init__(self, widgets, context):
         """
@@ -77,7 +77,7 @@ class ImageViewerWidget(Application.Widget):
         """
         if old.name == 'view':
             # replace view area with a fade animation
-            old.animate(0.5, unparent=True).behave('opacity', 255, 0)
+            old.animate(0.5, unparent=True).behave('opacity', old.opacity, 0)
             new.opacity = 0
             new.animate(0.5).behave('opacity', 0, 255)
             new.parent = self
@@ -134,12 +134,15 @@ class ImageViewer(Application):
     """
     Full screen image viewer for imageitems
     """
+
+    name = 'imageviewer'
+
     def __init__(self):
         """
         create an image viewer application
         """
         capabilities = (CAPABILITY_TOGGLE, CAPABILITY_FULLSCREEN)
-        Application.__init__(self, 'imageviewer', 'image', capabilities)
+        Application.__init__(self, 'image', capabilities)
         self.osd_mode = 0
         self.bitmapcache = ObjectCache(3, desc='viewer')
         self.slideshow = True
@@ -168,7 +171,7 @@ class ImageViewer(Application):
         """
         Show the image
         """
-        self.set_eventmap('image')
+        self.eventmap = 'image'
         # Store item and playlist. We need to keep the playlist object
         # here to make sure it is not deleted when player is running in
         # the background.
@@ -195,7 +198,7 @@ class ImageViewer(Application):
         """
         Stop the current viewing
         """
-        if self.get_status() != STATUS_RUNNING:
+        if self.status != STATUS_RUNNING:
             # already stopped
             return True
         # set status to stopping
@@ -266,14 +269,14 @@ class ImageViewer(Application):
                 self.gui_context.zoom = max(1.0, self.gui_context.zoom + event.arg)
             if self.gui_context.zoom > 1.01:
                 if zoom == 1.0:
-                    self.set_eventmap('image_zoom')
+                    self.eventmap = 'image_zoom'
                 # update position based on scaling
                 factor = float(self.gui_context.zoom) / zoom
                 x, y = self.gui_context.pos
                 self.gui_context.pos = int(x * factor), int(y * factor)
             else:
                 if zoom > 1.0:
-                    self.set_eventmap('image')
+                    self.eventmap = 'image'
                 self.gui_context.zoom = 1.0
                 self.gui_context.pos = 0,0
             return True

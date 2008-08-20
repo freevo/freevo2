@@ -52,9 +52,12 @@ class Player(Application):
     """
     Video player object.
     """
+
+    name = 'videoplayer'
+
     def __init__(self):
         capabilities = (CAPABILITY_FULLSCREEN, )
-        Application.__init__(self, 'videoplayer', 'video', capabilities)
+        Application.__init__(self, 'video', capabilities)
         self.player = kaa.popcorn.Player()
         # self.player.set_window(self.engine.get_window())
         self.elapsed_timer = kaa.WeakTimer(self.elapsed)
@@ -86,7 +89,7 @@ class Player(Application):
         if (yield self.get_resources('AUDIO', 'VIDEO', force=True)) == False:
             log.error("Can't get resource AUDIO, VIDEO")
             yield False
-        
+
         # store item and playlist
         self.item = item
         self.playlist = self.item.get_playlist()
@@ -121,7 +124,7 @@ class Player(Application):
         """
         Stop playing.
         """
-        if self.get_status() != STATUS_RUNNING:
+        if self.status != STATUS_RUNNING:
             return True
         self.player.stop()
         self.status = STATUS_STOPPING
@@ -134,9 +137,9 @@ class Player(Application):
         if self.player.is_in_menu() != self.is_in_menu:
             self.is_in_menu = not self.is_in_menu
             if self.is_in_menu:
-                self.set_eventmap('dvdnav')
+                self.eventmap = 'dvdnav'
             else:
-                self.set_eventmap('video')
+                self.eventmap = 'video'
         # FIXME: if item does not start at position 0 the start time
         # must be taken into consideration for elapsed. This happens for
         # TS files from DVB sources.
@@ -201,15 +204,15 @@ class Player(Application):
                 log.info('change scale to %s', modes[idx])
                 self.player.set_property('scale', modes[idx])
             return True
-                
+
         if event in (NEXT, PREV):
             self.player.nav_command(str(event).lower())
             return True
-            
+
         if event == DVDNAV_MENU:
             self.player.nav_command('menu1')
             return True
-            
+
         if str(event).startswith('DVDNAV_'):
             # dvd navigation commands
             self.player.nav_command(str(event)[7:].lower())

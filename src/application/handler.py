@@ -72,7 +72,7 @@ class Handler(object):
         self.current = None
         self.windows = []
         self.eventmap = None
-        
+
         # callback for events
         kaa.EventHandler(self.handle).register()
 
@@ -85,23 +85,22 @@ class Handler(object):
         Set new focus (input mapping, application show/hide)
         """
         app = self.applications[-1]
-
         # set input mapping
         focus = app
         if self.windows:
             focus = self.windows[-1]
-        log.info('set focus to %s' % focus)
-        self.eventmap = focus.eventmap
-
+        if self.eventmap != focus.eventmap:
+            log.info('set focus to %s' % focus)
+            self.eventmap = focus.eventmap
         if app == self.current:
             # same app as before
             return
-
         log.info('switch application from %s to %s' % (self.current, app))
         self.signals['changed'].emit(app)
-        app._show_app()
+        app.signals['show'].emit()
+        app.gui_context.show()
         if self.current:
-            self.current._hide_app()
+            self.current.signals['hide'].emit()
         self.current = app
 
 

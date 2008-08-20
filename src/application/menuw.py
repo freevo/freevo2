@@ -43,8 +43,11 @@ class MenuWidget(Application, MenuStack):
     The MenuWidget is an Application for GUI and event handling and also
     an instance of MenuStack defined in menu.stack.
     """
+
+    name = 'menu'
+
     def __init__(self, menu):
-        Application.__init__(self, 'menu', 'menu', (CAPABILITY_TOGGLE,))
+        Application.__init__(self, 'menu', (CAPABILITY_TOGGLE,))
         MenuStack.__init__(self)
         self.pushmenu(menu)
         self.status = STATUS_RUNNING

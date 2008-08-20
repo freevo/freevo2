@@ -31,7 +31,7 @@
 
 # gui imports
 import kaa.candy
-import core
+from ...application.widget import Application
 
 class MenuType(kaa.candy.Container):
     """
@@ -47,7 +47,7 @@ class MenuType(kaa.candy.Container):
         # FIXME: handle animations here
         # context.get('menu').pos
         super(MenuType, self).set_context(context)
-        
+
     @classmethod
     def candyxml_parse(cls, element):
         """
@@ -57,11 +57,11 @@ class MenuType(kaa.candy.Container):
         return dict(widgets=kwargs['widgets'])
 
 
-class MenuApplication(core.Application):
+class MenuApplication(Application):
     """
     Menu application implementation, style simple
     """
-    __application__ = 'menu'
+    freevo_appname = 'menu'
     candyxml_style = 'simple'
 
     def __init__(self, widgets, context=None):
@@ -85,6 +85,6 @@ class MenuApplication(core.Application):
     def set_context(self, context):
         self.set_menu(context)
         super(MenuApplication, self).set_context(context)
-        
+
 MenuApplication.candyxml_register()
 MenuType.candyxml_register()

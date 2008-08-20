@@ -33,6 +33,7 @@ __all__ = [ 'TextWindow', 'MessageWindow', 'ConfirmWindow']
 
 # kaa imports
 import kaa
+from kaa.utils import property
 
 # freevo imports
 # from freevo.ui import gui
@@ -49,7 +50,7 @@ class Window(object):
 
     def __init__(self):
         self.engine = gui.Window(self.type)
-        self._eventmap = 'input'
+        self.__eventmap = 'input'
         self._visible = False
 
 
@@ -77,13 +78,6 @@ class Window(object):
         return True
 
 
-    def is_visible(self):
-        """
-        Return if the window is visible right now.
-        """
-        return self._visible
-
-
     def eventhandler(self, event):
         """
         Eventhandler for the window, this raw window has nothing to do
@@ -91,21 +85,20 @@ class Window(object):
         return False
 
 
-    def set_eventmap(self):
-        """
-        Set the eventmap for the window
-        """
-        self._eventmap = eventmap
-        handler.set_focus()
-
-
-    def get_eventmap(self):
+    @property
+    def eventmap(self):
         """
         Return the eventmap for the window
         """
-        return self._eventmap
+        return self.__eventmap
 
-    eventmap = property(get_eventmap, set_eventmap, None, "eventmap")
+    @eventmap.setter
+    def eventmap(self):
+        """
+        Set the eventmap for the window
+        """
+        self.__eventmap = eventmap
+        handler.set_focus()
 
 
 class TextWindow(Window):

@@ -36,14 +36,14 @@ import logging
 
 # kaa imports
 import kaa
+from kaa.utils import property
 
 # freevo imports
 from freevo.resources import ResourceHandler
-from freevo.ui.gui import show_application as gui_show
-from freevo.ui.gui.application import Application as ApplicationWidget
 
 # application imports
 from handler import handler
+from widget import Application as ApplicationWidget
 
 # get logging object
 log = logging.getLogger()
@@ -57,9 +57,10 @@ CAPABILITY_TOGGLE     = 1
 CAPABILITY_PAUSE      = 2
 CAPABILITY_FULLSCREEN = 4
 
-
 class WidgetContext(dict):
-
+    """
+    Context link between application.Application and gui.Application
+    """
     def __init__(self, name):
         self._ctx = {}
         self._name = name
@@ -67,20 +68,30 @@ class WidgetContext(dict):
         self._changed = False
 
     def show(self):
-        self._app = gui_show(self._name, self._ctx)
-
-    def hide(self):
-        self._app = None
+        """
+        Render the widget
+        """
+        from .. import gui
+        self._app = gui.show_application(self._name, self._ctx)
 
     def sync(self):
+        """
+        Update the widget
+        """
         if self._app:
             self._app.set_context(self._ctx)
         self._changed = False
 
     def __getattr__(self, attr):
+        """
+        Get context attribute
+        """
         return self._ctx.get(attr)
 
     def __setattr__(self, attr, value):
+        """
+        Set context attribute
+        """
         if attr.startswith('_'):
             super(WidgetContext, self).__setattr__(attr, value)
             return
@@ -95,76 +106,70 @@ class Application(ResourceHandler):
     A basic application
     """
 
+    # class for the gui part of the application
     Widget = ApplicationWidget
 
-    def __init__(self, name, eventmap, capabilities=[]):
+    # variables to override
+    name = None
+
+    def __init__(self, eventmap, capabilities=[]):
         """
         Init the Application object.
         """
-        self.__name    = name
-        self._eventmap = eventmap
-        self._visible  = False
-        self.signals   = kaa.Signals('show', 'hide', 'start', 'stop')
-        self._status   = STATUS_IDLE
-        self._capabilities = 0
-        self.gui_context = WidgetContext(self.__name)
+        self.signals = kaa.Signals('show', 'hide', 'start', 'stop')
+        self.__status = STATUS_IDLE
+        self.__eventmap = eventmap
+        self.__capabilities = 0
+        self.gui_context = WidgetContext(self.name)
         for cap in capabilities:
-            self._capabilities |= cap
-
+            self.__capabilities |= cap
 
     def has_capability(self, capability):
         """
         Return True if the application has the given capability.
         """
-        return (self._capabilities & capability) != 0
+        return (self.__capabilities & capability) != 0
 
-
-    def get_status(self):
+    @property
+    def status(self):
         """
         Return the current application status.
         """
-        return self._status
+        return self.__status
 
-
-    def set_status(self, status):
+    @status.setter
+    def status(self, status):
         """
         Set application status and react on some changes.
         """
         if status in (STATUS_STOPPED, STATUS_IDLE):
             self.free_resources()
-        if status == STATUS_RUNNING and self._status == STATUS_IDLE:
+        if status == STATUS_RUNNING and self.__status == STATUS_IDLE:
             handler.show_application(self)
-            self._status = status
+            self.__status = status
             self.signals['start'].emit()
         elif status == STATUS_IDLE:
             handler.hide_application(self)
             self.free_resources(resume=True)
-            self._status = status
+            self.__status = status
             self.signals['stop'].emit()
         else:
-            self._status = status
+            self.__status = status
 
-    status = property(get_status, set_status, None, "application status")
+    @property
+    def eventmap(self):
+        """
+        Return the eventmap for the application.
+        """
+        return self.__eventmap
 
-
-    def _show_app(self):
+    @eventmap.setter
+    def eventmap(self, eventmap):
         """
-        Show the application on the screen. This function should only be called
-        from the application handler.
+        Set a new eventmap for the event handler
         """
-        self._visible = True
-        self.signals['show'].emit()
-        self.gui_context.show()
-
-    def _hide_app(self):
-        """
-        Hide the application. This function should only be called from
-        the application handler.
-        """
-        self._visible = False
-        self.signals['hide'].emit()
-        # FIXME: this has no effect
-        self.gui_context.hide()
+        self.__eventmap = eventmap
+        handler.set_focus()
 
     def eventhandler(self, event):
         """
@@ -173,48 +178,16 @@ class Application(ResourceHandler):
         error = 'Error, no eventhandler defined for %s' % self.application
         raise AttributeError(error)
 
-
     def stop(self):
         """
         Stop the application. If it is not shown again in the same cycle, the
         hide() function will be called. If the app isn't really stopped now
         (e.g. a child needs to be stopped), do not call this function.
         """
-        self._status = STATUS_STOPPED
-
-
-    def is_visible(self):
-        """
-        Return if the application is visible right now.
-        """
-        return self._visible
-
-
-    def set_eventmap(self, eventmap):
-        """
-        Set a new eventmap for the event handler
-        """
-        self._eventmap = eventmap
-        handler.set_focus()
-
-
-    def get_eventmap(self):
-        """
-        Return the eventmap for the application.
-        """
-        return self._eventmap
-
-    eventmap = property(get_eventmap, set_eventmap, None, "eventmap")
-
-    def get_name(self):
-        """
-        Get the name of the application.
-        """
-        return self.__name
-
+        self.__status = STATUS_STOPPED
 
     def __repr__(self):
         """
         String for debugging.
         """
-        return self.__name
+        return self.name

@@ -86,7 +86,7 @@ class PluginInterface(Plugin):
         """
         Callback on application changes.
         """
-        if app.get_name() == 'menu' and self._mode == OFF:
+        if app.name == 'menu' and self._mode == OFF:
             # menu is shown, start timer
             self.timer.start(60)
             self.counter = 0

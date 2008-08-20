@@ -33,12 +33,12 @@
 import kaa.candy
 
 # display config
-from .. import config as guicfg
+from freevo.ui.gui import config as guicfg
 
 class ApplicationStyles(dict):
     """
     Dict to store the different application classes based on the
-    __application__ (name) and the style.
+    freevo_appname (name) and the style.
     """
     candyxml_name = 'application'
 
@@ -74,7 +74,7 @@ class Application(kaa.candy.Container):
             return kaa.candy.candyxml.get_class(element.node, name)
 
     candyxml_name = 'application'
-    __application__ = 'default'
+    freevo_appname = 'default'
 
     def __init__(self, widgets, context=None):
         super(Application, self).__init__(None, None, widgets, context=context)
@@ -100,7 +100,7 @@ class Application(kaa.candy.Container):
 
     @classmethod
     def candyxml_register(cls):
-        name = cls.__application__
+        name = cls.freevo_appname
         if hasattr(cls, 'candyxml_style'):
             name += ':%s' % cls.candyxml_style
         kaa.candy.candyxml.register(cls, name)

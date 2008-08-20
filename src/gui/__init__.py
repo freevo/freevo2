@@ -32,7 +32,6 @@
 import os
 from stage import Window, config
 from widgets import *
-import application
 
 window = Window()
 

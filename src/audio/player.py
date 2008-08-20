@@ -52,9 +52,12 @@ class Player(Application):
     """
     Audio player object.
     """
+
+    name = 'audioplayer'
+
     def __init__(self):
         capabilities = (CAPABILITY_TOGGLE, CAPABILITY_PAUSE)
-        Application.__init__(self, 'audioplayer', 'audio', capabilities)
+        Application.__init__(self, 'audio', capabilities)
         self.player = kaa.popcorn.Player()
         self.elapsed_timer = kaa.WeakTimer(self.elapsed)
 
@@ -122,7 +125,7 @@ class Player(Application):
         """
         Stop playing.
         """
-        if self.get_status() != STATUS_RUNNING:
+        if self.status != STATUS_RUNNING:
             return True
         self.player.stop()
         self.status = STATUS_STOPPING
