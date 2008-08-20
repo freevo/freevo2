@@ -59,7 +59,7 @@ CAPABILITY_FULLSCREEN = 4
 
 class WidgetContext(dict):
     """
-    Context link between application.Application and gui.Application
+    Context link between Application and view
     """
     def __init__(self, name):
         self._ctx = {}

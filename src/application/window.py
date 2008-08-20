@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2007 Dirk Meyer, et al.
+# Copyright (C) 2007-2008 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -36,11 +36,33 @@ import kaa
 from kaa.utils import property
 
 # freevo imports
-# from freevo.ui import gui
+from freevo import view
 from freevo.ui.event import *
 
 # application imports
 from handler import handler
+from base import WidgetContext as BaseWidgetContext
+
+class WidgetContext(BaseWidgetContext):
+    """
+    Context link between Window and view
+    """
+    def show(self):
+        """
+        Render and show the widget
+        """
+        if 0: # no support in the view yet
+            self._app = view.show_window(self._name, self._ctx)
+            self._app.show()
+
+    def hide(self):
+        """
+        Hide the widget
+        """
+        if self._app:
+            self._app.hide()
+        self._app = None
+
 
 class Window(object):
     """
@@ -49,41 +71,35 @@ class Window(object):
     type = None
 
     def __init__(self):
-        self.engine = gui.Window(self.type)
         self.__eventmap = 'input'
-        self._visible = False
-
+        self.__visible = False
+        self.gui_context = WidgetContext(self.name)
 
     def show(self):
         """
         Show the window on the screen.
         """
-        if self._visible:
-            return False
-        self._visible = True
+        if self.__visible:
+            return
+        self.__visible = True
         handler.add_window(self)
-        self.engine.show(self)
-        return True
-
+        self.gui_context.show()
 
     def hide(self):
         """
         Hide the window.
         """
-        if not self._visible:
-            return False
-        self._visible = False
+        if not self.__visible:
+            return
+        self.__visible = False
         handler.remove_window(self)
-        self.engine.hide()
-        return True
-
+        self.gui_context.hide()
 
     def eventhandler(self, event):
         """
         Eventhandler for the window, this raw window has nothing to do
         """
         return False
-
 
     @property
     def eventmap(self):
@@ -101,42 +117,39 @@ class Window(object):
         handler.set_focus()
 
 
-class TextWindow(Window):
-    """
-    A simple window without eventhandler showing a text.
-    """
-
-    type = 'text'
-
-    def __init__(self, text):
-        Window.__init__(self)
-        self.text = text
-
-
 class Button(kaa.Signal):
     """
     A button used in some windows.
     """
-
     def __init__(self, name, selected=True):
         self.name = name
         self.selected = selected
         kaa.Signal.__init__(self)
 
 
+class TextWindow(Window):
+    """
+    A simple window without eventhandler showing a text.
+    """
+    type = 'text'
+
+    def __init__(self, text):
+        Window.__init__(self)
+        # FIXME: update gui_context
+        self.text = text
+
+
 class MessageWindow(Window):
     """
     A simple window showing a text. The window will hide on input
-    events.
+    events. It is used as small information.
     """
-
     type = 'message'
 
     def __init__(self, text, button=_('OK')):
         Window.__init__(self)
         self.text = text
         self.button = Button(button)
-
 
     def eventhandler(self, event):
         """
@@ -145,6 +158,7 @@ class MessageWindow(Window):
         if event in (INPUT_ENTER, INPUT_EXIT):
             self.hide()
             if event == INPUT_ENTER:
+                # FIXME: update gui_context
                 self.button.emit()
             return True
         return False
@@ -156,7 +170,6 @@ class ConfirmWindow(Window):
     from. In most cases this window is used to ask the user if an action
     should really be performed.
     """
-
     type = 'confirm'
 
     def __init__(self, text, buttons=(_('Yes'), _('No')), default_choice=0):
@@ -167,11 +180,11 @@ class ConfirmWindow(Window):
             self.buttons.append(Button(text, len(self.buttons) == default_choice))
         self.selected = self.buttons[default_choice]
 
-
     def eventhandler(self, event):
         """
         Eventhandler to toggle the selection or press the button
         """
+        # FIXME: update gui_context
         if event in (INPUT_LEFT, INPUT_RIGHT):
             # Toggle selection
             self.selected.selected = False
@@ -186,10 +199,8 @@ class ConfirmWindow(Window):
             self.selected.selected = True
             self.engine.update()
             return True
-
         elif event == INPUT_ENTER:
             self.selected.emit()
             self.hide()
             return True
-
         return False
