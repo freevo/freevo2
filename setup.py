@@ -77,7 +77,23 @@ if len(sys.argv) > 1 and not '--help' in sys.argv and \
         xmlconfig('build/config.cxml', cxml_files, 'freevo.ui')
 
     data_files.append(('share/freevo/config', [ 'build/config.cxml' ]))
-    
+
+def package_finder(result, dirname, names):
+    """
+    os.path.walk helper for 'src'
+    """
+    for name in names:
+        if os.path.splitext(name)[1] == '.py':
+            import_name = dirname.replace('/','.').replace('..src', 'freevo.ui')
+            # special gui handling
+            import_name = import_name.replace('.ui.gui', '.view')
+            result[import_name] = dirname
+            return result
+    return result
+
+package_dir = {}
+os.path.walk('./src', package_finder, package_dir)
+
 # now start the python magic
 setup (name         = 'freevo',
        version      = VERSION,
@@ -86,7 +102,7 @@ setup (name         = 'freevo',
        author_email = 'freevo-devel@lists.sourceforge.net',
        url          = 'http://www.freevo.org',
        license      = 'GPL',
-
+       package_dir  = package_dir,
        i18n         = 'freevo',
        data_files   = data_files,
        )

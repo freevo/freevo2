@@ -203,7 +203,7 @@ except ImportError, i:
 
 # freevo imports
 from freevo import beacon
-import freevo.ui.gui as view
+import freevo.view
 
 # load the fxditem to make sure it's the first in the
 # mimetypes list
@@ -224,17 +224,17 @@ import freevo.ui.fxditem
 #         displays.fullscreen = True
 
 try:
-    view.configure(config, freevo.conf.SHAREDIR)
+    freevo.view.configure(config, freevo.conf.SHAREDIR)
 
     # Fire up splashscreen and load the plugins
-    progress = view.show_application('splash').get_widget('plugins')
+    progress = freevo.view.show_application('splash').get_widget('plugins')
     progress.max = num_plugins-1
 
     # load plugins
     freevo.plugin.init(freevo.ui, progress.inc)
 
     # prepare again, now that all plugins are loaded
-    view.load_theme()
+    freevo.view.load_theme()
 
     # start menu
     from freevo.ui.mainmenu import MainMenu

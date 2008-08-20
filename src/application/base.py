@@ -43,7 +43,7 @@ from freevo.resources import ResourceHandler
 
 # application imports
 from handler import handler
-from freevo.ui import gui as view
+from freevo import view
 
 # get logging object
 log = logging.getLogger()

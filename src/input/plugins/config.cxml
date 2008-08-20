@@ -1,5 +1,9 @@
 <?xml version="1.0"?>
 <config name="input.plugin">
+    <group name="keyboard" plugin="10">
+        <desc>Keyboard usage</desc>
+    </group>
+
     <group name="lirc" plugin="false">
         <desc>
             Support remote control using the lirc daemon.

@@ -1,8 +1,8 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# x11.py - X11 window key input plugin
+# keyboard.py - keyboard input plugin
 # -----------------------------------------------------------------------------
-# $Id: x11.py 10185 2007-12-07 20:16:29Z dmeyer $
+# $Id$
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -39,13 +39,11 @@ from freevo.ui import config
 
 # input imports
 from freevo.ui.input import KEYBOARD_MAP
-from freevo.ui.gui import window
+from freevo.view import signals
 from interface import InputPlugin
 
 # get logging object
 log = logging.getLogger('input')
-
-SCREENSHOT = 0
 
 class PluginInterface(InputPlugin):
     """
@@ -57,12 +55,12 @@ class PluginInterface(InputPlugin):
         Active X11 input layer
         """
         InputPlugin.plugin_activate(self, level)
-        window.signals["key-press"].connect(self.handle)
+        signals["key-press"].connect(self.handle)
         self.keymap = copy.deepcopy(KEYBOARD_MAP)
         for key, mapping in config.input.keyboardmap.items():
             self.keymap[key] = mapping.upper()
 
-        
+
     def handle(self, keycode):
         """
         Callback to handle the x11 keys.

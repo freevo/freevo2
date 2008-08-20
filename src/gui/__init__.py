@@ -36,11 +36,13 @@ from config import config
 from widgets import *
 
 window = None
+signals = None
 
 def configure(cfg, sharedir):
     config.load(cfg, sharedir)
-    global window
+    global window, signals
     window = Window()
+    signals = window.signals
 
 def show_application(application, context=None):
     return window.show_application(application, context)

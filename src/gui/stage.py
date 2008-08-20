@@ -149,7 +149,3 @@ class Window(kaa.candy.Stage):
         widget = self._theme.get(name)[style]()
         widget.parent = self.stage
         return widget
-
-# load input plugin
-from freevo import plugin
-plugin.activate('input.candy')
