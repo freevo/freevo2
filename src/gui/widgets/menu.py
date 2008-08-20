@@ -31,7 +31,7 @@
 
 # gui imports
 import kaa.candy
-from ...application.widget import Application
+from application import Application
 
 class MenuType(kaa.candy.Container):
     """

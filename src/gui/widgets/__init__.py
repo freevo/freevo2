@@ -5,4 +5,4 @@ import os
 import kaa.utils
 
 for widget in kaa.utils.get_plugins(os.path.dirname(__file__)):
-    exec('import %s' % widget)
+    exec('from %s import *' % widget)

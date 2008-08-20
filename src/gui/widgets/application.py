@@ -33,7 +33,7 @@
 import kaa.candy
 
 # display config
-from freevo.ui.gui import config as guicfg
+from .. import config as guicfg
 
 class ApplicationStyles(dict):
     """
