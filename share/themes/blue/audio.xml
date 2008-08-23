@@ -20,7 +20,7 @@
 
         <listing style="fixed-selection" x="300" y="100" width="490"
 	    height="490" spacing="6">
-	    <label font="Vera" height="35" color="0xcccccc">
+	    <label font="Vera" height="30" color="0xcccccc">
 		<properties xpadding="10" ypadding="2"/>
 		$item.name
 	    </label>

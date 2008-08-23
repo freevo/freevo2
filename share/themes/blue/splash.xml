@@ -7,7 +7,7 @@
         <properties depth="1"/>
         <!-- background image -->
         <image filename="../../images/blurrsplash.jpg" ignore-overscan="true"/>
-        <label x="100" y="380" width="600" font="Vera:24" color="0xff0000">
+        <label x="100" y="380" width="600" font="Vera:20" color="0xcccccc">
 	    <properties xalign="center"/>
             Starting Freevo, please wait...
         </label>
@@ -15,7 +15,6 @@
         <rectangle x="100" y="400" width="600" height="16" color="0xffffff" radius="20"/>
         <rectangle x="105" y="402" width="590" height="12" color="0x000000"/>
         <progressbar x="105" y="402" width="590" height="12">
-            <!-- set name to get the widget from ouside the gui code -->
             <properties name="plugins"/>
             <rectangle color="0xffffff"/>
         </progressbar>

@@ -21,7 +21,7 @@
 	</container>
 	
         <listing style="fixed-selection" x="10" y="280" width="780" height="310" spacing="6">
-	    <label font="Vera" height="35" color="0xcccccc">
+	    <label font="Vera" height="30" color="0xcccccc">
 		<properties xpadding="10" ypadding="2"/>
 		$item.name
 	    </label>
