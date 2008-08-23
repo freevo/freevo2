@@ -3,6 +3,7 @@
 
     <menu name="image" style="default">
         <listing style="grid" x="10" y="100" width="780" height="480" spacing="16">
+	    <properties xalign="center"/>
 	    <container width="130" height="130">
 		<properties anchor-point="65,65" opacity="150"/>
 		<thumbnail height="100" thumbnail="item.get('thumbnail')">

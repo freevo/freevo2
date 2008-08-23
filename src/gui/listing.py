@@ -31,6 +31,7 @@
 
 # kaa imports
 import kaa
+from kaa.utils import property
 
 # gui imports
 import kaa.candy
@@ -48,6 +49,9 @@ class Listing(kaa.candy.Group):
     candyxml_name = 'listing'
     context_sensitive = True
 
+    __xalign = None
+    __yalign = None
+
     def __init__(self, pos, size, label, selection, spacing=0, context=None):
         super(Listing, self).__init__(pos, size, context)
         self.spacing = spacing
@@ -56,6 +60,26 @@ class Listing(kaa.candy.Group):
         self.grid = None
         self.page = 0
         self.selected = None
+
+    @property
+    def xalign(self):
+        return self.__xalign or Listing.ALIGN_LEFT
+
+    @xalign.setter
+    def xalign(self, align):
+        self.__xalign = align
+        self._queue_sync_properties('xalign')
+        self._queue_sync(layout=True)
+
+    @property
+    def yalign(self):
+        return self.__yalign or Listing.ALIGN_TOP
+
+    @yalign.setter
+    def yalign(self, align):
+        self.__yalign = align
+        self._queue_sync_properties('yalign')
+        self._queue_sync(layout=True)
 
     def _create_children(self):
         """
@@ -104,6 +128,19 @@ class Listing(kaa.candy.Group):
             self.grid.behave('opacity', content.opacity, e)
         self._set_selected(menu.selected_pos, 0)
         super(Listing, self)._candy_prepare_render()
+
+    def _candy_sync_layout(self):
+        if 'xalign' in self._sync_properties:
+            if self.__xalign == Listing.ALIGN_CENTER:
+                self.grid.x = (self.width - self.grid.width) / 2
+            if self.__xalign == Listing.ALIGN_RIGHT:
+                self.grid.x = self.width - self.grid.width
+        if 'yalign' in self._sync_properties:
+            if self.__yalign == Listing.ALIGN_CENTER:
+                self.grid.y = (self.height - self.grid.height) / 2
+            if self.__yalign == Listing.ALIGN_BOTTOM:
+                self.grid.y = (self.height - self.grid.height) / 2
+        super(Listing, self)._candy_sync_layout()
 
     def _set_selected(self, idx, secs):
         if not self.grid:
@@ -196,26 +233,21 @@ class GridListing(Listing):
         if not self.grid:
             return
         # FIXME: add some more and better logic here
-        # *****************************************************************
-        # FIXME: this code is wrong when coming back from the image viewer
-        # We MUST remeber how the grud looked like
-        # *****************************************************************
-        # we need to figure out of the user moved horizonal or vertical
-        # we guess it here by choosing the shortest path
         diff = self._selected_idx - idx
-        print self._selected_idx, idx, self.viewport, self._selected_pos
-        if abs(diff) >= self.grid.num_cols:
+        vertical = abs(diff) / self.grid.num_cols
+        horizonal = abs(diff) % self.grid.num_cols
+        if vertical:
             # move up or down
-            self._selected_pos[1] -= diff / self.grid.num_cols
+            self._selected_pos[1] -= diff / abs(diff) * vertical
             while self._selected_pos[1] >= self.viewport[1] + self.grid.num_rows:
                 self.viewport[1] += self.grid.num_rows
                 self.grid.scroll_by((0, self.grid.num_rows), secs, force=True)
             while self._selected_pos[1] < self.viewport[1]:
                 self.viewport[1] -= self.grid.num_rows
                 self.grid.scroll_by((0, -self.grid.num_rows), secs, force=True)
-        else:
+        if horizonal:
             # move left or right
-            self._selected_pos[0] -= diff
+            self._selected_pos[0] -= diff / abs(diff) * horizonal
             while self._selected_pos[0] >= self.viewport[0] + self.grid.num_cols:
                 self.viewport[0] += self.grid.num_cols
                 self.grid.scroll_by((self.grid.num_cols, 0), secs, force=True)
