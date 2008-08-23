@@ -1,6 +1,28 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <theme geometry="800x600">
 
+    <menu name="image" style="default">
+        <listing style="grid" x="10" y="100" width="780" height="480" spacing="16">
+	    <container width="130" height="130">
+		<properties anchor-point="65,65" opacity="150"/>
+		<thumbnail height="100" thumbnail="item.get('thumbnail')">
+		    <properties xalign="center" yalign="center"/>
+		</thumbnail>
+		<label font="Vera" y="110" height="20" color="0xffffff">
+		    <properties xalign="center"/>
+		    $item.name
+		</label>
+	    </container>
+            <selection>
+		<properties scale="1.05" opacity="255"/>
+		<container>
+		    <rectangle color="0xc0000000" x="-10" y="-10" radius="15"
+			width="150" height="150"/>
+		</container>
+            </selection>
+        </listing>
+    </menu>
+
     <application name="imageviewer" style="simple">
         <properties depth="1"/>
 	<container depends="$image">

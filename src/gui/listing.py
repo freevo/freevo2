@@ -57,12 +57,10 @@ class Listing(kaa.candy.Group):
         self.page = 0
         self.selected = None
 
-    def _candy_prepare_render(self):
+    def _create_children(self):
         """
-        Prepare rendering
+        Create grid and selection children
         """
-        if self.grid:
-            return super(Listing, self)._candy_prepare_render()
         # create one label to get some information we need. This widget
         # is only to get the information, it will never be used
         menu = self.eval_context('menu')
@@ -80,12 +78,30 @@ class Listing(kaa.candy.Group):
         self.grid = kaa.candy.SelectionGrid(None, (w,h), (w, content.height),
               'item', menu.choices, self._template, bar, 1, (0, self.spacing))
         self.grid.parent = self
+
+    def _candy_prepare_render(self):
+        """
+        Prepare rendering
+        """
+        if self.grid:
+            return super(Listing, self)._candy_prepare_render()
+        # create one label to get some information we need. This widget
+        # is only to get the information, it will never be used
+        menu = self.eval_context('menu')
+        content = self._template()
+        self._create_children()
         menu.rows = self.grid.num_rows
         menu.cols = self.grid.num_cols
         # now add some animations
         if self._selection.properties.get('color'):
             self.grid.behave('color', content.color,
                 self._selection.properties.get('color'))
+        if self._selection.properties.get('scale'):
+            e = float(self._selection.properties.get('scale'))
+            self.grid.behave('scale', content.scale, (e, e))
+        if self._selection.properties.get('opacity'):
+            e = int(self._selection.properties.get('opacity'))
+            self.grid.behave('opacity', content.opacity, e)
         self._set_selected(menu.selected_pos, 0)
         super(Listing, self)._candy_prepare_render()
 
@@ -139,6 +155,77 @@ class FixedSelectionListing(Listing):
         self.grid.scroll_to((0, idx-2), secs)
         self.grid.select((0, idx), secs)
 
-# register widget to the core
+
+class GridListing(Listing):
+    """
+    Listing widget to show a menu.
+    """
+    candyxml_style = 'grid'
+
+    def __init__(self, pos, size, label, selection, spacing=0, context=None):
+        super(GridListing,self).__init__(pos, size, label, selection, spacing, context)
+        self.viewport = [0,0]
+        self._selected_idx = 0
+        self._selected_pos = [0,0]
+
+    def _create_children(self):
+        """
+        Create grid and selection children
+        """
+        # create one label to get some information we need. This widget
+        # is only to get the information, it will never be used
+        menu = self.eval_context('menu')
+        content = self._template()
+        # create bar and set the height
+        bar = self._selection.widget
+        if kaa.candy.is_template(bar):
+            bar = bar()
+        bar.height = content.height
+        bar.width = content.width
+        # create grid, the location of the bar is not 100% correct
+        # because of baseline is not text_height is not label.height
+        w = (self.inner_width / (content.width + self.spacing)) * \
+            (content.width + self.spacing)
+        h = (self.inner_height / (content.height + self.spacing)) * \
+            (content.height + self.spacing)
+        self.grid = kaa.candy.SelectionGrid(None, (w,h), (content.width, content.height),
+              'item', menu.choices, self._template, bar, 1, (self.spacing, self.spacing))
+        self.grid.parent = self
+
+    def _set_selected(self, idx, secs):
+        if not self.grid:
+            return
+        # FIXME: add some more and better logic here
+        # *****************************************************************
+        # FIXME: this code is wrong when coming back from the image viewer
+        # We MUST remeber how the grud looked like
+        # *****************************************************************
+        # we need to figure out of the user moved horizonal or vertical
+        # we guess it here by choosing the shortest path
+        diff = self._selected_idx - idx
+        print self._selected_idx, idx, self.viewport, self._selected_pos
+        if abs(diff) >= self.grid.num_cols:
+            # move up or down
+            self._selected_pos[1] -= diff / self.grid.num_cols
+            while self._selected_pos[1] >= self.viewport[1] + self.grid.num_rows:
+                self.viewport[1] += self.grid.num_rows
+                self.grid.scroll_by((0, self.grid.num_rows), secs, force=True)
+            while self._selected_pos[1] < self.viewport[1]:
+                self.viewport[1] -= self.grid.num_rows
+                self.grid.scroll_by((0, -self.grid.num_rows), secs, force=True)
+        else:
+            # move left or right
+            self._selected_pos[0] -= diff
+            while self._selected_pos[0] >= self.viewport[0] + self.grid.num_cols:
+                self.viewport[0] += self.grid.num_cols
+                self.grid.scroll_by((self.grid.num_cols, 0), secs, force=True)
+            while self._selected_pos[0] < self.viewport[0]:
+                self.viewport[0] -= self.grid.num_cols
+                self.grid.scroll_by((-self.grid.num_cols, 0), secs, force=True)
+        self._selected_idx = idx
+        self.grid.select(self._selected_pos, secs)
+
+# register widgets to the core
 Listing.candyxml_register()
 FixedSelectionListing.candyxml_register()
+GridListing.candyxml_register()
