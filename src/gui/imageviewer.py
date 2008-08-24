@@ -111,7 +111,7 @@ class ImageViewer(Application):
         Set a new context.
         """
         super(ImageViewer, self).set_context(context)
-        self._queue_sync(rendering=True)
+        self._queue_rendering()
 
 # register widget to kaa.candy
 ImageViewer.candyxml_register()

@@ -69,7 +69,7 @@ class Listing(kaa.candy.Group):
     def xalign(self, align):
         self.__xalign = align
         self._queue_sync_properties('xalign')
-        self._queue_sync(layout=True)
+        self._queue_sync_layout()
 
     @property
     def yalign(self):
@@ -79,7 +79,7 @@ class Listing(kaa.candy.Group):
     def yalign(self, align):
         self.__yalign = align
         self._queue_sync_properties('yalign')
-        self._queue_sync(layout=True)
+        self._queue_sync_layout()
 
     def _create_children(self):
         """
