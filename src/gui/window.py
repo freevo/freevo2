@@ -57,7 +57,8 @@ class Window(kaa.candy.Stage):
                     kaa.candy.config.imagepath.remove(path)
         self._theme_prefix = os.path.join(config.sharedir, 'themes', name)
         kaa.candy.config.imagepath.append(self._theme_prefix)
-        self._theme = self.candyxml(self._theme_prefix + '/' + part)[1]
+        info, self._theme = self.candyxml(self._theme_prefix + '/' + part)
+        self._theme.icons = os.path.join(config.sharedir, 'icons', info['icons'])
         # reference theme in all widgets
         # NOTE: this bounds all widgets created from this point to the
         # same theme. Two displays with different themes are not possible.

@@ -30,6 +30,10 @@
                 <rectangle color="0xa0000000" radius="30"/>
             </selection>
         </listing>
+
+	<image style="icon" x="500" y="350" width="290" height="240" name="video">
+	    <properties xalign="right" yalign="bottom" keep-aspect="true" opacity="50"/>
+	</image>
     </menu>
 
     <application name="videoplayer" style="simple">
