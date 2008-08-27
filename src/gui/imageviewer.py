@@ -54,7 +54,7 @@ class ImageViewer(Application):
         super(ImageViewer, self).__init__(widgets, context)
         self._view = None
 
-    def replace_child(self, child, replace):
+    def _candy_replace_child(self, child, replace):
         """
         Replace child with a new one.
         """
@@ -65,13 +65,13 @@ class ImageViewer(Application):
             replace.animate(0.5).behave('opacity', 0, 255)
             replace.parent = self
             return
-        super(ImageViewer, self).replace_child(child, replace)
+        super(ImageViewer, self)._candy_replace_child(child, replace)
 
-    def _prepare_sync(self):
+    def _candy_prepare(self):
         """
         Prepare rendering
         """
-        super(ImageViewer, self)._prepare_sync()
+        super(ImageViewer, self)._candy_prepare()
         view = self.get_widget('view')
         if view is not self._view:
             self._zoom = 1.0
@@ -105,15 +105,15 @@ class ImageViewer(Application):
                 image.x = image.y = 0
                 image.width, image.height = self.width, self.height
 
-    def _set_context_execute(self, context):
+    def _candy_context_sync(self, context):
         """
         Set a new context.
 
         @param context: dict of context key,value pairs
         """
-        super(ImageViewer, self)._set_context_execute(context)
+        super(ImageViewer, self)._candy_context_sync(context)
         # trigger new context evaluation
-        self._prepare_sync()
+        self._candy_prepare()
 
 # register widget to kaa.candy
 ImageViewer.candyxml_register()

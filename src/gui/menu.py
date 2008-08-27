@@ -77,14 +77,14 @@ class MenuApplication(Application):
         self.menu.type = name
         self.menu.parent = self
 
-    def _set_context_prepare(self, context):
+    def _candy_context_prepare(self, context):
         """
         Try if the widget is capable of handling the context. This does not
         modify any internal variables and is thread safe.
 
         @param context: context dict
         """
-        if not super(MenuApplication, self)._set_context_prepare(context):
+        if not super(MenuApplication, self)._candy_context_prepare(context):
             return False
         name = context.get('menu').type
         if not name in self.templates:
@@ -96,12 +96,12 @@ class MenuApplication(Application):
             self.menu.userdata['context:replace'] = menu
         return True
 
-    def replace_child(self, child, replace):
+    def _candy_replace_child(self, child, replace):
         """
         Replace child with a new one.
         """
         if child != self.menu:
-            return super(MenuApplication, self).replace_child(child, replace)
+            return super(MenuApplication, self)._candy_replace_child(child, replace)
         # FIXME: add some nice animations here
         child.parent = None
         self.menu = replace

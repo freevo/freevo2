@@ -13,8 +13,8 @@ class Thumbnail(kaa.candy.Thumbnail):
         super(Thumbnail,self).__init__(pos, size, context=context)
         self.item = item
 
-    def _set_context_execute(self, context):
-        super(Thumbnail, self)._set_context_execute(context)
+    def _candy_context_sync(self, context):
+        super(Thumbnail, self)._candy_context_sync(context)
         self.item = self.__item
 
     @property

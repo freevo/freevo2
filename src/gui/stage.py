@@ -52,11 +52,11 @@ class Stage(kaa.candy.Group):
             self._queue_sync_properties('monitor-aspect')
         self._screen = None
 
-    def _candy_sync_properties(self):
+    def _clutter_sync_properties(self):
         """
         Set some simple properties of the clutter.Actor
         """
-        super(Stage, self)._candy_sync_properties()
+        super(Stage, self)._clutter_sync_properties()
         if 'monitor-aspect' in self._sync_properties:
             self._obj.set_scale(1.0, config.stage.scale)
 

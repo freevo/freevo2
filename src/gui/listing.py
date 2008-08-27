@@ -123,12 +123,12 @@ class Listing(kaa.candy.Group):
             'item', menu.choices, self._template, bar, 1, spacing)
         self.grid.parent = self
 
-    def _prepare_sync(self):
+    def _candy_prepare(self):
         """
         Prepare rendering
         """
         if self.grid:
-            return super(Listing, self)._prepare_sync()
+            return super(Listing, self)._candy_prepare()
         # create one label to get some information we need. This widget
         # is only to get the information, it will never be used
         menu = self.context.menu
@@ -147,9 +147,9 @@ class Listing(kaa.candy.Group):
             e = int(self._selection.properties.get('opacity'))
             self.grid.behave('opacity', content.opacity, e)
         self._set_selected(menu.selected_pos, 0)
-        super(Listing, self)._prepare_sync()
+        super(Listing, self)._candy_prepare()
 
-    def _candy_sync_layout(self):
+    def _clutter_sync_layout(self):
         if 'xalign' in self._sync_properties:
             if self.__xalign == Listing.ALIGN_CENTER:
                 self.grid.x = (self.width - self.grid.width) / 2
@@ -160,7 +160,7 @@ class Listing(kaa.candy.Group):
                 self.grid.y = (self.height - self.grid.height) / 2
             if self.__yalign == Listing.ALIGN_BOTTOM:
                 self.grid.y = (self.height - self.grid.height) / 2
-        super(Listing, self)._candy_sync_layout()
+        super(Listing, self)._clutter_sync_layout()
 
     def _set_selected(self, idx, secs):
         if not self.grid:
@@ -178,11 +178,11 @@ class Listing(kaa.candy.Group):
                 self.page = page
             self.grid.select((idx, 0), secs)
 
-    def _set_context_execute(self, context):
+    def _candy_context_sync(self, context):
         """
         Set a new context for the widget and redraw it.
         """
-        super(Listing, self)._set_context_execute(context)
+        super(Listing, self)._candy_context_sync(context)
         menu = self.context.menu
         if menu.selected == self.selected:
             return
