@@ -103,12 +103,12 @@ class Listing(kaa.candy.Group):
               'item', menu.choices, self._template, bar, 1, (0, self.spacing))
         self.grid.parent = self
 
-    def _candy_prepare_render(self):
+    def _prepare_sync(self):
         """
         Prepare rendering
         """
         if self.grid:
-            return super(Listing, self)._candy_prepare_render()
+            return super(Listing, self)._prepare_sync()
         # create one label to get some information we need. This widget
         # is only to get the information, it will never be used
         menu = self.eval_context('menu')
@@ -127,7 +127,7 @@ class Listing(kaa.candy.Group):
             e = int(self._selection.properties.get('opacity'))
             self.grid.behave('opacity', content.opacity, e)
         self._set_selected(menu.selected_pos, 0)
-        super(Listing, self)._candy_prepare_render()
+        super(Listing, self)._prepare_sync()
 
     def _candy_sync_layout(self):
         if 'xalign' in self._sync_properties:

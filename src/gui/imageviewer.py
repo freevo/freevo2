@@ -68,11 +68,11 @@ class ImageViewer(Application):
             return
         super(ImageViewer, self)._child_replace(old, new)
 
-    def _candy_prepare_render(self):
+    def _prepare_sync(self):
         """
         Prepare rendering
         """
-        super(ImageViewer, self)._candy_prepare_render()
+        super(ImageViewer, self)._prepare_sync()
         view = self.get_widget('view')
         if view is not self._view:
             self._zoom = 1.0

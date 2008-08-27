@@ -66,25 +66,37 @@ class MenuApplication(Application):
 
     def __init__(self, widgets, context=None):
         super(MenuApplication, self).__init__(widgets, context)
-        self.__current = None
         self.templates = self.theme.get('menu')
-        self.set_menu(context)
-
-    def set_menu(self, context):
         name = context.get('menu').type
         if not name in self.templates:
             name = 'default'
-        if not self.__current or self.__current.type != name:
-            if self.__current:
-                # FIXME: handle animations here
-                self.__current.parent = None
-            self.__current = self.templates.get(name)(context)
-            self.__current.parent = self
-            self.__current.type = name
+        self.__menu = self.templates.get(name)(context)
+        self.__menu.type = name
+        self.__menu.parent = self
 
-    def set_context(self, context):
-        self.set_menu(context)
-        super(MenuApplication, self).set_context(context)
+    def try_context(self, context):
+        if not super(MenuApplication, self).try_context(context):
+            return False
+        name = context.get('menu').type
+        if not name in self.templates:
+            name = 'default'
+        if self.__menu.type != name:
+            menu = self.templates.get(name)(context)
+            menu.type = name
+            menu._prepare_sync_with_parent(self)
+            self._queue_replace_children(self.__menu, menu)
+        return True
 
+    def _child_replace(self, old, new):
+        """
+        Replace child with a new one.
+        """
+        if old != self.__menu:
+            return super(MenuApplication, self)._child_replace(old, new)
+        # FIXME: add some nice animations here
+        old.parent = None
+        self.__menu = new
+        self.__menu.parent = self
+        
 MenuApplication.candyxml_register()
 MenuType.candyxml_register()

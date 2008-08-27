@@ -42,7 +42,7 @@ class Thumbnail(kaa.candy.Thumbnail):
                 return
         except:
             pass
-        if self._try_mimetype(item.type):
+        if item.type and self._try_mimetype(item.type):
             return
         if self._try_mimetype('unknown'):
             return
