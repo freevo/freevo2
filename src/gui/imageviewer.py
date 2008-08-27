@@ -56,8 +56,7 @@ class ImageViewer(Application):
 
     def replace_child(self, child, replace):
         """
-        Replace child with a new one. This function is a callback from
-        set_context. It is used for changing images.
+        Replace child with a new one.
         """
         if child.name == 'view':
             # replace view area with a fade animation
@@ -81,17 +80,17 @@ class ImageViewer(Application):
             self._view.anchor_point = self.width / 2, self.height / 2
             self._pos = 0, 0
         animation = None
-        if self._zoom != self.eval_context('zoom'):
-            self._zoom = self.eval_context('zoom')
+        if self._zoom != self.context.zoom:
+            self._zoom = self.context.zoom
             animation = view.animate(0.2)
             animation.behave('scale', view.scale, (self._zoom, self._zoom))
-        if self._pos != self.eval_context('pos'):
+        if self._pos != self.context.pos:
             if not animation:
                 animation = view.animate(0.2)
-            self._pos = self.eval_context('pos')
+            self._pos = self.context.pos
             animation.behave('move', (view.x, view.y), (-self._pos[0], -self._pos[1]))
-        if self._rotation != self.eval_context('rotation'):
-            self._rotation = self.eval_context('rotation')
+        if self._rotation != self.context.rotation:
+            self._rotation = self.context.rotation
             image = self.get_widget('image')
             image.rotation = self._rotation
             # Update image geometry. This is not a good solution but it helps
@@ -105,6 +104,6 @@ class ImageViewer(Application):
             else:
                 image.x = image.y = 0
                 image.width, image.height = self.width, self.height
-        
+
 # register widget to kaa.candy
 ImageViewer.candyxml_register()

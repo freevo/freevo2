@@ -80,7 +80,7 @@ class WidgetContext(dict):
         Update the widget
         """
         if self._app:
-            self._app.set_context(self._ctx)
+            self._app.context = self._ctx
         self._changed = False
 
     def __getattr__(self, attr):

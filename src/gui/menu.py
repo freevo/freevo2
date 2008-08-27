@@ -43,11 +43,6 @@ class MenuType(kaa.candy.Container):
     def __init__(self, widgets, context=None):
         super(MenuType, self).__init__(None, None, widgets, context=context)
 
-    def set_context(self, context):
-        # FIXME: handle animations here
-        # context.get('menu').pos
-        super(MenuType, self).set_context(context)
-
     @classmethod
     def candyxml_parse(cls, element):
         """
@@ -82,14 +77,14 @@ class MenuApplication(Application):
         self.menu.type = name
         self.menu.parent = self
 
-    def try_context(self, context):
+    def _set_context_prepare(self, context):
         """
         Try if the widget is capable of handling the context. This does not
         modify any internal variables and is thread safe.
 
         @param context: context dict
         """
-        if not super(MenuApplication, self).try_context(context):
+        if not super(MenuApplication, self)._set_context_prepare(context):
             return False
         name = context.get('menu').type
         if not name in self.templates:

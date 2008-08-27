@@ -52,6 +52,24 @@
 		    keep-aspect="true" ignore-overscan="true"/>
 	    </image>
 	</container>
+	<container name="browser" >
+	    <properties depth="2"/>
+	    <rectangle y="490" color="0x66000000"/>
+	    <listing style="fixed-selection" x="-50" y="500" width="900"
+		height="90" spacing="16" selection="center">
+		<properties xalign="center"/>
+		<thumbnail style="mimetype" width="100" height="70" item="item">
+		    <properties xalign="center" yalign="center"/>
+		</thumbnail>
+		<selection>
+		    <properties scale="1.05" opacity="255"/>
+		    <container>
+			<rectangle color="0xc0000000" x="-10" y="-10" radius="15"
+			    width="150" height="150"/>
+		    </container>
+		</selection>
+	    </listing>
+	</container>
     </application>
 
 

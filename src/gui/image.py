@@ -1,24 +1,42 @@
 import os
 
+from kaa.utils import property
 import kaa.imlib2
 import kaa.candy
 
 class Thumbnail(kaa.candy.Thumbnail):
     candyxml_style = 'mimetype'
 
+    __item = __item_eval = None
+
     def __init__(self, pos, size, item, context=None):
         super(Thumbnail,self).__init__(pos, size, context=context)
+        self.item = item
+
+    def _set_context_execute(self, context):
+        super(Thumbnail, self)._set_context_execute(context)
+        self.item = self.__item
+
+    @property
+    def item(self):
+        return self.__item_eval
+
+    @item.setter
+    def item(self, item):
+        self.__item = item
         if isinstance(item, (str, unicode)):
-            if context:
-                item = self.eval_context(item, depends=True)
+            if self.context:
+                item = self.context.get(item)
             else:
                 item = None
-        self.item = item
+        if self.__item_eval == item:
+            return
+        self.__item_eval = item
         if not item:
             return
         self.set_thumbnail(item.get('thumbnail'))
         if not self.has_image():
-            self.load_mimetype(item)
+            self._load_mimetype(item)
 
     def _try_mimetype(self, name):
         for ext in ('.png', '.jpg'):
@@ -28,7 +46,7 @@ class Thumbnail(kaa.candy.Thumbnail):
                 return True
         return False
 
-    def load_mimetype(self, item):
+    def _load_mimetype(self, item):
         if item.type == 'dir':
             if self._try_mimetype('folder_%s' % item.media_type):
                 return
@@ -59,11 +77,13 @@ class Icon(kaa.candy.Image):
 
     candyxml_style = 'icon'
 
+    __name = __name_eval = None
+
     def __init__(self, pos, size, name, context=None):
         super(Icon, self).__init__(pos, size, context=context)
         if name and name.startswith('$'):
-            # variable from the context, e.g. $varname
-            name = self.eval_context(name[1:], depends=True)
+            self.add_dependency(name)
+            name = self.context.get(name)
         if not name:
             return
         for ext in ('.png', '.jpg'):

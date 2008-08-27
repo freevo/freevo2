@@ -62,6 +62,7 @@ class Listing(kaa.candy.Group):
         self.grid = None
         self.page = 0
         self.selected = None
+        self.add_dependency('menu')
 
     @property
     def xalign(self):
@@ -89,7 +90,7 @@ class Listing(kaa.candy.Group):
         """
         # create one label to get some information we need. This widget
         # is only to get the information, it will never be used
-        menu = self.eval_context('menu')
+        menu = self.context.menu
         content = self._template()
         # create bar and set the height
         bar = self._selection.widget
@@ -130,7 +131,7 @@ class Listing(kaa.candy.Group):
             return super(Listing, self)._prepare_sync()
         # create one label to get some information we need. This widget
         # is only to get the information, it will never be used
-        menu = self.eval_context('menu', depends=True)
+        menu = self.context.menu
         content = self._template()
         self._create_children()
         menu.rows = self.grid.num_rows
@@ -177,12 +178,12 @@ class Listing(kaa.candy.Group):
                 self.page = page
             self.grid.select((idx, 0), secs)
 
-    def set_context(self, context):
+    def _set_context_execute(self, context):
         """
         Set a new context for the widget and redraw it.
         """
-        super(Listing, self).set_context(context)
-        menu = self.get_context('menu')
+        super(Listing, self)._set_context_execute(context)
+        menu = self.context.menu
         if menu.selected == self.selected:
             return
         self.selected = menu.selected
@@ -262,7 +263,7 @@ class GridListing(Listing):
         """
         # create one label to get some information we need. This widget
         # is only to get the information, it will never be used
-        menu = self.eval_context('menu')
+        menu = self.context.menu
         content = self._template()
         # create bar and set the height
         bar = self._selection.widget
