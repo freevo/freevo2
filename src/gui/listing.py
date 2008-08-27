@@ -41,6 +41,8 @@ class Listing(kaa.candy.Group):
     Listing widget to show a menu.
     """
 
+    HORIZONTAL, VERTICAL =  range(2)
+
     class Selection(object):
         def __init__(self):
             self.widget = None
@@ -93,14 +95,31 @@ class Listing(kaa.candy.Group):
         bar = self._selection.widget
         if kaa.candy.is_template(bar):
             bar = bar()
-        bar.height = content.height
-        # create grid, the location of the bar is not 100% correct
-        # because of baseline is not text_height is not label.height
-        w = self.inner_width
-        h = (self.inner_height / (content.height + self.spacing)) * \
-            (content.height + self.spacing)
-        self.grid = kaa.candy.SelectionGrid(None, (w,h), (w, content.height),
-              'item', menu.choices, self._template, bar, 1, (0, self.spacing))
+        w, h = self.inner_width, self.inner_height
+        try:
+            vertical = self.inner_height / content.height
+        except:
+            vertical = 1
+        try:
+            horizonal = self.inner_width / content.width
+        except:
+            horizonal = 1
+        if vertical > horizonal:
+            self._orientation = Listing.VERTICAL
+            bar.height = content.height
+            h = (self.inner_height / (content.height + self.spacing)) * \
+                (content.height + self.spacing)
+            cell_size = (w, content.height)
+            spacing = (0, self.spacing)
+        else:
+            self._orientation = Listing.HORIZONTAL
+            bar.width = content.width
+            w = (self.inner_width / (content.width + self.spacing)) * \
+                (content.width + self.spacing)
+            cell_size = (content.width, h)
+            spacing = (self.spacing, 0)
+        self.grid = kaa.candy.SelectionGrid(None, (w,h), cell_size,
+            'item', menu.choices, self._template, bar, 1, spacing)
         self.grid.parent = self
 
     def _prepare_sync(self):
@@ -111,7 +130,7 @@ class Listing(kaa.candy.Group):
             return super(Listing, self)._prepare_sync()
         # create one label to get some information we need. This widget
         # is only to get the information, it will never be used
-        menu = self.eval_context('menu')
+        menu = self.eval_context('menu', depends=True)
         content = self._template()
         self._create_children()
         menu.rows = self.grid.num_rows
@@ -145,11 +164,18 @@ class Listing(kaa.candy.Group):
     def _set_selected(self, idx, secs):
         if not self.grid:
             return
-        page = (idx / self.grid.num_rows) * self.grid.num_rows
-        if page != self.page:
-            self.grid.scroll_to((0, page), secs)
-            self.page = page
-        self.grid.select((0, idx), secs)
+        if self._orientation == Listing.VERTICAL:
+            page = (idx / self.grid.num_rows) * self.grid.num_rows
+            if page != self.page:
+                self.grid.scroll_to((0, page), secs)
+                self.page = page
+            self.grid.select((0, idx), secs)
+        else:
+            page = (idx / self.grid.num_cols) * self.grid.num_cols
+            if page != self.page:
+                self.grid.scroll_to((page, 0), secs)
+                self.page = page
+            self.grid.select((idx, 0), secs)
 
     def set_context(self, context):
         """
@@ -186,12 +212,37 @@ class FixedSelectionListing(Listing):
 
     candyxml_style = 'fixed-selection'
 
+    def __init__(self, pos, size, label, selection, selection_pos=2, spacing=0,
+                 context=None):
+        super(FixedSelectionListing, self).__init__(pos, size, label, selection,
+            spacing, context)
+        self.selection_pos = selection_pos
+
     def _set_selected(self, idx, secs):
         if not self.grid:
             return
-        self.grid.scroll_to((0, idx-2), secs)
-        self.grid.select((0, idx), secs)
+        if self._orientation == Listing.VERTICAL:
+            if isinstance(self.selection_pos, (str, unicode)):
+                if self.selection_pos == 'center':
+                    self.selection_pos = self.grid.num_rows / 2
+                self.selection_pos = int(self.selection_pos)
+            self.grid.scroll_to((0, idx-self.selection_pos), secs)
+            self.grid.select((0, idx), secs)
+        else:
+            if isinstance(self.selection_pos, (str, unicode)):
+                if self.selection_pos == 'center':
+                    self.selection_pos = self.grid.num_cols / 2
+                self.selection_pos = int(self.selection_pos)
+            self.grid.scroll_to((idx-self.selection_pos, 0), secs)
+            self.grid.select((idx, 0), secs)
 
+    @classmethod
+    def candyxml_parse(cls, element):
+        """
+        Parse the XML element for parameter to create the widget.
+        """
+        return super(FixedSelectionListing, cls).candyxml_parse(element).update(
+            selection_pos=element.selection or 2)
 
 class GridListing(Listing):
     """
