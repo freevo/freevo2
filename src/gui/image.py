@@ -10,7 +10,7 @@ class Thumbnail(kaa.candy.Thumbnail):
         super(Thumbnail,self).__init__(pos, size, context=context)
         if isinstance(item, (str, unicode)):
             if context:
-                item = self.eval_context(item)
+                item = self.eval_context(item, depends=True)
             else:
                 item = None
         self.item = item
@@ -63,7 +63,7 @@ class Icon(kaa.candy.Image):
         super(Icon, self).__init__(pos, size, context=context)
         if name and name.startswith('$'):
             # variable from the context, e.g. $varname
-            name = self.eval_context(name[1:])
+            name = self.eval_context(name[1:], depends=True)
         if not name:
             return
         for ext in ('.png', '.jpg'):
