@@ -54,19 +54,19 @@ class ImageViewer(Application):
         super(ImageViewer, self).__init__(widgets, context)
         self._view = None
 
-    def _child_replace(self, old, new):
+    def replace_child(self, child, replace):
         """
         Replace child with a new one. This function is a callback from
         set_context. It is used for changing images.
         """
-        if old.name == 'view':
+        if child.name == 'view':
             # replace view area with a fade animation
-            old.animate(0.5, unparent=True).behave('opacity', old.opacity, 0)
-            new.opacity = 0
-            new.animate(0.5).behave('opacity', 0, 255)
-            new.parent = self
+            child.animate(0.5, unparent=True).behave('opacity', child.opacity, 0)
+            replace.opacity = 0
+            replace.animate(0.5).behave('opacity', 0, 255)
+            replace.parent = self
             return
-        super(ImageViewer, self)._child_replace(old, new)
+        super(ImageViewer, self).replace_child(child, replace)
 
     def _prepare_sync(self):
         """
