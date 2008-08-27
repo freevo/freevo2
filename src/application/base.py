@@ -72,12 +72,13 @@ class WidgetContext(dict):
         Render the widget
         """
         self._app = view.show_application(self._name, self._ctx)
+        self._changed = False
 
     def sync(self):
         """
         Update the widget
         """
-        if self._app:
+        if self._app and self._changed:
             self._app.set_context(self._ctx)
         self._changed = False
 

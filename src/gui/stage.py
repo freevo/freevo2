@@ -71,12 +71,18 @@ class Stage(kaa.candy.Group):
         """
         Show <application> widget
         """
-        self.swap(widget)
-        self._screen = widget
-        if self._screen:
-            self._screen.width = self.width
-            self._screen.height = self.height
-            self._screen.parent = self
+        if widget:
+            widget.width = self.width
+            widget.height = self.height
+            widget.prepare(self)
+        try:
+            kaa.candy.thread_enter()
+            if widget:
+                widget.parent = self
+            self.swap(widget)
+            self._screen = widget
+        finally:
+            kaa.candy.thread_leave()
         return widget
 
 

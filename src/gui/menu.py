@@ -91,7 +91,7 @@ class MenuApplication(Application):
         if self.__menu.type != name:
             menu = self.templates.get(name)(context)
             menu.type = name
-            menu._prepare_sync_with_parent(self)
+            menu.prepare(self)
             self._queue_replace_children(self.__menu, menu)
         return True
 

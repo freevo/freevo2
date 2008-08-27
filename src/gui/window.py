@@ -90,5 +90,8 @@ class Window(kaa.candy.Stage):
         Render widget with the given name
         """
         widget = self._theme.get(name)[style]()
+        widget.prepare(self.stage)
+        kaa.candy.thread_enter()
         widget.parent = self.stage
+        kaa.candy.thread_leave()
         return widget
