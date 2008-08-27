@@ -73,12 +73,13 @@ class WidgetContext(dict):
         """
         self._app = view.show_application(self._name, self._ctx)
         self._changed = False
+        kaa.signals['step'].disconnect(self.sync)
 
     def sync(self):
         """
         Update the widget
         """
-        if self._app and self._changed:
+        if self._app:
             self._app.set_context(self._ctx)
         self._changed = False
 
