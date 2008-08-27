@@ -108,6 +108,7 @@ class ImageViewer(Application):
         self.gui_context.rotation = item.get('rotation') or 0
         self.gui_context.zoom = 1.0
         self.gui_context.pos = 0,0
+        self.gui_context.menu = self.playlist
         self.status = STATUS_RUNNING
         # start timer
         if self.item.duration and self.slideshow and \
