@@ -105,13 +105,6 @@ class ImageViewer(Application):
             else:
                 image.x = image.y = 0
                 image.width, image.height = self.width, self.height
-
-    def set_context(self, context):
-        """
-        Set a new context.
-        """
-        super(ImageViewer, self).set_context(context)
-        self._queue_rendering()
-
+        
 # register widget to kaa.candy
 ImageViewer.candyxml_register()
