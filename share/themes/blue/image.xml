@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <theme geometry="800x600">
 
+    <menu name="image main menu" style="default">
+        <listing x="20" y="100" width="600" height="480" spacing="6">
+	    <label font="Vera" height="30" color="0xcccccc">
+		<properties xpadding="10" ypadding="2"/>
+		$item.name
+	    </label>
+            <selection>
+		<properties color="0xffffff"/>
+                <rectangle color="0xa0000000" radius="20"/>
+            </selection>
+        </listing>
+	<image style="icon" x="500" y="350" width="290" height="240" name="image">
+	    <properties xalign="right" yalign="bottom" keep-aspect="true" opacity="50"/>
+	</image>
+    </menu>
+
     <menu name="image" style="default">
         <listing style="grid" x="10" y="100" width="780" height="480" spacing="16">
 	    <properties xalign="center"/>
@@ -32,7 +48,7 @@
 	<container depends="$image">
 	    <properties name="view" ignore-overscan="true"/>
 	    <image filename="$image">
-		<properties name="image" xalign="center" yalign="center" 
+		<properties name="image" xalign="center" yalign="center"
 		    keep-aspect="true" ignore-overscan="true"/>
 	    </image>
 	</container>

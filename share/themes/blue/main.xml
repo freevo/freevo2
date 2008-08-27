@@ -35,6 +35,10 @@
                 <rectangle color="0xa0000000" radius="40"/>
             </selection>
         </listing>
+	<image style="icon" x="500" y="350" width="290" height="240"
+	    name="$item.media_type">
+	    <properties xalign="right" yalign="bottom" keep-aspect="true"/>
+	</image>
     </menu>
 
     <menu name="default" style="default">

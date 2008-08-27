@@ -53,8 +53,16 @@ class MenuType(kaa.candy.Container):
         """
         Parse the XML element for parameter to create the widget.
         """
-        kwargs = super(MenuType, cls).candyxml_parse(element)
-        return dict(widgets=kwargs['widgets'])
+        widgets = []
+        for inherit in element.get_children('inherit'):
+            element.remove(inherit)
+            theme = element
+            while getattr(theme, '_parent', None):
+                theme = theme._parent
+            kwargs = theme._elements.get(element.node)[inherit.name]._kwargs
+            widgets.extend(kwargs.get('widgets'))
+        widgets.extend(super(MenuType, cls).candyxml_parse(element).get('widgets'))
+        return dict(widgets=widgets)
 
 
 class MenuApplication(Application):
@@ -97,6 +105,6 @@ class MenuApplication(Application):
         old.parent = None
         self.__menu = new
         self.__menu.parent = self
-        
+
 MenuApplication.candyxml_register()
 MenuType.candyxml_register()

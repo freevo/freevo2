@@ -35,6 +35,10 @@
 	</image>
     </menu>
 
+    <menu name="audio main menu" style="default">
+	<inherit name="audio"/>
+    </menu>
+
     <application name="audioplayer" style="simple">
         <image filename="../../images/blurrback.jpg" ignore-overscan="true"/>
 	<container x="40" y="100" width="720" height="270">
