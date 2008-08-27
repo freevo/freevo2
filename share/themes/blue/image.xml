@@ -52,6 +52,7 @@
 		    keep-aspect="true" ignore-overscan="true"/>
 	    </image>
 	</container>
+	<!-- This does not work yet
 	<container name="browser" >
 	    <properties depth="2"/>
 	    <rectangle y="490" color="0x66000000"/>
@@ -70,6 +71,7 @@
 		</selection>
 	    </listing>
 	</container>
+	-->
     </application>
 
 
