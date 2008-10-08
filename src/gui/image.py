@@ -100,5 +100,31 @@ class Icon(kaa.candy.Image):
             name=element.name)
 
 
+class MediaImage(kaa.candy.Image):
+
+    candyxml_style = 'media'
+
+    __name = __name_eval = None
+
+    def __init__(self, pos, size, folder, context=None):
+        super(MediaImage, self).__init__(pos, size, context=context)
+        self.add_dependency('item.media_type')
+        name = self.context.get('item.media_type') or 'default'
+        for name in (name, 'default'):
+            for ext in ('.png', '.jpg'):
+                fname = os.path.join(self.theme.icons, folder, name + ext)
+                if os.path.isfile(fname):
+                    self.set_image(fname)
+                    return
+
+    @classmethod
+    def candyxml_parse(cls, element):
+        """
+        """
+        return kaa.candy.Imlib2Texture.candyxml_parse(element).update(
+            folder=element.folder)
+
+
 Thumbnail.candyxml_register()
 Icon.candyxml_register()
+MediaImage.candyxml_register()

@@ -58,10 +58,12 @@ class MenuWidget(Application, MenuStack):
         if self.is_locked():
             return
         MenuStack.refresh(self, reload)
-        self.gui_context.menu = self.menustack[-1]
+        if self.gui_context.menu != self.menustack[-1]:
+            self.gui_context.previous = self.gui_context.menu
+            self.gui_context.next = self.menustack[-1]
+            self.gui_context.menu = self.menustack[-1]
+            self.gui_context.type = self.menustack[-1].type
         self.gui_context.item = self.menustack[-1].selected.properties
-        self.gui_context.type = self.menustack[-1].type
-
 
     def eventhandler(self, event):
         """

@@ -224,6 +224,7 @@ import freevo.ui.fxditem
 #         displays.fullscreen = True
 
 try:
+    kaa.candy.config.performance_debug = True
     freevo.view.configure(config, freevo.conf.SHAREDIR)
 
     # Fire up splashscreen and load the plugins

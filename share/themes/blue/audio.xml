@@ -2,24 +2,30 @@
 <theme geometry="800x600">
 
     <menu name="audio" style="default">
+	<alias name="audio main menu"/>
 	<container x="10" y="100" width="270" height="490">
 	    <rectangle color="0xcc000000" radius="30"/>
-	    <thumbnail x="10" y="10" width="250" height="250"
-		thumbnail="$item.thumbnail">
-	    </thumbnail>
-	    <label x="10" y="280" width="230" font="Vera:20" color="0xffffff">
-		$item.name
-	    </label>
-	    <label x="10" y="320" width="230" font="Vera:18" color="0xffffff">
-		$item.artist
-	    </label>
-	    <label x="10" y="340" width="230" font="Vera:18" color="0xffffff">
-		$item.album
-	    </label>
+	    <container depends="item">
+		<thumbnail x="10" y="10" width="250" height="250" thumbnail="$item.thumbnail"/>
+		<label x="10" y="280" width="230" font="Vera:20" color="0xffffff">
+		    $item.name
+		</label>
+		<label x="10" y="320" width="230" font="Vera:18" color="0xffffff">
+		    $item.artist
+		</label>
+		<label x="10" y="340" width="230" font="Vera:18" color="0xffffff">
+		    $item.album
+		</label>
+		<eventhandler event="show">
+		    <animate secs="0.2" behaviour="opacity" start="0" end="255"/>
+		</eventhandler>
+		<eventhandler event="hide">
+		    <animate secs="0.2" behaviour="opacity" end="100"/>
+		</eventhandler>
+	    </container>
 	</container>
 
-        <listing style="fixed-selection" x="300" y="100" width="490"
-	    height="490" spacing="6">
+        <listing style="fixed-selection" x="300" y="100" width="490" height="490" spacing="6">
 	    <label font="Vera" height="30" color="0xcccccc">
 		<properties xpadding="10" ypadding="2"/>
 		$item.name
@@ -28,24 +34,41 @@
 		<properties color="0xffffff"/>
                 <rectangle color="0xa0000000" radius="30"/>
             </selection>
+	    <eventhandler event="show" condition="previous.pos &lt; next.pos">
+		<animate secs="0.2" behaviour="opacity" start="0" end="255"/>
+		<animate secs="0.2" behaviour="move" x1="320" x2="300"/>
+	    </eventhandler>
+	    <eventhandler event="show" condition="previous.pos &gt; next.pos">
+		<animate secs="0.2" behaviour="opacity" start="0" end="255"/>
+		<animate secs="0.2" behaviour="move" x1="280" x2="300"/>
+	    </eventhandler>
+	    <eventhandler event="hide" condition="previous.pos &lt; next.pos">
+		<animate secs="0.2" behaviour="opacity" start="255" end="0"/>
+		<animate secs="0.2" behaviour="move" x1="300" x2="280"/>
+	    </eventhandler>
+	    <eventhandler event="hide" condition="previous.pos &gt; next.pos">
+		<animate secs="0.2" behaviour="opacity" start="255" end="0"/>
+		<animate secs="0.2" behaviour="move" x1="300" x2="320"/>
+	    </eventhandler>
         </listing>
 
 	<image style="icon" x="500" y="350" width="290" height="240" name="audio">
 	    <properties xalign="right" yalign="bottom" keep-aspect="true" opacity="50"/>
 	</image>
-    </menu>
 
-    <menu name="audio main menu" style="default">
-	<inherit name="audio"/>
+	<eventhandler event="show" condition="previous.type == 'main'">
+	    <animate delay="0.2" secs="0.2" behaviour="opacity" start="0" end="255"/>
+	</eventhandler>
+	<eventhandler event="hide" condition="next.type == 'main'">
+	    <animate secs="0.2" behaviour="opacity" end="0"/>
+	</eventhandler>
     </menu>
 
     <application name="audioplayer" style="simple">
         <image filename="../../images/blurrback.jpg" ignore-overscan="true"/>
 	<container x="40" y="100" width="720" height="270">
 	    <rectangle color="0xcc000000" radius="30"/>
-	    <thumbnail x="20" y="20" width="230" height="230"
-		thumbnail="$item.thumbnail">
-	    </thumbnail>
+	    <thumbnail x="20" y="20" width="230" height="230" thumbnail="$item.thumbnail"/>
 	    <container x="300"  y="20" width="420" height="230">
 		<label font="Vera:24" color="0xffffff">$item.title</label>
 		<label y="200" font="Vera:24" color="0xffffff">
@@ -73,18 +96,6 @@
 </theme>
 <!-- Keep this comment at the end of the file
 Local variables:
-mode: xml
-sgml-omittag:nil
-sgml-shorttag:nil
-sgml-namecase-general:nil
-sgml-general-insert-case:lower
-sgml-minimize-attributes:nil
-sgml-always-quote-attributes:t
-sgml-indent-step:4
-sgml-indent-data:t
-sgml-parent-document:nil
-sgml-exposed-tags:nil
-sgml-local-catalogs:nil
-sgml-local-ecat-files:nil
+nxml-child-indent: 4
 End:
 -->

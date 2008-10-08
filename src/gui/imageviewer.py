@@ -54,7 +54,7 @@ class ImageViewer(Application):
         super(ImageViewer, self).__init__(widgets, context)
         self._view = None
 
-    def _candy_replace_child(self, child, replace):
+    def _candy_replace_child(self, child, replace, context):
         """
         Replace child with a new one.
         """
@@ -65,7 +65,7 @@ class ImageViewer(Application):
             replace.animate(0.5).behave('opacity', 0, 255)
             replace.parent = self
             return
-        super(ImageViewer, self)._candy_replace_child(child, replace)
+        super(ImageViewer, self)._candy_replace_child(child, replace, context)
 
     def _candy_prepare(self):
         """

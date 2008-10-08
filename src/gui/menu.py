@@ -29,8 +29,11 @@
 #
 # -----------------------------------------------------------------------------
 
-# gui imports
+# kaa imports
+import kaa
 import kaa.candy
+
+# gui imports
 from application import Application
 
 class MenuType(kaa.candy.Container):
@@ -42,6 +45,18 @@ class MenuType(kaa.candy.Container):
 
     def __init__(self, widgets, context=None):
         super(MenuType, self).__init__(None, None, widgets, context=context)
+        self.cid = context.get('menu').id
+
+    def _candy_context_prepare(self, context):
+        """
+        Try if the widget is capable of handling the context.
+
+        @param context: context dict
+        """
+        if self.cid != context.get('menu').id:
+            # print 'menu change', self.context.get('menu').pos, context.get('menu').pos
+            self.cid = context.get('menu').id
+        return super(MenuType, self)._candy_context_prepare(context)
 
     @classmethod
     def candyxml_parse(cls, element):
@@ -59,6 +74,8 @@ class MenuType(kaa.candy.Container):
         widgets.extend(super(MenuType, cls).candyxml_parse(element).get('widgets'))
         return dict(widgets=widgets)
 
+    def __del__(self):
+        print 'del', self.context.get('type')
 
 class MenuApplication(Application):
     """
@@ -73,7 +90,8 @@ class MenuApplication(Application):
         name = context.get('menu').type
         if not name in self.templates:
             name = 'default'
-        self.menu = self.templates.get(name)(context)
+        self.__template = self.templates.get(name)
+        self.menu = self.__template(context)
         self.menu.type = name
         self.menu.parent = self
 
@@ -89,23 +107,27 @@ class MenuApplication(Application):
         name = context.get('menu').type
         if not name in self.templates:
             name = 'default'
-        if self.menu.type != name:
-            menu = self.templates.get(name)(context)
-            menu.type = name
-            menu.prepare(self)
-            self.menu.userdata['context:replace'] = menu
+        if self.menu.type == name:
+            return True
+        template = self.templates.get(name)
+        if template == self.__template:
+            # same template, just update the existing one
+            self.menu.type = name
+            return True
+        self.__template = template
+        menu = template(context)
+        menu.type = name
+        menu.prepare(self)
+        self.menu.userdata['context:replace'] = menu
         return True
 
-    def _candy_replace_child(self, child, replace):
+    def _candy_replace_child(self, child, replace, context):
         """
         Replace child with a new one.
         """
-        if child != self.menu:
-            return super(MenuApplication, self)._candy_replace_child(child, replace)
-        # FIXME: add some nice animations here
-        child.parent = None
-        self.menu = replace
-        self.menu.parent = self
+        if child == self.menu:
+            self.menu = replace
+        return super(MenuApplication, self)._candy_replace_child(child, replace, context)
 
 MenuApplication.candyxml_register()
 MenuType.candyxml_register()

@@ -15,6 +15,12 @@
 	<image style="icon" x="500" y="350" width="290" height="240" name="image">
 	    <properties xalign="right" yalign="bottom" keep-aspect="true" opacity="50"/>
 	</image>
+	<eventhandler event="show" depends="previous.type == 'main'">
+	    <animate delay="0.2" secs="0.2" behaviour="opacity" start="0" end="255"/>
+	</eventhandler>
+	<eventhandler event="hide" depends="next.type == 'main'">
+	    <animate secs="0.2" behaviour="opacity" end="100"/>
+	</eventhandler>
     </menu>
 
     <menu name="image" style="default">
@@ -33,10 +39,17 @@
             <selection>
 		<properties scale="1.05" opacity="255"/>
 		<container>
-		    <rectangle color="0xc0000000" x="-10" y="-10" radius="15"
-			width="150" height="150"/>
+		    <rectangle color="0xc0000000" x="-10" y="-10" radius="15" width="150" height="150"/>
 		</container>
             </selection>
+	    <eventhandler event="show">
+		<animate secs="0.2" behaviour="opacity" start="0" end="255"/>
+		<animate secs="0.2" behaviour="move" x1="50" x2="10"/>
+	    </eventhandler>
+	    <eventhandler event="hide">
+		<animate secs="0.2" behaviour="opacity" start="255" end="0"/>
+		<animate secs="0.2" behaviour="move" x1="10" x2="-40"/>
+	    </eventhandler>
         </listing>
 	<image style="icon" x="500" y="350" width="290" height="240" name="image">
 	    <properties xalign="right" yalign="bottom" keep-aspect="true" opacity="50"/>
@@ -48,8 +61,7 @@
 	<container depends="$image">
 	    <properties name="view" ignore-overscan="true"/>
 	    <image filename="$image">
-		<properties name="image" xalign="center" yalign="center"
-		    keep-aspect="true" ignore-overscan="true"/>
+		<properties name="image" xalign="center" yalign="center" keep-aspect="true" ignore-overscan="true"/>
 	    </image>
 	</container>
 	<!-- This does not work yet
@@ -74,22 +86,9 @@
 	-->
     </application>
 
-
 </theme>
 <!-- Keep this comment at the end of the file
 Local variables:
-mode: xml
-sgml-omittag:nil
-sgml-shorttag:nil
-sgml-namecase-general:nil
-sgml-general-insert-case:lower
-sgml-minimize-attributes:nil
-sgml-always-quote-attributes:t
-sgml-indent-step:4
-sgml-indent-data:t
-sgml-parent-document:nil
-sgml-exposed-tags:nil
-sgml-local-catalogs:nil
-sgml-local-ecat-files:nil
+nxml-child-indent: 4
 End:
 -->
