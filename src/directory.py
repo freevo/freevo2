@@ -341,7 +341,7 @@ class DirItem(Playlist):
         self.item_menu = None
         self.query = yield kaa.beacon.query(parent=self.info)
         self.query.signals['changed'].connect_weak(self._update_listing)
-        self.query.monitor = True
+        self.query.monitor()
 
         items = self._get_items()
         item_menu = menu.Menu(self.name, items, type = self.menu_type)
