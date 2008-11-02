@@ -42,18 +42,26 @@
 		    <rectangle color="0xc0000000" x="-10" y="-10" radius="15" width="150" height="150"/>
 		</container>
             </selection>
-	    <eventhandler event="show">
+	    <eventhandler event="show" condition="previous.pos &lt; next.pos">
 		<animate secs="0.2" behaviour="opacity" start="0" end="255"/>
-		<animate secs="0.2" behaviour="move" x1="50" x2="10"/>
+		<animate secs="0.2" behaviour="move" x1="20" x2="0"/>
 	    </eventhandler>
-	    <eventhandler event="hide">
+	    <eventhandler event="show" condition="previous.pos &gt; next.pos">
+		<animate secs="0.2" behaviour="opacity" start="0" end="255"/>
+		<animate secs="0.2" behaviour="move" x1="-20" x2="0"/>
+	    </eventhandler>
+	    <eventhandler event="hide" condition="previous.pos &lt; next.pos">
 		<animate secs="0.2" behaviour="opacity" start="255" end="0"/>
-		<animate secs="0.2" behaviour="move" x1="10" x2="-40"/>
+		<animate secs="0.2" behaviour="move" x1="0" x2="-20"/>
+	    </eventhandler>
+	    <eventhandler event="hide" condition="previous.pos &gt; next.pos">
+		<animate secs="0.2" behaviour="opacity" start="255" end="0"/>
+		<animate secs="0.2" behaviour="move" x1="0" x2="20"/>
 	    </eventhandler>
         </listing>
-	<image style="icon" x="500" y="350" width="290" height="240" name="image">
-	    <properties xalign="right" yalign="bottom" keep-aspect="true" opacity="50"/>
-	</image>
+<!-- 	<image style="icon" x="500" y="350" width="290" height="240" name="image"> -->
+<!-- 	    <properties xalign="right" yalign="bottom" keep-aspect="true" opacity="50"/> -->
+<!-- 	</image> -->
     </menu>
 
     <application name="imageviewer" style="simple">

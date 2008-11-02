@@ -4,7 +4,6 @@
     <stage style="zoom"/>
 
     <application name="splash">
-        <properties depth="1"/>
         <!-- background image -->
         <image filename="../../images/blurrsplash.jpg" ignore-overscan="true"/>
         <label x="100" y="380" width="600" font="Vera:20" color="0xcccccc">
