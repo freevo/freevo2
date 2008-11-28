@@ -123,8 +123,3 @@ class MediaImage(kaa.candy.Image):
         """
         return kaa.candy.Imlib2Texture.candyxml_parse(element).update(
             folder=element.folder)
-
-
-Thumbnail.candyxml_register()
-Icon.candyxml_register()
-MediaImage.candyxml_register()

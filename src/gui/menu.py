@@ -81,8 +81,7 @@ class MenuApplication(Application):
     """
     Menu application implementation, style simple
     """
-    freevo_appname = 'menu'
-    candyxml_style = 'simple'
+    candyxml_style = 'menu:simple'
 
     def __init__(self, widgets, context=None):
         super(MenuApplication, self).__init__(widgets, context)
@@ -128,6 +127,3 @@ class MenuApplication(Application):
         if child == self.menu:
             self.menu = replace
         return super(MenuApplication, self)._candy_replace_child(child, replace, context)
-
-MenuApplication.candyxml_register()
-MenuType.candyxml_register()

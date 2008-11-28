@@ -102,6 +102,3 @@ class ZoomStage(Stage):
             self._screen.anchor_point = self.width / 2, self.height / 2
             a = self._screen.animate(0.5, unparent=True)
             a.behave('scale', (1, 1), (1.5, 1.5)).behave('opacity', 255, 0)
-
-Stage.candyxml_register()
-ZoomStage.candyxml_register()

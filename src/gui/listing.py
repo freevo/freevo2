@@ -310,8 +310,3 @@ class GridListing(Listing):
                 self.grid.scroll_by((-self.grid.num_cols, 0), secs, force=True)
         self._selected_idx = idx
         self.grid.select(self._selected_pos, secs)
-
-# register widgets to the core
-Listing.candyxml_register()
-FixedSelectionListing.candyxml_register()
-GridListing.candyxml_register()

@@ -42,8 +42,7 @@ class ImageViewer(Application):
     """
     Widget for the Imageviewer. This is the kaa.candy part of the application
     """
-    freevo_appname = 'imageviewer'
-    candyxml_style = 'simple'
+    candyxml_style = 'imageviewer:simple'
 
     def __init__(self, widgets, context):
         """
@@ -114,6 +113,3 @@ class ImageViewer(Application):
         super(ImageViewer, self)._candy_context_sync(context)
         # trigger new context evaluation
         self._candy_prepare()
-
-# register widget to kaa.candy
-ImageViewer.candyxml_register()

@@ -53,5 +53,3 @@ class OSD(kaa.candy.Label):
     def show(self):
         self.opacity = 0
         self.animate('0.2').behave('opacity', 0, 255)
-
-OSD.candyxml_register()

@@ -35,10 +35,10 @@ import kaa.candy
 # display config
 from config import config
 
-class ApplicationStyles(dict):
+class ApplicationStyles(kaa.candy.candyxml.Styles):
     """
     Dict to store the different application classes based on the
-    freevo_appname (name) and the style.
+    name and the style.
     """
     candyxml_name = 'application'
 
@@ -59,7 +59,7 @@ class ApplicationStyles(dict):
                 return self.get(key)
 
 # register this as application
-kaa.candy.candyxml.register(ApplicationStyles(), kaa.candy.candyxml.STYLE_HANDLER)
+kaa.candy.candyxml.register(ApplicationStyles())
 
 class Application(kaa.candy.Container):
     """
@@ -74,7 +74,7 @@ class Application(kaa.candy.Container):
             return kaa.candy.candyxml.get_class(element.node, name)
 
     candyxml_name = 'application'
-    freevo_appname = 'default'
+    candyxml_style = 'default'
 
     def __init__(self, widgets, context=None):
         super(Application, self).__init__(None, None, widgets, context=context)
@@ -98,13 +98,3 @@ class Application(kaa.candy.Container):
                 c._attrs['height'] = int(value + factor * 2 * guicfg.overscan_y)
         kwargs = super(Application, cls).candyxml_parse(element)
         return dict(widgets=kwargs['widgets'])
-
-    @classmethod
-    def candyxml_register(cls):
-        name = cls.freevo_appname
-        if hasattr(cls, 'candyxml_style'):
-            name += ':%s' % cls.candyxml_style
-        kaa.candy.candyxml.register(cls, name)
-
-# register default application
-Application.candyxml_register()

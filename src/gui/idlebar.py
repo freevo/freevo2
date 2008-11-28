@@ -115,5 +115,3 @@ class Idlebar(kaa.candy.Container):
                 c._attrs['width'] = int(value + factor * 2 * guicfg.overscan_x)
                 c._attrs['height'] += guicfg.overscan_y
         return super(Idlebar, cls).candyxml_parse(element)
-
-Idlebar.candyxml_register()
