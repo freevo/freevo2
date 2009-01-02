@@ -50,7 +50,7 @@ class PluginInterface(IdleBarPlugin):
 
     def connect(self, container):
         self.widget = kaa.candy.Label((0, container.inner_height/4),
-              (None, container.inner_height/3*2), 'Vera', 0xffffff, '')
+              (None, container.inner_height/3*2), '', 'Vera', 0xffffff)
         self.widget.xalign=self.widget.ALIGN_RIGHT
         self.widget.yalign=self.widget.ALIGN_CENTER
         container.add(self.widget)
