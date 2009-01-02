@@ -53,7 +53,7 @@ class PluginInterface(IdleBarPlugin):
               (None, container.inner_height/3*2), 'Vera', 0xffffff, '')
         self.widget.xalign=self.widget.ALIGN_RIGHT
         self.widget.yalign=self.widget.ALIGN_CENTER
-        self.widget.parent = container
+        container.add(self.widget)
         self.current = ''
         self.update()
         kaa.Timer(self.update).start(10)

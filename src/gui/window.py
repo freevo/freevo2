@@ -46,7 +46,7 @@ class Window(kaa.candy.Stage):
         self.load_theme(config.theme, 'splash.xml')
         # This is the only child we have have.
         self.stage = self._theme.get('stage')[None]()
-        self.stage.parent = self
+        self.add(self.stage)
 
     def load_theme(self, name=None, part=''):
         if name == None:
@@ -92,6 +92,6 @@ class Window(kaa.candy.Stage):
         widget = self._theme.get(name)[style]()
         widget.prepare(self.stage)
         kaa.candy.thread_enter()
-        widget.parent = self.stage
+        self.stage.add(widget)
         kaa.candy.thread_leave()
         return widget

@@ -92,7 +92,7 @@ class Listing(kaa.candy.Group):
         # is only to get the information, it will never be used
         menu = self.context.menu
         content = self._template()
-        content.parent = self
+        self.add(content)
         # create bar and set the height
         bar = self._selection.widget
         if kaa.candy.is_template(bar):
@@ -122,8 +122,8 @@ class Listing(kaa.candy.Group):
             spacing = (self.spacing, 0)
         self.grid = kaa.candy.SelectionGrid(None, (w,h), cell_size,
             'item', menu.choices, self._template, bar, 1, spacing)
-        content.parent = None
-        self.grid.parent = self
+        self.remove(content)
+        self.add(self.grid)
 
     def _candy_prepare(self):
         """
@@ -281,7 +281,7 @@ class GridListing(Listing):
             (content.height + self.spacing)
         self.grid = kaa.candy.SelectionGrid(None, (w,h), (content.width, content.height),
               'item', menu.choices, self._template, bar, 1, (self.spacing, self.spacing))
-        self.grid.parent = self
+        self.add(self.grid)
 
     def _set_selected(self, idx, secs):
         if not self.grid:

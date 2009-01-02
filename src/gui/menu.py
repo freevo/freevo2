@@ -92,7 +92,7 @@ class MenuApplication(Application):
         self.__template = self.templates.get(name)
         self.menu = self.__template(context)
         self.menu.type = name
-        self.menu.parent = self
+        self.add(self.menu)
 
     def _candy_context_prepare(self, context):
         """

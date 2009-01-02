@@ -62,7 +62,7 @@ class ImageViewer(Application):
             child.animate(0.5, unparent=True).behave('opacity', child.opacity, 0)
             replace.opacity = 0
             replace.animate(0.5).behave('opacity', 0, 255)
-            replace.parent = self
+            self.add(replace)
             return
         super(ImageViewer, self)._candy_replace_child(child, replace, context)
 

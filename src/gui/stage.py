@@ -65,7 +65,7 @@ class Stage(kaa.candy.Group):
         Replace current widget with new one
         """
         if self._screen:
-            self._screen.parent = None
+            self.remove(self._screen)
 
     def show_application(self, widget):
         """
@@ -78,7 +78,7 @@ class Stage(kaa.candy.Group):
         try:
             kaa.candy.thread_enter()
             if widget:
-                widget.parent = self
+                self.add(widget)
             self.swap(widget)
             self._screen = widget
         finally:
