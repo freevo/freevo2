@@ -54,6 +54,8 @@ class Listing(kaa.candy.Group):
     __xalign = None
     __yalign = None
 
+    create_grid = kaa.candy.SelectionGrid
+
     def __init__(self, pos, size, label, selection, spacing=0, context=None):
         super(Listing, self).__init__(pos, size, context)
         self.spacing = spacing
@@ -93,10 +95,8 @@ class Listing(kaa.candy.Group):
         menu = self.context.menu
         content = self._template()
         self.add(content)
-        # create bar and set the height
+        # create bar
         bar = self._selection.widget
-        if kaa.candy.is_template(bar):
-            bar = bar()
         w, h = self.inner_width, self.inner_height
         try:
             vertical = self.inner_height / content.height
@@ -108,7 +108,10 @@ class Listing(kaa.candy.Group):
             horizonal = 1
         if vertical > horizonal:
             self._orientation = Listing.VERTICAL
-            bar.height = content.height
+            if kaa.candy.is_template(bar):
+                bar.set_property('height', content.height)
+            else:
+                bar.height = content.height
             h = (self.inner_height / (content.height + self.spacing)) * \
                 (content.height + self.spacing)
             if not content._dynamic_size:
@@ -119,7 +122,10 @@ class Listing(kaa.candy.Group):
                 spacing = (0, self.spacing)
         else:
             self._orientation = Listing.HORIZONTAL
-            bar.width = content.width
+            if kaa.candy.is_template(bar):
+                bar.set_property('width', content.width)
+            else:
+                bar.width = content.width
             w = (self.inner_width / (content.width + self.spacing)) * \
                 (content.width + self.spacing)
             if not content._dynamic_size:
@@ -128,7 +134,7 @@ class Listing(kaa.candy.Group):
             else:
                 cell_size = (content.width, h)
                 spacing = (self.spacing, 0)
-        self.grid = kaa.candy.SelectionGrid(None, (w,h), cell_size,
+        self.grid = self.create_grid(None, (w,h), cell_size,
             'item', menu.choices, self._template, bar, 1, spacing)
         self.remove(content)
         self.add(self.grid)
@@ -278,16 +284,18 @@ class GridListing(Listing):
         # create bar and set the height
         bar = self._selection.widget
         if kaa.candy.is_template(bar):
-            bar = bar()
-        bar.height = content.height
-        bar.width = content.width
+            bar.set_property('width', content.width)
+            bar.set_property('height', content.height)
+        else:
+            bar.width = content.width
+            bar.height = content.height
         # create grid, the location of the bar is not 100% correct
         # because of baseline is not text_height is not label.height
         w = (self.inner_width / (content.width + self.spacing)) * \
             (content.width + self.spacing)
         h = (self.inner_height / (content.height + self.spacing)) * \
             (content.height + self.spacing)
-        self.grid = kaa.candy.SelectionGrid(None, (w,h), (content.width, content.height),
+        self.grid = self.create_grid(None, (w,h), (content.width, content.height),
               'item', menu.choices, self._template, bar, 1, (self.spacing, self.spacing))
         self.add(self.grid)
 
