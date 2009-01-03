@@ -111,15 +111,23 @@ class Listing(kaa.candy.Group):
             bar.height = content.height
             h = (self.inner_height / (content.height + self.spacing)) * \
                 (content.height + self.spacing)
-            cell_size = (w, content.height)
-            spacing = (0, self.spacing)
+            if not content._dynamic_size:
+                cell_size = (content.width, content.height)
+                spacing = (w - content.width, self.spacing)
+            else:
+                cell_size = (w, content.height)
+                spacing = (0, self.spacing)
         else:
             self._orientation = Listing.HORIZONTAL
             bar.width = content.width
             w = (self.inner_width / (content.width + self.spacing)) * \
                 (content.width + self.spacing)
-            cell_size = (content.width, h)
-            spacing = (self.spacing, 0)
+            if not content._dynamic_size:
+                cell_size = (content.width, content.height)
+                spacing = (self.spacing, h - content.height)
+            else:
+                cell_size = (content.width, h)
+                spacing = (self.spacing, 0)
         self.grid = kaa.candy.SelectionGrid(None, (w,h), cell_size,
             'item', menu.choices, self._template, bar, 1, spacing)
         self.remove(content)

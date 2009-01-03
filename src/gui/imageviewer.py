@@ -62,8 +62,6 @@ class ImageViewer(Application):
             child.animate(0.5, unparent=True).behave('opacity', child.opacity, 0)
             replace.opacity = 0
             replace.animate(0.5).behave('opacity', 0, 255)
-            self.add(replace)
-            return
         super(ImageViewer, self)._candy_replace_child(child, replace, context)
 
     def _candy_prepare(self):
@@ -72,6 +70,12 @@ class ImageViewer(Application):
         """
         super(ImageViewer, self)._candy_prepare()
         view = self.get_widget('view')
+        if not view:
+            # FIXME: this may happen if we scroll to fast. It has to
+            # be a thread problem. This needs more investigation. Wild
+            # guess: we ask for the widget the same time the clutter
+            # thread is replacing it.
+            return
         if view is not self._view:
             self._zoom = 1.0
             self._rotation = 0
@@ -79,6 +83,8 @@ class ImageViewer(Application):
             self._view.anchor_point = self.width / 2, self.height / 2
             self._pos = 0, 0
         animation = None
+        # FIXME: if we do not zoom, we should upload a downscaled
+        # version of the image to make it faster.
         if self._zoom != self.context.zoom:
             self._zoom = self.context.zoom
             animation = view.animate(0.2)
