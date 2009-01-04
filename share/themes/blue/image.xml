@@ -81,12 +81,12 @@
 			<properties xalign="shrink" yalign="shrink"/>
 			<reflection opacity="80"/>
 		    </thumbnail>
-		    <rectangle name="border" color="0xff000000" border_color="0xffffff" border_size="2">
-			<properties passive="True"/>
+		    <rectangle color="0xff000000" border_color="0xffffff" border_size="2">
+			<properties passive="True" name="border"/>
 		    </rectangle>
 		</container>
 		<selection>
-<!-- 		    <properties color="0xff0000"/> -->
+		    <properties border-color="0xff0000" target="border"/>
 		    <rectangle color="0xccffffff" width="100" height="70" radius="20">
 			<properties xpadding="-10" ypadding="-10"/>
 		    </rectangle>

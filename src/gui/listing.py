@@ -46,7 +46,7 @@ class Listing(kaa.candy.Group):
     class Selection(object):
         def __init__(self):
             self.widget = None
-            self.properties = {}
+            self.properties = []
 
     candyxml_name = 'listing'
     context_sensitive = True
@@ -153,15 +153,19 @@ class Listing(kaa.candy.Group):
         menu.rows = self.grid.num_rows
         menu.cols = self.grid.num_cols
         # now add some animations
-        if self._selection.properties.get('color'):
-            self.grid.behave('color', content.color,
-                self._selection.properties.get('color'))
-        if self._selection.properties.get('scale'):
-            e = float(self._selection.properties.get('scale'))
-            self.grid.behave('scale', content.scale, (e, e))
-        if self._selection.properties.get('opacity'):
-            e = int(self._selection.properties.get('opacity'))
-            self.grid.behave('opacity', content.opacity, e)
+        for properties in self._selection.properties:
+            # FIXME: this logic incl. <properties> parsing should be
+            # in kaa.candy
+            target = content
+            if properties.get('target'):
+                target = content.get_widget(properties.get('target'))
+            for prop, value in properties.items():
+                if prop.find('color') != -1:
+                    self.grid.behave('color', getattr(target, prop), value, attribute=prop, target=properties.get('target'))
+                if prop == 'scale':
+                    self.grid.behave('scale', target.scale, (float(value), float(value)), target=properties.get('target'))
+                if prop == 'opacity':
+                    self.grid.behave('opacity', target.opacity, int(value), target=properties.get('target'))
         self._set_selected(menu.selected_pos, 0)
         super(Listing, self)._candy_prepare()
 
@@ -215,7 +219,7 @@ class Listing(kaa.candy.Group):
             if child.node == 'selection':
                 for sub in child:
                     if sub.node == 'properties':
-                        selection.properties.update(sub.attributes())
+                        selection.properties.append(dict(sub.attributes()))
                         continue
                     selection.widget = sub.xmlcreate()
                 element.remove(child)
