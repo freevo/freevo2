@@ -53,8 +53,8 @@ def configure(cfg, sharedir):
 def show_application(application, context=None):
     return window.show_application(application, context)
 
-def show_widget(name, context=None):
-    return window.render(name, context)
+def show_widget(name, style=None, context=None):
+    return window.render(name, style, context)
 
 def load_theme(theme=None):
     return window.load_theme(theme)

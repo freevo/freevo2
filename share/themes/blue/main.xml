@@ -19,6 +19,17 @@
         <properties depth="3" xalign="right" xpadding="10" ypadding="10"/>
     </osd>
 
+    <popup font="Vera:24" color="0xffffff">
+	<container use-as="background">
+	    <rectangle x="5" y="5" width="100%" height="100%" color="0xbb111111" radius="20">
+		<properties xpadding="-10" ypadding="-10"/>
+	    </rectangle>
+	    <rectangle color="0x001F4A95" border-color="0xcccccc" border-size="2" radius="20">
+		<properties xpadding="-10" ypadding="-10"/>
+	    </rectangle>
+	</container>
+    </popup>
+
     <application name="menu" style="simple">
         <image filename="../../images/blurrback.jpg" ignore-overscan="true"/>
     </application>

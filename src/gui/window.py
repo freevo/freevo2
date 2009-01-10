@@ -85,11 +85,11 @@ class Window(kaa.candy.Stage):
             print 'no application', name
         return self.stage.show_application(widget)
 
-    def render(self, name, style=None):
+    def render(self, name, style=None, context=None):
         """
         Render widget with the given name
         """
-        widget = self._theme.get(name)[style]()
+        widget = self._theme.get(name)[style](context=context)
         widget.prepare(self.stage)
         kaa.candy.thread_enter()
         self.stage.add(widget)

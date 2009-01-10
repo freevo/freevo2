@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2007-2008 Dirk Meyer, et al.
+# Copyright (C) 2007-2009 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -43,37 +43,35 @@ from freevo.ui.event import *
 from handler import handler
 from base import WidgetContext as BaseWidgetContext
 
-class WidgetContext(BaseWidgetContext):
-    """
-    Context link between Window and view
-    """
-    def show(self):
-        """
-        Render and show the widget
-        """
-        if 0: # no support in the view yet
-            self._app = view.show_window(self._name, self._ctx)
-            self._app.show()
-
-    def hide(self):
-        """
-        Hide the widget
-        """
-        if self._app:
-            self._app.hide()
-        self._app = None
-
-
-class Window(object):
+class TextWindow(object):
     """
     A basic empty window, not very usefull on its own.
     """
-    type = None
+    class WidgetContext(BaseWidgetContext):
+        """
+        Context link between Window and view
+        """
+        def show(self):
+            """
+            Render and show the widget
+            """
+            self._app = view.show_widget('popup', context=self._ctx)
+            kaa.signals['step'].disconnect(self.sync)
 
-    def __init__(self):
+        def hide(self):
+            """
+            Hide the widget
+            """
+            if self._app:
+                self._app.unparent()
+            self._app = None
+
+
+    def __init__(self, text):
         self.__eventmap = 'input'
         self.__visible = False
-        self.gui_context = WidgetContext(self.name)
+        self.gui_context = TextWindow.WidgetContext('popup')
+        self.gui_context.text = text
 
     def show(self):
         """
@@ -97,7 +95,7 @@ class Window(object):
 
     def eventhandler(self, event):
         """
-        Eventhandler for the window, this raw window has nothing to do
+        Eventhandler for the window, this window has nothing to do
         """
         return False
 
@@ -127,28 +125,14 @@ class Button(kaa.Signal):
         kaa.Signal.__init__(self)
 
 
-class TextWindow(Window):
-    """
-    A simple window without eventhandler showing a text.
-    """
-    type = 'text'
-
-    def __init__(self, text):
-        Window.__init__(self)
-        # FIXME: update gui_context
-        self.text = text
-
-
-class MessageWindow(Window):
+class MessageWindow(TextWindow):
     """
     A simple window showing a text. The window will hide on input
     events. It is used as small information.
     """
-    type = 'message'
-
     def __init__(self, text, button=_('OK')):
-        Window.__init__(self)
-        self.text = text
+        super(MessageWindow, self).__init__(text)
+        self.gui_context.text = 'Dead End, MessageWindow not working'
         self.button = Button(button)
 
     def eventhandler(self, event):
@@ -164,17 +148,15 @@ class MessageWindow(Window):
         return False
 
 
-class ConfirmWindow(Window):
+class ConfirmWindow(TextWindow):
     """
     A simple window showing a text and two buttons for the user to choose
     from. In most cases this window is used to ask the user if an action
     should really be performed.
     """
-    type = 'confirm'
-
     def __init__(self, text, buttons=(_('Yes'), _('No')), default_choice=0):
-        Window.__init__(self)
-        self.text = text
+        super(ConfirmWindow, self).__init__(text)
+        self.gui_context.text = 'Dead End, ConfirmWindow not working'
         self.buttons = []
         for text in buttons:
             self.buttons.append(Button(text, len(self.buttons) == default_choice))
