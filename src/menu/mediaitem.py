@@ -142,7 +142,7 @@ class MediaItem(Item):
         if style == 'percent':
             try:
                 length = int(self.info.get('length'))
-                if not hasattr(self, 'elapsed') or not lengt:
+                if not hasattr(self, 'elapsed') or not length:
                     return 0
                 return min(100 * self.elapsed / length, 100)
             except ValueError:
