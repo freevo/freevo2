@@ -56,7 +56,7 @@ class ShutdownItem(MainMenuItem):
         """
         return a list of actions for this item
         """
-        if config.confirm and False:
+        if config.confirm:
             items = [ Action(_('Shutdown Freevo'), self.confirm_freevo),
                       Action(_('Shutdown system'), self.confirm_system),
                       Action(_('Restart Freevo'), self.confirm_freevo_restart),

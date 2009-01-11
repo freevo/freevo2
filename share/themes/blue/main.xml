@@ -28,6 +28,13 @@
 		<properties xpadding="-10" ypadding="-10"/>
 	    </rectangle>
 	</container>
+	<button use-as="button" font="Vera:24" color="0xbbbbbb">
+	    <rectangle use-as="background" color="0xff000000" radius="10"/>
+	    <selection>
+		<properties color="0xffffff"/>
+		<properties target="background" color="0xa0000000"/>
+	    </selection>
+	</button>
     </popup>
 
     <application name="menu" style="simple">

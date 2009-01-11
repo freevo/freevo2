@@ -120,9 +120,9 @@ class Button(kaa.Signal):
     A button used in some windows.
     """
     def __init__(self, name, selected=True):
+        super(Button, self).__init__()
         self.name = name
         self.selected = selected
-        kaa.Signal.__init__(self)
 
 
 class MessageWindow(TextWindow):
@@ -132,8 +132,8 @@ class MessageWindow(TextWindow):
     """
     def __init__(self, text, button=_('OK')):
         super(MessageWindow, self).__init__(text)
-        self.gui_context.text = 'Dead End, MessageWindow not working'
         self.button = Button(button)
+        self.gui_context.buttons = [ self.button ]
 
     def eventhandler(self, event):
         """
@@ -142,7 +142,6 @@ class MessageWindow(TextWindow):
         if event in (INPUT_ENTER, INPUT_EXIT):
             self.hide()
             if event == INPUT_ENTER:
-                # FIXME: update gui_context
                 self.button.emit()
             return True
         return False
@@ -156,17 +155,16 @@ class ConfirmWindow(TextWindow):
     """
     def __init__(self, text, buttons=(_('Yes'), _('No')), default_choice=0):
         super(ConfirmWindow, self).__init__(text)
-        self.gui_context.text = 'Dead End, ConfirmWindow not working'
         self.buttons = []
         for text in buttons:
             self.buttons.append(Button(text, len(self.buttons) == default_choice))
+        self.gui_context.buttons = self.buttons
         self.selected = self.buttons[default_choice]
 
     def eventhandler(self, event):
         """
         Eventhandler to toggle the selection or press the button
         """
-        # FIXME: update gui_context
         if event in (INPUT_LEFT, INPUT_RIGHT):
             # Toggle selection
             self.selected.selected = False
@@ -179,7 +177,7 @@ class ConfirmWindow(TextWindow):
                 index = index - 1
             self.selected = self.buttons[index]
             self.selected.selected = True
-            self.engine.update()
+            self.gui_context.sync()
             return True
         elif event == INPUT_ENTER:
             self.selected.emit()

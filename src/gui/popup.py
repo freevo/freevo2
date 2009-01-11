@@ -30,6 +30,7 @@
 # -----------------------------------------------------------------------------
 
 # python imports
+import copy
 import math
 
 # kaa.candy import
@@ -38,14 +39,13 @@ import kaa.candy
 class Popup(kaa.candy.Container):
 
     candyxml_name = 'popup'
+    context_sensitive = True
 
-    def __init__(self, text, font, color, background, content=None, context=None):
+    def __init__(self, text, font, color, background, button_template, context=None):
         super(Popup, self).__init__(context=context)
         self.layout = 'vertical'
         if kaa.candy.is_template(background):
             background = background()
-        if kaa.candy.is_template(content):
-            content = content()
         self.__text = self.context.get('text', text)
         self.__font = font
         self.__color = color
@@ -54,8 +54,16 @@ class Popup(kaa.candy.Container):
         self.spacing = 20
         self.text = None
         self.add(self.background)
-        self.xalign = self.yalign = self.ALIGN_SHRINK
-        self.content = content
+        self.xalign = self.yalign = kaa.candy.ALIGN_SHRINK
+        if context.get('buttons'):
+            # show buttons in the popup
+            self.content = kaa.candy.LayoutGroup(layout='horizontal')
+            self.content.context_sensitive = True
+            self.content.xalign = self.content.yalign = kaa.candy.ALIGN_SHRINK
+            for button in context.get('buttons'):
+                self.content.add(button_template(obj=button, context=self.context))
+        else:
+            self.content = None
 
     def _candy_prepare(self):
         """
@@ -66,8 +74,8 @@ class Popup(kaa.candy.Container):
             return
         # create text widget
         self.text = kaa.candy.Text(None, None, self.__text, self.__font, self.__color)
-        self.text.yalign = self.ALIGN_SHRINK
-        self.text.xalign = self.ALIGN_CENTER
+        self.text.yalign = kaa.candy.ALIGN_SHRINK
+        self.text.xalign = kaa.candy.ALIGN_CENTER
         self.add(self.text)
         # We need at least text_height * text_width space for the text, in
         # most cases more (because of line breaks. To make the text look
@@ -83,7 +91,7 @@ class Popup(kaa.candy.Container):
         self.text.width = max(min(int(math.sqrt(text_height * text_width * 4 / 3)), max_width), min_width)
         self.text.height = max_height
         if self.content:
-            self.content.xalign = self.content.ALIGN_CENTER
+            self.content.xalign = kaa.candy.ALIGN_CENTER
             self.content.width = self.text.width
             if not self.content.parent:
                 self.add(self.content)
@@ -106,4 +114,69 @@ class Popup(kaa.candy.Container):
         Parse the XML element for parameter to create the widget.
         """
         parameter = super(Popup, cls).candyxml_parse(element)
-        return dict(background=parameter.get('background'), color=element.color, font=element.font, text='')
+        return dict(background=parameter.get('background'), color=element.color,
+            font=element.font, text='', button_template=parameter.get('button'))
+
+
+class Properties(kaa.candy.Properties):
+
+    def __init__(self):
+        super(Properties, self).__init__()
+        self._revert = {}
+
+    def modify(self, widget, revert):
+        if revert:
+            if widget in self._revert:
+                self._revert[widget].modify(widget)
+            return
+        if not widget in self._revert:
+            prop = kaa.candy.Properties()
+            for key, value in self.items():
+                if key != 'target':
+                    prop[key] = getattr(widget, key)
+            self._revert[widget] = prop
+        super(Properties, self).modify(widget)
+
+class Button(kaa.candy.Group):
+
+    candyxml_name = 'button'
+    context_sensitive = True
+
+    def __init__(self, pos=None, size=None, obj=None, font='Vera:24', color='0xffffff', background=None, properties=None, context=None):
+        super(Button, self).__init__(pos, size, context)
+        self.xalign = self.yalign = kaa.candy.ALIGN_SHRINK
+        if background:
+            if kaa.candy.is_template(background):
+                background = background()
+            background.passive = True
+            background.name = 'background'
+            self.add(background)
+        self.xpadding = 20
+        self.label = kaa.candy.Label(None, size, obj.name, font, color)
+        self.label.xpadding = 20
+        self.label.xalign = self.label.yalign = kaa.candy.ALIGN_SHRINK
+        self.add(self.label)
+        self._properties = copy.copy(properties)
+        self._button = obj
+        self._candy_context_sync(self.context)
+
+    def _candy_context_sync(self, context):
+        """
+        Set a new context.
+        """
+        super(Button, self)._candy_context_sync(context)
+        for properties in self._properties:
+            target = self.label
+            if properties.get('target'):
+                target = self.get_widget(properties.get('target'))
+            properties.modify(target, revert=not self._button.selected)
+
+    @classmethod
+    def candyxml_parse(cls, element):
+        """
+        Parse the XML element for parameter to create the widget.
+        """
+        properties = []
+        for prop in element.selection.get_children('properties'):
+            properties.append(Properties.candyxml_create(prop))
+        return super(Button, cls).candyxml_parse(element).update(font=element.font, color=element.color, properties=properties)
