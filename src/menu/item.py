@@ -87,7 +87,7 @@ class Item(object):
             return self._image
         thumb = self.info.get('thumbnail')
         if thumb:
-            return thumb.get()
+            return thumb.image
         return None
 
     def _set_image(self, image):
