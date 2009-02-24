@@ -40,16 +40,15 @@ import kaa
 import kaa.beacon
 
 # Freevo imports
-from freevo.ui.mainmenu import MainMenuPlugin
-from freevo.ui.menu import Item, ActionItem, Menu, Action
-from freevo.ui.playlist import Playlist
+from ... import api as freevo
 
-class AlbumItem(Item):
+
+class AlbumItem(freevo.Item):
     """
     Item for on Album (or all) for an artist.
     """
     def __init__(self, artist, album, parent):
-        Item.__init__(self, parent)
+        super(AlbumItem, self).__init__(parent)
         self.artist = artist
         self.album = album
         self.name = _('[ All Songs ]')
@@ -69,7 +68,7 @@ class AlbumItem(Item):
             query = dict(artist=self.artist, type='audio')
         # FIXME: monitor query for live update
         async = kaa.beacon.query(**query)
-        self.playlist = Playlist(title, async, self, type='audio')
+        self.playlist = freevo.Playlist(title, async, self, type='audio')
         self.playlist.browse()
 
 
@@ -77,16 +76,16 @@ class AlbumItem(Item):
         """
         Actions for this item.
         """
-        return [ Action(_('Browse Songs'), self.browse) ]
+        return [ freevo.Action(_('Browse Songs'), self.browse) ]
 
 
 
-class ArtistItem(Item):
+class ArtistItem(freevo.Item):
     """
     Item for an artist.
     """
     def __init__(self, artist, parent):
-        Item.__init__(self, parent)
+        super(ArtistItem, self).__init__(parent)
         self.artist = artist
         # Work around a beacon bug
         for part in artist.split(' '):
@@ -104,18 +103,18 @@ class ArtistItem(Item):
         items = [ AlbumItem(self.artist, None, self) ]
         for album in query:
             items.append(AlbumItem(self.artist, album, self))
-        self.get_menustack().pushmenu(Menu(_('Album'), items, type='audio'))
+        self.get_menustack().pushmenu(freevo.Menu(_('Album'), items, type='audio'))
 
 
     def actions(self):
         """
         Actions for this item.
         """
-        return [ Action(_('Browse Album from %s') % self.name, self.browse) ]
+        return [ freevo.Action(_('Browse Album from %s') % self.name, self.browse) ]
 
 
 
-class PluginInterface(MainMenuPlugin):
+class PluginInterface(freevo.MainMenuPlugin):
     """
     Add 'Browse by Artist' to the audio menu.
     """
@@ -128,11 +127,11 @@ class PluginInterface(MainMenuPlugin):
         items = []
         for artist in (yield kaa.beacon.query(attr='artist', type='audio')):
             items.append(ArtistItem(artist, parent))
-        parent.get_menustack().pushmenu(Menu(_('Artists'), items, type='audio'))
+        parent.get_menustack().pushmenu(freevo.Menu(_('Artists'), items, type='audio'))
 
 
     def items(self, parent):
         """
         Return the main menu item.
         """
-        return [ ActionItem(_('Browse by Artists'), parent, self.artists) ]
+        return [ freevo.ActionItem(_('Browse by Artists'), parent, self.artists) ]

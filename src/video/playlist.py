@@ -33,9 +33,9 @@
 # -----------------------------------------------------------------------------
 
 # freevo imports
-from freevo.ui.playlist import Playlist
+from .. import api as freevo
 
-class VideoPlaylist(Playlist):
+class VideoPlaylist(freevo.Playlist):
     type = 'video'
 
     def get_id(self):

@@ -58,10 +58,6 @@ def update():
 
     return
 
-    # import fxditem here, we may get in trouble doing it at the
-    # beginning (maybe, maybe not). FIXME!
-    from freevo.ui import fxditem
-    
     fxd['id']    = {}
     fxd['label'] = []
     discset      = {}

@@ -32,7 +32,7 @@
 # -----------------------------------------------------------------------------
 
 import kaa.input.lirc
-from freevo.ui import config
+from ... import api as freevo
 from interface import InputPlugin
 
 class PluginInterface(InputPlugin):
@@ -41,5 +41,5 @@ class PluginInterface(InputPlugin):
     """
     def __init__(self):
         InputPlugin.__init__(self)
-        kaa.input.lirc.init('freevo', config.input.plugin.lirc.lircrc)
+        kaa.input.lirc.init('freevo', freevo.config.input.plugin.lirc.lircrc)
         kaa.input.lirc.signal.connect(self.post_key)

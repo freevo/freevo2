@@ -39,18 +39,16 @@ import kaa
 import kaa.beacon
 
 # freevo imports
-from freevo.ui.menu import Item, Action, ActionItem, Menu, MediaPlugin
-from freevo.ui.mainmenu import MainMenuPlugin
-from freevo.ui.image import ImageItem
-from freevo.ui.application import TextWindow, MessageWindow
+from ... import api as freevo
+from .. import ImageItem
 
-class ApodMainMenuItem(Item):
+class ApodMainMenuItem(freevo.Item):
     """
     This is the item for the main menu and creates the list
     of commands in a submenu.
     """
     def __init__(self, parent, imagedir):
-        Item.__init__(self, parent)
+        super(ApodMainMenuItem, self).__init__(parent)
         self.name = _( 'APOD' )
         self.info = { 'title'       : 'APOD',
                       'description' : 'Astronomy Picture of the day' }
@@ -61,7 +59,7 @@ class ApodMainMenuItem(Item):
         """
         Return actions for the item.
         """
-        return [ Action(_('APOD Pictures'), self.create_menu) ]
+        return [ freevo.Action(_('APOD Pictures'), self.create_menu) ]
 
 
     def create_menu(self):
@@ -69,15 +67,15 @@ class ApodMainMenuItem(Item):
         Create a menu for APOD.
         """
         # current image
-        current = ActionItem(_('Current Picture'), self, self.fetch_picture)
+        current = freevo.ActionItem(_('Current Picture'), self, self.fetch_picture)
         current.description = _('Download the current picture')
 
         # previous images
-        previous = ActionItem(_('Previous Pictures'), self, self.browse_pictures)
+        previous = freevo.ActionItem(_('Previous Pictures'), self, self.browse_pictures)
         previous.description = _('Browse all previously downloaded images')
 
         # add menu
-        self.get_menustack().pushmenu(Menu( _( 'Apod Pictures' ), [ current, previous ]))
+        self.get_menustack().pushmenu(freevo.Menu( _( 'Apod Pictures' ), [ current, previous ]))
 
 
     @kaa.coroutine()
@@ -88,20 +86,20 @@ class ApodMainMenuItem(Item):
         listing = (yield kaa.beacon.query(filename=self.imagedir)).get(filter='extmap')
         # get items
         items = []
-        for p in MediaPlugin.plugins('image'):
+        for p in freevo.MediaPlugin.plugins('image'):
             items += p.get(self, listing)
 
         if items:
-            self.get_menustack().pushmenu(Menu(_('Apod Pictures'), items))
+            self.get_menustack().pushmenu(freevo.Menu(_('Apod Pictures'), items))
         else:
-            MessageWindow(_('No Images found')).show()
+            freevo.MessageWindow(_('No Images found')).show()
 
 
     def fetch_picture(self):
         """
         Fetch current picture.
         """
-        box = TextWindow(text=_('Getting picture, please wait'))
+        box = freevo.TextWindow(text=_('Getting picture, please wait'))
         box.show()
 
         async = kaa.ThreadCallback(self._fetch_picture_thread)()
@@ -139,7 +137,7 @@ class ApodMainMenuItem(Item):
         box.destroy()
         if not isinstance(exc_value, (str, unicode)):
             error = 'Exception: %s' % exc_value
-        MessageWindow(error).show()
+        freevo.MessageWindow(error).show()
 
 
     def _fetch_picture_finished(self, filename, box):
@@ -153,7 +151,7 @@ class ApodMainMenuItem(Item):
 
 
 
-class PluginInterface(MainMenuPlugin):
+class PluginInterface(freevo.MainMenuPlugin):
     """
     Astronomy Picture of the Day download plugin. Downloads the picture
     for the current day and allow access to the dir for browsing the old
@@ -183,7 +181,7 @@ class PluginInterface(MainMenuPlugin):
         self.imagedir = imagedir
 
         # init the plugin
-        MainMenuPlugin.__init__(self)
+        super(PluginInterface, self).__init__()
 
 
 

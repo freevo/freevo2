@@ -40,8 +40,7 @@ import logging
 import time
 
 # freevo imports
-from freevo.ui.menu import MediaItem, Action
-from freevo.ui.event import PLAY_END, STOP
+from .. import api as freevo
 
 # audio player
 import player as audioplayer
@@ -49,14 +48,14 @@ import player as audioplayer
 # get logging object
 log = logging.getLogger('audio')
 
-class AudioItem(MediaItem):
+class AudioItem(freevo.MediaItem):
     """
     This is the common class to get information about audiofiles.
     """
     type = 'audio'
     
     def __init__(self, url, parent):
-        MediaItem.__init__(self, parent)
+        super(AudioItem, self).__init__(parent)
         self.user_stop = False
         self.set_url(url)
 
@@ -71,14 +70,14 @@ class AudioItem(MediaItem):
             except (ValueError, KeyError, TypeError):
                 track = 0
             return u'%20d %s' % (track, self.name.lower())
-        return MediaItem.sort(self, mode)
+        return super(AudioItem, self).sort(mode)
 
 
     def actions(self):
         """
         return a list of possible actions on this item
         """
-        return [ Action('Play',  self.play) ]
+        return [ freevo.Action('Play',  self.play) ]
 
 
     def play(self):
@@ -100,10 +99,10 @@ class AudioItem(MediaItem):
         """
         eventhandler for this item
         """
-        if event == STOP:
+        if event == freevo.STOP:
             self.user_stop = True
-        if event == PLAY_END:
+        if event == freevo.PLAY_END:
             if not self.user_stop:
                 self['last_played'] = int(time.time())
                 self.user_stop = False
-        return MediaItem.eventhandler(self, event)
+        return super(AudioItem, self).eventhandler(event)

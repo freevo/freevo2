@@ -42,8 +42,7 @@ __all__ = [ 'get_items' ]
 import kaa.popcorn
 
 # freevo imports
-from freevo.ui.menu import *
-
+from .. import api as freevo
 
 def play_movie(item, **kwargs):
     """
@@ -86,27 +85,27 @@ def audio_selection(item):
             name = '%s (channels=%s)' % (a['language'], a['channels'])
         else:
             name = '%s (channels=%s %s)' % (a['language'], a['channels'], a['codec'])
-        action = ActionItem(name, item, set_variable)
+        action = freevo.ActionItem(name, item, set_variable)
         action.parameter('selected_audio', a['id'])
         menu_items.append(action)
-    item.get_menustack().pushmenu(Menu(_('Audio Menu'), menu_items))
+    item.get_menustack().pushmenu(freevo.Menu(_('Audio Menu'), menu_items))
 
 
 def subtitle_selection(item):
     """
     Submenu for subtitle selection.
     """
-    action = ActionItem(_('no subtitles'), item, set_variable)
+    action = freevo.ActionItem(_('no subtitles'), item, set_variable)
     action.parameter('selected_subtitle', -1)
     menu_items = [ action ]
     for pos, s in enumerate(item.info['subtitles']):
         name = s.get('language')
         if s.get('title'):
             name = '%s (%s)' % (s.get('name'), s.get('language'))
-        action = ActionItem(name, item, set_variable)
+        action = freevo.ActionItem(name, item, set_variable)
         action.parameter('selected_subtitle', pos)
         menu_items.append(action)
-    item.get_menustack().pushmenu(Menu(_('Subtitle Menu'), menu_items))
+    item.get_menustack().pushmenu(freevo.Menu(_('Subtitle Menu'), menu_items))
 
 
 def chapter_selection(item):
@@ -116,17 +115,17 @@ def chapter_selection(item):
     menu_items = []
     if isinstance(item.info['chapters'], int):
         for c in range(1, item.info['chapters']):
-            a = ActionItem(_('Play chapter %s') % c, item, start_chapter)
+            a = freevo.ActionItem(_('Play chapter %s') % c, item, start_chapter)
             a.parameter('-chapter %s' % c)
             menu_items.append(a)
     elif item.info['chapters']:
         for c in item.info['chapters']:
             pos = '%01d:%02d:%02d' % (int(c.pos) / 3600, (int(c.pos) / 60) % 60,
                                       int(c.pos) % 60)
-            a = ActionItem(pos, item, start_chapter)
+            a = freevo.ActionItem(pos, item, start_chapter)
             a.parameter('-ss %s' % c.pos)
             menu_items.append(a)
-    item.get_menustack().pushmenu(Menu(_('Chapter Menu'), menu_items))
+    item.get_menustack().pushmenu(freevo.Menu(_('Chapter Menu'), menu_items))
 
 
 def player_selection(item):
@@ -135,10 +134,10 @@ def player_selection(item):
     """
     menu_items = []
     for player in kaa.popcorn.player_names():
-        a = ActionItem(player, item, play_movie)
+        a = freevo.ActionItem(player, item, play_movie)
         a.parameter(player=player)
         menu_items.append(a)
-    item.get_menustack().pushmenu(Menu(_('Player Selection'), menu_items))
+    item.get_menustack().pushmenu(freevo.Menu(_('Player Selection'), menu_items))
 
     
 def toggle(item, name, variable):
@@ -158,9 +157,9 @@ def add_toggle(item, name, var):
     Add a 'toggle' item.
     """
     if item[var]:
-        action = ActionItem(_('Turn off %s') % name, item, toggle)
+        action = freevo.ActionItem(_('Turn off %s') % name, item, toggle)
     else:
-        action = ActionItem(_('Turn on %s') % name, item, toggle)
+        action = freevo.ActionItem(_('Turn on %s') % name, item, toggle)
     action.parameter(name, var)
     return action
 
@@ -173,10 +172,10 @@ def get_items(item):
 
     if item.filename or item.mode in ('dvd', 'vcd'):
         if item.info.has_key('audio') and len(item.info['audio']) > 1:
-            a = ActionItem(_('Audio selection'), item, audio_selection)
+            a = freevo.ActionItem(_('Audio selection'), item, audio_selection)
             items.append(a)
         if item.info.has_key('subtitles') and len(item.info['subtitles']) > 1:
-            a = ActionItem(_('Subtitle selection'), item, subtitle_selection)
+            a = freevo.ActionItem(_('Subtitle selection'), item, subtitle_selection)
             items.append(a)
         # FIXME: kaa.popcorn does not understand chapter selection
         # if item.info.has_key('chapters') and item.info['chapters'] > 1:
@@ -184,5 +183,5 @@ def get_items(item):
         #   items.append(a)
 
     items.append(add_toggle(item, _('deinterlacing'), 'interlaced'))
-    items.append(ActionItem(_('Select player'), item, player_selection))
+    items.append(freevo.ActionItem(_('Select player'), item, player_selection))
     return items

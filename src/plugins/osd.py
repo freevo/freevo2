@@ -40,7 +40,7 @@ import kaa
 
 # freevo imports
 from freevo import plugin, view
-from freevo.ui.event import OSD_MESSAGE
+from .. import api as freevo
 
 # get logging object
 log = logging.getLogger()
@@ -57,7 +57,7 @@ class PluginInterface(plugin.Plugin):
         init the osd
         """
         super(PluginInterface, self).__init__()
-        kaa.EventHandler(self.show).register([ OSD_MESSAGE ])
+        kaa.EventHandler(self.show).register([ freevo.OSD_MESSAGE ])
         self.widget = None
         self.hide_timer = kaa.OneShotTimer(self.hide)
 

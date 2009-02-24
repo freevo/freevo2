@@ -40,12 +40,10 @@ import kaa
 import kaa.beacon
 
 # freevo imports
-from freevo.ui.menu import Item, Menu
-from freevo.ui.mainmenu import MainMenuPlugin
-from freevo.ui.playlist import Playlist
+from ... import api as freevo
 
 
-class BeaconQueryItem(Item):
+class BeaconQueryItem(freevo.Item):
     """
     Base item for all items in this plugin.
     """
@@ -53,7 +51,7 @@ class BeaconQueryItem(Item):
     media_type = 'image'
 
     def __init__(self, name, parent, sample=None):
-        Item.__init__(self, parent)
+        super(BeaconQueryItem, self).__init__(parent)
         self.name = name
         if sample:
             self.info['thumbnail'] = sample.get('thumbnail')
@@ -82,7 +80,7 @@ class BeaconQueryItem(Item):
         items = self.get_items(all)
         if isinstance(items, kaa.InProgress):
             items = yield items
-        menu = Menu(self.name, items, type='image')
+        menu = freevo.Menu(self.name, items, type='image')
         menu.autoselect = True
         self.get_menustack().pushmenu(menu)
 
@@ -109,7 +107,7 @@ class MonthItem(BeaconQueryItem):
         for day, sample in result:
             result = yield self._query((self._year, self._month, day),
                                        (self._year, self._month, day))
-            p = Playlist(_('%s-%s-%s') % (self._year, self._month, day),
+            p = freevo.Playlist(_('%s-%s-%s') % (self._year, self._month, day),
                          playlist=result, parent=self, type='image')
             p.info['thumbnail'] = result[0].get('thumbnail')
             items.append(p)
@@ -150,7 +148,7 @@ class CalendarItem(BeaconQueryItem):
         return [ YearItem(year, sample, self) for year, sample in result ]
 
 
-class PluginInterface(MainMenuPlugin):
+class PluginInterface(freevo.MainMenuPlugin):
     """
     Calendar view plugin.
     """

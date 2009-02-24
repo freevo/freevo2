@@ -38,17 +38,12 @@ import os
 import kaa
 
 # freevo imports
-# from freevo.ui import gui
-from freevo.ui.menu import Action
-from freevo.ui.application import ConfirmWindow
-from freevo.ui.mainmenu import MainMenuItem, MainMenuPlugin
-# from freevo.ui.gui import theme, widgets
-from freevo.ui import config
+from .. import api as freevo
 
 # get shutdown config
-config = config.plugin.shutdown
+config = freevo.config.plugin.shutdown
 
-class ShutdownItem(MainMenuItem):
+class ShutdownItem(freevo.MainMenuItem):
     """
     Item for shutdown
     """
@@ -57,15 +52,15 @@ class ShutdownItem(MainMenuItem):
         return a list of actions for this item
         """
         if config.confirm:
-            items = [ Action(_('Shutdown Freevo'), self.confirm_freevo),
-                      Action(_('Shutdown system'), self.confirm_system),
-                      Action(_('Restart Freevo'), self.confirm_freevo_restart),
-                      Action(_('Restart system'), self.confirm_sys_restart) ]
+            items = [ freevo.Action(_('Shutdown Freevo'), self.confirm_freevo),
+                      freevo.Action(_('Shutdown system'), self.confirm_system),
+                      freevo.Action(_('Restart Freevo'), self.confirm_freevo_restart),
+                      freevo.Action(_('Restart system'), self.confirm_sys_restart) ]
         else:
-            items = [ Action(_('Shutdown Freevo'), self.shutdown_freevo),
-                      Action(_('Shutdown system'), self.shutdown_system),
-                      Action(_('Restart Freevo'), self.shutdown_freevo_restart),
-                      Action(_('Restart system'), self.shutdown_sys_restart) ]
+            items = [ freevo.Action(_('Shutdown Freevo'), self.shutdown_freevo),
+                      freevo.Action(_('Shutdown system'), self.shutdown_system),
+                      freevo.Action(_('Restart Freevo'), self.shutdown_freevo_restart),
+                      freevo.Action(_('Restart system'), self.shutdown_sys_restart) ]
 
         if config.default == 'system':
             items = [ items[1], items[0], items[2] ]
@@ -78,7 +73,7 @@ class ShutdownItem(MainMenuItem):
         Pops up a ConfirmWindow.
         """
         what = _('Do you really want to shut down Freevo?')
-        box = ConfirmWindow(what, default_choice=1)
+        box = freevo.ConfirmWindow(what, default_choice=1)
         box.buttons[0].connect(self.shutdown_freevo)
         box.show()
 
@@ -88,7 +83,7 @@ class ShutdownItem(MainMenuItem):
         Pops up a ConfirmWindow.
         """
         what = _('Do you really want to shut down the system?')
-        box = ConfirmWindow(what, default_choice=1)
+        box = freevo.ConfirmWindow(what, default_choice=1)
         box.buttons[0].connect(self.shutdown_system)
         box.show()
 
@@ -98,7 +93,7 @@ class ShutdownItem(MainMenuItem):
         Pops up a ConfirmWindow.
         """
         what = _('Do you really want to restart Freevo?')
-        box = ConfirmWindow(what, default_choice=1)
+        box = freevo.ConfirmWindow(what, default_choice=1)
         box.buttons[0].connect(self.shutdown_freevo_restart)
         box.show()
 
@@ -108,7 +103,7 @@ class ShutdownItem(MainMenuItem):
         Pops up a ConfirmWindow.
         """
         what = _('Do you really want to restart the system?')
-        box = ConfirmWindow(what, default_choice=1)
+        box = freevo.ConfirmWindow(what, default_choice=1)
         box.buttons[0].connect(self.shutdown_sys_restart)
         box.show()
 
@@ -167,7 +162,7 @@ class ShutdownItem(MainMenuItem):
 # the plugin is defined here
 #
 
-class PluginInterface(MainMenuPlugin):
+class PluginInterface(freevo.MainMenuPlugin):
     """
     Plugin to shutdown Freevo from the main menu
     """

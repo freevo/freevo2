@@ -43,9 +43,8 @@ import kaa
 
 # freevo imports
 from freevo.resources import ResourceHandler
-from freevo.ui import application
+from ... import api as freevo
 from interface import InputPlugin
-from freevo.ui import config
 
 import logging
 log = logging.getLogger('input')
@@ -59,7 +58,7 @@ class PluginInterface(InputPlugin, ResourceHandler):
     def __init__(self):
         InputPlugin.__init__(self)
 
-        self.config = config.input.plugin.joystick
+        self.config = freevo.config.input.plugin.joystick
 
         self.device_name = self.config.device
 

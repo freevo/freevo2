@@ -37,8 +37,7 @@ import logging
 import kaa.beacon
 
 # freevo imports
-from freevo.ui.menu import Action, Menu, ItemPlugin
-from freevo.ui.event import PLAY_START, PLAY_END, STOP, SEEK, Event
+from ... import api as freevo
 
 # the logging object
 log = logging.getLogger()
@@ -51,13 +50,13 @@ if not 'epydoc' in sys.modules:
         autobookmark_resume = (int, kaa.beacon.ATTR_SIMPLE))
 
 
-class PluginInterface(ItemPlugin):
+class PluginInterface(freevo.ItemPlugin):
     """
     class to handle auto bookmarks
     """
 
     def __init__(self):
-        ItemPlugin.__init__(self)
+        super(PluginInterface, self).__init__()
         self._ignore_end = False
         self._seek = 0
 
@@ -67,7 +66,7 @@ class PluginInterface(ItemPlugin):
         Return additional actions for the item.
         """
         if item[RESUME]:
-            return [ Action(_('Resume playback'), self.resume) ]
+            return [ freevo.Action(_('Resume playback'), self.resume) ]
         return []
 
 
@@ -85,7 +84,7 @@ class PluginInterface(ItemPlugin):
         Handle video events.
         """
         # auto bookmark store
-        if event == STOP:
+        if event == freevo.STOP:
             if item.mode == 'file' and item.elapsed:
                 # this will store in kaa.beacon
                 log.info('auto-bookmark store')
@@ -96,13 +95,13 @@ class PluginInterface(ItemPlugin):
             return False
 
         # seek to the given position
-        if event == PLAY_START and self._seek:
-            Event(SEEK, self._seek).post()
+        if event == freevo.PLAY_START and self._seek:
+            freevo.Event(freevo.SEEK, self._seek).post()
             self._seek = 0
             return False
 
         # auto bookmark delete
-        if event == PLAY_END:
+        if event == freevo.PLAY_END:
             if self._ignore_end:
                 self._ignore_end = False
             else:

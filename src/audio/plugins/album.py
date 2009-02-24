@@ -40,18 +40,14 @@ import kaa
 import kaa.beacon
 
 # Freevo imports
-from freevo.ui.mainmenu import MainMenuPlugin
-from freevo.ui.menu import Item, ItemList, ActionItem, Menu, Action, GridMenu, MediaItem
-from freevo.ui.playlist import Playlist
-from freevo.ui.audio import AudioItem
-from freevo.ui.directory import DirItem
+from ... import api as freevo
 
-class AlbumItem(MediaItem):
+class AlbumItem(freevo.MediaItem):
     """
     Item for on Album (or all) for an artist.
     """
     def __init__(self, artist, album, parent):
-        MediaItem.__init__(self, parent)
+        super(AlbumItem, self).__init__(parent)
         self.artist = artist
         self.album = album
         self.name = _('[ All Songs ]')
@@ -72,7 +68,7 @@ class AlbumItem(MediaItem):
             query = dict(artist=self.artist, type='audio')
         # FIXME: monitor query for live update
         async = kaa.beacon.query(**query)
-        self.playlist = Playlist(title, async, self, type='audio')
+        self.playlist = freevo.Playlist(title, async, self, type='audio')
         self.playlist.browse()
 
 
@@ -80,16 +76,16 @@ class AlbumItem(MediaItem):
         """
         Actions for this item.
         """
-        return [ Action(_('Browse Songs'), self.browse) ]
+        return [ freevo.Action(_('Browse Songs'), self.browse) ]
 
 
 
-class ArtistAlbumView(GridMenu):
+class ArtistAlbumView(freevo.GridMenu):
     """
     Item for an artist.
     """
     def __init__(self, parent):
-        GridMenu.__init__(self, _('Artist/Albums View'), type = 'audio grid')
+        super(ArtistAlbumView, self).__init__(_('Artist/Albums View'), type = 'audio grid')
         self.artists_base = 0
         self.artists = []
         self.col_row_swap = False
@@ -140,13 +136,13 @@ class ArtistAlbumView(GridMenu):
         return artist_name
 
 
-class PluginInterface(MainMenuPlugin):
+class PluginInterface(freevo.MainMenuPlugin):
     """
     Add 'Browse by Artist albums' to the audio menu.
     """
 
     def items(self, parent):
-        return [ ActionItem(_('Browse by Artists/Albums'), parent, self.show) ]
+        return [ freevo.ActionItem(_('Browse by Artists/Albums'), parent, self.show) ]
 
     def show(self, parent):
         artistalbumview = ArtistAlbumView(parent)

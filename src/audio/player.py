@@ -40,15 +40,12 @@ import kaa.utils
 import kaa.popcorn
 
 # Freevo imports
-from freevo.ui.event import *
-from freevo.ui.application import Application, STATUS_RUNNING, STATUS_STOPPING, \
-     STATUS_STOPPED, STATUS_IDLE, CAPABILITY_TOGGLE, CAPABILITY_PAUSE, \
-     CAPABILITY_FULLSCREEN
+from .. import api as freevo
 
 # get logging object
 log = logging.getLogger('audio')
 
-class Player(Application):
+class Player(freevo.Application):
     """
     Audio player object.
     """
@@ -56,8 +53,8 @@ class Player(Application):
     name = 'audioplayer'
 
     def __init__(self):
-        capabilities = (CAPABILITY_TOGGLE, CAPABILITY_PAUSE)
-        Application.__init__(self, 'audio', capabilities)
+        capabilities = (freevo.CAPABILITY_TOGGLE, freevo.CAPABILITY_PAUSE)
+        super(Player, self).__init__('audio', capabilities)
         self.player = kaa.popcorn.Player()
         self.elapsed_timer = kaa.WeakTimer(self.elapsed)
 
@@ -67,15 +64,15 @@ class Player(Application):
         """
         play an item
         """
-        if not self.status in (STATUS_IDLE, STATUS_STOPPED):
+        if not self.status in (freevo.STATUS_IDLE, freevo.STATUS_STOPPED):
             # Already running, stop the current player by sending a STOP
             # event. The event will also get to the playlist behind the
             # current item and the whole list will be stopped.
-            Event(STOP, handler=self.eventhandler).post()
+            freevo.Event(freevo.STOP, handler=self.eventhandler).post()
             # Now connect to our own 'stop' signal once to repeat this current
             # function call without the player playing
             yield kaa.inprogress(self.signals['stop'])
-            if not self.status in (STATUS_IDLE, STATUS_STOPPED):
+            if not self.status in (freevo.STATUS_IDLE, freevo.STATUS_STOPPED):
                 log.error('unable to stop current audio playback')
                 yield False
         if not kaa.main.is_running():
@@ -100,11 +97,11 @@ class Player(Application):
         # Set the current item to the gui engine
         self.gui_context.item = self.item.properties
         self.gui_context.menu = self.playlist
-        self.status = STATUS_RUNNING
+        self.status = freevo.STATUS_RUNNING
 
         # Open media item and start playback
-        play_start = Event(PLAY_START, handler=self.eventhandler)
-        play_end = Event(PLAY_END, handler=self.eventhandler)
+        play_start = freevo.Event(freevo.PLAY_START, handler=self.eventhandler)
+        play_end = freevo.Event(freevo.PLAY_END, handler=self.eventhandler)
         self.player.signals['end'].connect_once(play_end.post, self.item)
         try:
             yield self.player.open(self.item.url)
@@ -125,10 +122,10 @@ class Player(Application):
         """
         Stop playing.
         """
-        if self.status != STATUS_RUNNING:
+        if self.status != freevo.STATUS_RUNNING:
             return True
         self.player.stop()
-        self.status = STATUS_STOPPING
+        self.status = freevo.STATUS_STOPPING
 
 
     def elapsed(self):
@@ -144,29 +141,29 @@ class Player(Application):
         React on some events or send them to the real player or the
         item belongig to the player
         """
-        if event == STOP:
+        if event == freevo.STOP:
             # Stop the player and pass the event to the item
             self.stop()
             self.item.eventhandler(event)
             return True
 
-        if event == PLAY_START:
+        if event == freevo.PLAY_START:
             self.elapsed_timer.start(0.2)
             self.item.eventhandler(event)
             return True
 
-        if event == PLAY_END:
+        if event == freevo.PLAY_END:
             # Now the player has stopped (either we called self.stop() or the
             # player stopped by itself. So we need to set the application to
             # to stopped.
-            self.status = STATUS_STOPPED
+            self.status = freevo.STATUS_STOPPED
             self.elapsed_timer.stop()
             self.item.eventhandler(event)
-            if self.status == STATUS_STOPPED:
-                self.status = STATUS_IDLE
+            if self.status == freevo.STATUS_STOPPED:
+                self.status = freevo.STATUS_IDLE
             return True
 
-        if event in (PAUSE, PLAY):
+        if event in (freevo.PAUSE, freevo.PLAY):
             if self.player.get_state() == kaa.popcorn.STATE_PLAYING:
                 self.suspend()
                 return True
@@ -175,7 +172,7 @@ class Player(Application):
                 return True
             return False
 
-        if event == SEEK:
+        if event == freevo.SEEK:
             self.player.seek(int(event.arg), kaa.popcorn.SEEK_RELATIVE)
             return True
 
@@ -194,7 +191,7 @@ class Player(Application):
         Release the audio resource that others can use it.
         """
         # FIXME: make sure this function is not called twice
-        if not self.status == STATUS_RUNNING:
+        if not self.status == freevo.STATUS_RUNNING:
             yield False
         if self.player.get_state() == kaa.popcorn.STATE_PAUSED:
             yield None
@@ -211,7 +208,7 @@ class Player(Application):
         Resume playing the audio, at the position before.
         """
         # FIXME: make sure this function is not called twice
-        if not self.status == STATUS_RUNNING:
+        if not self.status == freevo.STATUS_RUNNING:
             yield False
         if self.player.get_state() == kaa.popcorn.STATE_PLAYING:
             yield False

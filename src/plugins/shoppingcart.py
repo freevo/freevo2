@@ -38,17 +38,17 @@
 import kaa
 
 # freevo imports
-from freevo.ui.menu import Action, ItemPlugin
+from .. import api as freevo
 
 
-class PluginInterface(ItemPlugin):
+class PluginInterface(freevo.ItemPlugin):
     """
     This plugin copies or moves files to directories. Go to a file hit
     enter pick 'add to cart' and then go to a directory. Press enter
     and pick what you want to do.
     """
     def __init__(self):
-        ItemPlugin.__init__(self)
+        super(PluginInterface, self).__init__()
         self.cart = []
 
 
@@ -107,11 +107,11 @@ class PluginInterface(ItemPlugin):
                         break
                 else:
                     # add move action
-                    a = Action(_('Cart: Move Files Here'), self.move_or_copy)
+                    a = freevo.Action(_('Cart: Move Files Here'), self.move_or_copy)
                     a.parameter('move')
                     actions.append(a)
                 # add copy action
-                a = Action(_('Cart: Copy Files Here'), self.move_or_copy)
+                a = freevo.Action(_('Cart: Copy Files Here'), self.move_or_copy)
                 a.parameter('copy')
                 actions.append(a)
 
@@ -124,7 +124,7 @@ class PluginInterface(ItemPlugin):
                 txt = _('Add Directory to Cart')
             else:
                 txt = _('Remove Directory to Cart')
-            a = Action(txt, self.add_or_remove, 'cart:add')
+            a = freevo.Action(txt, self.add_or_remove, 'cart:add')
             actions.append(a)
 
         elif hasattr(item, 'files') and item.files and \
@@ -133,11 +133,11 @@ class PluginInterface(ItemPlugin):
                 txt = _('Add Item to Cart')
             else:
                 txt = _('Remove Item to Cart')
-            a = Action(txt, self.add_or_remove, 'cart:add')
+            a = freevo.Action(txt, self.add_or_remove, 'cart:add')
             actions.append(a)
 
         if self.cart:
             # add delete option
-            actions.append(Action(_('Delete Cart'), self.clear))
+            actions.append(freevo.Action(_('Delete Cart'), self.clear))
 
         return actions

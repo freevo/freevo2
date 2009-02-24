@@ -38,19 +38,17 @@ __all__ = [ 'ImageItem' ]
 import time
 
 # freevo imports
-from freevo.ui import config
-from freevo.ui.menu import MediaItem, Action
-from freevo.ui.event import PLAY_END, STOP
+from .. import api as freevo
 from viewer import viewer
 
-class ImageItem(MediaItem):
+class ImageItem(freevo.MediaItem):
     """
     An item for image files
     """
     type = 'image'
 
-    def __init__(self, url, parent, duration = config.image.viewer.duration):
-        MediaItem.__init__(self, parent)
+    def __init__(self, url, parent, duration = freevo.config.image.viewer.duration):
+        super(ImageItem, self).__init__(parent)
         self.user_stop = False
         # set url and parse the name
         self.set_url(url)
@@ -70,7 +68,7 @@ class ImageItem(MediaItem):
         """
         Return a list of possible actions on this item.
         """
-        return [ Action(_('View Image'), self.play) ]
+        return [ freevo.Action(_('View Image'), self.play) ]
 
 
     def cache(self):
@@ -98,10 +96,10 @@ class ImageItem(MediaItem):
         """
         eventhandler for this item
         """
-        if event == STOP:
+        if event == freevo.STOP:
             self.user_stop = True
-        if event == PLAY_END:
+        if event == freevo.PLAY_END:
             if not self.user_stop:
                 self['last_played'] = int(time.time())
                 self.user_stop = False
-        return MediaItem.eventhandler(self, event)
+        return super(ImageItem, self).eventhandler(event)

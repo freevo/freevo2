@@ -38,16 +38,14 @@ import logging
 
 # freevo imports
 from freevo import plugin
-from freevo.ui import config
-from freevo.ui.input import EVENTMAP as global_map
-from freevo.ui.event import Event
-from freevo.ui.application import get_eventmap as current_app
+from ... import api as freevo
+from .. import EVENTMAP as global_map
 
 # get logging object
 log = logging.getLogger('input')
 
 # get config event map
-config_map = config.input.eventmap
+config_map = freevo.config.input.eventmap
 
 class InputPlugin(plugin.Plugin):
     """
@@ -62,13 +60,13 @@ class InputPlugin(plugin.Plugin):
         if not key:
             return None
 
-        for app in (current_app(), 'global'):
+        for app in (freevo.get_eventmap(), 'global'):
             # check config file event mapping
             if app in config_map and key in config_map[app]:
-                event = Event(*config_map[app][key].split(' '))
+                event = freevo.Event(*config_map[app][key].split(' '))
                 return event.post(event_source='user')
             # check global pre-defined event mapping
             if app in global_map and key in global_map[app]:
                 return global_map[app][key].post(event_source='user')
 
-        log.warning('no event mapping for key %s in %s' % (key, current_app()))
+        log.warning('no event mapping for key %s in %s' % (key, freevo.get_eventmap()))

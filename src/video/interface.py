@@ -41,19 +41,14 @@ import copy
 import string
 
 # freevo imports
-from freevo import plugin
-from freevo.ui import fxditem
-from freevo.ui.menu import Files, MediaPlugin
-from freevo.ui import config
-from freevo.ui.mediamenu import MediaMenu
-from freevo.ui.mainmenu import MainMenuPlugin
+from .. import api as freevo
 
 # video imports
 from videoitem import VideoItem
 import database
 import fxdhandler
 
-class PluginInterface(MediaPlugin, MainMenuPlugin):
+class PluginInterface(freevo.MediaPlugin, freevo.MainMenuPlugin):
     """
     Plugin to handle all kinds of video items
     """
@@ -64,8 +59,8 @@ class PluginInterface(MediaPlugin, MainMenuPlugin):
         Activate the plugin.
         """
         # load the fxd part of video
-        fxditem.add_parser(['video'], 'movie', fxdhandler.parse_movie)
-        # fxditem.add_parser(['video'], 'disc-set', fxdhandler.parse_disc_set)
+        freevo.add_fxdparser(['video'], 'movie', fxdhandler.parse_movie)
+        # freevo.add_fxdparser(['video'], 'disc-set', fxdhandler.parse_disc_set)
 
         # update the database
         database.update()
@@ -75,7 +70,7 @@ class PluginInterface(MediaPlugin, MainMenuPlugin):
         """
         return the list of suffixes this class handles
         """
-        return [ 'beacon:video' ] + config.video.suffix.split(',')
+        return [ 'beacon:video' ] + freevo.config.video.suffix.split(',')
 
 
     def get(self, parent, listing):
@@ -93,4 +88,4 @@ class PluginInterface(MediaPlugin, MainMenuPlugin):
         """
         MainMenuPlugin.items to return the video item.
         """
-        return [ MediaMenu(parent, _('Watch a Movie'), 'video', config.video.items) ]
+        return [ freevo.MediaMenu(parent, _('Watch a Movie'), 'video', freevo.config.video.items) ]

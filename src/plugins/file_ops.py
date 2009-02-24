@@ -32,14 +32,13 @@
 import logging
 
 # freevo imports
-from freevo.ui.menu import Action, ItemPlugin
-from freevo.ui.application import ConfirmWindow
+from .. import api as freevo
 
 # get logging object
 log = logging.getLogger()
 
 
-class PluginInterface(ItemPlugin):
+class PluginInterface(freevo.ItemPlugin):
     """
     Small plugin to delete files
     """
@@ -59,7 +58,7 @@ class PluginInterface(ItemPlugin):
         actions = []
 
         if item.files.delete_possible():
-            a = Action(_('Delete'), self.delete, 'delete')
+            a = freevo.Action(_('Delete'), self.delete, 'delete')
             actions.append(a)
 
         return actions
@@ -67,7 +66,7 @@ class PluginInterface(ItemPlugin):
 
     def delete(self, item):
         txt = _('Do you wish to delete\n \'%s\'?') % item.name
-        box = ConfirmWindow(txt, default_choice=1)
+        box = freevo.ConfirmWindow(txt, default_choice=1)
         box.buttons[0].connect(self._delete, item)
         box.show()
 

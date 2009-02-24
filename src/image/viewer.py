@@ -40,12 +40,8 @@ import logging
 import kaa
 import kaa.imlib2
 
-# cache for loading images
-from freevo.ui.util import ObjectCache
-
-from freevo.ui.event import *
-from freevo.ui.application import Application, STATUS_RUNNING, STATUS_STOPPING, \
-     STATUS_STOPPED, STATUS_IDLE, CAPABILITY_TOGGLE, CAPABILITY_FULLSCREEN
+# freevo imports
+from .. import api as freevo
 
 # get logging object
 log = logging.getLogger('image')
@@ -53,7 +49,7 @@ log = logging.getLogger('image')
 # global viewer, will be set to the ImageViewer
 viewer = None
 
-class ImageViewer(Application):
+class ImageViewer(freevo.Application):
     """
     Full screen image viewer for imageitems
     """
@@ -64,10 +60,10 @@ class ImageViewer(Application):
         """
         create an image viewer application
         """
-        capabilities = (CAPABILITY_TOGGLE, CAPABILITY_FULLSCREEN)
-        Application.__init__(self, 'image', capabilities)
+        capabilities = (freevo.CAPABILITY_TOGGLE, freevo.CAPABILITY_FULLSCREEN)
+        super(ImageViewer, self).__init__('image', capabilities)
         self.osd_mode = 0
-        self.bitmapcache = ObjectCache(3, desc='viewer')
+        self.bitmapcache = freevo.util.ObjectCache(3, desc='viewer')
         self.slideshow = True
         self.sshow_timer = kaa.OneShotTimer(self._next)
         self.signals['stop'].connect_weak(self._cleanup)
@@ -80,13 +76,13 @@ class ImageViewer(Application):
         # we don't need the signalhandler anymore
         self.sshow_timer.stop()
         # reset bitmap cache
-        self.bitmapcache = ObjectCache(3, desc='viewer')
+        self.bitmapcache = freevo.util.ObjectCache(3, desc='viewer')
 
     def _next(self):
         """
         Send PLAY_END to show next image.
         """
-        event = Event(PLAY_END, self.item)
+        event = freevo.Event(freevo.PLAY_END, self.item)
         event.set_handler(self.eventhandler)
         event.post()
 
@@ -109,25 +105,25 @@ class ImageViewer(Application):
         self.gui_context.zoom = 1.0
         self.gui_context.pos = 0,0
         self.gui_context.menu = self.playlist
-        self.status = STATUS_RUNNING
+        self.status = freevo.STATUS_RUNNING
         # start timer
         if self.item.duration and self.slideshow and \
                not self.sshow_timer.active():
             self.sshow_timer.start(self.item.duration)
         # Notify everyone about the viewing
-        PLAY_START.post(item)
+        freevo.PLAY_START.post(item)
         return None
 
     def stop(self):
         """
         Stop the current viewing
         """
-        if self.status != STATUS_RUNNING:
+        if self.status != freevo.STATUS_RUNNING:
             # already stopped
             return True
         # set status to stopping
-        self.status = STATUS_STOPPING
-        event = Event(PLAY_END, self.item)
+        self.status = freevo.STATUS_STOPPING
+        event = freevo.Event(freevo.PLAY_END, self.item)
         event.set_handler(self.eventhandler)
         event.post()
 
@@ -144,38 +140,38 @@ class ImageViewer(Application):
         """
         Handle incoming events
         """
-        if event == PAUSE or event == PLAY:
+        if event == freevo.PAUSE or event == freevo.PLAY:
             if self.slideshow:
-                OSD_MESSAGE.post(_('pause'))
+                freevo.OSD_MESSAGE.post(_('pause'))
                 self.slideshow = False
                 self.sshow_timer.stop()
             else:
-                OSD_MESSAGE.post(_('play'))
+                freevo.OSD_MESSAGE.post(_('play'))
                 self.slideshow = True
                 self.sshow_timer.start(1)
             return True
 
-        if event == STOP:
+        if event == freevo.STOP:
             self.stop()
             self.item.eventhandler(event)
             return True
 
-        if event == PLAYLIST_NEXT or event == PLAYLIST_PREV:
+        if event == freevo.PLAYLIST_NEXT or event == freevo.PLAYLIST_PREV:
             # up and down will stop the slideshow and pass the
             # event to the playlist
             self.sshow_timer.stop()
             self.item.eventhandler(event)
             return True
 
-        if event == PLAY_END:
+        if event == freevo.PLAY_END:
             # Viewing is done, set application to stopped
-            self.status = STATUS_STOPPED
+            self.status = freevo.STATUS_STOPPED
             self.item.eventhandler(event)
-            if self.status == STATUS_STOPPED:
-                self.status = STATUS_IDLE
+            if self.status == freevo.STATUS_STOPPED:
+                self.status = freevo.STATUS_IDLE
             return True
 
-        if event == IMAGE_ROTATE:
+        if event == freevo.IMAGE_ROTATE:
             # rotate image
             if event.arg == 'left':
                 self.gui_context.rotation = (self.gui_context.rotation + 270) % 360
@@ -183,13 +179,13 @@ class ImageViewer(Application):
                 self.gui_context.rotation = (self.gui_context.rotation + 90) % 360
             return True
 
-        if event in (ZOOM, ZOOM_IN, ZOOM_OUT):
+        if event in (freevo.ZOOM, freevo.ZOOM_IN, freevo.ZOOM_OUT):
             zoom = self.gui_context.zoom
-            if event == ZOOM:
+            if event == freevo.ZOOM:
                 self.gui_context.zoom = event.arg
-            if event == ZOOM_IN:
+            if event == freevo.ZOOM_IN:
                 self.gui_context.zoom += event.arg
-            if event == ZOOM_OUT:
+            if event == freevo.ZOOM_OUT:
                 self.gui_context.zoom = max(1.0, self.gui_context.zoom + event.arg)
             if self.gui_context.zoom > 1.01:
                 if zoom == 1.0:
@@ -205,17 +201,17 @@ class ImageViewer(Application):
                 self.gui_context.pos = 0,0
             return True
 
-        if event == IMAGE_MOVE:
+        if event == freevo.IMAGE_MOVE:
             # move inside a zoomed image
             x, y = self.gui_context.pos
             self.gui_context.pos = x + event.arg[0], y + event.arg[1]
             return True
 
-        if event == TOGGLE_OSD:
+        if event == freevo.TOGGLE_OSD:
             # FIXME: update widget
             return True
 
-        if event == IMAGE_SAVE:
+        if event == freevo.IMAGE_SAVE:
             # FIXME
             return True
 

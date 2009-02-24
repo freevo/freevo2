@@ -41,22 +41,18 @@ import logging
 import kaa
 
 # Freevo imports
-from freevo.ui import config
-
-from freevo.ui.menu import Action, Menu
+from .. import api as freevo
 from audioitem import AudioItem
-from freevo.ui.playlist import Playlist
-from freevo.ui.directory import DirItem
 
 # get logging object
 log = logging.getLogger('audio')
 
-class AudioDiskItem(Playlist):
+class AudioDiskItem(freevo.Playlist):
     """
     Class for handling audio disks.
     """
     def __init__(self, device, parent):
-        Playlist.__init__(self, parent=parent, type='audio')
+        super(AudioDiskItem, self).__init__(parent=parent, type='audio')
         self.type = 'audiocd'
         self.info = device
         self.name = device.get('title')
@@ -69,7 +65,7 @@ class AudioDiskItem(Playlist):
         """
         Return a list of actions for this item
         """
-        return [ Action(_('Browse disc'), self.browse ) ]
+        return [ freevo.Action(_('Browse disc'), self.browse ) ]
 
 
     @kaa.coroutine()
@@ -89,8 +85,8 @@ class AudioDiskItem(Playlist):
         items = []
 
         # random playlist (only active for audio)
-        if config.directory.add_random_playlist and len(play_items) > 1:
-            pl = Playlist(_('Random playlist'), play_items, self, random=True)
+        if freevo.config.directory.add_random_playlist and len(play_items) > 1:
+            pl = freevo.Playlist(_('Random playlist'), play_items, self, random=True)
             pl.autoplay = True
             items += [ pl ]
 
@@ -98,9 +94,9 @@ class AudioDiskItem(Playlist):
 
         # BEACON_FIXME
         # if hasattr(self.info, 'mixed'):
-        #     d = DirItem(self.mountdir, self)
+        #     d = freevo.DirItem(self.mountdir, self)
         #     d.name = _('Data files on disc')
         #     items.append(d)
 
-        item_menu = Menu(self.name, items, type = 'audio')
+        item_menu = freevo.Menu(self.name, items, type = 'audio')
         self.get_menustack().pushmenu(item_menu)

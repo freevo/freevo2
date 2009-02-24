@@ -58,11 +58,7 @@ import os
 import kaa
 
 # Freevo imports
-from freevo.ui import config
-from freevo.ui import menu
-
-from freevo.ui.util import match_files
-from freevo.ui.playlist import Playlist
+from .. import api as freevo
 
 # ImageItem
 from imageitem import ImageItem
@@ -89,15 +85,14 @@ def fxdhandler(node, parent, listing):
             if child.name == 'directory':
                 # for directories add all files in it
                 recursive = fxd.getattr(child, 'recursive', 0)
-                files = match_files(fname, config.image.suffix.split(','), recursive)
+                files = freevo.util.match_files(fname, freevo.config.image.suffix.split(','), recursive)
 
             elif child.name == 'file':
                 # add the given filename
                 files = [ fname ]
 
             # get duration until the next images comes up
-            duration = fxd.getattr(child, 'duration', 0) or \
-                       config.image.viewer.duration
+            duration = fxd.getattr(child, 'duration', 0) or freevo.config.image.viewer.duration
 
             for file in files:
                 items.append(ImageItem(file, None, duration))
@@ -107,7 +102,7 @@ def fxdhandler(node, parent, listing):
             print e
 
     # create the playlist based on the parsed file list
-    pl = Playlist('', items, fxd.getattr(None, 'parent', None),
+    pl = freevo.Playlist('', items, fxd.getattr(None, 'parent', None),
                   random=fxd.getattr(node, 'random', 0),
                   repeat=fxd.getattr(node, 'repeat', 0))
     pl.autoplay = True
@@ -125,7 +120,7 @@ def fxdhandler(node, parent, listing):
 
     files  = []
     suffix = []
-    for p in menu.MediaPlugin.plugins('audio'):
+    for p in freevo.MediaPlugin.plugins('audio'):
         suffix += p.suffix()
 
     for child in children:
@@ -133,7 +128,7 @@ def fxdhandler(node, parent, listing):
             fname  = os.path.join(dirname, fxd.gettext(child))
             if child.name == 'directory':
                 recursive = fxd.getattr(child, 'recursive', 0)
-                files += match_files(fname, suffix, recursive)
+                files += freevo.util.match_files(fname, suffix, recursive)
             elif child.name == 'file':
                 files.append(fname)
         except OSError, e:
@@ -141,7 +136,7 @@ def fxdhandler(node, parent, listing):
             print e
 
     if files:
-        bg = Playlist(playlist=files, random = random,
+        bg = freevo.Playlist(playlist=files, random = random,
                       repeat=True, type='audio')
         pl.background_playlist = bg
 

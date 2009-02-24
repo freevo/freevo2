@@ -39,10 +39,10 @@ import kaa
 # freevo core imports
 from freevo.plugin import Plugin
 
-# freevo.ui imports
-from freevo.ui import config
-from freevo.ui.event import Event, DPMS_BLANK_SCREEN
-from freevo.ui.application import signals as app_signals
+# freevo imports
+from .. import api as freevo
+# FIXME: api import failure
+from ..application import signals as app_signals
 
 # blanking modes
 OFF, AUTO, USER = range(3)
@@ -74,7 +74,7 @@ class PluginInterface(Plugin):
         Poll function called every minute to check for timeout.
         """
         self.counter += 1
-        if self.counter == config.plugin.dpms.timeout:
+        if self.counter == freevo.config.plugin.dpms.timeout:
             # timeout, force dpms and turn off the monitor
             self._mode = AUTO
             self.xset('dpms force off')
@@ -103,7 +103,7 @@ class PluginInterface(Plugin):
             # user generated event (key/button), reset timeout counter
             self.counter = 0
         if (event.source == 'user' and self._mode == AUTO) or \
-               (self._mode == USER and event == DPMS_BLANK_SCREEN):
+               (self._mode == USER and event == freevo.DPMS_BLANK_SCREEN):
             # screen is blank right now, restore it
             self._mode = OFF
             self.xset('dpms force on s reset')
@@ -111,7 +111,7 @@ class PluginInterface(Plugin):
             self.timer.start(60)
             return
 
-        if event == DPMS_BLANK_SCREEN:
+        if event == freevo.DPMS_BLANK_SCREEN:
             # event to turn off the monitor
             self._mode = USER
             self.xset('dpms force off')

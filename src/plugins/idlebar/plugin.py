@@ -32,7 +32,8 @@
 import logging
 
 from freevo import plugin, view
-from freevo.ui import application, config
+# FIXME: api import failure
+from ... import application
 
 # get logging object
 log = logging.getLogger()

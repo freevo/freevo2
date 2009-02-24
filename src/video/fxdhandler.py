@@ -68,8 +68,8 @@ import logging
 import kaa
 
 # freevo imports
+from .. import api as freevo
 from videoitem import VideoItem
-from freevo.ui.menu import Files
 
 # get logging object
 log = logging.getLogger('video')
@@ -181,6 +181,6 @@ def parse_disc_set(fxd, node):
             item.mplayer_options = ''
 
     if not item.files:
-        item.files = Files()
+        item.files = freevo.Files()
     item.files.fxd_file  = fxd.filename
     fxd.getattr(None, 'items', []).append(item)

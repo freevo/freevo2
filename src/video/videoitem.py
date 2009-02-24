@@ -46,11 +46,7 @@ import time
 import kaa
 
 # freevo imports
-from freevo.ui import config
-
-from freevo.ui.application import MessageWindow, ConfirmWindow
-from freevo.ui.menu import Menu, MediaItem, Files, Action
-from freevo.ui.event import PLAY_END, STOP
+from .. import api as freevo
 
 # video imports
 import configure
@@ -62,15 +58,15 @@ import player as videoplayer
 log = logging.getLogger('video')
 
 # compile VIDEO_SHOW_REGEXP
-regexp = config.video.show_regexp
+regexp = freevo.config.video.show_regexp
 VIDEO_SHOW_REGEXP_MATCH = re.compile("^.*" + regexp).match
 VIDEO_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + regexp + "[\.\- ]*").split
 
-class VideoItem(MediaItem):
+class VideoItem(freevo.MediaItem):
     type = 'video'
 
     def __init__(self, url, parent):
-        MediaItem.__init__(self, parent)
+        super(VideoItem, self).__init__(parent)
         self.user_stop = False
 
         self.subtitle_file     = {}         # text subtitles
@@ -129,13 +125,13 @@ class VideoItem(MediaItem):
         directly because this functions also changes other attributes, like
         filename and mode
         """
-        MediaItem.set_url(self, url)
+        super(VideoItem, self).set_url(url)
         if self.url.startswith('dvd://') or self.url.startswith('vcd://'):
             if self.info.filename:
                 # dvd on harddisc, add '/' for xine
                 self.url = self.url + '/'
                 self.filename = self.info.filename
-                self.files    = Files()
+                self.files    = freevo.Files()
                 self.files.append(self.filename)
             elif self.url.rfind('.iso') + 4 == self.url.rfind('/'):
                 # dvd or vcd iso
@@ -181,13 +177,13 @@ class VideoItem(MediaItem):
         return a list of possible actions on this item.
         """
         if self.url.startswith('dvd://') and self.url[-1] == '/':
-            items = [ Action(_('Play DVD'), self.play),
-                      Action(_('DVD title list'), self.dvd_vcd_title_menu) ]
+            items = [ freevo.Action(_('Play DVD'), self.play),
+                      freevo.Action(_('DVD title list'), self.dvd_vcd_title_menu) ]
         elif self.url == 'vcd://':
-            items = [ Action(_('Play VCD'), self.play),
-                      Action(_('VCD title list'), self.dvd_vcd_title_menu) ]
+            items = [ freevo.Action(_('Play VCD'), self.play),
+                      freevo.Action(_('VCD title list'), self.dvd_vcd_title_menu) ]
         else:
-            items = [ Action(_('Play'), self.play) ]
+            items = [ freevo.Action(_('Play'), self.play) ]
 
         # Add the configure stuff (e.g. set audio language)
         items += configure.get_items(self)
@@ -212,7 +208,7 @@ class VideoItem(MediaItem):
             track = VideoItem(track, self)
             track.name = _('Play Title %s') % track.info.get('name')
             items.append(track)
-        moviemenu = Menu(self.name, items)
+        moviemenu = freevo.Menu(self.name, items)
         moviemenu.type = 'video'
         self.get_menustack().pushmenu(moviemenu)
 
@@ -237,10 +233,10 @@ class VideoItem(MediaItem):
         """
         eventhandler for this item
         """
-        if event == STOP:
+        if event == freevo.STOP:
             self.user_stop = True
-        if event == PLAY_END:
+        if event == freevo.PLAY_END:
             if not self.user_stop:
                 self['last_played'] = int(time.time())
                 self.user_stop = False
-        return MediaItem.eventhandler(self, event)
+        super(VideoItem, self).eventhandler(event)

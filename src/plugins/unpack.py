@@ -41,8 +41,7 @@ import os
 import kaa
 
 # freevo imports
-from freevo.ui.menu import Item, Action, MediaPlugin
-from freevo.ui.application import TextWindow
+from .. import api as freevo
 
 # possible archives and how to unpack them
 _cmdlines = {
@@ -50,12 +49,12 @@ _cmdlines = {
     'rar': [ 'unrar', 'x', '__filename__', '__dirname__' ] }
 
 
-class ArchiveItem(Item):
+class ArchiveItem(freevo.Item):
     """
     Archive item with the action to unpack.
     """
     def __init__(self, fname, parent):
-        Item.__init__(self, parent)
+        super(ArchiveItem, self).__init__(parent)
         self.fname = fname
         self.name = os.path.basename(fname)
         self.description = _('Archive File')
@@ -65,7 +64,7 @@ class ArchiveItem(Item):
         """
         Return possible actions for this item.
         """
-        return [ Action(_('Unpack archive'), self.unpack) ]
+        return [ freevo.Action(_('Unpack archive'), self.unpack) ]
 
 
     def unpack(self):
@@ -76,7 +75,7 @@ class ArchiveItem(Item):
         for param in _cmdlines[os.path.splitext(self.fname)[1][1:]]:
             app.append(param.replace('__filename__', self.fname).\
                        replace('__dirname__', os.path.dirname(self.fname)))
-        self.pop = TextWindow(text=_('unpacking...'))
+        self.pop = freevo.TextWindow(text=_('unpacking...'))
         self.pop.show()
         child = kaa.Process(app)
         child.start().connect(self.finished)
@@ -89,7 +88,7 @@ class ArchiveItem(Item):
         self.pop.destroy()
 
         
-class PluginInterface(MediaPlugin):
+class PluginInterface(freevo.MediaPlugin):
     """
     A media plugin for zip and rar archives.
     """

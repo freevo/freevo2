@@ -45,12 +45,7 @@ import re
 import stat
 
 # Freevo imports
-from freevo import plugin
-from freevo.ui import fxditem
-from freevo.ui import config
-from freevo.ui.menu import MediaPlugin
-from freevo.ui.mediamenu import MediaMenu
-from freevo.ui.mainmenu import MainMenuPlugin
+from .. import api as freevo
 
 # AudioItem
 from audioitem import AudioItem
@@ -59,7 +54,7 @@ from audiodiskitem import AudioDiskItem
 # fxdhandler for <audio> tags
 from fxdhandler import fxdhandler
 
-class PluginInterface(MediaPlugin, MainMenuPlugin):
+class PluginInterface(freevo.MediaPlugin, freevo.MainMenuPlugin):
     """
     Plugin to handle all kinds of audio items
     """
@@ -70,14 +65,14 @@ class PluginInterface(MediaPlugin, MainMenuPlugin):
         Activate the plugin.
         """
         # add fxd parser callback
-        fxditem.add_parser(['audio'], 'audio', fxdhandler)
+        freevo.add_fxdparser(['audio'], 'audio', fxdhandler)
 
 
     def suffix(self):
         """
         return the list of suffixes this class handles
         """
-        return [ 'beacon:audio' ] + config.audio.suffix.split(',')
+        return [ 'beacon:audio' ] + freevo.config.audio.suffix.split(',')
 
 
     def get(self, parent, listing):
@@ -100,4 +95,4 @@ class PluginInterface(MediaPlugin, MainMenuPlugin):
         """
         MainMenuPlugin.items to return the audio item.
         """
-        return [ MediaMenu(parent, _('Audio Main Menu'), 'audio', config.audio.items) ]
+        return [ freevo.MediaMenu(parent, _('Audio Main Menu'), 'audio', freevo.config.audio.items) ]

@@ -30,8 +30,9 @@ import re
 import kaa
 
 from freevo import plugin
-from freevo.ui import application
-from freevo.ui.event import PLAY_START, PLAY_END, STOP, OSD_MESSAGE
+from .. import api as freevo
+# FIXME: api import failure
+from .. import application
 
 import logging
 log = logging.getLogger()
@@ -174,16 +175,16 @@ class PluginInterface( plugin.Plugin ):
     def eventhandler(self, event):
         self.update()
 
-        if event == PLAY_START:
+        if event == freevo.PLAY_START:
             if self.running:
                 self.timer.start(0.2)
             self.playitem = event.arg
 
-        elif event == PLAY_END or event == STOP:
+        elif event == freevo.PLAY_END or event == freevo.STOP:
             self.playitem = None
             self.timer.stop()
 
-        elif event == OSD_MESSAGE:
+        elif event == freevo.OSD_MESSAGE:
             result = []
             line = ''
             for word in re.findall(u'.*?[, -.;\n\m\r]', unicode(event.arg) + u' '):
