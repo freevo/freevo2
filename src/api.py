@@ -1,17 +1,12 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# application - Application Submodule
+# api.py - API to access various Freevo classes and objects needed for plugins
 # -----------------------------------------------------------------------------
-# $Id$
-#
-# Import information. This module depends on the following freevo.ui modules:
-# freevo.ui.event   for the event definitions
-# freevo.ui.menu    for the MenuWidget
-# freevo.ui.gui     for gui callbacks
+# $Id: __init__.py 10817 2008-06-20 15:41:17Z dmeyer $
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2005-2007 Dirk Meyer, et al.
+# Copyright (C) 2009 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -34,32 +29,32 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'Application', 'get_active', 'get_eventmap', 'signals',
-            'STATUS_RUNNING', 'STATUS_STOPPING', 'STATUS_STOPPED', 'STATUS_IDLE',
-            'CAPABILITY_TOGGLE', 'CAPABILITY_PAUSE', 'CAPABILITY_FULLSCREEN',
-            'MenuWidget', 'TextWindow', 'MessageWindow', 'ConfirmWindow' ]
+__all__ = [ 'config', 'plugins', 'util' ]
 
-import sys
+# python imports
+import os
 
-from base import Application, STATUS_RUNNING, STATUS_STOPPING, \
-     STATUS_STOPPED, STATUS_IDLE, CAPABILITY_TOGGLE, CAPABILITY_PAUSE, \
-     CAPABILITY_FULLSCREEN
+# freevo core imports
+import freevo.conf
+import freevo.xmlconfig
 
-from handler import handler as _handler
-from window import TextWindow, MessageWindow, ConfirmWindow
-from menuw import MenuWidget
+# freevo.ui imports
+import event
 
-def get_active():
-    """
-    Get active application.
-    """
-    return _handler.get_active()
+# expose SHAREDIR to other modules
+SHAREDIR = freevo.conf.SHAREDIR
 
-def get_eventmap():
-    """
-    Return current eventmap.
-    """
-    return _handler.eventmap
+# generate config
+pycfgfile = freevo.conf.datafile('freevo_config.py')
+cfgdir = os.path.join(SHAREDIR, 'config')
+cfgsource = [ os.path.join(cfgdir, f) for f in os.listdir(cfgdir) if f.endswith('.cxml') ]
+freevo.xmlconfig.xmlconfig(pycfgfile, cfgsource, 'freevo.ui')
 
-# signals defined by the application base code
-signals = _handler.signals
+# load config structure. This will add 'config', 'plugins' and 'events'
+execfile(pycfgfile)
+
+# add events defined in xml config to event.py.
+for e in events:
+    setattr(event, e, event.Event(e))
+
+import util

@@ -38,8 +38,7 @@ import logging
 from kaa.weakref import weakref
 
 # freevo imports
-from freevo.ui import config
-from freevo.ui.event import *
+from .. import api as freevo
 
 # menu imports
 from item import Item
@@ -215,32 +214,32 @@ class GridMenu(Menu):
         if self.choices == None:
             return False
 
-        if event == MENU_UP:
+        if event == freevo.MENU_UP:
             self.select(col=self.selected_col, row=self.selected_row-1 )
             return True
 
-        if event == MENU_DOWN:
+        if event == freevo.MENU_DOWN:
             self.select(col=self.selected_col, row=self.selected_row+1 )
             return True
 
-        if event == MENU_PAGEUP:
+        if event == freevo.MENU_PAGEUP:
             self.select(col=self.selected_col, row=self.selected_row-self.rows )
             return True
 
-        if event == MENU_PAGEDOWN:
+        if event == freevo.MENU_PAGEDOWN:
             self.select(col=self.selected_col, row=self.selected_row+self.rows )
             return True
 
-        if event == MENU_LEFT:
+        if event == freevo.MENU_LEFT:
             self.select(col=self.selected_col-1, row=self.selected_row )
             return True
 
-        if event == MENU_RIGHT:
+        if event == freevo.MENU_RIGHT:
             self.select(col=self.selected_col+1, row=self.selected_row )
             return True
 
-        if event in (MENU_PLAY_ITEM, MENU_CHANGE_SELECTION, MENU_SELECT,
-                     MENU_PLAY_ITEM, MENU_SUBMENU, MENU_CALL_ITEM_ACTION):
+        if event in (freevo.MENU_PLAY_ITEM, freevo.MENU_CHANGE_SELECTION, freevo.MENU_SELECT,
+                     freevo.MENU_PLAY_ITEM, freevo.MENU_SUBMENU, freevo.MENU_CALL_ITEM_ACTION):
             return Menu.eventhandler(self, event)
 
         return False

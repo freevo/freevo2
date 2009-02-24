@@ -29,6 +29,8 @@
 #
 # -----------------------------------------------------------------------------
 
+__all__ = [ 'DirItem' ]
+
 # python imports
 import os
 import stat
@@ -42,23 +44,13 @@ import kaa.beacon
 from kaa.weakref import weakref
 
 # freevo imports
-from freevo.ui import config
-
-import menu
-import fxditem
-
-from menu import Files, Action, ActionItem, MediaPlugin
-from playlist import Playlist
-from event import OSD_MESSAGE, DIRECTORY_CHANGE_MENU_TYPE, \
-     DIRECTORY_TOGGLE_HIDE_PLAYED
-
-from application import MessageWindow
+import api as freevo
 
 # get logging object
 log = logging.getLogger()
 
 # get config object directory
-config = config.directory
+config = freevo.config.directory
 
 def find_start_string(s1, s2):
     """
@@ -92,7 +84,7 @@ def remove_start_string(string, start):
     return string[0].upper() + string[1:]
 
 
-class DirItem(Playlist):
+class DirItem(freevo.Playlist):
     """
     class for handling directories
     """
@@ -108,10 +100,10 @@ class DirItem(Playlist):
         if type == 'tv':
             type = 'video'
 
-        Playlist.__init__(self, parent=parent, type=type)
+        super(DirItem, self).__init__(parent=parent, type=type)
         self.item_menu  = None
         self.set_url(directory)
-        self.files = Files()
+        self.files = freevo.Files()
         if directory.get('read_only'):
             self.files.read_only = True
         self.files.append(directory)
@@ -162,7 +154,7 @@ class DirItem(Playlist):
             # memory override of that value
             return value
         # get config value from freevo_config
-        value = Playlist.get_cfg(self, var)
+        value = super(DirItem, self).get_cfg(var)
         if value not in (None, 'auto'):
             # value is set for this item
             if value == 'on':
@@ -197,7 +189,7 @@ class DirItem(Playlist):
         if self.media_type:
             media_type = '_%s' % self.media_type
         num = 0
-        for p in MediaPlugin.plugins(self.media_type):
+        for p in freevo.MediaPlugin.plugins(self.media_type):
             num += p.count(self, listing)
         self['cache:num_items_play%s' % media_type] = num
         self['cache:num_items_dir%s' % media_type] = len(listing.get('beacon:dir'))
@@ -214,7 +206,7 @@ class DirItem(Playlist):
         key = 'cache:num_items_%s' % type
         if self.media_type:
             key += '_' + self.media_type
-        num = Playlist.get(self, key)
+        num = freevo.Playlist.get(self, key)
         if num is not None:
             return num
         self.query_num_items()
@@ -226,12 +218,12 @@ class DirItem(Playlist):
         Eventhandler for a directory item.
         """
         if self.item_menu == None:
-            return Playlist.eventhandler(self, event)
+            return super(DirItem, self).eventhandler(event)
 
-        if event == DIRECTORY_CHANGE_MENU_TYPE:
+        if event == freevo.DIRECTORY_CHANGE_MENU_TYPE:
             possible = [ ]
 
-            for p in MediaPlugin.plugins():
+            for p in freevo.MediaPlugin.plugins():
                 for t in p.possible_media_types:
                     if not t in possible:
                         possible.append(t)
@@ -240,27 +232,27 @@ class DirItem(Playlist):
                 pos = possible.index(self.media_type)
                 type = possible[(pos+1) % len(possible)]
             except (IndexError, ValueError), e:
-                return Playlist.eventhandler(self, event)
+                return super(DirItem, self).eventhandler(event)
 
             self.media_type = self.menu_type = type
             # deactivate autoplay but not save it
             self['mem:autoplay_single_item'] = False
             self.item_menu.autoselect = False
             self.browse()
-            OSD_MESSAGE.post('%s view' % type)
+            freevo.OSD_MESSAGE.post('%s view' % type)
             return True
 
-        if event == DIRECTORY_TOGGLE_HIDE_PLAYED:
+        if event == freevo.DIRECTORY_TOGGLE_HIDE_PLAYED:
             self['cfg:hide_played'] = not self['cfg:hide_played']
             self['mem:autoplay_single_item'] = False
             self.item_menu.autoselect = False
             self.browse()
             if self['cfg:hide_played']:
-                OSD_MESSAGE.post('Hide played items')
+                freevo.OSD_MESSAGE.post('Hide played items')
             else:
-                OSD_MESSAGE.post('Show all items')
+                freevo.OSD_MESSAGE.post('Show all items')
 
-        return Playlist.eventhandler(self, event)
+        return super(DirItem, self).eventhandler(event)
 
 
     # ======================================================================
@@ -271,8 +263,8 @@ class DirItem(Playlist):
         """
         return a list of actions for this item
         """
-        browse = Action(_('Browse directory'), self.browse)
-        play = Action(_('Play all files in directory'), self.play)
+        browse = freevo.Action(_('Browse directory'), self.browse)
+        play = freevo.Action(_('Play all files in directory'), self.play)
 
         if self['num_items']:
             if self['cfg:autoplay_items'] and not self['num_items:dir']:
@@ -283,19 +275,19 @@ class DirItem(Playlist):
             items = [ browse ]
 
         if self.info['num_items']:
-            a = Action(_('Random play all items'), self.play)
+            a = freevo.Action(_('Random play all items'), self.play)
             a.parameter(random=True)
             items.append(a)
 
         if self['num_items:dir']:
-            a = Action(_('Recursive random play all items'), self.play)
+            a = freevo.Action(_('Recursive random play all items'), self.play)
             a.parameter(random=True, recursive=True)
             items.append(a)
-            a = Action(_('Recursive play all items'), self.play)
+            a = freevo.Action(_('Recursive play all items'), self.play)
             a.parameter(recursive=True)
             items.append(a)
 
-        a = Action(_('Configure directory'), self.configure, 'configure')
+        a = freevo.Action(_('Configure directory'), self.configure, 'configure')
         items.append(a)
 
         return items
@@ -308,10 +300,10 @@ class DirItem(Playlist):
         """
         # FIXME: add password checking here
         if not os.path.exists(self.filename):
-	    MessageWindow(_('Directory does not exist')).show()
+	    freevo.MessageWindow(_('Directory does not exist')).show()
             return
         items = yield kaa.beacon.query(parent=self.info, recursive=recursive)
-        pl = Playlist(playlist=items, parent=self, type=self.media_type, random=random)
+        pl = freevo.Playlist(playlist=items, parent=self, type=self.media_type, random=random)
         pl.play()
         # Now this is ugly. If we do nothing 'pl' will be deleted by the
         # garbage collector, so we have to store it somehow
@@ -335,7 +327,7 @@ class DirItem(Playlist):
 
         elif not os.path.exists(self.filename):
             # FIXME: better handling!!!!!
-	    MessageWindow(_('Directory does not exist')).show()
+	    freevo.MessageWindow(_('Directory does not exist')).show()
             return
 
         self.item_menu = None
@@ -344,7 +336,7 @@ class DirItem(Playlist):
         self.query.monitor()
 
         items = self._get_items()
-        item_menu = menu.Menu(self.name, items, type = self.menu_type)
+        item_menu = freevo.Menu(self.name, items, type = self.menu_type)
         item_menu.autoselect = self['cfg:autoplay_single_item']
         self.get_menustack().pushmenu(item_menu)
         self.item_menu = weakref(item_menu)
@@ -376,7 +368,7 @@ class DirItem(Playlist):
         # build items
         #
         # build play_items, pl_items and dir_items
-        for p in MediaPlugin.plugins(self.media_type):
+        for p in freevo.MediaPlugin.plugins(self.media_type):
             for i in p.get(self, listing):
                 if i.type == 'playlist':
                     pl_items.append(i)
@@ -455,7 +447,7 @@ class DirItem(Playlist):
         # random playlist
         if self.menu_type and self.menu_type in \
                config.add_random_playlist and len(play_items) > 1:
-            pl = Playlist(_('Random playlist'), play_items, self,
+            pl = freevo.Playlist(_('Random playlist'), play_items, self,
                           random=True, type=self.media_type)
             pl.autoplay = True
             items = [ pl ] + items

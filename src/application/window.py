@@ -29,7 +29,7 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'TextWindow', 'MessageWindow', 'ConfirmWindow']
+__all__ = [ 'TextWindow', 'MessageWindow', 'ConfirmWindow' ]
 
 # kaa imports
 import kaa
@@ -37,7 +37,7 @@ from kaa.utils import property
 
 # freevo imports
 from freevo import view
-from freevo.ui.event import *
+from .. import api as freevo
 
 # application imports
 from handler import handler
@@ -139,9 +139,9 @@ class MessageWindow(TextWindow):
         """
         Eventhandler to close the box on INPUT_ENTER or INPUT_EXIT
         """
-        if event in (INPUT_ENTER, INPUT_EXIT):
+        if event in (freevo.INPUT_ENTER, freevo.INPUT_EXIT):
             self.hide()
-            if event == INPUT_ENTER:
+            if event == freevo.INPUT_ENTER:
                 self.button.emit()
             return True
         return False
@@ -165,11 +165,11 @@ class ConfirmWindow(TextWindow):
         """
         Eventhandler to toggle the selection or press the button
         """
-        if event in (INPUT_LEFT, INPUT_RIGHT):
+        if event in (freevo.INPUT_LEFT, freevo.INPUT_RIGHT):
             # Toggle selection
             self.selected.selected = False
             index = self.buttons.index(self.selected)
-            if event == INPUT_LEFT:
+            if event == freevo.INPUT_LEFT:
                 index = (index + 1) % len(self.buttons)
             elif index == 0:
                 index = len(self.buttons) - 1
@@ -179,7 +179,7 @@ class ConfirmWindow(TextWindow):
             self.selected.selected = True
             self.gui_context.sync()
             return True
-        elif event == INPUT_ENTER:
+        elif event == freevo.INPUT_ENTER:
             self.selected.emit()
             self.hide()
             return True

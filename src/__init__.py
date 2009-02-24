@@ -29,39 +29,16 @@
 #
 # -----------------------------------------------------------------------------
 
-"""
-Freevo UI
-
-@group Core: application, event, util
-@group Menu: menu, mediamenu, mainmenu
-@group Media: directory, playlist, fxditem, audio, image, video, tv, games
-@group Plugins: input, plugins
-@group GUI Subsystem: gui
-
-"""
-
-# python imports
-import os
-
-# freevo core imports
-import freevo.conf
-import freevo.xmlconfig
-
-# freevo.ui imports
-import event
-
-# expose SHAREDIR to other modules
-SHAREDIR = freevo.conf.SHAREDIR
-
-# generate config
-pycfgfile = freevo.conf.datafile('freevo_config.py')
-cfgdir = os.path.join(SHAREDIR, 'config')
-cfgsource = [ os.path.join(cfgdir, f) for f in os.listdir(cfgdir) if f.endswith('.cxml') ]
-freevo.xmlconfig.xmlconfig(pycfgfile, cfgsource, 'freevo.ui')
-
-# load config structure. This will add 'config', 'plugins' and 'events'
-execfile(pycfgfile)
-
-# add events defined in xml config to event.py.
-for e in events:
-    setattr(event, e, event.Event(e))
+import api as __api__
+import event as __event__
+for obj in dir(__event__):
+    if obj.upper() == obj or obj == 'Event':
+        __api__.__all__.append(obj)
+        setattr(__api__, obj, getattr(__event__, obj))
+for module in ('menu', 'application', 'fxditem', 'playlist', 'directory', 'mainmenu'):
+    exec('import %s as module' % module)
+    for obj in module.__all__:
+        __api__.__all__.append(obj)
+        setattr(__api__, obj, getattr(module, obj))
+from api import *
+__all__ = __api__.__all__

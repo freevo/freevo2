@@ -36,11 +36,10 @@ __all__ = [ 'MainMenuItem', 'MainMenu', 'MainMenuPlugin' ]
 
 # freevo imports
 from freevo import plugin
-from menu import Item, Menu
-from application.menuw import MenuWidget
+import api as freevo
 
 
-class MainMenuItem(Item):
+class MainMenuItem(freevo.Item):
     """
     This class is a main menu item. Items of this type can be returned by
     a MainMenuPlugin.
@@ -85,7 +84,7 @@ class MainMenuPlugin(plugin.Plugin):
         return [ x for x in MainMenuPlugin.plugin_list if x.plugin_media() == subtype ]
 
 
-class MainMenu(Item):
+class MainMenu(freevo.Item):
     """
     This class handles the main menu. It will start the main menu widget
     and the first menu page based on the main menu plugins.
@@ -98,9 +97,9 @@ class MainMenu(Item):
         items = []
         for p in MainMenuPlugin.plugins():
             items += p.items(self)
-        menu = Menu(_('Freevo Main Menu'), items, type='main')
+        menu = freevo.Menu(_('Freevo Main Menu'), items, type='main')
         menu.autoselect = True
-        self.menuw = MenuWidget(menu)
+        self.menuw = freevo.MenuWidget(menu)
 
     def get_menustack(self):
         """

@@ -40,9 +40,6 @@ import time
 import kaa
 import kaa.beacon
 
-# freevo imports
-from freevo.ui.event import PLAY_START, STOP
-
 # menu imports
 from item import Item, ActionItem
 from files import Files

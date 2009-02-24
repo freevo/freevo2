@@ -29,6 +29,7 @@
 #
 # -----------------------------------------------------------------------------
 
+__all__ = [ 'add_fxdparser' ]
 
 # python imports
 import copy
@@ -43,18 +44,18 @@ import freevo.fxdparser
 
 # freevo imports
 from freevo import plugin
-from menu import Item, Action, Menu, MediaPlugin
+import api as freevo
 
 # get logging object
 log = logging.getLogger()
 
 
-class Container(Item):
+class Container(freevo.Item):
     """
     A simple container containing for items parsed from the fxd
     """
     def __init__(self, title, image, info, parent, type):
-        Item.__init__(self, parent)
+        super(Container, self).__init__(parent)
         self.items = []
         self.name = title
         self.image = image
@@ -65,25 +66,25 @@ class Container(Item):
         """
         Actions for this item
         """
-        return [ Action(_('Browse list'), self.browse) ]
+        return [ freevo.Action(_('Browse list'), self.browse) ]
 
 
     def browse(self):
         """
         Show all items
         """
-        m = Menu(self.name, self.items, type=self.media_type)
+        m = freevo.Menu(self.name, self.items, type=self.media_type)
         self.get_menustack().pushmenu(m)
 
 
 
-class PluginInterface(MediaPlugin):
+class PluginInterface(freevo.MediaPlugin):
     """
     Class to handle fxd files in directories
     """
 
     def __init__(self):
-        MediaPlugin.__init__(self)
+        super(PluginInterface, self).__init__()
         self._callbacks = []
 
 
@@ -172,4 +173,5 @@ class PluginInterface(MediaPlugin):
 # load the MediaPlugin
 interface = PluginInterface()
 add_parser = interface.add_parser
+add_fxdparser = interface.add_parser
 plugin.activate(interface, level=0)

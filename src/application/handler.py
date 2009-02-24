@@ -45,7 +45,7 @@ import logging
 import kaa
 
 # freevo imports
-from freevo.ui.event import TOGGLE_APPLICATION
+from .. import api as freevo
 
 # the logging object
 log = logging.getLogger()
@@ -185,7 +185,7 @@ class Handler(object):
         """
         log.debug('handling event %s' % str(event))
 
-        if event == TOGGLE_APPLICATION and len(self.applications) > 1 and \
+        if event == freevo.TOGGLE_APPLICATION and len(self.applications) > 1 and \
                self.applications[-1].has_capability(CAPABILITY_TOGGLE):
             log.info('Toggle application')
             self.applications.insert(0, self.applications.pop())

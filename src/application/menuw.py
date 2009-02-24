@@ -32,13 +32,13 @@
 __all__ = [ 'MenuWidget' ]
 
 # freevo imports
-from freevo.ui.menu import MenuStack
+from .. import api as freevo
 
 # application imports
 from base import Application, STATUS_RUNNING, CAPABILITY_TOGGLE
 
 
-class MenuWidget(Application, MenuStack):
+class MenuWidget(Application, freevo.MenuStack):
     """
     The MenuWidget is an Application for GUI and event handling and also
     an instance of MenuStack defined in menu.stack.
@@ -48,7 +48,7 @@ class MenuWidget(Application, MenuStack):
 
     def __init__(self, menu):
         Application.__init__(self, 'menu', (CAPABILITY_TOGGLE,))
-        MenuStack.__init__(self)
+        freevo.MenuStack.__init__(self)
         self.pushmenu(menu)
         self.status = STATUS_RUNNING
         self.signals['show'].connect_weak(self.refresh, True)
@@ -57,7 +57,7 @@ class MenuWidget(Application, MenuStack):
     def refresh(self, reload=False):
         if self.is_locked():
             return
-        MenuStack.refresh(self, reload)
+        freevo.MenuStack.refresh(self, reload)
         if self.gui_context.menu != self.menustack[-1]:
             self.gui_context.previous = self.gui_context.menu
             self.gui_context.next = self.menustack[-1]
@@ -69,4 +69,4 @@ class MenuWidget(Application, MenuStack):
         """
         Eventhandler for menu control
         """
-        return MenuStack.eventhandler(self, event)
+        return freevo.MenuStack.eventhandler(self, event)

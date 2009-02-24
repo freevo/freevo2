@@ -38,8 +38,7 @@ import logging
 from kaa.weakref import weakref
 
 # freevo imports
-from freevo.ui import config
-from freevo.ui.event import *
+from .. import api as freevo
 
 # menu imports
 from item import Item
@@ -128,59 +127,59 @@ class Menu(ItemList):
             return False
 
         if self.cols == 1:
-            if config.menu.arrow_navigation:
-                if event == MENU_LEFT:
-                    # event = MENU_BACK_ONE_MENU
+            if freevo.config.menu.arrow_navigation:
+                if event == freevo.MENU_LEFT:
+                    # event = freevo.MENU_BACK_ONE_MENU
                     # we can not just change the event here because
                     # stack.py processes this.
                     self.stack.back_one_menu()
-                elif event == MENU_RIGHT:
-                    event = MENU_SELECT
+                elif event == freevo.MENU_RIGHT:
+                    event = freevo.MENU_SELECT
             else:
-                if event == MENU_LEFT:
-                    event = MENU_PAGEUP
-                elif event == MENU_RIGHT:
-                    event = MENU_PAGEDOWN
+                if event == freevo.MENU_LEFT:
+                    event = freevo.MENU_PAGEUP
+                elif event == freevo.MENU_RIGHT:
+                    event = freevo.MENU_PAGEDOWN
 
         if self.rows == 1:
-            if event == MENU_LEFT:
-                event = MENU_UP
-            if event == MENU_RIGHT:
-                event = MENU_DOWN
+            if event == freevo.MENU_LEFT:
+                event = freevo.MENU_UP
+            if event == freevo.MENU_RIGHT:
+                event = freevo.MENU_DOWN
 
-        if event == MENU_UP:
+        if event == freevo.MENU_UP:
             self.select(-self.cols)
             return True
 
-        if event == MENU_DOWN:
+        if event == freevo.MENU_DOWN:
             self.select(self.cols)
             return True
 
-        if event == MENU_PAGEUP:
+        if event == freevo.MENU_PAGEUP:
             self.select(-(self.rows * self.cols))
             return True
 
-        if event == MENU_PAGEDOWN:
+        if event == freevo.MENU_PAGEDOWN:
             self.select(self.rows * self.cols)
             return True
 
-        if event == MENU_LEFT:
+        if event == freevo.MENU_LEFT:
             self.select(-1)
             return True
 
-        if event == MENU_RIGHT:
+        if event == freevo.MENU_RIGHT:
             self.select(1)
             return True
 
-        if event == MENU_PLAY_ITEM and hasattr(self.selected, 'play'):
+        if event == freevo.MENU_PLAY_ITEM and hasattr(self.selected, 'play'):
             self.selected.play()
             return True
 
-        if event == MENU_CHANGE_SELECTION:
+        if event == freevo.MENU_CHANGE_SELECTION:
             self.select(event.arg)
             return True
 
-        if event == MENU_SELECT or event == MENU_PLAY_ITEM:
+        if event == freevo.MENU_SELECT or event == freevo.MENU_PLAY_ITEM:
             actions = self.selected._get_actions()
             if not actions:
                 OSD_MESSAGE.post(_('No action defined for this choice!'))
@@ -193,7 +192,7 @@ class Menu(ItemList):
             # in any case, return True because this event is handled here
             return True
 
-        if event == MENU_SUBMENU:
+        if event == freevo.MENU_SUBMENU:
             if self._is_submenu or not self.stack:
                 return False
 
@@ -206,7 +205,7 @@ class Menu(ItemList):
             self.stack.pushmenu(s)
             return True
 
-        if event == MENU_CALL_ITEM_ACTION:
+        if event == freevo.MENU_CALL_ITEM_ACTION:
             log.info('calling action %s' % event.arg)
             for action in self.selected._get_actions():
                 if action.shortcut == event.arg:

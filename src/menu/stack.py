@@ -39,10 +39,11 @@ __all__ = [ 'MenuStack' ]
 import logging
 
 # kaa imports
+import kaa
 from kaa.weakref import weakref
 
 # freevo imports
-from freevo.ui.event import *
+from .. import api as freevo
 
 # menu imports
 from item import Item
@@ -90,7 +91,7 @@ class MenuStack(object):
         if len(self.menustack) > 1 and self.menustack[-1]._is_submenu:
             self.back_one_menu(refresh)
         elif len(self.menustack) > 1 and osd_message:
-            OSD_MESSAGE.post(osd_message)
+            freevo.OSD_MESSAGE.post(osd_message)
 
 
     def pushmenu(self, menu):
@@ -196,17 +197,17 @@ class MenuStack(object):
             self.refresh()
             return result
 
-        if event == MENU_GOTO_MAINMENU:
+        if event == freevo.MENU_GOTO_MAINMENU:
             while len(self.menustack) > 1:
                 menu = self.menustack.pop()
             self.refresh()
             return True
 
-        if event == MENU_BACK_ONE_MENU:
+        if event == freevo.MENU_BACK_ONE_MENU:
             self.back_one_menu()
             return True
 
-        if event == MENU_GOTO_MEDIA:
+        if event == freevo.MENU_GOTO_MEDIA:
             # TODO: it would be nice to remember the current menu stack
             # but that is something we have to do inside mediamenu if it
             # is possible at all.
@@ -223,7 +224,7 @@ class MenuStack(object):
                     return True
             return True
 
-        if event == MENU_GOTO_MENU:
+        if event == freevo.MENU_GOTO_MENU:
             # TODO: add some doc, example:
             # input.eventmap[menu][5] = MENU_GOTO_MENU /Watch a Movie/My Home Videos
             path = ' '.join(event.arg)
@@ -244,7 +245,7 @@ class MenuStack(object):
                 
         # handle empty menus
         if not menu.choices:
-            if event in ( MENU_SELECT, MENU_SUBMENU, MENU_PLAY_ITEM):
+            if event in ( freevo.MENU_SELECT, freevo.MENU_SUBMENU, freevo.MENU_PLAY_ITEM):
                 self.back_one_menu()
                 return True
             selected = getattr(self.menustack[-2], 'selected', None)

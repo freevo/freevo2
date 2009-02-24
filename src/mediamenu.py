@@ -8,7 +8,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2003-2007 Dirk Meyer, et al.
+# Copyright (C) 2003-2009 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -31,6 +31,8 @@
 #
 # -----------------------------------------------------------------------------
 
+__all__ = [ 'MediaMenu' ]
+
 # python imports
 import os
 import copy
@@ -39,17 +41,13 @@ import logging
 # kaa imports
 import kaa.beacon
 from kaa.weakref import weakref
-
-from freevo.ui.event import EJECT
-from freevo.ui.directory import DirItem
-from freevo.ui.mainmenu import MainMenuItem, MainMenuPlugin
-from freevo.ui.menu import Menu, Item, MediaPlugin
+import api as freevo
 
 # get logging object
 log = logging.getLogger()
 
 
-class MediaMenu(MainMenuItem):
+class MediaMenu(freevo.MainMenuItem):
     """
     This is the main menu for different media types. It displays the default
     directories, the beacon mountpoints and sub-plugins.
@@ -94,12 +92,12 @@ class MediaMenu(MainMenuItem):
                 # path is a directory
                 if os.path.isdir(filename):
                     for d in listing.get('beacon:dir'):
-                        d = DirItem(d, self, name = title, type = self.media_type)
+                        d = freevo.DirItem(d, self, name = title, type = self.media_type)
                         items.append(d)
                     continue
 
                 # normal file
-                for p in MediaPlugin.plugins(self.media_type):
+                for p in freevo.MediaPlugin.plugins(self.media_type):
                     p_items = p.get(self, listing)
                     if title:
                         for i in p_items:
@@ -121,11 +119,10 @@ class MediaMenu(MainMenuItem):
             if media.mountpoint == '/':
                 continue
             listing = kaa.beacon.wrap(media.root, filter='extmap')
-            for p in MediaPlugin.plugins(self.media_type):
+            for p in freevo.MediaPlugin.plugins(self.media_type):
                 items.extend(p.get(self, listing))
             for d in listing.get('beacon:dir'):
-                items.append(DirItem(d, self, name=media.label,
-                                     type = self.media_type))
+                items.append(freevo.DirItem(d, self, name=media.label, type = self.media_type))
         return items
 
 
@@ -134,7 +131,7 @@ class MediaMenu(MainMenuItem):
         Generate items based on plugins
         """
         items = []
-        for p in MainMenuPlugin.plugins(self.media_type):
+        for p in freevo.MainMenuPlugin.plugins(self.media_type):
             items += p.items( self )
         return items
 
@@ -156,7 +153,7 @@ class MediaMenu(MainMenuItem):
         # generate all other items
         items = yield self._get_all_items()
         type = '%s main menu' % self.media_type
-        item_menu = Menu(self.name, items, type = type, reload_func = self.reload)
+        item_menu = freevo.Menu(self.name, items, type = type, reload_func = self.reload)
         item_menu.autoselect = True
         self.item_menu = weakref(item_menu)
         self.get_menustack().pushmenu(item_menu)
@@ -186,7 +183,7 @@ class MediaMenu(MainMenuItem):
         """
         Eventhandler for the media menu
         """
-        if event == EJECT and self.item_menu and \
+        if event == freevo.EJECT and self.item_menu and \
            self.item_menu.selected.info['parent'] == \
            self.item_menu.selected.info['media']:
             self.item_menu.selected.info['media'].eject()
