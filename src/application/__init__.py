@@ -6,7 +6,6 @@
 #
 # Import information. This module depends on the following freevo.ui modules:
 # freevo.ui.event   for the event definitions
-# freevo.ui.menu    for the MenuWidget
 # freevo.ui.gui     for gui callbacks
 #
 # -----------------------------------------------------------------------------
@@ -37,7 +36,7 @@
 __all__ = [ 'Application', 'get_active', 'get_eventmap', 'signals',
             'STATUS_RUNNING', 'STATUS_STOPPING', 'STATUS_STOPPED', 'STATUS_IDLE',
             'CAPABILITY_TOGGLE', 'CAPABILITY_PAUSE', 'CAPABILITY_FULLSCREEN',
-            'MenuWidget', 'TextWindow', 'MessageWindow', 'ConfirmWindow' ]
+            'TextWindow', 'MessageWindow', 'ConfirmWindow' ]
 
 import sys
 
@@ -47,7 +46,6 @@ from base import Application, STATUS_RUNNING, STATUS_STOPPING, \
 
 from handler import handler as _handler
 from window import TextWindow, MessageWindow, ConfirmWindow
-from menuw import MenuWidget
 
 def get_active():
     """

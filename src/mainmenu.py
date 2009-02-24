@@ -84,6 +84,40 @@ class MainMenuPlugin(plugin.Plugin):
         return [ x for x in MainMenuPlugin.plugin_list if x.plugin_media() == subtype ]
 
 
+class MenuWidget(freevo.Application, freevo.MenuStack):
+    """
+    The MenuWidget is an Application for GUI and event handling and also
+    an instance of MenuStack defined in menu.stack.
+    """
+
+    name = 'menu'
+
+    def __init__(self, menu):
+        freevo.Application.__init__(self, 'menu', (freevo.CAPABILITY_TOGGLE,))
+        freevo.MenuStack.__init__(self)
+        self.pushmenu(menu)
+        self.status = freevo.STATUS_RUNNING
+        self.signals['show'].connect_weak(self.refresh, True)
+
+
+    def refresh(self, reload=False):
+        if self.is_locked():
+            return
+        freevo.MenuStack.refresh(self, reload)
+        if self.gui_context.menu != self.menustack[-1]:
+            self.gui_context.previous = self.gui_context.menu
+            self.gui_context.next = self.menustack[-1]
+            self.gui_context.menu = self.menustack[-1]
+            self.gui_context.type = self.menustack[-1].type
+        self.gui_context.item = self.menustack[-1].selected.properties
+
+    def eventhandler(self, event):
+        """
+        Eventhandler for menu control
+        """
+        return freevo.MenuStack.eventhandler(self, event)
+
+
 class MainMenu(freevo.Item):
     """
     This class handles the main menu. It will start the main menu widget
@@ -99,7 +133,7 @@ class MainMenu(freevo.Item):
             items += p.items(self)
         menu = freevo.Menu(_('Freevo Main Menu'), items, type='main')
         menu.autoselect = True
-        self.menuw = freevo.MenuWidget(menu)
+        self.menuw = MenuWidget(menu)
 
     def get_menustack(self):
         """
@@ -107,6 +141,7 @@ class MainMenu(freevo.Item):
         because it is not bound to a menupage.
         """
         return self.menuw
+
 
 # register base class
 plugin.register(MainMenuPlugin)
