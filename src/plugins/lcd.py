@@ -31,7 +31,6 @@ import logging
 import kaa
 import kaa.display
 
-from freevo import plugin
 from .. import core as freevo
 
 log = logging.getLogger()
@@ -66,7 +65,7 @@ layouts = { 2:
             }
 }
 
-class PluginInterface( plugin.Plugin ):
+class PluginInterface( freevo.Plugin ):
     """
     Display context info in LCD using lcdproc daemon.
     """
@@ -75,7 +74,7 @@ class PluginInterface( plugin.Plugin ):
         """
         init the lcd
         """
-        plugin.Plugin.__init__( self )
+        super(PluginInterface, self).__init__()
         self.lcd = kaa.display.LCD()
         self.lcd.signals['connected'].connect_once(self._connected)
         self.running = False

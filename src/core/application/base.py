@@ -39,11 +39,11 @@ import kaa
 from kaa.utils import property
 
 # freevo imports
-from freevo.resources import ResourceHandler
+from ... import gui
+from .. import api as freevo
 
 # application imports
 from handler import handler
-from freevo import view
 
 # get logging object
 log = logging.getLogger()
@@ -71,7 +71,7 @@ class WidgetContext(dict):
         """
         Render the widget
         """
-        self._app = view.show_application(self._name, self._ctx)
+        self._app = gui.show_application(self._name, self._ctx)
         self._changed = False
         kaa.signals['step'].disconnect(self.sync)
 
@@ -102,7 +102,7 @@ class WidgetContext(dict):
         self._ctx[attr] = value
 
 
-class Application(ResourceHandler):
+class Application(freevo.ResourceHandler):
     """
     A basic application
     """

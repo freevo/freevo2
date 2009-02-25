@@ -35,7 +35,6 @@
 __all__ = [ 'MainMenuItem', 'MainMenu', 'MainMenuPlugin' ]
 
 # freevo imports
-from freevo import plugin
 import api as freevo
 
 
@@ -66,7 +65,7 @@ class MainMenuItem(freevo.Item):
         return items
 
 
-class MainMenuPlugin(plugin.Plugin):
+class MainMenuPlugin(freevo.Plugin):
     """
     Plugin class for plugins to add something to the main menu
     """
@@ -144,4 +143,4 @@ class MainMenu(freevo.Item):
 
 
 # register base class
-plugin.register(MainMenuPlugin)
+freevo.register_plugin(MainMenuPlugin)

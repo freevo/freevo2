@@ -51,9 +51,11 @@ for pos, arg in enumerate(sys.argv[1:]):
     libdir = 'lib/python%s.%s/site-packages' % sys.version_info[:2]
     sys.path.insert(0, os.path.join(prefix, libdir))
 
+sys.path.insert(0, 'src')
+sys.path.insert(0, 'src/core')
 # import freevo distribution utils
-from freevo.distribution import setup, VERSION
-from freevo.xmlconfig import xmlconfig
+from distribution import setup, VERSION
+from xmlconfig import xmlconfig
 
 data_files = []
 # add some files to Docs
@@ -74,9 +76,9 @@ if len(sys.argv) > 1 and not '--help' in sys.argv and \
        max(*[os.stat(x)[stat.ST_MTIME] for x in cxml_files ]):
         if not os.path.isdir('build'):
             os.mkdir('build')
-        xmlconfig('build/config.cxml', cxml_files, 'freevo.ui')
+        xmlconfig('build/config.cxml', cxml_files, 'freevo2')
 
-    data_files.append(('share/freevo/config', [ 'build/config.cxml' ]))
+    data_files.append(('share/freevo2/config', [ 'build/config.cxml' ]))
 
 def package_finder(result, dirname, names):
     """
@@ -84,9 +86,7 @@ def package_finder(result, dirname, names):
     """
     for name in names:
         if os.path.splitext(name)[1] == '.py':
-            import_name = dirname.replace('/','.').replace('..src', 'freevo.ui')
-            # special gui handling
-            import_name = import_name.replace('.ui.gui', '.view')
+            import_name = dirname.replace('/','.').replace('..src', 'freevo2')
             result[import_name] = dirname
             return result
     return result

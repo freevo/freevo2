@@ -32,13 +32,13 @@
 import logging
 
 # freevo imports
-from freevo import plugin, view
 from ... import core as freevo
+from ... import gui
 
 # get logging object
 log = logging.getLogger()
 
-class PluginInterface(plugin.Plugin):
+class PluginInterface(freevo.Plugin):
     """
     """
     def plugin_activate(self, level):
@@ -51,18 +51,18 @@ class PluginInterface(plugin.Plugin):
 
     def _app_change(self, app):
         if not self.widget:
-            self.widget = view.show_widget('idlebar')
+            self.widget = gui.show_widget('idlebar')
             for p in IdleBarPlugin.plugins():
                 self.widget.connect(p)
         fullscreen = app.has_capability(freevo.CAPABILITY_FULLSCREEN)
         self.widget.visible = not fullscreen
 
 
-class IdleBarPlugin(plugin.Plugin):
+class IdleBarPlugin(freevo.Plugin):
     def __init__(self):
-        plugin.Plugin.__init__(self)
-        if not plugin.getbyname('idlebar'):
-            plugin.activate('idlebar')
+        super(IdleBarPlugin, self).__init__()
+        if not freevo.get_plugin('idlebar'):
+            freevo.activate_plugin('idlebar')
 
     def plugins():
         """
@@ -73,4 +73,4 @@ class IdleBarPlugin(plugin.Plugin):
     plugins = staticmethod(plugins)
 
 
-plugin.register(IdleBarPlugin)
+freevo.register_plugin(IdleBarPlugin)

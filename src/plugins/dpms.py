@@ -36,16 +36,13 @@ import os
 import kaa.utils
 import kaa
 
-# freevo core imports
-from freevo.plugin import Plugin
-
 # freevo imports
 from .. import core as freevo
 
 # blanking modes
 OFF, AUTO, USER = range(3)
 
-class PluginInterface(Plugin):
+class PluginInterface(freevo.Plugin):
 
     def plugin_activate(self, level):
         if not os.environ.get('DISPLAY') or not kaa.utils.which('xset'):

@@ -40,10 +40,9 @@ import os
 import kaa
 
 # freevo core imports
-import freevo.fxdparser
+import fxdparser
 
 # freevo imports
-from freevo import plugin
 import api as freevo
 
 # get logging object
@@ -104,7 +103,7 @@ class PluginInterface(freevo.MediaPlugin):
         items = []
         for fxd in files:
             try:
-                doc = freevo.fxdparser.Document(fxd.filename)
+                doc = fxdparser.Document(fxd.filename)
                 items.extend(self._parse(doc, parent, listing, media_type))
             except:
                 log.exception("fxd file %s corrupt" % fxd.filename)
@@ -174,4 +173,4 @@ class PluginInterface(freevo.MediaPlugin):
 interface = PluginInterface()
 add_parser = interface.add_parser
 add_fxdparser = interface.add_parser
-plugin.activate(interface, level=0)
+freevo.activate_plugin(interface, level=0)

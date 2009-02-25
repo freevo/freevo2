@@ -29,7 +29,7 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'config', 'plugins', 'signals', 'util' ]
+__all__ = [ 'config', 'plugins', 'signals', 'util', 'ResourceHandler' ]
 
 # python imports
 import os
@@ -38,20 +38,20 @@ import os
 import kaa
 
 # freevo core imports
-import freevo.conf
-import freevo.xmlconfig
+import environ
+from xmlconfig import xmlconfig
 
 # freevo.ui imports
 import event
 
 # expose SHAREDIR to other modules
-SHAREDIR = freevo.conf.SHAREDIR
+SHAREDIR = environ.SHAREDIR
 
 # generate config
-pycfgfile = freevo.conf.datafile('freevo_config.py')
+pycfgfile = environ.datafile('freevo_config.py')
 cfgdir = os.path.join(SHAREDIR, 'config')
 cfgsource = [ os.path.join(cfgdir, f) for f in os.listdir(cfgdir) if f.endswith('.cxml') ]
-freevo.xmlconfig.xmlconfig(pycfgfile, cfgsource, 'freevo.ui')
+xmlconfig(pycfgfile, cfgsource, 'freevo.ui')
 
 # load config structure. This will add 'config', 'plugins' and 'events'
 execfile(pycfgfile)
@@ -63,4 +63,7 @@ signals = {}
 for e in events:
     setattr(event, e, event.Event(e))
 
+from resources import ResourceHandler
+
 import util
+import beacon

@@ -36,8 +36,8 @@ import logging
 
 # freevo imports
 from ... import core as freevo
+from ... import gui
 from .. import KEYBOARD_MAP
-from freevo.view import signals
 from interface import InputPlugin
 
 # get logging object
@@ -53,7 +53,7 @@ class PluginInterface(InputPlugin):
         Active X11 input layer
         """
         InputPlugin.plugin_activate(self, level)
-        signals["key-press"].connect(self.handle)
+        gui.signals["key-press"].connect(self.handle)
         self.keymap = copy.deepcopy(KEYBOARD_MAP)
         for key, mapping in freevo.config.input.keyboardmap.items():
             self.keymap[key] = mapping.upper()

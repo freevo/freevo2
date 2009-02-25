@@ -44,7 +44,6 @@ import kaa.beacon
 from kaa.weakref import weakref
 
 # freevo imports
-from freevo import plugin
 import api as freevo
 
 # get logging object
@@ -505,4 +504,4 @@ class PluginInterface(freevo.MediaPlugin):
 
 # load the MediaPlugin
 interface = PluginInterface()
-plugin.activate(interface)
+freevo.activate_plugin(interface)

@@ -36,7 +36,7 @@ import kaa
 from kaa.utils import property
 
 # freevo imports
-from freevo import view
+from ... import gui
 from .. import api as freevo
 
 # application imports
@@ -55,7 +55,7 @@ class TextWindow(object):
             """
             Render and show the widget
             """
-            self._app = view.show_widget('popup', context=self._ctx)
+            self._app = gui.show_widget('popup', context=self._ctx)
             kaa.signals['step'].disconnect(self.sync)
 
         def hide(self):

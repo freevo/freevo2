@@ -93,11 +93,9 @@ try:
     # now load other modules to check if all requirements are installed
     import pysqlite2
 
-    import freevo
-    import freevo.plugin
-    import freevo.ui
+    import freevo2
 
-    config = freevo.ui.config
+    config = freevo2.config
 
     # load config file
     cfgfile = os.path.expanduser('~/.freevo/freevo2.conf')
@@ -129,7 +127,7 @@ try:
 
     # plugins is a list of known plugins
     num_plugins = 0
-    for p in freevo.ui.plugins:
+    for p in freevo2.plugins:
         c = config
         for attr in p.split('.'):
             c = getattr(c, attr)
@@ -137,9 +135,9 @@ try:
             p = p.replace('plugin.', '').replace('..', '.')
             num_plugins += 1
             if isinstance(c.activate, bool):
-                freevo.plugin.activate(p)
+                freevo2.activate_plugin(p)
             else:
-                freevo.plugin.activate(p, level=c.activate)
+                freevo2.activate_plugin(p, level=c.activate)
 
 except ImportError, i:
     print 'ImportError: %s' % i
@@ -202,8 +200,7 @@ except ImportError, i:
 #     os.execvp('xinit', [ 'xinit', sys.argv[0], '-force-fs',  '--', ':'+str(server_num) ])
 
 # freevo imports
-from freevo import beacon
-import freevo.view
+import freevo2.gui
 
 #
 # Freevo main function
@@ -221,20 +218,20 @@ import freevo.view
 
 try:
     kaa.candy.config.performance_debug = True
-    freevo.view.configure(config, freevo.conf.SHAREDIR)
+    freevo2.gui.configure(config, freevo2.core.environ.SHAREDIR)
 
     # Fire up splashscreen and load the plugins
-    progress = freevo.view.show_application('splash').get_widget('plugins')
+    progress = freevo2.gui.show_application('splash').get_widget('plugins')
     progress.max = num_plugins-1
 
     # load plugins
-    freevo.plugin.init(freevo.ui, progress.inc)
+    freevo2.init_plugins(freevo2, progress.inc)
 
     # prepare again, now that all plugins are loaded
-    freevo.view.load_theme()
+    freevo2.gui.load_theme()
 
     # start menu
-    freevo.ui.MainMenu()
+    freevo2.MainMenu()
 
     # start main loop
     kaa.main.run()

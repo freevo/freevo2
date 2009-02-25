@@ -37,7 +37,6 @@ import copy
 import logging
 
 # freevo imports
-from freevo import plugin
 from ... import core as freevo
 from .. import EVENTMAP as global_map
 
@@ -47,7 +46,7 @@ log = logging.getLogger('input')
 # get config event map
 config_map = freevo.config.input.eventmap
 
-class InputPlugin(plugin.Plugin):
+class InputPlugin(freevo.Plugin):
     """
     Plugin for input devices such as keyboard and lirc. A plugin of this
     type should be in input/plugins

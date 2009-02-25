@@ -39,13 +39,13 @@ import logging
 import kaa
 
 # freevo imports
-from freevo import plugin, view
 from .. import core as freevo
+from .. import gui
 
 # get logging object
 log = logging.getLogger()
 
-class PluginInterface(plugin.Plugin):
+class PluginInterface(freevo.Plugin):
     """
     OSD plugin.
 
@@ -67,7 +67,7 @@ class PluginInterface(plugin.Plugin):
         """
         if self.widget is not None:
             self.widget.hide()
-        self.widget = view.show_widget('osd')
+        self.widget = gui.show_widget('osd')
         self.widget.message = event.arg
         self.widget.show()
         # Start hide timer for 2 seconds.

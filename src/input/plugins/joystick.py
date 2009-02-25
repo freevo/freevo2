@@ -42,14 +42,13 @@ from time import sleep
 import kaa
 
 # freevo imports
-from freevo.resources import ResourceHandler
 from ... import core as freevo
 from interface import InputPlugin
 
 import logging
 log = logging.getLogger('input')
 
-class PluginInterface(InputPlugin, ResourceHandler):
+class PluginInterface(InputPlugin, freevo.ResourceHandler):
 
     # Hardcoded for now to make it work at the CeBIT. This needs to
     # be a config variable.

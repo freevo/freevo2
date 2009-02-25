@@ -32,9 +32,9 @@
 __all__ = [ 'ItemPlugin', 'MediaPlugin' ]
 
 # freevo imports
-from freevo import plugin
+from .. import api as freevo
 
-class ItemPlugin(plugin.Plugin):
+class ItemPlugin(freevo.Plugin):
     """
     Plugin class to add something to the item action list
 
@@ -69,7 +69,7 @@ class ItemPlugin(plugin.Plugin):
 
 
 
-class MediaPlugin(plugin.Plugin):
+class MediaPlugin(freevo.Plugin):
     """
     Plugin class for medias handled in a directory/playlist.
     self.possible_media_types is a list of display types where this
@@ -118,5 +118,5 @@ class MediaPlugin(plugin.Plugin):
 
 
 # register base class
-plugin.register(MediaPlugin)
-plugin.register(ItemPlugin)
+freevo.register_plugin(MediaPlugin)
+freevo.register_plugin(ItemPlugin)
