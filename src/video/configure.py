@@ -42,7 +42,7 @@ __all__ = [ 'get_items' ]
 import kaa.popcorn
 
 # freevo imports
-from .. import api as freevo
+from .. import core as freevo
 
 def play_movie(item, **kwargs):
     """

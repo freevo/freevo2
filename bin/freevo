@@ -205,10 +205,6 @@ except ImportError, i:
 from freevo import beacon
 import freevo.view
 
-# load the fxditem to make sure it's the first in the
-# mimetypes list
-import freevo.ui.fxditem
-
 #
 # Freevo main function
 #
@@ -238,8 +234,7 @@ try:
     freevo.view.load_theme()
 
     # start menu
-    from freevo.ui.mainmenu import MainMenu
-    MainMenu()
+    freevo.ui.MainMenu()
 
     # start main loop
     kaa.main.run()

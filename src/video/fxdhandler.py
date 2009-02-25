@@ -68,7 +68,7 @@ import logging
 import kaa
 
 # freevo imports
-from .. import api as freevo
+from .. import core as freevo
 from videoitem import VideoItem
 
 # get logging object

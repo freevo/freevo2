@@ -38,7 +38,7 @@ __all__ = [ 'ImageItem' ]
 import time
 
 # freevo imports
-from .. import api as freevo
+from .. import core as freevo
 from viewer import viewer
 
 class ImageItem(freevo.MediaItem):

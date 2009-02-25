@@ -31,9 +31,9 @@
 
 import logging
 
+# freevo imports
 from freevo import plugin, view
-# FIXME: api import failure
-from ... import application
+from ... import core as freevo
 
 # get logging object
 log = logging.getLogger()
@@ -46,7 +46,7 @@ class PluginInterface(plugin.Plugin):
         init the idlebar
         """
         # register for signals
-        application.signals['changed'].connect(self._app_change)
+        freevo.signals['application-change'].connect(self._app_change)
         self.widget = None
 
     def _app_change(self, app):
@@ -54,7 +54,7 @@ class PluginInterface(plugin.Plugin):
             self.widget = view.show_widget('idlebar')
             for p in IdleBarPlugin.plugins():
                 self.widget.connect(p)
-        fullscreen = app.has_capability(application.CAPABILITY_FULLSCREEN)
+        fullscreen = app.has_capability(freevo.CAPABILITY_FULLSCREEN)
         self.widget.visible = not fullscreen
 
 

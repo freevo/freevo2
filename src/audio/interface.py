@@ -45,7 +45,7 @@ import re
 import stat
 
 # Freevo imports
-from .. import api as freevo
+from .. import core as freevo
 
 # AudioItem
 from audioitem import AudioItem

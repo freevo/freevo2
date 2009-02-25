@@ -39,7 +39,7 @@ import kaa
 import kaa.beacon
 
 # freevo imports
-from ... import api as freevo
+from ... import core as freevo
 from .. import ImageItem
 
 class ApodMainMenuItem(freevo.Item):

@@ -40,9 +40,7 @@ import kaa
 from freevo.plugin import Plugin
 
 # freevo imports
-from .. import api as freevo
-# FIXME: api import failure
-from ..application import signals as app_signals
+from .. import core as freevo
 
 # blanking modes
 OFF, AUTO, USER = range(3)
@@ -64,7 +62,7 @@ class PluginInterface(Plugin):
         # turn on dpms on shutdown
         kaa.main.signals['shutdown'].connect(self.xset, '+dpms')
         # register to application changes
-        app_signals['changed'].connect(self.application_changed)
+        freevo.signals['application-change'].connect(self.application_changed)
         # turn off dpms
         self.xset('-dpms s off')
 

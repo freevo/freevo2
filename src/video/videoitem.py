@@ -46,7 +46,7 @@ import time
 import kaa
 
 # freevo imports
-from .. import api as freevo
+from .. import core as freevo
 
 # video imports
 import configure

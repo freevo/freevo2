@@ -32,7 +32,7 @@
 import logging
 
 # freevo imports
-from .. import api as freevo
+from .. import core as freevo
 
 # get logging object
 log = logging.getLogger()

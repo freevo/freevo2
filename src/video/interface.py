@@ -41,7 +41,7 @@ import copy
 import string
 
 # freevo imports
-from .. import api as freevo
+from .. import core as freevo
 
 # video imports
 from videoitem import VideoItem

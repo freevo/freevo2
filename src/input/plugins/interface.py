@@ -38,7 +38,7 @@ import logging
 
 # freevo imports
 from freevo import plugin
-from ... import api as freevo
+from ... import core as freevo
 from .. import EVENTMAP as global_map
 
 # get logging object

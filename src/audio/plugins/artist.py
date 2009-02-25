@@ -40,7 +40,7 @@ import kaa
 import kaa.beacon
 
 # Freevo imports
-from ... import api as freevo
+from ... import core as freevo
 
 
 class AlbumItem(freevo.Item):

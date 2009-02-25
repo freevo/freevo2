@@ -58,7 +58,7 @@ import os
 import kaa
 
 # Freevo imports
-from .. import api as freevo
+from .. import core as freevo
 
 # ImageItem
 from imageitem import ImageItem

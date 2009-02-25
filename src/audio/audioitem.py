@@ -40,7 +40,7 @@ import logging
 import time
 
 # freevo imports
-from .. import api as freevo
+from .. import core as freevo
 
 # audio player
 import player as audioplayer

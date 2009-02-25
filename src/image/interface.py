@@ -40,7 +40,7 @@
 __all__ = [ 'PluginInterface' ]
 
 # freevo imports
-from .. import api as freevo
+from .. import core as freevo
 
 # ImageItem
 from imageitem import ImageItem

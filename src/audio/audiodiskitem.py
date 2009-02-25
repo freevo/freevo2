@@ -41,7 +41,7 @@ import logging
 import kaa
 
 # Freevo imports
-from .. import api as freevo
+from .. import core as freevo
 from audioitem import AudioItem
 
 # get logging object

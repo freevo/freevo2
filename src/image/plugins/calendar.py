@@ -40,7 +40,7 @@ import kaa
 import kaa.beacon
 
 # freevo imports
-from ... import api as freevo
+from ... import core as freevo
 
 
 class BeaconQueryItem(freevo.Item):

@@ -1,14 +1,16 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# lirc.py - A lirc input plugin for Freevo.
+# application - Application Submodule
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# This file handles the lirc input device and maps it to freevo events.
+# Import information. This module depends on the following freevo.ui modules:
+# freevo.ui.event   for the event definitions
+# freevo.ui.gui     for gui callbacks
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2007 Krister Lagerstrom, Dirk Meyer, et al.
+# Copyright (C) 2005-2007 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -31,15 +33,31 @@
 #
 # -----------------------------------------------------------------------------
 
-import kaa.input.lirc
-from ... import core as freevo
-from interface import InputPlugin
+__all__ = [ 'Application', 'get_application', 'get_eventmap', 'signals',
+            'STATUS_RUNNING', 'STATUS_STOPPING', 'STATUS_STOPPED', 'STATUS_IDLE',
+            'CAPABILITY_TOGGLE', 'CAPABILITY_PAUSE', 'CAPABILITY_FULLSCREEN',
+            'TextWindow', 'MessageWindow', 'ConfirmWindow' ]
 
-class PluginInterface(InputPlugin):
+import sys
+
+from base import Application, STATUS_RUNNING, STATUS_STOPPING, \
+     STATUS_STOPPED, STATUS_IDLE, CAPABILITY_TOGGLE, CAPABILITY_PAUSE, \
+     CAPABILITY_FULLSCREEN
+
+from handler import handler as _handler
+from window import TextWindow, MessageWindow, ConfirmWindow
+
+def get_application():
     """
-    Input plugin for lirc
+    Get active application.
     """
-    def __init__(self):
-        InputPlugin.__init__(self)
-        kaa.input.lirc.init('freevo', freevo.config.input.plugin.lirc.lircrc)
-        kaa.input.lirc.signal.connect(self.post_key)
+    return _handler.get_active()
+
+def get_eventmap():
+    """
+    Return current eventmap.
+    """
+    return _handler.eventmap
+
+# signals defined by the application base code
+signals = _handler.signals

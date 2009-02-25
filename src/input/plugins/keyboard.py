@@ -35,7 +35,7 @@ import copy
 import logging
 
 # freevo imports
-from ... import api as freevo
+from ... import core as freevo
 from .. import KEYBOARD_MAP
 from freevo.view import signals
 from interface import InputPlugin

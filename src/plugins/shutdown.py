@@ -38,7 +38,7 @@ import os
 import kaa
 
 # freevo imports
-from .. import api as freevo
+from .. import core as freevo
 
 # get shutdown config
 config = freevo.config.plugin.shutdown

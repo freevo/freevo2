@@ -26,18 +26,15 @@
 # ----------------------------------------------------------------------- */
 
 import re
+import logging
 
 import kaa
+import kaa.display
 
 from freevo import plugin
-from .. import api as freevo
-# FIXME: api import failure
-from .. import application
+from .. import core as freevo
 
-import logging
 log = logging.getLogger()
-
-import kaa.display
 
 varreg = re.compile('%%.*?%%')
 
@@ -115,8 +112,8 @@ class PluginInterface( plugin.Plugin ):
         self.columns = c
 
         kaa.EventHandler(self.eventhandler).register()
-        application.signals['changed'].connect(self.set_application)
-        self.set_application(application.get_active())
+        freevo.signals['application-change'].connect(self.set_application)
+        self.set_application(freevo.get_application())
 
 
     def set_application(self, app):

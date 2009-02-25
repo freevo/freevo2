@@ -43,7 +43,7 @@ import kaa
 
 # freevo imports
 from freevo.resources import ResourceHandler
-from ... import api as freevo
+from ... import core as freevo
 from interface import InputPlugin
 
 import logging

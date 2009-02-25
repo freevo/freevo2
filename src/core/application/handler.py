@@ -77,7 +77,7 @@ class Handler(object):
         kaa.EventHandler(self.handle).register()
 
         # Signals
-        self.signals = { 'changed': kaa.Signal() }
+        self.signals = { 'application-change': kaa.Signal() }
 
 
     def set_focus(self):
@@ -96,7 +96,7 @@ class Handler(object):
             # same app as before
             return
         log.info('switch application from %s to %s' % (self.current, app))
-        self.signals['changed'].emit(app)
+        self.signals['application-change'].emit(app)
         app.signals['show'].emit()
         app.gui_context.show()
         if self.current:

@@ -1,6 +1,6 @@
 __all__ = [ 'EVENTMAP' ]
 
-from .. import api as freevo
+from .. import core as freevo
 
 #
 # Default key-event map

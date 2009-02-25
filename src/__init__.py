@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2007 Dirk Meyer, et al.
+# Copyright (C) 2007-2009 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -29,16 +29,4 @@
 #
 # -----------------------------------------------------------------------------
 
-import api as __api__
-import event as __event__
-for obj in dir(__event__):
-    if obj.upper() == obj or obj == 'Event':
-        __api__.__all__.append(obj)
-        setattr(__api__, obj, getattr(__event__, obj))
-for module in ('menu', 'application', 'fxditem', 'playlist', 'directory', 'mainmenu', 'mediamenu'):
-    exec('import %s as module' % module)
-    for obj in module.__all__:
-        __api__.__all__.append(obj)
-        setattr(__api__, obj, getattr(module, obj))
-from api import *
-__all__ = __api__.__all__
+from core import *
