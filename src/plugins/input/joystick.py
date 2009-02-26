@@ -43,7 +43,7 @@ import kaa
 
 # freevo imports
 from ... import core as freevo
-from interface import InputPlugin
+from plugin import InputPlugin
 
 import logging
 log = logging.getLogger('input')

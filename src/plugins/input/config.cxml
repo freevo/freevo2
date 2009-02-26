@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<config name="input">
+    <desc>
+        This section is used for mapping keys and buttons from input devices
+        such as keyboard and remote control to Freevo events. The mapping is
+        done in two steps: the first step converts the key or remote button to
+        a unique name in Freevo and the second step maps that key based on the
+        current application inside Freevo to an event.
+        For remote control using lirc the first step is done with the lirrc
+        file mapping the codes from /etc/lird.conf to unique names. For
+        keyboard control some basic mappings are defined in input/keymap.py and
+        this can be extented with the input.keyboardmap variable.
+        The second mapping is done in the eventmap group in this config.
+    </desc>
+
+    <dict name="eventmap" type="str">
+        <desc>
+            Change the event mapping for applications. The syntax is
+            input.eventmap[application][key] = event [ options].
+            As example, to use the key 1 to toggle deinterlacing in the video
+            and 2 to seek forward 60 seconds player set
+            input.eventmap[video][1] = VIDEO_TOGGLE_INTERLACE
+            input.eventmap[video][2] = SEEK 60
+        </desc>
+        <dict type="str">
+            <var type="str"/>
+        </dict>
+    </dict>
+
+    <group name="plugin">
+
+        <group name="keyboard" plugin="10">
+            <desc>Keyboard usage</desc>
+    	
+	    <dict name="mapping" type="str">
+	        <desc>Keyboard mapping</desc>
+		<var type="str"/>
+	    </dict>
+    
+	</group>
+    
+        <group name="lirc" plugin="false">
+            <desc>
+                Support remote control using the lirc daemon.
+            </desc>
+            <var name="lircrc" default="/etc/freevo/lircrc">
+                <desc>
+                    Location of the freevo lircrc file. This file needs to map the
+                    lirc events into Freevo event names.
+                    begin
+                        prog = freevo
+                        button = select
+                        config = SELECT
+                    end
+                </desc>
+            </var>
+            <code>
+                if os.path.isfile(os.path.expanduser('~/.freevo/lircrc')):
+                    lircrc = os.path.expanduser('~/.freevo/lircrc')
+                    set_default(config.input.plugin.lirc.lircrc, lircrc)
+                if os.path.isfile(config.input.plugin.lirc.lircrc):
+                    set_default(config.input.plugin.lirc.activate, True)
+            </code>
+        </group>
+    
+        <group name="joystick" plugin="false">
+            <desc>
+                Joystick plugin.
+            </desc>
+            <var name="device" type="str">
+                <desc>The Joystick input device for example /dev/input/js0</desc>
+            </var>
+            <list name="events">
+                <var name="event" type="str">
+                    <desc>The event to send on this button/axis event. For
+                    example EXIT, SELECT, UP, DOWN,...</desc>
+                </var>
+                <var name="input" type="str">
+                    <desc>The input that raises the event. Example:
+                          button 1 (for the first button no the joystick)
+                          button 2 ...
+                          up 0 (the first axis up)
+                          down 1 (the second axis down)
+                    </desc>
+                </var>
+            </list>
+        </group>
+    </group>
+
+</config>

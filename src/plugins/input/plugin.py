@@ -1,18 +1,17 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# keyboard.py - keyboard input plugin
+# interface.py - Base class for input plugins
 # -----------------------------------------------------------------------------
 # $Id$
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2005-2007 Dirk Meyer, et al.
 #
-# First Edition: Andreas Büsching <crunchy@tzi.de>
+# First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
 # Please see the file AUTHORS for a complete list of authors.
-# Some of the work from Andreas Büsching is moved into kaa.display
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,44 +29,43 @@
 #
 # -----------------------------------------------------------------------------
 
+__all__ = [ 'InputPlugin' ]
+
+
 # python imports
 import copy
 import logging
 
 # freevo imports
 from ... import core as freevo
-from ... import gui
-from .. import KEYBOARD_MAP
-from interface import InputPlugin
+from eventmap import EVENTMAP
 
 # get logging object
 log = logging.getLogger('input')
 
-class PluginInterface(InputPlugin):
+# get config event map
+config_map = freevo.config.input.eventmap
+
+class InputPlugin(freevo.Plugin):
     """
-    Plugin for x11 keys.
+    Plugin for input devices such as keyboard and lirc. A plugin of this
+    type should be in input/plugins
     """
 
-    def plugin_activate(self, level):
+    def post_key(self, key):
         """
-        Active X11 input layer
+        Send a keyboard event to the event queue
         """
-        InputPlugin.plugin_activate(self, level)
-        gui.signals["key-press"].connect(self.handle)
-        self.keymap = copy.deepcopy(KEYBOARD_MAP)
-        for key, mapping in freevo.config.input.keyboardmap.items():
-            self.keymap[key] = mapping.upper()
+        if not key:
+            return None
 
+        for app in (freevo.get_eventmap(), 'global'):
+            # check config file event mapping
+            if app in config_map and key in config_map[app]:
+                event = freevo.Event(*config_map[app][key].split(' '))
+                return event.post(event_source='user')
+            # check global pre-defined event mapping
+            if app in EVENTMAP and key in EVENTMAP[app]:
+                return EVENTMAP[app][key].post(event_source='user')
 
-    def handle(self, keycode):
-        """
-        Callback to handle the x11 keys.
-        """
-        if isinstance(keycode, int):
-            log.debug('Bad keycode %s' % keycode)
-            return True
-        if self.keymap.has_key(keycode.upper()):
-            self.post_key( self.keymap[keycode.upper()] )
-        else:
-            log.debug('No mapping for key %s' % keycode.upper())
-        return True
+        log.warning('no event mapping for key %s in %s' % (key, freevo.get_eventmap()))

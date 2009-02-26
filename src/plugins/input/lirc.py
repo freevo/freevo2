@@ -33,7 +33,7 @@
 
 import kaa.input.lirc
 from ... import core as freevo
-from interface import InputPlugin
+from plugin import InputPlugin
 
 class PluginInterface(InputPlugin):
     """
