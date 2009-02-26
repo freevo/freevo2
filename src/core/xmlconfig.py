@@ -64,24 +64,18 @@ def xmlconfig(configfile, sources, package):
         if not m.getAttribute('name'):
             doc = m.parentNode
             continue
-        if not m.getAttribute('name').endswith('plugin'):
-            modules.append(m)
-            continue
-        # list of plugins
-        for plugin in m.childNodes:
-            if plugin.nodeName == 'group':
-                name = '%s.%s' % (m.getAttribute('name'), plugin.getAttribute('name'))
-                plugin.setAttribute('name', name)
-                modules.append(plugin)
+        modules.append(m)
 
     def valfunc(node):
         name = node.getAttribute('name')
         if name.startswith('plugin'):
+            return '3%s' % name
+        if 'plugin' in name:
             return '2%s' % name
-        if node.hasAttribute('plugin') or '.plugin.' in name:
+        if node.hasAttribute('plugin'):
             return '1%s' % name
         if 'gui' in name:
-            return '3%s' % name
+            return '4%s' % name
         return '0%s' % name
 
     # sort modules somehow
@@ -94,11 +88,9 @@ def xmlconfig(configfile, sources, package):
     def get_parent(parent, name, position=''):
         for child in parent.childNodes:
             if child.nodeName == 'group':
-                # print 'have', child.getattr('name')
                 if position + child.nodeName == name:
                     raise RuntimeError('bad tree')
                 if name.startswith(position + child.getAttribute('name')):
-                    # print 'deeper'
                     position = position + child.getAttribute('name') + '.'
                     return get_parent(child, name, position)
         for name in name[len(position):].strip(' .').split('.'):
@@ -110,18 +102,29 @@ def xmlconfig(configfile, sources, package):
 
     for m in modules:
         parent = get_parent(doc.firstChild, m.getAttribute('name'))
-        if m.hasAttribute('plugin'):
-            node = doc.createElement('var')
-            node.setAttribute('name', 'activate')
-            node.setAttribute('default', m.getAttribute('plugin'))
-            parent.appendChild(node)
-            parent.setAttribute('is_plugin', 'yes')
+        if m.getAttribute('plugin'):
+            parent.setAttribute('plugin', m.getAttribute('plugin'))
         for child in m.childNodes[:]:
             parent.appendChild(child)
 
     if configfile.endswith('.cxml'):
         return open(configfile, 'w').write(doc.toxml())
-    
+
+    plugins = []
+    def find_plugins(node, position=''):
+        for child in node.childNodes:
+            if not child.nodeName == 'group':
+                continue
+            if child.hasAttribute('plugin'):
+                node = doc.createElement('var')
+                node.setAttribute('name', 'activate')
+                node.setAttribute('default', child.getAttribute('plugin'))
+                child.insertBefore(node, child.firstChild)
+                child.setAttribute('is_plugin', 'yes')
+                plugins.append("%s%s" % (position, child.getAttribute('name')))
+            find_plugins(child, position + child.getAttribute('name') + '.')
+    find_plugins(doc.firstChild)
+
     out = open(configfile, 'w')
     out.write('# -*- coding: iso-8859-1 -*-\n')
     out.write('# -*- hash: %s -*-\n' % hashkey)
@@ -130,16 +133,9 @@ def xmlconfig(configfile, sources, package):
     out.write('config = ')
     kaa.distribution.xmlconfig.Parser(package).parse(doc.firstChild, out)
 
-    def find_plugins(node, position=''):
-        for child in node.childNodes:
-            if not child.nodeName == 'group':
-                continue
-            if child.hasAttribute('is_plugin'):
-                name = "%s%s" % (position, child.getAttribute('name'))
-                out.write('\'%s\', ' % name.strip('. ,'))
-            find_plugins(child, position + child.getAttribute('name') + '.')
     out.write('\nplugins = [')
-    find_plugins(doc.firstChild)
+    for plugin in plugins:
+        out.write('\'%s\', ' % plugin.strip('. ,'))
     out.write(']\n')
 
     def find_events(node):
@@ -151,7 +147,7 @@ def xmlconfig(configfile, sources, package):
     out.write('\nevents = [')
     find_events(doc.firstChild)
     out.write(']\n')
-    
+
     def find_extern(node):
         for child in node.childNodes:
             if child.nodeName == 'extern':
@@ -161,7 +157,7 @@ def xmlconfig(configfile, sources, package):
             if child.nodeName == 'group':
                 find_extern(child)
     find_extern(doc.firstChild)
-    
+
     def find_code(node):
         for child in node.childNodes:
             if child.nodeName == 'code':
