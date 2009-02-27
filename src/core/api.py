@@ -29,27 +29,32 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'config', 'plugins', 'signals', 'util', 'ResourceHandler' ]
+__all__ = [ 'FREEVO_SHARE_DIR', 'FREEVO_DATA_DIR', 'config', 'Plugin', 'init_plugins',
+            'activate_plugin', 'register_plugin', 'get_plugin', 'num_plugins', 'signals',
+            'util', 'ResourceHandler' ]
 
 # python imports
 import os
 
-# kaa imports
-import kaa
-
 # freevo core imports
-import environ
 from xmlconfig import xmlconfig
 
-# freevo.ui imports
+# freevo.core imports
 import event
+from plugin import *
 
-# expose SHAREDIR to other modules
-SHAREDIR = environ.SHAREDIR
+# directory variables
+FREEVO_INSTALL_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../../../..'))
+FREEVO_SHARE_DIR = os.path.abspath(os.path.join(FREEVO_INSTALL_DIR, 'share/freevo2'))
+FREEVO_DATA_DIR = '/var/lib/freevo'
+if os.getuid():
+    FREEVO_DATA_DIR = os.path.expanduser('~/.freevo/data')
+if not os.path.isdir(FREEVO_DATA_DIR):
+    os.makedirs(FREEVO_DATA_DIR)
 
 # generate config
-pycfgfile = environ.datafile('freevo_config.py')
-cfgdir = os.path.join(SHAREDIR, 'config')
+pycfgfile = os.path.join(FREEVO_DATA_DIR, 'freevo_config.py')
+cfgdir = os.path.join(FREEVO_SHARE_DIR, 'config')
 cfgsource = [ os.path.join(cfgdir, f) for f in os.listdir(cfgdir) if f.endswith('.cxml') ]
 xmlconfig(pycfgfile, cfgsource, 'freevo.ui')
 
@@ -62,6 +67,21 @@ signals = {}
 # add events defined in xml config to event.py.
 for e in events:
     setattr(event, e, event.Event(e))
+
+# plugins is a list of known plugins loaded from pycfgfile
+# activate all of them
+num_plugins = 0
+for plugin in plugins:
+    group = config
+    for attr in plugin.split('.'):
+        group = getattr(group, attr)
+    if group.activate:
+        plugin = plugin.replace('plugin.', '').replace('..', '.')
+        num_plugins += 1
+        if isinstance(group.activate, bool):
+            activate_plugin(plugin)
+        else:
+            activate_plugin(plugin, level=group.activate)
 
 from resources import ResourceHandler
 

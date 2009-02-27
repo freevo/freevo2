@@ -1,25 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# main.py - This is the Freevo main application code
+# freevo - This is the Freevo main application code
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# This file is the python start file for Freevo. It handles the init phase like
-# checking the python modules, loading the plugins and starting the main menu.
+# This file is the python start file for Freevo. It handles the init
+# phase like checking the python modules, loading the plugins and
+# starting the main menu.
 #
-# It also contains the splashscreen.
-#
-# TODO: o add background mode
-#       o add --start, --stop and --restart
+# -----------------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2009 Dirk Meyer, et al.
 #
 # First edition: Krister Lagerstrom <krister-freevo@kmlager.com>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
-# -----------------------------------------------------------------------------
-# Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
-# Please see the file doc/CREDITS for a complete list of authors.
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,21 +36,38 @@
 
 # python imports
 import os
-import sys, time
-import traceback
-import signal
-
+import sys
+import gc
 import logging
 import logging.config
+import logging.handlers
+import gettext
 
 # get logging object
 log = logging.getLogger()
+
+# set basic env variables
+if not os.environ.has_key('HOME') or not os.environ['HOME'] or os.environ['HOME'] == '/':
+    os.environ['HOME'] = '/root'
+if not os.environ.has_key('USER') or not os.environ['USER']:
+    os.environ['USER'] = 'root'
 
 # insert freevo path information
 __site__ = '../lib/python%s.%s/site-packages' % sys.version_info[:2]
 __site__ = os.path.abspath(os.path.join(os.path.dirname(__file__), __site__))
 if not __site__ in sys.path:
     sys.path.insert(0, __site__)
+
+# if len(sys.argv) == 2 and sys.argv[1] in ('-fs', '--fullscreen', '-f'):
+#     # start X server and run freevo, ignore everything else for now
+#     server_num = 0
+#     while 1:
+#         if not os.path.exists('/tmp/.X11-unix/X' + str(server_num)):
+#             break
+#         server_num += 1
+#     sys.stdin.close()
+#     os.execvp('xinit', [ 'xinit', sys.argv[0], '-force-fs',  '--', ':'+str(server_num) ])
+#
 
 #
 # kaa checking
@@ -75,170 +89,107 @@ except ImportError:
     print
     sys.exit(1)
 
+#
+# i18n support
+#
 try:
-    # i18n support
-
     # First load the xml module. It's not needed here but it will mess
     # up with the domain we set (set it from freevo 4Suite). By loading it
     # first, Freevo will override the 4Suite setting to freevo
-    try:
-        from xml.utils import qp_xml
-        from xml.dom import minidom
-    except ImportError:
-        pass
+    from xml.dom import minidom
+    from xml.utils import qp_xml
+except ImportError:
+    pass
+i18npath = os.path.abspath(os.path.join(os.path.dirname(__file__), '../share/locale'))
+i18n = gettext.translation('freevo', i18npath, fallback=True)
+i18n.install(unicode=True)
 
-    import kaa.display
-    import kaa.candy
+#
+# Set up logging module
+#
+logger = logging.getLogger()
 
-    # now load other modules to check if all requirements are installed
-    import pysqlite2
+# remove handler, we want to set the look and avoid duplicate handlers
+for l in logger.handlers[:]:
+    logger.removeHandler(l)
 
-    import freevo2
+# set stdout logging
+formatter = logging.Formatter('%(levelname)s %(module)s(%(lineno)s): %(message)s')
+handler = logging.StreamHandler()
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
-    config = freevo2.config
+# set file logger
+logdir = '/var/log/freevo'
+if os.getuid():
+    logdir = os.path.expanduser('~/.freevo/log')
+if not os.path.isdir(logdir):
+    os.makedirs(logdir)
+formatter = logging.Formatter('%(asctime)s %(levelname)-8s [%(name)6s] %(filename)s %(lineno)s: %(message)s')
+handler = logging.handlers.RotatingFileHandler('%s/freevo' % logdir, maxBytes=1000000, backupCount=2)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
-    # load config file
-    cfgfile = os.path.expanduser('~/.freevo/freevo2.conf')
-    if '-c' in sys.argv:
-        cfgfile = sys.argv[sys.argv.index('-c')+1]
+# set log level
+logger.setLevel(logging.WARNING)
 
-    if not os.path.isfile(cfgfile):
-        print '%s does not exist' % cfgfile
-        print 'The file is now created and Freevo will stop so you can'
-        print 'adjust the config settings.'
-        print 'You should recheck freevo2.conf after every svn update. Use'
-        print '\'freevo setup\' to rebuild the file without starting freevo.'
-        print 'Your settings will be saved when the config file is rewritten.'
-        config.load(cfgfile, create=True)
-        sys.exit(0)
+#
+# Load freevo modules and config file
+#
+import freevo2.gui
+import freevo2.core
 
-    config.load(cfgfile, create=True)
-    if len(sys.argv) > 1 and sys.argv[1] in ('setup', '--setup', 'config', '--config'):
-        print 'wrote %s' % cfgfile
-        sys.exit(0)
+cfgfile = os.path.expanduser('~/.freevo/freevo2.conf')
+if '-c' in sys.argv:
+    cfgfile = sys.argv[sys.argv.index('-c')+1]
 
-    if config.debug:
-        # FIXME: make it possible to set debug for specific parts.
-        # Maybe use an environment variable and hock it into freevo.core
-        # or kaa.base.
-        logging.getLogger().setLevel(logging.INFO)
-
-    config.watch()
-
-    # plugins is a list of known plugins
-    num_plugins = 0
-    for p in freevo2.plugins:
-        c = config
-        for attr in p.split('.'):
-            c = getattr(c, attr)
-        if c.activate:
-            p = p.replace('plugin.', '').replace('..', '.')
-            num_plugins += 1
-            if isinstance(c.activate, bool):
-                freevo2.activate_plugin(p)
-            else:
-                freevo2.activate_plugin(p, level=c.activate)
-
-except ImportError, i:
-    print 'ImportError: %s' % i
-    print 'Not all requirements of Freevo are installed on your system.'
-    print 'Please check the INSTALL file for more informations.'
-    print
+if not os.path.isfile(cfgfile):
+    print '%s does not exist' % cfgfile
+    print 'The file is now created and Freevo will stop so you can'
+    print 'adjust the config settings.'
+    print 'You should recheck freevo2.conf after every svn update. Use'
+    print '\'freevo setup\' to rebuild the file without starting freevo.'
+    print 'Your settings will be saved when the config file is rewritten.'
+    freevo2.core.config.load(cfgfile, create=True)
     sys.exit(0)
 
+freevo2.core.config.load(cfgfile, create=True)
+if len(sys.argv) > 1 and sys.argv[1] in ('setup', '--setup', 'config', '--config'):
+    print 'wrote %s' % cfgfile
+    sys.exit(0)
 
-#
-# daemon mode
-#
-# start freevo with --daemon and it will only start a small helper that
-# will wait for an ir command to start freevo
-#
+if freevo2.core.config.debug:
+    # FIXME: make it possible to set debug for specific parts.  Maybe
+    # use an environment variable and hock it into freevo2.core or
+    # kaa.base.
+    logging.getLogger().setLevel(logging.INFO)
 
-# CANDY-FIXME
-# if len(sys.argv) == 2 and sys.argv[1] in ('-daemon', '--daemon', '-d'):
-#     from kaa.input import lirc
+freevo2.core.config.watch()
 
-#     def handle_key(key):
-#         if not key in ( 'EXIT', 'POWER' ):
-#             return True
-#         lirc.stop()
-#         options = ''
-#         if config.gui.display.engine.lower() in ( 'imlib2', ) and not \
-#                (os.environ.has_key('DISPLAY') and os.environ['DISPLAY']):
-#             options = '-fs'
-#         log.info('start freevo %s', options)
-#         os.system('%s %s >/dev/null 2>/dev/null' % (sys.argv[0], options))
-#         lirc.init('freevo', config.input.plugin.lirc.lircrc)
-#         log.info('freevo stopped')
-#         return True
+# Configure gui
+kaa.candy.config.performance_debug = True
+freevo2.gui.configure(freevo2.core.config, freevo2.core.FREEVO_SHARE_DIR)
 
-#     if not lirc.init('freevo', config.input.plugin.lirc.lircrc):
-#         log.error('Could not initialize PyLirc!')
-#         sys.exit(1)
+# Fire up splashscreen and load the plugins
+progress = freevo2.gui.show_application('splash').get_widget('plugins')
+progress.max = freevo2.core.num_plugins - 1
 
-#     kaa.signals['lirc'].connect(handle_key)
-#     log.info('daemon running')
-#     kaa.main.run()
-#     log.info('daemon done')
-#     sys.exit(1)
+# Load plugins
+freevo2.core.init_plugins(freevo2, progress.inc)
 
-#
-# Fullscreen X mode
-#
-# Start a new X server and run Freevo as windowmanager in fullscreen mode. This
-# could require xrandr in the future to have a better effect
-#
-# CANDY-FIXME
-# if len(sys.argv) == 2 and sys.argv[1] in ('-fs', '--fullscreen', '-f'):
-#     # start X server and run freevo, ignore everything else for now
-#     server_num = 0
-#     while 1:
-#         if not os.path.exists('/tmp/.X11-unix/X' + str(server_num)):
-#             break
-#         server_num += 1
-#     sys.stdin.close()
-#     os.execvp('xinit', [ 'xinit', sys.argv[0], '-force-fs',  '--', ':'+str(server_num) ])
+# Prepare again, now that all plugins are loaded
+freevo2.gui.load_theme()
 
-# freevo imports
-import freevo2.gui
+# Start menu
+freevo2.core.MainMenu()
 
-#
-# Freevo main function
-#
+def garbage_collect():
+    gc.collect()
+    for g in gc.garbage:
+        logger.warning('Unable to free %s' % g)
 
-# parse arguments
-# CANDY-FIXME
-# if len(sys.argv) >= 2:
+# Set up garbage collector to be called every 5 seconds
+kaa.Timer(garbage_collect).start(5)
 
-#     # force fullscreen mode
-#     # deactivate screen blanking and set osd to fullscreen
-#     if '-force-fs' in sys.argv[1]:
-#         os.system('xset -dpms s off')
-#         displays.fullscreen = True
-
-try:
-    kaa.candy.config.performance_debug = True
-    freevo2.gui.configure(config, freevo2.core.environ.SHAREDIR)
-
-    # Fire up splashscreen and load the plugins
-    progress = freevo2.gui.show_application('splash').get_widget('plugins')
-    progress.max = num_plugins-1
-
-    # load plugins
-    freevo2.init_plugins(freevo2, progress.inc)
-
-    # prepare again, now that all plugins are loaded
-    freevo2.gui.load_theme()
-
-    # start menu
-    freevo2.MainMenu()
-
-    # start main loop
-    kaa.main.run()
-
-except SystemExit:
-    kaa.main.stop()
-
-except:
-    log.exception('Crash!')
-    kaa.main.stop()
+# Start main loop
+kaa.main.run()
