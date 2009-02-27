@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------------------
 # album.py - browse collection based on album/artist tag
 # -----------------------------------------------------------------------------
-# $Id: album.py 9541 2007-05-01 18:46:35Z dmeyer $
+# $Id$
 #
 # This plugin adds an item 'Browse by Artists albums' to the audio menu.
 # It views the albums per artist in a grid view.
