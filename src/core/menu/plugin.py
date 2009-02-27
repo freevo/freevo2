@@ -62,8 +62,7 @@ class ItemPlugin(freevo.Plugin):
         """
         Static function to return all ItemPlugins.
         """
-        return [ x for x in ItemPlugin.plugin_list \
-                 if x.plugin_media() in (None, subtype) ]
+        return [ x for x in ItemPlugin.plugin_list if x.plugin_media in (None, subtype) ]
 
     plugins = staticmethod(plugins)
 

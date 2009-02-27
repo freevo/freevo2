@@ -50,9 +50,10 @@ class Plugin(object):
     Basic plugin class.
     """
 
+    plugin_media = None
+
     def __init__(self, name=''):
         self._plugin_level = 10
-        self._plugin_media = None
 
 
     def plugin_activate(self, level):
@@ -70,13 +71,6 @@ class Plugin(object):
         _loader.names[name] = self
 
 
-    def plugin_media(self):
-        """
-        Return special media the plugin is valid in.
-        """
-        return self._plugin_media
-
-    
     def plugin_level(self):
         """
         Return plugin level.
@@ -256,7 +250,8 @@ class PluginLoader(object):
 
         try:
             plugin._plugin_level = level
-            plugin._plugin_media = special
+            if special:
+                plugin.plugin_media = special
             plugin.plugin_activate(level)
         except:
             log.exception('failed to activate plugin %s' % name)

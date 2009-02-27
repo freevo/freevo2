@@ -80,7 +80,7 @@ class MainMenuPlugin(freevo.Plugin):
         """
         Return all MainMenuPlugins.
         """
-        return [ x for x in MainMenuPlugin.plugin_list if x.plugin_media() == subtype ]
+        return [ x for x in MainMenuPlugin.plugin_list if x.plugin_media == subtype ]
 
 
 class MenuWidget(freevo.Application, freevo.MenuStack):
