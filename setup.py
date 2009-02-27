@@ -51,7 +51,6 @@ for pos, arg in enumerate(sys.argv[1:]):
     libdir = 'lib/python%s.%s/site-packages' % sys.version_info[:2]
     sys.path.insert(0, os.path.join(prefix, libdir))
 
-sys.path.insert(0, 'src')
 sys.path.insert(0, 'src/core')
 # import freevo distribution utils
 from distribution import setup, VERSION
