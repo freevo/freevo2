@@ -36,12 +36,12 @@ import kaa
 from kaa.utils import property
 
 # freevo imports
-from ... import gui
-from .. import api as freevo
+from .. import gui
+import api as freevo
 
 # application imports
-from handler import handler
-from base import WidgetContext as BaseWidgetContext
+from taskmanager import taskmanager
+from application import WidgetContext as BaseWidgetContext
 
 class TextWindow(object):
     """
@@ -80,7 +80,7 @@ class TextWindow(object):
         if self.__visible:
             return
         self.__visible = True
-        handler.add_window(self)
+        taskmanager.add_window(self)
         self.gui_context.show()
 
     def hide(self):
@@ -90,7 +90,7 @@ class TextWindow(object):
         if not self.__visible:
             return
         self.__visible = False
-        handler.remove_window(self)
+        taskmanager.remove_window(self)
         self.gui_context.hide()
 
     def eventhandler(self, event):
@@ -112,7 +112,7 @@ class TextWindow(object):
         Set the eventmap for the window
         """
         self.__eventmap = eventmap
-        handler.set_focus()
+        taskmanager.set_focus()
 
 
 class Button(kaa.Signal):

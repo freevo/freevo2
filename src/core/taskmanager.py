@@ -1,14 +1,12 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# handler.py - Handle active applications and windows
+# taskmanager.py - Handle active applications and windows
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# This file defines the application handler. The handler will manage the
-# current active applications and windows, show/hide them and send events to
-# the application or window with the focus.
-#
-# The handler should not be accessed from outside the application module.
+# This file defines the taskmanager. It will manage the current active
+# applications and windows, show/hide them and send events to the
+# application or window with the focus.
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -35,7 +33,7 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'handler' ]
+__all__ = [ 'taskmanager', 'signals' ]
 
 # python imports
 import logging
@@ -44,15 +42,13 @@ import logging
 import kaa
 
 # freevo imports
-from .. import api as freevo
+import api as freevo
 
 # the logging object
 log = logging.getLogger()
 
 # the global object
-handler = None
-
-# -----------------------------------------------------------------------------
+taskmanager = None
 
 STATUS_IDLE     = 'idle'
 STATUS_RUNNING  = 'running'
@@ -61,7 +57,7 @@ STATUS_STOPPED  = 'stopped'
 
 CAPABILITY_TOGGLE = 1
 
-class Handler(object):
+class TaskManager(object):
     """
     This is the main application for Freevo, handling applications
     with an event handler and the event mapping.
@@ -71,13 +67,10 @@ class Handler(object):
         self.current = None
         self.windows = []
         self.eventmap = None
-
         # callback for events
         kaa.EventHandler(self.handle).register()
-
         # Signals
         self.signals = { 'application-change': kaa.Signal() }
-
 
     def set_focus(self):
         """
@@ -101,7 +94,6 @@ class Handler(object):
         if self.current:
             self.current.signals['hide'].emit()
         self.current = app
-
 
     def show_application(self, app):
         """
@@ -133,7 +125,6 @@ class Handler(object):
             self.applications.append(app)
         self.set_focus()
 
-
     def hide_application(self, app):
         """
         Remove application from stack.
@@ -150,14 +141,12 @@ class Handler(object):
         self.applications.pop()
         self.set_focus()
 
-
     def add_window(self, window):
         """
         Add a window above all applications
         """
         self.windows.append(window)
         self.set_focus()
-
 
     def remove_window(self, window):
         """
@@ -168,52 +157,39 @@ class Handler(object):
         self.windows.remove(window)
         self.set_focus()
 
-
-    def get_active(self):
-        """
-        Return the application
-        """
-        if not self.applications:
-            return None
-        return self.applications[-1]
-
-
     def handle(self, event):
         """
         Event handling function.
         """
         log.debug('handling event %s' % str(event))
-
         if event == freevo.TOGGLE_APPLICATION and len(self.applications) > 1 and \
                self.applications[-1].has_capability(CAPABILITY_TOGGLE):
             log.info('Toggle application')
             self.applications.insert(0, self.applications.pop())
             self.set_focus()
             return True
-
         result = None
-
         if event.handler:
             # event has it's own handler function, call this
             # function and do not pass it on the the normal
             # handling.
             result = event.handler(event=event) or True
-
         if not result and len(self.windows):
             # maybe handled by the current popup
             result = self.windows[-1].eventhandler(event=event)
-
         if not result:
             # handle by the current application
             result = self.applications[-1].eventhandler(event=event)
-
-        # This function has to return True or it will be deleted from
-        # the kaa eventhandler. The kaa event code is not aware of
-        # InProgress objects so if result is an InProgress object we wait
-        # here using step(). This is ugly and needs to be fixed.
+        # FIXME: This function has to return True or it will be
+        # deleted from the kaa eventhandler. The kaa event code is not
+        # aware of InProgress objects so if result is an InProgress
+        # object we wait here using step().
         if isinstance(result, kaa.InProgress):
             while not result.is_finished():
                 kaa.main.step()
 
 # create the global object
-handler = Handler()
+taskmanager = TaskManager()
+
+# expose signals
+signals = taskmanager.signals

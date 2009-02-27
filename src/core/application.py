@@ -29,7 +29,9 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'Application' ]
+__all__ = [ 'Application', 'STATUS_RUNNING', 'STATUS_STOPPING', 'STATUS_STOPPED',
+            'STATUS_IDLE', 'CAPABILITY_TOGGLE', 'CAPABILITY_PAUSE',
+            'CAPABILITY_FULLSCREEN' ]
 
 # python imports
 import logging
@@ -39,11 +41,11 @@ import kaa
 from kaa.utils import property
 
 # freevo imports
-from ... import gui
-from .. import api as freevo
+from .. import gui
+import api as freevo
 
 # application imports
-from handler import handler
+from taskmanager import taskmanager
 
 # get logging object
 log = logging.getLogger()
@@ -143,11 +145,11 @@ class Application(freevo.ResourceHandler):
         if status in (STATUS_STOPPED, STATUS_IDLE):
             self.free_resources()
         if status == STATUS_RUNNING and self.__status == STATUS_IDLE:
-            handler.show_application(self)
+            taskmanager.show_application(self)
             self.__status = status
             self.signals['start'].emit()
         elif status == STATUS_IDLE:
-            handler.hide_application(self)
+            taskmanager.hide_application(self)
             self.free_resources(resume=True)
             self.__status = status
             self.signals['stop'].emit()
@@ -167,7 +169,7 @@ class Application(freevo.ResourceHandler):
         Set a new eventmap for the event handler
         """
         self.__eventmap = eventmap
-        handler.set_focus()
+        taskmanager.set_focus()
 
     def eventhandler(self, event):
         """

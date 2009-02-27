@@ -59,7 +59,7 @@ class InputPlugin(freevo.Plugin):
         if not key:
             return None
 
-        for app in (freevo.get_eventmap(), 'global'):
+        for app in (freevo.taskmanager.eventmap, 'global'):
             # check config file event mapping
             if app in config_map and key in config_map[app]:
                 event = freevo.Event(*config_map[app][key].split(' '))
@@ -68,4 +68,4 @@ class InputPlugin(freevo.Plugin):
             if app in EVENTMAP and key in EVENTMAP[app]:
                 return EVENTMAP[app][key].post(event_source='user')
 
-        log.warning('no event mapping for key %s in %s' % (key, freevo.get_eventmap()))
+        log.warning('no event mapping for key %s in %s' % (key, freevo.taskmanager.eventmap))

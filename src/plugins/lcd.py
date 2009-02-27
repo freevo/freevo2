@@ -112,7 +112,7 @@ class PluginInterface( freevo.Plugin ):
 
         kaa.EventHandler(self.eventhandler).register()
         freevo.signals['application-change'].connect(self.set_application)
-        self.set_application(freevo.get_application())
+        self.set_application(freevo.taskmanager.current)
 
 
     def set_application(self, app):
