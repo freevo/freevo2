@@ -19,9 +19,11 @@
             <desc>Name in the mediamenu</desc>
         </var>
     </list>
+
     <var name="suffix" default="jpg,gif,png,jpeg,bmp,tiff">
         <desc>Comma seperated list of image suffixes.</desc>
     </var>
+
     <group name="viewer">
         <var name="duration" default="0">
             <desc>
@@ -46,4 +48,19 @@
             </values>
         </var>
     </group>
+
+    <group name="plugin">
+        <desc lang="en">image plugins</desc>
+
+	<group name="calendar" plugin="10">
+	    <desc>Show image files by date</desc>
+	</group>
+
+	<!-- FIXME: this plugin is currently broken
+	<group name="apod" plugin="20">
+	    <desc>Astronomy Picture of the Day</desc>
+	</group>
+	-->
+    </group>
+
 </config>

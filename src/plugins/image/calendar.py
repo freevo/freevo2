@@ -4,12 +4,12 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# This plugin let the user browse the images by date. It does not look so nice
-# on the GUI right now but shows the power of beacon.
+# This plugin let the user browse the images by date. It does not look
+# so nice on the GUI right now but shows the power of beacon.
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2007 Dirk Meyer, et al.
+# Copyright (C) 2007-2009 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -56,7 +56,6 @@ class BeaconQueryItem(freevo.Item):
         if sample:
             self.info['thumbnail'] = sample.get('thumbnail')
 
-
     def _query(self, start, stop, **query):
         """
         Query beacon for images between start and stop dates
@@ -65,7 +64,6 @@ class BeaconQueryItem(freevo.Item):
         s2 = time.mktime((stop[0], stop[1], stop[2], 23, 59, 59, -1, -1, -1))
         q = kaa.beacon.QExpr('range', (s1, s2))
         return kaa.beacon.query(timestamp=q, type='image', **query)
-
 
     @kaa.coroutine()
     def select(self):
@@ -92,11 +90,9 @@ class MonthItem(BeaconQueryItem):
     def __init__(self, year, month, sample, parent):
         name = _('%s-%s') % (year, month)
         BeaconQueryItem.__init__(self, name, parent, sample)
-        self.query = [ ((year, month, x), (year, month, x)) \
-                       for x in range(1, 32) ], 2
+        self.query = [ ((year, month, x), (year, month, x)) for x in range(1, 32) ], 2
         self._year = year
         self._month = month
-
 
     @kaa.coroutine()
     def get_items(self, result):
@@ -105,10 +101,8 @@ class MonthItem(BeaconQueryItem):
         """
         items = []
         for day, sample in result:
-            result = yield self._query((self._year, self._month, day),
-                                       (self._year, self._month, day))
-            p = freevo.Playlist(_('%s-%s-%s') % (self._year, self._month, day),
-                         playlist=result, parent=self, type='image')
+            result = yield self._query((self._year, self._month, day), (self._year, self._month, day))
+            p = freevo.Playlist(_('%s-%s-%s') % (self._year, self._month, day), playlist=result, parent=self, type='image')
             p.info['thumbnail'] = result[0].get('thumbnail')
             items.append(p)
         yield items
@@ -123,13 +117,11 @@ class YearItem(BeaconQueryItem):
         self.query = [ ((year, x, 1), (year, x, 31)) for x in range(1, 13) ], 1
         self._year = year
 
-
     def get_items(self, result):
         """
         Return months as MonthItem items.
         """
-        return [ MonthItem(self._year, month, sample, self) \
-                 for month, sample in result ]
+        return [ MonthItem(self._year, month, sample, self) for month, sample in result ]
 
 
 class CalendarItem(BeaconQueryItem):
@@ -139,7 +131,6 @@ class CalendarItem(BeaconQueryItem):
     def __init__(self, parent):
         BeaconQueryItem.__init__(self, _('Calendar'), parent)
         self.query = [ ((x, 1, 1), (x,12,31)) for x in range(1970, 2037) ], 0
-
 
     def get_items(self, result):
         """
@@ -152,6 +143,8 @@ class PluginInterface(freevo.MainMenuPlugin):
     """
     Calendar view plugin.
     """
+    plugin_media = 'image'
+
     def items(self, parent):
         """
         Return the main menu item.

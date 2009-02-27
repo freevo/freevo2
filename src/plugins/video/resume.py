@@ -55,11 +55,12 @@ class PluginInterface(freevo.ItemPlugin):
     class to handle auto bookmarks
     """
 
+    plugin_media = 'video'
+
     def __init__(self):
         super(PluginInterface, self).__init__()
         self._ignore_end = False
         self._seek = 0
-
 
     def actions(self, item):
         """
@@ -69,7 +70,6 @@ class PluginInterface(freevo.ItemPlugin):
             return [ freevo.Action(_('Resume playback'), self.resume) ]
         return []
 
-
     def resume(self, item):
         """
         Resume playback
@@ -77,7 +77,6 @@ class PluginInterface(freevo.ItemPlugin):
         self._seek = max(0, item[RESUME] - 10)
         item.get_menustack().delete_submenu()
         item.play()
-
 
     def eventhandler(self, item, event):
         """

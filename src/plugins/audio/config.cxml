@@ -26,4 +26,19 @@
         <!-- FIXME: not used -->
         <desc>Include video files in audio listing (e.g. music videos)</desc>
     </var>
+
+    <group name="plugin">
+        <desc lang="en">audio plugins</desc>
+
+	<group name="artist" plugin="10">
+	    <desc>Show audio files sorted by artist and album</desc>
+	</group>
+
+	<!-- FIXME: this plugin is currently broken
+	<group name="album" plugin="20">
+	    <desc>Show albums sorted by artist in a grid view</desc>
+	</group>
+	-->
+    </group>
+
 </config>

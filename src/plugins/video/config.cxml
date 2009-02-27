@@ -19,9 +19,11 @@
             <desc>Name in the mediamenu</desc>
         </var>
     </list>
+
     <var name="suffix" default="bin,viv,iso,nsv,rmvb,cue,avi,mpg,mpeg,wmv,rm,divx,ogm,vob,asf,m2v,m2p,mp4,nuv,mov,mkv,ts">
         <desc>Comma seperated list of video suffixes.</desc>
     </var>
+
     <var name="show-regexp" 
         default="s?([0-9]|[0-9][0-9])[xe]([0-9]|[0-9][0-9])[^0-9]">
         <desc>
@@ -29,4 +31,18 @@
             and title. Do not change this unless you know what you are doing.
         </desc>
     </var>
+
+    <group name="plugin">
+        <desc lang="en">video plugins</desc>
+
+	<group name="resume" plugin="10">
+	    <desc>
+	        Add resume option to video files. The plugin will remember the
+		position when playback is stopped and add a resume option to the
+		item menu. If the plugin level is lower than 10 resume will be the
+		default option.
+	    </desc>
+	</group>
+    </group>
+
 </config>

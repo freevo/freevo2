@@ -18,7 +18,7 @@
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
-# Please see the file doc/CREDITS for a complete list of authors.
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ __all__ = [ 'get_items' ]
 import kaa.popcorn
 
 # freevo imports
-from .. import core as freevo
+from ... import core as freevo
 
 def play_movie(item, **kwargs):
     """

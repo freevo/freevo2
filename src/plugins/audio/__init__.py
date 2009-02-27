@@ -1,16 +1,15 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# interface.py - interface between mediamenu and audio
+# audio - interface between mediamenu and audio
 # -----------------------------------------------------------------------------
 # $Id$
 #
 # This file defines the PluginInterface for the audio module of
-# Freevo. It is loaded by __init__.py and will activate the mediamenu
-# for audio.
+# Freevo. It will activate the mediamenu for audio.
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2006 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2009 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -33,26 +32,17 @@
 #
 # -----------------------------------------------------------------------------
 
-# only export 'PluginInterface' to the outside. This will be used
-# with plugin.activate('audio') and everything else should be handled
-# by using menu.MediaPlugin.plugins()
-
 __all__ = [ 'PluginInterface' ]
 
 # Python imports
 import os
-import re
-import stat
 
 # Freevo imports
-from .. import core as freevo
+from ... import core as freevo
 
 # AudioItem
-from audioitem import AudioItem
-from audiodiskitem import AudioDiskItem
+from item import AudioItem, AudioDiskItem
 
-# fxdhandler for <audio> tags
-from fxdhandler import fxdhandler
 
 class PluginInterface(freevo.MediaPlugin, freevo.MainMenuPlugin):
     """
@@ -64,16 +54,15 @@ class PluginInterface(freevo.MediaPlugin, freevo.MainMenuPlugin):
         """
         Activate the plugin.
         """
-        # add fxd parser callback
-        freevo.add_fxdparser(['audio'], 'audio', fxdhandler)
-
+        # FIXME: fxdparser is currently broken
+        # freevo.add_fxdparser(['audio'], 'audio', self.fxdhandler)
+        pass
 
     def suffix(self):
         """
         return the list of suffixes this class handles
         """
         return [ 'beacon:audio' ] + freevo.config.audio.suffix.split(',')
-
 
     def get(self, parent, listing):
         """
@@ -90,9 +79,55 @@ class PluginInterface(freevo.MediaPlugin, freevo.MainMenuPlugin):
                     items.append(AudioItem(file, parent))
         return items
 
-
     def items(self, parent):
         """
         MainMenuPlugin.items to return the audio item.
         """
         return [ freevo.MediaMenu(parent, _('Audio Main Menu'), 'audio', freevo.config.audio.items) ]
+
+    def fxdhandler(node, parent, listing):
+        """
+        Parse audio specific stuff from fxd files::
+
+          <?xml version="1.0" ?>
+          <freevo>
+              <audio title="Smoothjazz">
+                  <cover-img>foo.jpg</cover-img>
+                  <mplayer_options></mplayer_options>
+                  <player>xine</player>
+                  <playlist/>
+                  <reconnect/>
+                  <url>http://64.236.34.141:80/stream/1005</url>
+
+                  <info>
+                      <genre>JAZZ</genre>
+                      <description>A nice description</description>
+                  </info>
+
+              </audio>
+          </freevo>
+
+        Everything except title and url is optional. If <player> is
+        set, this player will be used (possible xine or mplayer). The
+        tag <playlist/> signals that this url is a playlist (mplayer
+        needs that). <reconnect/> signals that the player should
+        reconnect when the connection stopps.
+
+        FIXME: this code is currently broken
+        """
+        fxd = node
+        a = AudioItem('', fxd.getattr(None, 'parent', None))
+        a.name = fxd.getattr(node, 'title', a.name)
+        a.image = fxd.childcontent(node, 'cover-img')
+        a.url = fxd.childcontent(node, 'url')
+        if a.image:
+            a.image = os.path.join(os.path.dirname(fxd.filename), a.image)
+        a.mplayer_options = fxd.childcontent(node, 'mplayer_options')
+        if fxd.get_children(node, 'player'):
+            a.force_player = fxd.childcontent(node, 'player')
+        if fxd.get_children(node, 'playlist'):
+            a.is_playlist = True
+        if fxd.get_children(node, 'reconnect'):
+            a.reconnect = True
+        fxd.parse_info(fxd.get_children(node, 'info', 1), a)
+        fxd.getattr(None, 'items', []).append(a)

@@ -160,6 +160,8 @@ class PluginInterface(freevo.MainMenuPlugin):
     plugin.activate('image.apod', args=('/dir_for_apod',))
 
     """
+    plugin_media = 'image'
+
     def __init__(self, imagedir=None):
         """
         Init plugin and check if imagedir is a valid directory.

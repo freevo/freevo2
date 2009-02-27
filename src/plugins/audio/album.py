@@ -12,7 +12,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2007 Dirk Meyer, et al.
+# Copyright (C) 2007-2009 Dirk Meyer, et al.
 #
 # First Edition: Joost <joost.kop@gmail.com>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -54,7 +54,6 @@ class AlbumItem(freevo.MediaItem):
         if album:
             self.name = album
 
-
     @kaa.coroutine()
     def browse(self):
         """
@@ -71,13 +70,11 @@ class AlbumItem(freevo.MediaItem):
         self.playlist = freevo.Playlist(title, async, self, type='audio')
         self.playlist.browse()
 
-
     def actions(self):
         """
         Actions for this item.
         """
         return [ freevo.Action(_('Browse Songs'), self.browse) ]
-
 
 
 class ArtistAlbumView(freevo.GridMenu):
@@ -100,21 +97,18 @@ class ArtistAlbumView(freevo.GridMenu):
         # Query all artists.
         for artist in (yield kaa.beacon.query(attr='artist', type='audio')):
             self.artists.append(artist)
-
         items = []
         for artist in self.artists:
             # FIXME: monitor query for live update
             # FIXME: yield beacon query
             query = yield kaa.beacon.query(attr='album', artist=artist, type='audio')
-    
+            print query
             albums = [ AlbumItem(artist, None, self) ]
             for album in query:
                 albums.append(AlbumItem( artist, album, self))
-                
+
             items.append(albums)
-
         self.set_items(items)
-
 
     def get_column_name(self, col):
         """
@@ -141,9 +135,10 @@ class PluginInterface(freevo.MainMenuPlugin):
     Add 'Browse by Artist albums' to the audio menu.
     """
 
+    plugin_media = 'audio'
+
     def items(self, parent):
         return [ freevo.ActionItem(_('Browse by Artists/Albums'), parent, self.show) ]
 
     def show(self, parent):
-        artistalbumview = ArtistAlbumView(parent)
-        parent.get_menustack().pushmenu(artistalbumview)
+        parent.get_menustack().pushmenu(ArtistAlbumView(parent))

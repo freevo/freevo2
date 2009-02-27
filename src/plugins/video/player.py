@@ -40,7 +40,7 @@ import kaa.utils
 import kaa.popcorn
 
 # Freevo imports
-from .. import core as freevo
+from ... import core as freevo
 
 # get logging object
 log = logging.getLogger('video')
@@ -107,7 +107,7 @@ class Player(freevo.Application):
             yield self.player.play()
             freevo.PLAY_START.post(self.item)
         except kaa.popcorn.PlayerError, e:
-            self.player.signals['end'].disconnect(PLAY_END.post, self.item)
+            self.player.signals['end'].disconnect(freevo.PLAY_END.post, self.item)
             log.exception('video playback failed')
             # We should handle it here with a messge or something like that. To
             # make playlist work, we just send start and stop. It's ugly but it

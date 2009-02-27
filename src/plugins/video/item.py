@@ -12,12 +12,12 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2009 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
-# Please see the file doc/CREDITS for a complete list of authors.
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,9 +35,9 @@
 #
 # -----------------------------------------------------------------------------
 
+__all__ = [ 'VideoItems', 'VideoPlaylist' ]
+
 # python imports
-import os
-import copy
 import logging
 import re
 import time
@@ -46,12 +46,8 @@ import time
 import kaa
 
 # freevo imports
-from .. import core as freevo
-
-# video imports
+from ... import core as freevo
 import configure
-import database
-
 import player as videoplayer
 
 # get logging object
@@ -108,15 +104,10 @@ class VideoItem(freevo.MediaItem):
             # This matches a tv show with a show name, an epsiode and
             # a title of the specific episode
             sn = kaa.unicode_to_str(show_name[0].lower())
-            if database.tv_shows.has_key(sn):
-                tvinfo = database.tv_shows[sn]
-                self.info.set_variables(tvinfo[1])
-                if not self.image:
-                    self.image = tvinfo[0]
-            self.tv_show      = True
-            self.show_name    = show_name
+            self.tv_show = True
+            self.show_name = show_name
             self.tv_show_name = show_name[0]
-            self.tv_show_ep   = show_name[3]
+            self.tv_show_ep = show_name[3]
 
 
     def set_url(self, url):
@@ -162,7 +153,7 @@ class VideoItem(freevo.MediaItem):
         """
         Return aspect as string or None if unknown
         """
-        if key == 'aspect' and self.info.get('aspect'):
+        if self.info.get('aspect'):
             aspect = str(self.info.get('aspect'))
             return aspect[:aspect.find(' ')].replace('/', ':')
         return None
@@ -240,3 +231,15 @@ class VideoItem(freevo.MediaItem):
                 self['last_played'] = int(time.time())
                 self.user_stop = False
         super(VideoItem, self).eventhandler(event)
+
+
+
+class VideoPlaylist(freevo.Playlist):
+    type = 'video'
+
+    def get_id(self):
+        """
+        Return a unique id of the item. This id should be the same when the
+        item is rebuild later with the same informations
+        """
+        return ''.join([ c.get_id() for c in self.choices ])

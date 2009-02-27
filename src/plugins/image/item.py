@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# imageitem.py - Item for image files
+# item.py - Item for image files
 # -----------------------------------------------------------------------------
 # $Id$
 #
@@ -9,7 +9,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2007 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2009 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -38,7 +38,7 @@ __all__ = [ 'ImageItem' ]
 import time
 
 # freevo imports
-from .. import core as freevo
+from ... import core as freevo
 from viewer import viewer
 
 class ImageItem(freevo.MediaItem):
@@ -50,10 +50,8 @@ class ImageItem(freevo.MediaItem):
     def __init__(self, url, parent, duration = freevo.config.image.viewer.duration):
         super(ImageItem, self).__init__(parent)
         self.user_stop = False
-        # set url and parse the name
         self.set_url(url)
         self.duration = duration
-
 
     def get_geometry(self):
         """
@@ -63,13 +61,11 @@ class ImageItem(freevo.MediaItem):
             return '%sx%s' % (self.get('width'), self.get('height'))
         return None
 
-
     def actions(self):
         """
         Return a list of possible actions on this item.
         """
         return [ freevo.Action(_('View Image'), self.play) ]
-
 
     def cache(self):
         """
@@ -77,20 +73,17 @@ class ImageItem(freevo.MediaItem):
         """
         viewer.cache(self)
 
-
     def play(self):
         """
         View the image
         """
         viewer.view(self)
 
-
     def stop(self):
         """
         Stop viewing this item
         """
         viewer.stop()
-
 
     def eventhandler(self, event):
         """

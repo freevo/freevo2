@@ -1,16 +1,17 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# audiodiskitem.py - Item for CD Audio Disks
+# item.py - AudioItem and AudioDiskItem
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# This file handles and item for an audio cd. When selected it will
-# either play the whole disc or show a menu with all items.
+# This file contains an item used for audio files. It handles all actions
+# possible for an audio item
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2006 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2009 Dirk Meyer, et al.
 #
+# First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
 # Please see the file AUTHORS for a complete list of authors.
@@ -31,21 +32,79 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'AudioDiskItem' ]
+__all__ = [ 'AudioItem', 'AudioDiskItem' ]
 
-# Python imports
-import os
+# python imports
 import logging
+import time
 
 # kaa imports
 import kaa
 
-# Freevo imports
-from .. import core as freevo
-from audioitem import AudioItem
+# freevo imports
+from ... import core as freevo
+
+# audio player
+import player as audioplayer
 
 # get logging object
 log = logging.getLogger('audio')
+
+
+class AudioItem(freevo.MediaItem):
+    """
+    This is the common class to get information about audiofiles.
+    """
+    type = 'audio'
+
+    def __init__(self, url, parent):
+        super(AudioItem, self).__init__(parent)
+        self.user_stop = False
+        self.set_url(url)
+
+    def sort(self, mode='name'):
+        """
+        Returns the string how to sort this item
+        """
+        if mode in ('name', 'smart'):
+            try:
+                track = int(self.info.get('trackno'))
+            except (ValueError, KeyError, TypeError):
+                track = 0
+            return u'%20d %s' % (track, self.name.lower())
+        return super(AudioItem, self).sort(mode)
+
+    def actions(self):
+        """
+        return a list of possible actions on this item
+        """
+        return [ freevo.Action('Play',  self.play) ]
+
+    def play(self):
+        """
+        Start playing the item
+        """
+        self.elapsed = 0
+        audioplayer.play(self)
+
+    def stop(self):
+        """
+        Stop the current playing
+        """
+        audioplayer.stop()
+
+    def eventhandler(self, event):
+        """
+        eventhandler for this item
+        """
+        if event == freevo.STOP:
+            self.user_stop = True
+        if event == freevo.PLAY_END:
+            if not self.user_stop:
+                self['last_played'] = int(time.time())
+                self.user_stop = False
+        return super(AudioItem, self).eventhandler(event)
+
 
 class AudioDiskItem(freevo.Playlist):
     """
@@ -56,17 +115,14 @@ class AudioDiskItem(freevo.Playlist):
         self.type = 'audiocd'
         self.info = device
         self.name = device.get('title')
-
         # variables only for Playlist
         self.autoplay = 0
-
 
     def actions(self):
         """
         Return a list of actions for this item
         """
         return [ freevo.Action(_('Browse disc'), self.browse ) ]
-
 
     @kaa.coroutine()
     def browse(self):
@@ -76,27 +132,21 @@ class AudioDiskItem(freevo.Playlist):
         play_items = []
         for track in (yield self.info.list()):
             play_items.append(AudioItem(track, self))
-
         # add all playable items to the playlist of the directory
         # to play one files after the other
         self.set_playlist(play_items)
-
         # all items together
         items = []
-
         # random playlist (only active for audio)
         if freevo.config.directory.add_random_playlist and len(play_items) > 1:
             pl = freevo.Playlist(_('Random playlist'), play_items, self, random=True)
             pl.autoplay = True
             items += [ pl ]
-
         items += play_items
-
         # BEACON_FIXME
         # if hasattr(self.info, 'mixed'):
         #     d = freevo.DirItem(self.mountdir, self)
         #     d.name = _('Data files on disc')
         #     items.append(d)
-
         item_menu = freevo.Menu(self.name, items, type = 'audio')
         self.get_menustack().pushmenu(item_menu)

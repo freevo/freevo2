@@ -12,7 +12,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2006 Dirk Meyer, et al.
+# Copyright (C) 2006-2009 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -55,7 +55,6 @@ class AlbumItem(freevo.Item):
         if album:
             self.name = album
 
-
     def browse(self):
         """
         Show all items from that artist.
@@ -71,13 +70,11 @@ class AlbumItem(freevo.Item):
         self.playlist = freevo.Playlist(title, async, self, type='audio')
         self.playlist.browse()
 
-
     def actions(self):
         """
         Actions for this item.
         """
         return [ freevo.Action(_('Browse Songs'), self.browse) ]
-
 
 
 class ArtistItem(freevo.Item):
@@ -92,7 +89,6 @@ class ArtistItem(freevo.Item):
             self.name += ' ' + kaa.str_to_unicode(part.capitalize())
         self.name = self.name.strip()
 
-
     @kaa.coroutine()
     def browse(self):
         """
@@ -105,7 +101,6 @@ class ArtistItem(freevo.Item):
             items.append(AlbumItem(self.artist, album, self))
         self.get_menustack().pushmenu(freevo.Menu(_('Album'), items, type='audio'))
 
-
     def actions(self):
         """
         Actions for this item.
@@ -113,11 +108,12 @@ class ArtistItem(freevo.Item):
         return [ freevo.Action(_('Browse Album from %s') % self.name, self.browse) ]
 
 
-
 class PluginInterface(freevo.MainMenuPlugin):
     """
     Add 'Browse by Artist' to the audio menu.
     """
+
+    plugin_media = 'audio'
 
     @kaa.coroutine()
     def artists(self, parent):
@@ -128,7 +124,6 @@ class PluginInterface(freevo.MainMenuPlugin):
         for artist in (yield kaa.beacon.query(attr='artist', type='audio')):
             items.append(ArtistItem(artist, parent))
         parent.get_menustack().pushmenu(freevo.Menu(_('Artists'), items, type='audio'))
-
 
     def items(self, parent):
         """

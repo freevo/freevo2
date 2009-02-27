@@ -32,8 +32,6 @@
 __all__ = [ 'viewer' ]
 
 # python imports
-import os
-import sys
 import logging
 
 # kaa imports
@@ -41,7 +39,7 @@ import kaa
 import kaa.imlib2
 
 # freevo imports
-from .. import core as freevo
+from ... import core as freevo
 
 # get logging object
 log = logging.getLogger('image')
