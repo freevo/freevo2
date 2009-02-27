@@ -4,9 +4,11 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
+# FIXME: use kaa.saxutils to parse the file
+#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2007 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2009 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -34,19 +36,49 @@ __all__ = [ 'add_fxdparser' ]
 # python imports
 import copy
 import logging
+import xml.dom.minidom
 import os
 
 # kaa imports
 import kaa
-
-# freevo core imports
-import fxdparser
 
 # freevo imports
 import api as freevo
 
 # get logging object
 log = logging.getLogger()
+
+class MiniDomWrapper(object):
+    """
+    XML Element Wrapper
+    """
+    def __init__(self, node):
+        self._node = node
+
+    def __getattr__(self, attr):
+        if attr == 'name':
+            return self._node.nodeName
+        if attr == 'getattr':
+            return self._node.getAttribute
+        if attr == 'children':
+            return self
+        if attr == 'root':
+            node = self._node
+            while node.parentNode:
+                node = node.parentNode
+            return node
+        return getattr(self._node, attr)
+
+    def __iter__(self):
+        for n in self._node.childNodes:
+            if isinstance(n, xml.dom.minidom.Element):
+                yield MiniDomWrapper(n)
+
+    @property
+    def content(self):
+        if len(self._node.childNodes):
+            return self._node.childNodes[0].data
+        return u''
 
 
 class Container(freevo.Item):
@@ -60,13 +92,11 @@ class Container(freevo.Item):
         self.image = image
         self.media_type = type
 
-
     def actions(self):
         """
         Actions for this item
         """
         return [ freevo.Action(_('Browse list'), self.browse) ]
-
 
     def browse(self):
         """
@@ -76,16 +106,13 @@ class Container(freevo.Item):
         self.get_menustack().pushmenu(m)
 
 
-
 class PluginInterface(freevo.MediaPlugin):
     """
     Class to handle fxd files in directories
     """
-
     def __init__(self):
         super(PluginInterface, self).__init__()
         self._callbacks = []
-
 
     def get(self, parent, listing):
         """
@@ -94,22 +121,24 @@ class PluginInterface(freevo.MediaPlugin):
         files = listing.get('fxd')
         if not files:
             return []
-
         # get media_type from parent
         media_type = getattr(parent, 'media_type', None)
         if media_type == 'tv':
             media_type = 'video'
-
         items = []
         for fxd in files:
             try:
-                doc = fxdparser.Document(fxd.filename)
+                doc = xml.dom.minidom.parse(fxd.filename)
+                doc.dirname = os.path.dirname(fxd.filename)
+                tree = doc.firstChild
+                if tree.nodeName != 'freevo':
+                    raise RuntimeError('%s is not fxd file' % filename)
+                doc = MiniDomWrapper(doc)
                 items.extend(self._parse(doc, parent, listing, media_type))
             except:
                 log.exception("fxd file %s corrupt" % fxd.filename)
                 continue
         return items
-
 
     def suffix(self):
         """
@@ -117,20 +146,17 @@ class PluginInterface(freevo.MediaPlugin):
         """
         return [ 'fxd' ]
 
-
     def count(self, parent, listing):
         """
         Return how many items will be build on files
         """
         return len(self.get(parent, listing))
 
-
     def add_parser(self, types, node, callback):
         """
         Add a node parser for fxd files.
         """
         self._callbacks.append((types, node, callback))
-
 
     def _parse(self, node, parent, listing, media_type):
         """
@@ -166,7 +192,6 @@ class PluginInterface(freevo.MediaPlugin):
                 if con.items:
                     items.append(con)
         return items
-
 
 
 # load the MediaPlugin
