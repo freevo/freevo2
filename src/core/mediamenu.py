@@ -35,7 +35,6 @@ __all__ = [ 'MediaMenu' ]
 
 # python imports
 import os
-import copy
 import logging
 
 # kaa imports

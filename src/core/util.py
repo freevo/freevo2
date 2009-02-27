@@ -6,9 +6,9 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2007 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2009 Dirk Meyer, et al.
 #
-# Fisrt Version: Krister Lagerstrom <krister-freevo@kmlager.com>
+# First Version: Krister Lagerstrom <krister-freevo@kmlager.com>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
 # Please see the file AUTHORS for a complete list of authors.
@@ -33,8 +33,6 @@
 
 # python imports
 import os
-import statvfs
-import stat
 import logging
 
 # kaa imports
@@ -141,7 +139,7 @@ class ObjectCache(object):
             return self.cache[key]
         except:
             return None
-        
+
 
     def __setitem__(self, key, object):
         if isinstance(key, str):
@@ -152,17 +150,17 @@ class ObjectCache(object):
             del self.lru[self.lru.index(key)]
         except:
             pass
-            
+
         # Do we need to delete the oldest item?
         if len(self.cache) > self.cachesize:
             # Yes
             lru_key = self.lru[0]
             del self.cache[lru_key]
             del self.lru[0]
-            
+
         self.cache[key] = object
         self.lru.append(key)
-        
+
 
     def __delitem__(self, key):
         if isinstance(key, str):
@@ -173,7 +171,7 @@ class ObjectCache(object):
 
         del self.cache[key]
         del self.lru[self.lru.index(key)]
-        
+
 
 #
 # find files by pattern or suffix
@@ -197,7 +195,7 @@ def match_files(dirname, suffix_list, recursive = False):
     """
     if recursive:
         return match_files_recursively(dirname, suffix_list)
-    
+
     try:
         files = [ os.path.join(dirname, fname) \
                   for fname in os.listdir(dirname) if

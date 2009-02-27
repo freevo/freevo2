@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2007 Dirk Meyer, et al.
+# Copyright (C) 2007-2009 Dirk Meyer, et al.
 #
 # First Edition: Joost <joost.kop@gmail.com>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -49,9 +49,9 @@ log = logging.getLogger()
 
 class GridMenu(Menu):
     """
-    A Menu page with Items in grid form for the MenuStack. 
-    It is not allowed to change the selected item or the 
-    internal selection directly, use 'select' or 'set_items' 
+    A Menu page with Items in grid form for the MenuStack.
+    It is not allowed to change the selected item or the
+    internal selection directly, use 'select' or 'set_items'
     to do this.
     The grid is drawn row by row. The advanced_mode of this
     menu allowes row items to have different width.
@@ -154,12 +154,12 @@ class GridMenu(Menu):
             self.base_col = self.selected_col - (self.cols-1)
         elif self.selected_col-self.base_col < 0:
             self.base_col = self.selected_col
-    
+
         if self.selected_row-self.base_row > self.rows-1:
             self.base_row = self.selected_row - (self.rows-1)
         elif self.selected_row-self.base_row < 0:
             self.base_row = self.selected_row
-            
+
         # refresh view?
         if (self.last_base_col != self.base_col) or \
            (self.last_base_row != self.base_row):
@@ -191,7 +191,7 @@ class GridMenu(Menu):
                 return 'selected'
             else:
                 return 'default'
-            
+
 
     def get_column_name(self, col):
         """

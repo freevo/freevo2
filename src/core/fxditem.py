@@ -34,7 +34,6 @@
 __all__ = [ 'add_fxdparser' ]
 
 # python imports
-import copy
 import logging
 import xml.dom.minidom
 import os
@@ -132,7 +131,7 @@ class PluginInterface(freevo.MediaPlugin):
                 doc.dirname = os.path.dirname(fxd.filename)
                 tree = doc.firstChild
                 if tree.nodeName != 'freevo':
-                    raise RuntimeError('%s is not fxd file' % filename)
+                    raise RuntimeError('%s is not fxd file' % fxd.filename)
                 doc = MiniDomWrapper(doc)
                 items.extend(self._parse(doc, parent, listing, media_type))
             except:

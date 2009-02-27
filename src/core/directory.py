@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2007 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2009 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -33,10 +33,7 @@ __all__ = [ 'DirItem' ]
 
 # python imports
 import os
-import stat
-import copy
 import logging
-import time
 
 # kaa imports
 import kaa
@@ -120,7 +117,7 @@ class DirItem(freevo.Playlist):
         Return free space in the directory in MB.
         """
         s = os.statvfs(self.filename)
-        space = (s[statvfs.F_BAVAIL] * long(s[statvfs.F_BSIZE])) / 1000000
+        space = (s[os.statvfs.F_BAVAIL] * long(s[os.statvfs.F_BSIZE])) / 1000000
         space = space / 1000000
         if space > 1000:
             return '%s,%s' % (space / 1000, space % 1000)
@@ -132,7 +129,7 @@ class DirItem(freevo.Playlist):
         Return total space in the directory in MB.
         """
         s = os.statvfs(self.filename)
-        space = (s[statvfs.F_BLOCKS] * long(s[statvfs.F_BSIZE])) / 1000000
+        space = (s[os.statvfs.F_BLOCKS] * long(s[os.statvfs.F_BSIZE])) / 1000000
         if space > 1000:
             return '%s,%s' % (space / 1000, space % 1000)
         return space

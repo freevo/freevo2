@@ -10,7 +10,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2007 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2009 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -55,7 +55,7 @@ class Properties(object):
 
     def __getattr__(self, attr):
         return self.__item.get(attr)
-    
+
 class Item(object):
     """
     Item class. This is the base class for all items in the menu. It's a

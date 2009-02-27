@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2007 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2009 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -41,7 +41,6 @@ from kaa.weakref import weakref
 from .. import api as freevo
 
 # menu imports
-from item import Item
 from listing import ItemList
 
 # get logging object
@@ -182,7 +181,7 @@ class Menu(ItemList):
         if event == freevo.MENU_SELECT or event == freevo.MENU_PLAY_ITEM:
             actions = self.selected._get_actions()
             if not actions:
-                OSD_MESSAGE.post(_('No action defined for this choice!'))
+                freevo.OSD_MESSAGE.post(_('No action defined for this choice!'))
             else:
                 result = actions[0]()
                 if result:

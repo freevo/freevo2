@@ -10,7 +10,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2007 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2009 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -44,9 +44,6 @@ from kaa.weakref import weakref
 
 # freevo imports
 from .. import api as freevo
-
-# menu imports
-from item import Item
 
 # get logging object
 log = logging.getLogger('menu')
@@ -126,7 +123,7 @@ class MenuStack(object):
         """
         if self._lock:
             return
-        
+
         menu = self.menustack[-1]
 
         if menu.autoselect and len(menu.choices) == 1:
@@ -183,7 +180,7 @@ class MenuStack(object):
         """
         return self._lock
 
-    
+
     def eventhandler(self, event):
         """
         Eventhandler for menu control
@@ -241,8 +238,8 @@ class MenuStack(object):
                     break
             self._lock = False
             self.refresh()
-            
-                
+
+
         # handle empty menus
         if not menu.choices:
             if event in ( freevo.MENU_SELECT, freevo.MENU_SUBMENU, freevo.MENU_PLAY_ITEM):

@@ -4,13 +4,9 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# Import information. This module depends on the following freevo.ui modules:
-# freevo.ui.event   for the event definitions
-# freevo.ui.config  for config.menu.arrow_navigation
-#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2005-2007 Dirk Meyer, et al.
+# Copyright (C) 2005-2009 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -32,16 +28,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # -----------------------------------------------------------------------------
-
-"""
-Menu Core
-
-@group Item Classes: Item, ActionItem, MediaItem
-@group Menu and Action Classes: Action, Menu, GridMenu, MenuStack, ItemList, Files
-@group Plugins: ItemPlugin, MediaPlugin
-
-@requires: event, config.menu.arrow_navigation
-"""
 
 __all__ = [ 'Files', 'Item', 'ActionItem', 'ItemList', 'MediaItem', 'Action',
             'Menu', 'GridMenu', 'MenuStack', 'ItemPlugin', 'MediaPlugin' ]

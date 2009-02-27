@@ -107,7 +107,7 @@ class TextWindow(object):
         return self.__eventmap
 
     @eventmap.setter
-    def eventmap(self):
+    def eventmap(self, eventmap):
         """
         Set the eventmap for the window
         """

@@ -6,12 +6,12 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2009 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
-# Please see the file doc/CREDITS for a complete list of authors.
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,7 +32,6 @@
 # python imports
 import os
 import sys
-import re
 
 from distutils import core
 from distutils.command import install_lib
@@ -108,10 +107,10 @@ class i18n (core.Command):
     def initialize_options (self):
         self.no_merge     = 0
         self.compile_only = 0
-        
+
     def finalize_options (self):
         pass
-        
+
     def run (self):
         if not self.compile_only:
             print 'updating pot file'
@@ -193,7 +192,7 @@ class i18n (core.Command):
                         f.write('#: %s\n' % line)
                     f.write('msgid "%s"\nmsgstr ""\n' % text)
                 f.close()
-             
+
         if not self.no_merge and not self.compile_only:
             print 'updating po files'
             print '',
@@ -226,7 +225,7 @@ class freevo_install_lib (install_lib.install_lib):
                     os.remove(init)
         install_lib.install_lib.install(self)
 
-        
+
 def setup(**attrs):
     for i in ('name', 'version'):
         if not attrs.has_key(i):
@@ -241,7 +240,7 @@ def setup(**attrs):
 
     if not 'module' in attrs:
         attrs['module'] = 'ui'
-        
+
     if not 'cmdclass' in attrs:
         attrs['cmdclass'] = {}
 
@@ -277,7 +276,7 @@ def setup(**attrs):
         for script in os.listdir('bin'):
             if not script.startswith('.'):
                 scripts.append('bin/%s' % script)
-                
+
     core.setup(
         name         = attrs['name'],
         version      = attrs['version'],
@@ -285,7 +284,7 @@ def setup(**attrs):
         author       = attrs['author'],
         author_email = attrs['author_email'],
         url          = attrs['url'],
-        
+
         scripts      = scripts,
         package_dir  = attrs['package_dir'],
         packages     = attrs['package_dir'].keys()[:],

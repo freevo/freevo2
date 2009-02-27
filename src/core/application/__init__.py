@@ -10,7 +10,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2005-2007 Dirk Meyer, et al.
+# Copyright (C) 2005-2009 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -37,8 +37,6 @@ __all__ = [ 'Application', 'get_application', 'get_eventmap', 'signals',
             'STATUS_RUNNING', 'STATUS_STOPPING', 'STATUS_STOPPED', 'STATUS_IDLE',
             'CAPABILITY_TOGGLE', 'CAPABILITY_PAUSE', 'CAPABILITY_FULLSCREEN',
             'TextWindow', 'MessageWindow', 'ConfirmWindow' ]
-
-import sys
 
 from base import Application, STATUS_RUNNING, STATUS_STOPPING, \
      STATUS_STOPPED, STATUS_IDLE, CAPABILITY_TOGGLE, CAPABILITY_PAUSE, \

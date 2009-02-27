@@ -35,7 +35,6 @@ __all__ = [ 'Plugin', 'init_plugins', 'activate_plugin', 'register_plugin', 'get
 
 # python imports
 import os
-import copy
 import logging
 
 # kaa imports
@@ -55,13 +54,11 @@ class Plugin(object):
     def __init__(self, name=''):
         self._plugin_level = 10
 
-
     def plugin_activate(self, level):
         """
         Activate the plugin with given level
         """
         pass
-
 
     def plugin_set_name(self, name):
         """
@@ -69,7 +66,6 @@ class Plugin(object):
         because the plugin will always be registered by its own name.
         """
         _loader.names[name] = self
-
 
     def plugin_level(self):
         """
@@ -89,7 +85,6 @@ class PluginLoader(object):
         self._plugin_names = {}
         self._initialized  = False
 
-
     def activate(self, name, type=None, level=10, args=None):
         """
         Activate a plugin.
@@ -101,7 +96,6 @@ class PluginLoader(object):
         cmp_func = lambda l, o: cmp(l._plugin_level, o._plugin_level)
         for c in self._baseclasses:
             c.plugin_list.sort(cmp_func)
-
 
     def init(self, module, callback = None):
         """
@@ -118,77 +112,60 @@ class PluginLoader(object):
             if callback:
                 callback()
             self.__load_plugin(name, type, level, args)
-
         # sort plugins
         cmp_func = lambda l, o: cmp(l._plugin_level, o._plugin_level)
         for c in self._baseclasses:
             c.plugin_list.sort(cmp_func)
-
 
     def getbyname(self, name):
         """
         Get a plugin by it's name
         """
         return self._plugin_names.get(name, None)
-    
-    
+
     def register(self, plugin):
         """
         Register a plugin class
         """
         plugin.plugin_list = []
         return self._baseclasses.append(plugin)
-    
-    
+
     def _find_plugin_file(self, name):
         """
         Find the filename for the plugin and the python import statement.
         """
         filename = name.replace('.', '/')
         full_filename = os.path.join(self.path, filename)
-    
         if os.path.isfile(full_filename + '.py'):
             return filename.replace('/', '.'), None
-    
         if os.path.isdir(full_filename):
             return filename.replace('/', '.'), None
-    
         full_filename = os.path.join(self.path, 'plugins', filename)
-    
         if os.path.isfile(full_filename + '.py'):
             return 'plugins.' + filename.replace('/', '.'), None
-    
         if os.path.isdir(full_filename):
             return 'plugins.' + filename.replace('/', '.'), None
-    
         if filename.find('/') == -1:
             # unable to find plugin
             return None, None
-    
         special, filename = filename.split('/', 1)
         filename = os.path.join(special, 'plugins', filename)
         full_filename = os.path.join(self.path, filename)
-    
         if os.path.isfile(full_filename + '.py'):
             return filename.replace('/', '.'), special
-    
         if os.path.isdir(full_filename):
             return filename.replace('/', '.'), special
-    
         # unable to find plugin
         return None, None
-    
-    
+
     def __load_plugin(self, name, type, level, args):
         """
         Load the plugin and add it to the lists
         """
         if not isinstance(name, Plugin):
-
             # -----------------------------------------------------
             # locate plugin python file
             # -----------------------------------------------------
-            
             module, special = self._find_plugin_file(name)
             if module:
                 pclass = 'PluginInterface'
@@ -203,16 +180,13 @@ class PluginLoader(object):
             else:
                 log.critical('unable to locate plugin %s' % name)
                 return
-
             # -----------------------------------------------------
             # load plugin python file
             # -----------------------------------------------------
-
             try:
                 module = '%s.%s' % (self.import_path, module)
                 log.debug('loading %s as plugin %s' % (module, pclass))
                 exec('from %s import %s as plugin_class' % (module, pclass))
-
                 # create object
                 if not args:
                     plugin = plugin_class()
@@ -220,7 +194,6 @@ class PluginLoader(object):
                     plugin = plugin_class(*args)
                 else:
                     plugin = plugin_class(args)
-
                 # init failed
                 if not hasattr(plugin, '_plugin_level'):
                     if hasattr(plugin, 'reason'):
@@ -229,8 +202,7 @@ class PluginLoader(object):
                         reason = '''unknown
                         The plugin neither called __init__ nor set a reason why
                         Please contact the plugin author'''
-                    log.warning('plugin %s deactivated\n  reason: %s' % \
-                                (name, reason))
+                    log.warning('plugin %s deactivated\n  reason: %s' % (name, reason))
                     return
             except:
                 log.exception('failed to load plugin %s' % name)
@@ -239,15 +211,11 @@ class PluginLoader(object):
             # name is a plugin object
             plugin = name
             special = None
-
-
         # -----------------------------------------------------
         # configure and activate plugin object
         # -----------------------------------------------------
-
         if type:
             special = type
-
         try:
             plugin._plugin_level = level
             if special:
@@ -256,12 +224,9 @@ class PluginLoader(object):
         except:
             log.exception('failed to activate plugin %s' % name)
             return
-
-        
         # -----------------------------------------------------
         # register plugin object
         # -----------------------------------------------------
-
         self._plugin_names[name] = plugin
         for c in self._baseclasses:
             if isinstance(plugin, c):
