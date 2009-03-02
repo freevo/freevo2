@@ -192,7 +192,7 @@ class DirItem(freevo.Playlist):
         self['cache:num_items_dir%s' % media_type] = len(listing.get('beacon:dir'))
         self['cache:num_items_all%s' % media_type] = num + len(listing.get('beacon:dir'))
         # FIXME: what happens if a download is happening in that dir?
-        self.get_menustack().refresh()
+        self.menustack.refresh()
 
 
     def get_num_items(self, type='all'):
@@ -335,7 +335,7 @@ class DirItem(freevo.Playlist):
         items = self._get_items()
         item_menu = freevo.Menu(self.name, items, type = self.menu_type)
         item_menu.autoselect = self['cfg:autoplay_single_item']
-        self.get_menustack().pushmenu(item_menu)
+        self.menustack.pushmenu(item_menu)
         self.item_menu = weakref(item_menu)
 
 

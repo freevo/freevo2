@@ -141,4 +141,4 @@ class PluginInterface(freevo.MainMenuPlugin):
         return [ freevo.ActionItem(_('Browse by Artists/Albums'), parent, self.show) ]
 
     def show(self, parent):
-        parent.get_menustack().pushmenu(ArtistAlbumView(parent))
+        parent.menustack.pushmenu(ArtistAlbumView(parent))

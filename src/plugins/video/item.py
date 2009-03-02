@@ -188,7 +188,7 @@ class VideoItem(freevo.MediaItem):
         Generate special menu for DVD/VCD/SVCD content
         """
         # delete the submenu that got us here
-        self.get_menustack().delete_submenu(False)
+        self.menustack.back_submenu(False)
 
         # build a menu
         items = []
@@ -201,7 +201,7 @@ class VideoItem(freevo.MediaItem):
             items.append(track)
         moviemenu = freevo.Menu(self.name, items)
         moviemenu.type = 'video'
-        self.get_menustack().pushmenu(moviemenu)
+        self.menustack.pushmenu(moviemenu)
 
 
     def play(self, **kwargs):

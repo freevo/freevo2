@@ -75,7 +75,7 @@ class PluginInterface(freevo.ItemPlugin):
         Resume playback
         """
         self._seek = max(0, item[RESUME] - 10)
-        item.get_menustack().delete_submenu()
+        item.menustack.back_submenu()
         item.play()
 
     def eventhandler(self, item, event):

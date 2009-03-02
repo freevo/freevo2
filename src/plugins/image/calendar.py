@@ -80,7 +80,7 @@ class BeaconQueryItem(freevo.Item):
             items = yield items
         menu = freevo.Menu(self.name, items, type='image')
         menu.autoselect = True
-        self.get_menustack().pushmenu(menu)
+        self.menustack.pushmenu(menu)
 
 
 class MonthItem(BeaconQueryItem):

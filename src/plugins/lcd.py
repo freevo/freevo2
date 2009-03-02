@@ -148,8 +148,8 @@ class PluginInterface( freevo.Plugin ):
             return
 
         menu = None
-        if hasattr(self.current[0], 'get_menu'):
-            menu = self.current[0].get_menu()
+        if hasattr(self.current[0], 'current'):
+            menu = self.current[0].current
 
         item = self.playitem
 

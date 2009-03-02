@@ -149,4 +149,4 @@ class AudioDiskItem(freevo.Playlist):
         #     d.name = _('Data files on disc')
         #     items.append(d)
         item_menu = freevo.Menu(self.name, items, type = 'audio')
-        self.get_menustack().pushmenu(item_menu)
+        self.menustack.pushmenu(item_menu)

@@ -82,7 +82,8 @@ class Item(object):
     def properties(self):
         return Properties(self)
 
-    def _get_image(self):
+    @property
+    def image(self):
         if self._image:
             return self._image
         thumb = self.info.get('thumbnail')
@@ -90,11 +91,9 @@ class Item(object):
             return thumb.image
         return None
 
-    def _set_image(self, image):
+    @image.setter
+    def image(self, image):
         self._image = image
-
-    image = property(_get_image, _set_image, None, 'image object')
-
 
     def get_id(self):
         """
@@ -102,7 +101,6 @@ class Item(object):
         item is rebuild later with the same information
         """
         return self.name
-
 
     def sort(self, mode='name'):
         """
@@ -120,7 +118,6 @@ class Item(object):
         log.error('unsupport sort mode %s', mode)
         return ''
 
-
     def actions(self):
         """
         Returns a list of possible actions on this item. The first
@@ -128,14 +125,12 @@ class Item(object):
         """
         return [ Action(self.name, self.select) ]
 
-
     def select(self):
         """
         Select the item (default action). Need to be overloaded by the
         inherting item or actions() need to be overloaded.
         """
         raise RuntimeError("no action defined for %s", self)
-
 
     def _get_actions(self):
         """
@@ -156,8 +151,8 @@ class Item(object):
                 actions.append(a)
         return pre_actions + self.actions() + post_actions
 
-
-    def get_menustack(self):
+    @property
+    def menustack(self):
         """
         Return the menustack this item is associated with. If the item has no
         menu, this function will search the parent to get a possible menustack.
@@ -165,25 +160,24 @@ class Item(object):
         if self.menu and self.menu.stack:
             return self.menu.stack
         if self.parent:
-            return self.parent.get_menustack()
+            return self.parent.menustack
         return None
 
-
-    def get_submenu(self):
+    @property
+    def subitems(self):
         """
         Return submenu items.
         """
         return [ SubMenuItem(self, a) for a in self._get_actions() ]
 
-
-    def get_playlist(self):
+    @property
+    def playlist(self):
         """
         Return playlist object.
         """
         if self.parent:
-            return self.parent.get_playlist()
+            return self.parent.playlist
         return None
-
 
     def eventhandler(self, event):
         """
@@ -199,25 +193,25 @@ class Item(object):
         # nothing to do
         return False
 
-
     def get_name(self):
         """
         Return name of the item.
+        Used by the generic Item.get function.
         """
         return self.name
-
 
     def get_cfg(self, var):
         """
         Return stored config variable value.
+        Used by the generic Item.get function.
         """
         cfg = self.info.get('freevo_config', {})
         return cfg.get(var)
 
-
     def get_cache(self, var):
         """
         Return stored cache variable value.
+        Used by the generic Item.get function.
         """
         # freevo_config attribute in beacon
         mtime, cache = self.info.get('freevo_cache', ( 0, {} ))
@@ -227,24 +221,20 @@ class Item(object):
         self.info['freevo_cache'] = [ self.info.get('mtime'), {} ]
         return None
 
-
     def get(self, attr):
         """
         Return the specific attribute
         """
         if attr[:7] == 'parent(' and attr[-1] == ')' and self.parent:
             return self.parent[attr[7:-1]]
-
         if attr[:4] == 'len(' and attr[-1] == ')':
             value = self[attr[4:-1]]
             if value == None or value == '':
                 return 0
             return len(value)
-
         if attr in self._mem:
             # temp memory override
             return self._mem.get(attr)
-
         if attr.find(':') > 0:
             # get function with parameter
             keys = attr.split(':')
@@ -256,7 +246,6 @@ class Item(object):
             func = getattr(self, 'get_' + attr, None)
             if func is not None:
                 return func()
-
         # try beacon
         r = self.info.get(attr)
         if r not in (None, ''):
@@ -265,13 +254,11 @@ class Item(object):
         # TODO: is this needed?
         return getattr(self, attr, None)
 
-
     def __getitem__(self, attr):
         """
         Return the specific attribute
         """
         return self.get(attr)
-
 
     def __setitem__(self, key, value):
         """
@@ -281,7 +268,6 @@ class Item(object):
             # temp setting only in memory
             self._mem[key[4:]] = value
             return
-
         if key.startswith('cfg:'):
             # freevo_config attribute in beacon
             key = key[4:]
@@ -293,7 +279,6 @@ class Item(object):
             # set again to notify beacon
             self.info['freevo_config'] = cfg
             return
-
         if key.startswith('cache:'):
             # freevo_config attribute in beacon
             mtime, cache = self.info.get('freevo_cache', ( 0, {} ))
@@ -303,9 +288,7 @@ class Item(object):
             # set again to notify beacon
             self.info['freevo_cache'] = [ mtime, cache ]
             return
-
         self.info[key] = value
-
 
 
 class ActionItem(Item, Action):
@@ -318,13 +301,11 @@ class ActionItem(Item, Action):
         Action.__init__(self, name, function, description=description)
         self.item = parent
 
-
     def select(self):
         """
         On select call self.
         """
         return self()
-
 
 
 class SubMenuItem(Item):
@@ -337,7 +318,6 @@ class SubMenuItem(Item):
         self.name = action.name
         self.description = action.description
         self.image = parent.image
-
 
     def actions(self):
         """

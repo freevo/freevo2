@@ -67,7 +67,7 @@ class PluginInterface(freevo.ItemPlugin):
         kaa.ThreadCallback(self.__move_or_copy_thread, self.cart, operation,
                            item.filename)()
         self.cart = []
-        item.get_menustack().delete_submenu()
+        item.menustack.back_submenu()
 
 
     def add_or_remove(self, item):
@@ -80,7 +80,7 @@ class PluginInterface(freevo.ItemPlugin):
         else:
             self.cart.append(item)
             txt = _('Added to Cart')
-        item.get_menustack().delete_submenu(osd_message=txt)
+        item.menustack.back_submenu(osd_message=txt)
 
 
     def clear(self, item):
@@ -88,7 +88,7 @@ class PluginInterface(freevo.ItemPlugin):
         Clear the cart.
         """
         self.cart = []
-        item.get_menustack().delete_submenu()
+        item.menustack.back_submenu()
 
 
     def actions(self, item):

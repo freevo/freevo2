@@ -40,6 +40,7 @@ import logging
 
 # kaa imports
 import kaa
+from kaa.utils import property
 from kaa.weakref import weakref
 
 # freevo imports
@@ -54,42 +55,38 @@ class MenuStack(object):
     The MenuStack handles a stack of Menus
     """
     def __init__(self):
-        self.menustack = []
-        self._lock = False
-
+        self._stack = []
+        self.locked = False
 
     def back_to_menu(self, menu, refresh=True):
         """
         Go back to the given menu.
         """
-        while len(self.menustack) > 1 and self.menustack[-1] != menu:
-            self.menustack.pop()
+        while len(self._stack) > 1 and self._stack[-1] != menu:
+            self._stack.pop()
         if refresh:
             self.refresh(True)
-
 
     def back_one_menu(self, refresh=True):
         """
         Go back one menu page.
         """
-        if len(self.menustack) == 1:
+        if len(self._stack) == 1:
             return
-        self.menustack.pop()
+        self._stack.pop()
         if refresh:
             self.refresh(True)
 
-
-    def delete_submenu(self, refresh=True, reload=False, osd_message=''):
+    def back_submenu(self, refresh=True, reload=False, osd_message=''):
         """
         Delete the last menu if it is a submenu. Also refresh or reload the
         new menu if the attributes are set to True. If osd_message is set,
         this message will be send if the current menu is no submenu
         """
-        if len(self.menustack) > 1 and self.menustack[-1]._is_submenu:
+        if len(self._stack) > 1 and self._stack[-1]._is_submenu:
             self.back_one_menu(refresh)
-        elif len(self.menustack) > 1 and osd_message:
+        elif len(self._stack) > 1 and osd_message:
             freevo.OSD_MESSAGE.post(osd_message)
-
 
     def pushmenu(self, menu):
         """
@@ -97,41 +94,33 @@ class MenuStack(object):
         """
         # set stack (self) pointer to menu
         menu.stack = weakref(self)
-
-        if len(self.menustack) > 0:
-            previous = self.menustack[-1]
+        if len(self._stack) > 0:
+            previous = self._stack[-1]
         else:
             previous = None
-
         # set menu.pos and append
-        menu.pos = len(self.menustack)
-        self.menustack.append(menu)
-
+        menu.pos = len(self._stack)
+        self._stack.append(menu)
         if menu.autoselect and len(menu.choices) == 1:
             log.info('autoselect action')
             # autoselect only item in the menu
             menu.choices[0]._get_actions()[0]()
             return
-
         # refresh will do the update
         self.refresh()
-
 
     def refresh(self, reload=False):
         """
         Refresh the stack and redraw it.
         """
-        if self._lock:
+        if self.locked:
             return
-
-        menu = self.menustack[-1]
-
+        menu = self._stack[-1]
         if menu.autoselect and len(menu.choices) == 1:
             # do not show a menu with only one item. Go back to
             # the previous page
             log.info('delete menu with only one item')
             return self.back_one_menu()
-
         if reload and menu.reload_func:
             # The menu has a reload function. Call it to rebuild
             # this menu. If the functions returns something, replace
@@ -139,64 +128,42 @@ class MenuStack(object):
             new_menu = menu.reload_func()
             if new_menu and not isinstance(new_menu, kaa.InProgress):
                 # FIXME: is this special case needed?
-                self.menustack[-1] = new_menu
+                self._stack[-1] = new_menu
                 menu = new_menu
-
         return
-
 
     def __getitem__(self, attr):
         """
         Return menustack item.
         """
-        return self.menustack[attr]
-
+        return self._stack[attr]
 
     def __setitem__(self, attr, value):
         """
         Set menustack item.
         """
-        self.menustack[attr] = value
+        self._stack[attr] = value
 
-
-    def get_selected(self):
-        """
-        Return the current selected item in the current menu.
-        """
-        return self.menustack[-1].selected
-
-
-    def get_menu(self):
+    @property
+    def current(self):
         """
         Return the current menu.
         """
-        return self.menustack[-1]
-
-
-    def is_locked(self):
-        """
-        Return if the menu stack is locked because it is re-building
-        itself. This should prevent wrong redraws.
-        """
-        return self._lock
-
+        return self._stack[-1]
 
     def eventhandler(self, event):
         """
         Eventhandler for menu control
         """
-        menu = self.menustack[-1]
-
+        menu = self._stack[-1]
         result = menu.eventhandler(event)
         if result:
-            # menu handed this event and returned either True or
-            # an InProgress object
             self.refresh()
             return result
 
         if event == freevo.MENU_GOTO_MAINMENU:
-            while len(self.menustack) > 1:
-                menu = self.menustack.pop()
+            while len(self._stack) > 1:
+                self._stack.pop()
             self.refresh()
             return True
 
@@ -208,14 +175,12 @@ class MenuStack(object):
             # TODO: it would be nice to remember the current menu stack
             # but that is something we have to do inside mediamenu if it
             # is possible at all.
-            if len(self.menustack) > 1 and \
-                   getattr(self.menustack[0].selected, 'media_type', None) == event.arg:
+            if len(self._stack) > 1 and getattr(menu.selected, 'media_type', None) == event.arg:
                 # already in that menu
                 return True
-            menu = self.menustack[0]
             for item in menu.choices:
                 if getattr(item, 'media_type', None) == event.arg:
-                    self.menustack = [ menu ]
+                    self._stack = [ menu ]
                     menu.select(item)
                     item.actions()[0]()
                     return True
@@ -225,10 +190,10 @@ class MenuStack(object):
             # TODO: add some doc, example:
             # input.eventmap[menu][5] = MENU_GOTO_MENU /Watch a Movie/My Home Videos
             path = ' '.join(event.arg)
-            self.menustack = [ self.menustack[0] ]
-            self._lock = True
+            self._stack = [ self._stack[0] ]
+            self.locked = True
             for name in path.split(path[0])[1:]:
-                menu = self.get_menu()
+                menu = self.current
                 for item in menu.choices:
                     if item.name == name:
                         menu.select(item)
@@ -236,22 +201,19 @@ class MenuStack(object):
                         break
                 else:
                     break
-            self._lock = False
+            self.locked = False
             self.refresh()
 
-
-        # handle empty menus
         if not menu.choices:
+            # handle empty menus
             if event in ( freevo.MENU_SELECT, freevo.MENU_SUBMENU, freevo.MENU_PLAY_ITEM):
                 self.back_one_menu()
                 return True
-            selected = getattr(self.menustack[-2], 'selected', None)
+            selected = getattr(self._stack[-2], 'selected', None)
             if selected:
                 return selected.eventhandler(event)
             return False
-
-        # pass to selected eventhandler
         if menu.selected:
+            # pass to selected eventhandler
             return menu.selected.eventhandler(event)
-
         return False

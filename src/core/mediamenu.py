@@ -155,7 +155,7 @@ class MediaMenu(freevo.MainMenuItem):
         item_menu = freevo.Menu(self.name, items, type = type, reload_func = self.reload)
         item_menu.autoselect = True
         self.item_menu = weakref(item_menu)
-        self.get_menustack().pushmenu(item_menu)
+        self.menustack.pushmenu(item_menu)
 
 
     @kaa.coroutine()

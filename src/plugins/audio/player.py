@@ -90,7 +90,7 @@ class Player(freevo.Application):
         # here to make sure it is not deleted when player is running in
         # the background.
         self.item = item
-        self.playlist = self.item.get_playlist()
+        self.playlist = self.item.playlist
         if self.playlist:
             self.playlist.select(self.item)
 

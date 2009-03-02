@@ -40,6 +40,7 @@ import logging
 # kaa imports
 import kaa
 import kaa.beacon
+from kaa.utils import property
 from kaa.weakref import weakref
 
 # freevo imports
@@ -255,7 +256,7 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
         # randomize if needed
         self._randomize()
         menu = freevo.Menu(self.name, self.choices, type = self.media_type)
-        self.get_menustack().pushmenu(menu)
+        self.menustack.pushmenu(menu)
 
 
     @kaa.coroutine()
@@ -340,7 +341,8 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
             self.next_pos = None
 
 
-    def get_playlist(self):
+    @property
+    def playlist(self):
         """
         Return playlist object.
         """

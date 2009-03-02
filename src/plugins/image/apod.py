@@ -75,7 +75,7 @@ class ApodMainMenuItem(freevo.Item):
         previous.description = _('Browse all previously downloaded images')
 
         # add menu
-        self.get_menustack().pushmenu(freevo.Menu( _( 'Apod Pictures' ), [ current, previous ]))
+        self.menustack.pushmenu(freevo.Menu( _( 'Apod Pictures' ), [ current, previous ]))
 
 
     @kaa.coroutine()
@@ -90,7 +90,7 @@ class ApodMainMenuItem(freevo.Item):
             items += p.get(self, listing)
 
         if items:
-            self.get_menustack().pushmenu(freevo.Menu(_('Apod Pictures'), items))
+            self.menustack.pushmenu(freevo.Menu(_('Apod Pictures'), items))
         else:
             freevo.MessageWindow(_('No Images found')).show()
 

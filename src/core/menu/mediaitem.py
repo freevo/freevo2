@@ -220,10 +220,10 @@ class MediaItem(Item):
         current = choices[(choices.index(current) + 1) % len(choices)]
         self[dbvar] = current
         # change name
-        item = self.get_menustack().get_selected()
+        item = self.menustack.current.selected
         item.name = name + '\t'  + current
         # rebuild menu
-        self.get_menustack().refresh(True)
+        self.menustack.refresh(True)
 
 
     def configure(self):
@@ -239,7 +239,7 @@ class MediaItem(Item):
             items.append(action)
         if not items:
             return
-        self.get_menustack().delete_submenu(False)
+        self.menustack.back_submenu(False)
         m = Menu(_('Configure'), items)
         m.table = (80, 20)
-        self.get_menustack().pushmenu(m)
+        self.menustack.pushmenu(m)

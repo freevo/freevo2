@@ -34,6 +34,9 @@
 
 __all__ = [ 'MainMenuItem', 'MainMenu', 'MainMenuPlugin' ]
 
+# kaa imports
+from kaa.utils import property
+
 # freevo imports
 import api as freevo
 
@@ -55,11 +58,12 @@ class MainMenuItem(freevo.Item):
             # this is the first page, force type to 'main'
             self.type = 'main'
 
-    def get_submenu(self):
+    @property
+    def subitems(self):
         """
         Return submenu items.
         """
-        items = super(MainMenuItem, self).get_submenu()
+        items = super(MainMenuItem, self).subitems
         for i in items:
             i.image = None
         return items
@@ -100,15 +104,15 @@ class MenuWidget(freevo.Application, freevo.MenuStack):
 
 
     def refresh(self, reload=False):
-        if self.is_locked():
+        if self.locked:
             return
         freevo.MenuStack.refresh(self, reload)
-        if self.gui_context.menu != self.menustack[-1]:
+        if self.gui_context.menu != self.current:
             self.gui_context.previous = self.gui_context.menu
-            self.gui_context.next = self.menustack[-1]
-            self.gui_context.menu = self.menustack[-1]
-            self.gui_context.type = self.menustack[-1].type
-        self.gui_context.item = self.menustack[-1].selected.properties
+            self.gui_context.next = self.current
+            self.gui_context.menu = self.current
+            self.gui_context.type = self.current.type
+        self.gui_context.item = self.current.selected.properties
 
     def eventhandler(self, event):
         """
@@ -134,7 +138,8 @@ class MainMenu(freevo.Item):
         menu.autoselect = True
         self.menuw = MenuWidget(menu)
 
-    def get_menustack(self):
+    @property
+    def menustack(self):
         """
         Get the menustack. This item needs to override this function
         because it is not bound to a menupage.

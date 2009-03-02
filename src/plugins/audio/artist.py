@@ -99,7 +99,7 @@ class ArtistItem(freevo.Item):
         items = [ AlbumItem(self.artist, None, self) ]
         for album in query:
             items.append(AlbumItem(self.artist, album, self))
-        self.get_menustack().pushmenu(freevo.Menu(_('Album'), items, type='audio'))
+        self.menustack.pushmenu(freevo.Menu(_('Album'), items, type='audio'))
 
     def actions(self):
         """
@@ -123,7 +123,7 @@ class PluginInterface(freevo.MainMenuPlugin):
         items = []
         for artist in (yield kaa.beacon.query(attr='artist', type='audio')):
             items.append(ArtistItem(artist, parent))
-        parent.get_menustack().pushmenu(freevo.Menu(_('Artists'), items, type='audio'))
+        parent.menustack.pushmenu(freevo.Menu(_('Artists'), items, type='audio'))
 
     def items(self, parent):
         """

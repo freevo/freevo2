@@ -102,7 +102,7 @@ class Container(freevo.Item):
         Show all items
         """
         m = freevo.Menu(self.name, self.items, type=self.media_type)
-        self.get_menustack().pushmenu(m)
+        self.menustack.pushmenu(m)
 
 
 class PluginInterface(freevo.MediaPlugin):

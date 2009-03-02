@@ -195,7 +195,7 @@ class Menu(ItemList):
             if self._is_submenu or not self.stack:
                 return False
 
-            items = self.selected.get_submenu()
+            items = self.selected.subitems
             if len(items) < 2:
                 # no submenu
                 return False

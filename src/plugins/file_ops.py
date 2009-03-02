@@ -73,4 +73,4 @@ class PluginInterface(freevo.ItemPlugin):
 
     def _delete(self, item):
         item.files.delete()
-        item.get_menustack().delete_submenu(True, True)
+        item.menustack.back_submenu(True, True)

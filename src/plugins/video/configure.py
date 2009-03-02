@@ -48,7 +48,7 @@ def play_movie(item, **kwargs):
     """
     play the movie (again)
     """
-    item.get_menustack().back_to_menu(item.menu, False)
+    item.menustack.back_to_menu(item.menu, False)
     item.play(**kwargs)
 
 
@@ -57,14 +57,14 @@ def set_variable(item, variable, value):
     Set a variable for the item.
     """
     setattr(item, variable, value)
-    item.get_menustack().back_one_menu()
+    item.menustack.back_one_menu()
 
 
 def start_chapter(item, chapter):
     """
     Handle chapter selection.
     """
-    item.get_menustack().back_to_menu(item.menu, False)
+    item.menustack.back_to_menu(item.menu, False)
     # FIXME: kaa.popcorn syntax
     play_movie(item, chapter=chapter)
 
@@ -88,7 +88,7 @@ def audio_selection(item):
         action = freevo.ActionItem(name, item, set_variable)
         action.parameter('selected_audio', a['id'])
         menu_items.append(action)
-    item.get_menustack().pushmenu(freevo.Menu(_('Audio Menu'), menu_items))
+    item.menustack.pushmenu(freevo.Menu(_('Audio Menu'), menu_items))
 
 
 def subtitle_selection(item):
@@ -105,7 +105,7 @@ def subtitle_selection(item):
         action = freevo.ActionItem(name, item, set_variable)
         action.parameter('selected_subtitle', pos)
         menu_items.append(action)
-    item.get_menustack().pushmenu(freevo.Menu(_('Subtitle Menu'), menu_items))
+    item.menustack.pushmenu(freevo.Menu(_('Subtitle Menu'), menu_items))
 
 
 def chapter_selection(item):
@@ -125,7 +125,7 @@ def chapter_selection(item):
             a = freevo.ActionItem(pos, item, start_chapter)
             a.parameter('-ss %s' % c.pos)
             menu_items.append(a)
-    item.get_menustack().pushmenu(freevo.Menu(_('Chapter Menu'), menu_items))
+    item.menustack.pushmenu(freevo.Menu(_('Chapter Menu'), menu_items))
 
 
 def player_selection(item):
@@ -137,7 +137,7 @@ def player_selection(item):
         a = freevo.ActionItem(player, item, play_movie)
         a.parameter(player=player)
         menu_items.append(a)
-    item.get_menustack().pushmenu(freevo.Menu(_('Player Selection'), menu_items))
+    item.menustack.pushmenu(freevo.Menu(_('Player Selection'), menu_items))
 
     
 def toggle(item, name, variable):
@@ -146,10 +146,10 @@ def toggle(item, name, variable):
     """
     item[variable] = not item[variable]
     # replace item
-    menuitem = item.get_menustack().get_selected()
+    menuitem = item.menustack.current.selected
     menuitem.menu.change_item(menuitem, add_toggle(item, name, variable))
     # update menu
-    item.get_menustack().refresh()
+    item.menustack.refresh()
 
 
 def add_toggle(item, name, var):
