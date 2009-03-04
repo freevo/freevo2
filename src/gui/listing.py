@@ -64,6 +64,7 @@ class Listing(kaa.candy.Group):
         self.grid = None
         self.page = 0
         self.selected = None
+        self.menustate = 0
         self.add_dependency('menu')
 
     @property
@@ -144,10 +145,14 @@ class Listing(kaa.candy.Group):
         Prepare rendering
         """
         if self.grid:
-            return super(Listing, self)._candy_prepare()
+            if not 'grid' in self._sync_properties:
+                return super(Listing, self)._candy_prepare()
+            self.grid.unparent()
+            self.grid = None
         # create one label to get some information we need. This widget
         # is only to get the information, it will never be used
         menu = self.context.menu
+        self.menustate = menu.state
         content = self._template()
         self._create_children()
         menu.rows = self.grid.num_rows
@@ -204,6 +209,10 @@ class Listing(kaa.candy.Group):
         """
         super(Listing, self)._candy_context_sync(context)
         menu = self.context.menu
+        if self.menustate != menu.state:
+            # the menu changed somehow
+            self._queue_rendering()
+            self._sync_properties['grid'] = True
         if menu.selected == self.selected:
             return
         self.selected = menu.selected
