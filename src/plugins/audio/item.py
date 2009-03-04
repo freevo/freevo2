@@ -145,7 +145,7 @@ class AudioDiskItem(freevo.Playlist):
         items += play_items
         # BEACON_FIXME
         # if hasattr(self.info, 'mixed'):
-        #     d = freevo.DirItem(self.mountdir, self)
+        #     d = freevo.Directory(self.mountdir, self)
         #     d.name = _('Data files on disc')
         #     items.append(d)
         item_menu = freevo.Menu(self.name, items, type = 'audio')

@@ -111,8 +111,8 @@ class ItemList(object):
             return True
 
         if not self.choices or item is None:
-            # We have no choices and can't select. This could happen when
-            # a DirItem is no playing playlist
+            # We have no choices and can't select. This could happen
+            # when a Directory Item has no Items
             self.selected = None
             self.selected_pos = -1
             return True

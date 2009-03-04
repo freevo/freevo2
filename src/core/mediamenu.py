@@ -91,7 +91,7 @@ class MediaMenu(freevo.MainMenuItem):
                 # path is a directory
                 if os.path.isdir(filename):
                     for d in listing.get('beacon:dir'):
-                        d = freevo.DirItem(d, self, name = title, type = self.media_type)
+                        d = freevo.Directory(d, self, name = title, type = self.media_type)
                         items.append(d)
                     continue
 
@@ -121,7 +121,7 @@ class MediaMenu(freevo.MainMenuItem):
             for p in freevo.MediaPlugin.plugins(self.media_type):
                 items.extend(p.get(self, listing))
             for d in listing.get('beacon:dir'):
-                items.append(freevo.DirItem(d, self, name=media.label, type = self.media_type))
+                items.append(freevo.Directory(d, self, name=media.label, type = self.media_type))
         return items
 
 
