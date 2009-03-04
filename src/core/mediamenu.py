@@ -4,7 +4,8 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# This plugin can create submenus for the different kind of media plugins.
+# This plugin can create submenus for the different kind of media
+# plugins (video, audio, image)
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -40,6 +41,8 @@ import logging
 # kaa imports
 import kaa.beacon
 from kaa.weakref import weakref
+
+# freevo imports
 import api as freevo
 
 # get logging object
@@ -48,20 +51,16 @@ log = logging.getLogger()
 
 class MediaMenu(freevo.MainMenuItem):
     """
-    This is the main menu for different media types. It displays the default
-    directories, the beacon mountpoints and sub-plugins.
+    This is the main menu for different media types. It displays the
+    default directories, the beacon mountpoints, and sub-plugins.
     """
-
     def __init__(self, parent, title, type, items):
         super(MediaMenu, self).__init__(parent)
         self.media_type = type
         self.item_menu = None
-
         kaa.beacon.signals['media.add'].connect_weak(self.media_change)
         kaa.beacon.signals['media.remove'].connect_weak(self.media_change)
-
         self.name = title
-
         self._items = items
         for filename in self._items:
             if hasattr(filename, 'path'):
@@ -74,13 +73,13 @@ class MediaMenu(freevo.MainMenuItem):
                    not filename == '/':
                 kaa.beacon.monitor(filename)
 
-
     @kaa.coroutine()
-    def _get_config_items(self):
+    def _get_items(self):
         """
-        Generate items based on the config settings
+        Return items for the menu.
         """
         items = []
+        # Add items based on the config file
         for item in self._items:
             try:
                 # kaa.config object
@@ -91,10 +90,8 @@ class MediaMenu(freevo.MainMenuItem):
                 # path is a directory
                 if os.path.isdir(filename):
                     for d in listing.get('beacon:dir'):
-                        d = freevo.Directory(d, self, name = title, type = self.media_type)
-                        items.append(d)
+                        items.append(freevo.Directory(d, self, name = title, type = self.media_type))
                     continue
-
                 # normal file
                 for p in freevo.MediaPlugin.plugins(self.media_type):
                     p_items = p.get(self, listing)
@@ -102,18 +99,10 @@ class MediaMenu(freevo.MainMenuItem):
                         for i in p_items:
                             i.name = title
                     items += p_items
-
             except:
                 log.exception('Error parsing %s' % str(item))
                 continue
-        yield items
-
-
-    def _get_beacon_items(self):
-        """
-        Generate items based on beacon mountpoints
-        """
-        items = []
+        # Add items based on beacon mountpoints
         for media in kaa.beacon.list_media():
             if media.mountpoint == '/':
                 continue
@@ -122,27 +111,10 @@ class MediaMenu(freevo.MainMenuItem):
                 items.extend(p.get(self, listing))
             for d in listing.get('beacon:dir'):
                 items.append(freevo.Directory(d, self, name=media.label, type = self.media_type))
-        return items
-
-
-    def _get_plugin_items(self):
-        """
-        Generate items based on plugins
-        """
-        items = []
+        # Add items from plugins
         for p in freevo.MainMenuPlugin.plugins(self.media_type):
             items += p.items( self )
-        return items
-
-
-    @kaa.coroutine()
-    def _get_all_items(self):
-        """
-        Return items for the menu.
-        """
-        cfg = yield self._get_config_items()
-        yield cfg + self._get_beacon_items() + self._get_plugin_items()
-
+        yield items
 
     @kaa.coroutine()
     def select(self):
@@ -150,13 +122,12 @@ class MediaMenu(freevo.MainMenuItem):
         Display the media menu
         """
         # generate all other items
-        items = yield self._get_all_items()
+        items = yield self._get_items()
         type = '%s main menu' % self.media_type
         item_menu = freevo.Menu(self.name, items, type = type, reload_func = self.reload)
         item_menu.autoselect = True
         self.item_menu = weakref(item_menu)
         self.menustack.pushmenu(item_menu)
-
 
     @kaa.coroutine()
     def reload(self):
@@ -164,9 +135,8 @@ class MediaMenu(freevo.MainMenuItem):
         Reload the menu. maybe a disc changed or some other plugin.
         """
         if self.item_menu:
-            items = yield self._get_all_items()
+            items = yield self._get_items()
             self.item_menu.set_items(items)
-
 
     @kaa.coroutine()
     def media_change(self, media):
@@ -174,9 +144,8 @@ class MediaMenu(freevo.MainMenuItem):
         Media change from kaa.beacon
         """
         if self.item_menu:
-            items = yield self._get_all_items()
+            items = yield self._get_items()
             self.item_menu.set_items(items)
-
 
     def eventhandler(self, event):
         """

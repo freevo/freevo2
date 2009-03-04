@@ -4,8 +4,9 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# This file contains the main menu and a class for main menu plugins. There
-# is also eventhandler support for the main menu showing the skin chooser.
+# This file contains the main menu and a class for main menu
+# plugins. There is also eventhandler support for the main menu
+# showing the skin chooser.
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -50,8 +51,6 @@ class MainMenuItem(freevo.Item):
         super(MainMenuItem, self).__init__(parent)
         if name:
             self.name = name
-        # FIXME: add a relative path to the image/watermark
-        # of the item with the full path in the candy image path
         self.image = image
         self.type = type
         if not type and not parent.parent:
@@ -102,7 +101,6 @@ class MenuWidget(freevo.Application, freevo.MenuStack):
         self.status = freevo.STATUS_RUNNING
         self.signals['show'].connect_weak(self.refresh, True)
 
-
     def refresh(self, reload=False):
         if self.locked:
             return
@@ -123,12 +121,12 @@ class MenuWidget(freevo.Application, freevo.MenuStack):
 
 class MainMenu(freevo.Item):
     """
-    This class handles the main menu. It will start the main menu widget
-    and the first menu page based on the main menu plugins.
+    This class handles the main menu. It will start the main menu
+    widget and the first menu page based on the main menu plugins.
     """
     def __init__(self):
         """
-        Setup the main menu and handle events (remote control, etc)
+        Setup the main menu
         """
         super(MainMenu, self).__init__(None)
         items = []
