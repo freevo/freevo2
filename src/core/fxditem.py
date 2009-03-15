@@ -129,10 +129,11 @@ class PluginInterface(freevo.MediaPlugin):
             try:
                 doc = xml.dom.minidom.parse(fxd.filename)
                 doc.dirname = os.path.dirname(fxd.filename)
+                doc.filename = fxd.filename
                 tree = doc.firstChild
                 if tree.nodeName != 'freevo':
                     raise RuntimeError('%s is not fxd file' % fxd.filename)
-                doc = MiniDomWrapper(doc)
+                doc = MiniDomWrapper(tree)
                 items.extend(self._parse(doc, parent, listing, media_type))
             except:
                 log.exception("fxd file %s corrupt" % fxd.filename)

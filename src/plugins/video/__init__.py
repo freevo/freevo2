@@ -85,7 +85,7 @@ class PluginInterface(freevo.MediaPlugin, freevo.MainMenuPlugin):
         """
         return [ freevo.MediaMenu(parent, _('Watch a Movie'), 'video', freevo.config.video.items) ]
 
-    def fxdhandler_movie(node, parent, listing):
+    def fxdhandler_movie(self, node, parent, listing):
         """
         Callback for VideoItem <movie>::
 
@@ -119,17 +119,29 @@ class PluginInterface(freevo.MediaPlugin, freevo.MainMenuPlugin):
                     if f.get('name') == filename:
                         files.append(f)
                         break
-                # Remove from listing to hide in VideoItem
-                # FIXME: make this faster
-                ext = os.path.splitext(filename)[1][1:]
-                for key in (ext, 'beacon:video'):
-                    for f in listing.get(key):
-                        if f.get('name') == filename:
-                            listing.get(key).remove(f)
-                            break
         if len(files) > 1:
             log.error('BEACON_FIXME: VideoItem with more than one file')
             files = [ files[0] ]
+        image = node.image
+        if len(files) == 0:
+            basename = os.path.splitext(node.root.filename)[0]
+            for f in listing.get('beacon:all'):
+                if getattr(f, 'url') and f.url.startswith('file://') and \
+                   os.path.splitext(f.url[7:])[0] == basename:
+                    if f.get('type') == 'video':
+                        files.append(f)
+                    if f.get('type') == 'image' and not image:
+                        image = f.url
+        # Remove from listing to hide in VideoItem
+        # FIXME: make this faster
+        for f in files:
+            filename = f.get('name')
+            ext = os.path.splitext(filename)[1][1:]
+            for key in (ext, 'beacon:video'):
+                for f in listing.get(key):
+                    if f.get('name') == filename:
+                        listing.get(key).remove(f)
+                        break
         if len(files) == 0:
             log.error('BEACON_FIXME: VideoItem with bad file \n%s', node)
             return None
@@ -142,8 +154,8 @@ class PluginInterface(freevo.MediaPlugin, freevo.MainMenuPlugin):
         if node.title:
             item.set_name(node.title)
         # BEACON_FIXME: item.files.fxd_file  = fxd.filename
-        if node.image:
-            item.image = node.image
+        if image:
+            item.image = image
             # BEACON_FIXME: item.files.image = image
         return item
 
