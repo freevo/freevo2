@@ -185,7 +185,7 @@ class TaskManager(object):
         # aware of InProgress objects so if result is an InProgress
         # object we wait here using step().
         if isinstance(result, kaa.InProgress):
-            while not result.is_finished():
+            while not result.finished:
                 kaa.main.step()
 
 # create the global object
