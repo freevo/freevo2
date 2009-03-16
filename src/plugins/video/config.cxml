@@ -43,6 +43,11 @@
 		default option.
 	    </desc>
 	</group>
+
+	<group name="series" plugin="10">
+	    <desc>Show Video TV Series</desc>
+	</group>
+
     </group>
 
 </config>
