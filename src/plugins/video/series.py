@@ -99,12 +99,36 @@ class SeriesItem(freevo.Item):
         return [ freevo.Action(_('Browse Album from %s') % self.name, self.browse) ]
 
 
+class VideoItemPlugin(freevo.ItemPlugin):
+    """
+    VideoItem plugin to show other episodes of the series
+    """
+    def actions(self, item):
+        """
+        Return video item actions
+        """
+        if not item.get('tvdb_series'):
+            return []
+        parent = item.parent
+        while parent:
+            if isinstance(parent, (SeasonItem, SeriesItem)):
+                return []
+            parent = parent.parent
+        return [ freevo.Action(_('More videos from "%s"') % item.get('tvdb_series'), self.browse) ]
+
+    def browse(self, item):
+        return SeriesItem(item.get('tvdb_series'), item).browse()
+
+
 class PluginInterface(freevo.MainMenuPlugin):
     """
     Add 'Browse by Artist' to the audio menu.
     """
 
     plugin_media = 'video'
+
+    def plugin_activate(self, level):
+        freevo.activate_plugin(VideoItemPlugin(), level=40)
 
     @kaa.coroutine()
     def series(self, parent):
