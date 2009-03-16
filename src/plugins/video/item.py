@@ -35,7 +35,7 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'VideoItems', 'VideoPlaylist' ]
+__all__ = [ 'VideoItem', 'VideoPlaylist' ]
 
 # python imports
 import logging
