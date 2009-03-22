@@ -103,7 +103,7 @@ class MediaMenu(freevo.MainMenuItem):
                 log.exception('Error parsing %s' % str(item))
                 continue
         # Add items based on beacon mountpoints
-        for media in kaa.beacon.list_media():
+        for media in (yield kaa.beacon.list_media()):
             if media.mountpoint == '/':
                 continue
             listing = kaa.beacon.wrap(media.root, filter='extmap')
