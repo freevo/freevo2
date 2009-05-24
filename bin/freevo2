@@ -150,10 +150,10 @@ if not os.path.isfile(cfgfile):
     print 'You should recheck freevo2.conf after every svn update. Use'
     print '\'freevo setup\' to rebuild the file without starting freevo.'
     print 'Your settings will be saved when the config file is rewritten.'
-    freevo2.core.config.load(cfgfile, create=True)
+    freevo2.core.config.load(cfgfile, sync=True)
     sys.exit(0)
 
-freevo2.core.config.load(cfgfile, create=True)
+freevo2.core.config.load(cfgfile, sync=True)
 if len(sys.argv) > 1 and sys.argv[1] in ('setup', '--setup', 'config', '--config'):
     print 'wrote %s' % cfgfile
     sys.exit(0)
