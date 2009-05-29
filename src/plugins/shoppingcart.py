@@ -64,8 +64,7 @@ class PluginInterface(freevo.ItemPlugin):
         """
         Move/Copy items to the given directory.
         """
-        kaa.ThreadCallback(self.__move_or_copy_thread, self.cart, operation,
-                           item.filename)()
+        kaa.ThreadCallable(self.__move_or_copy_thread)(self.cart, operation, item.filename)
         self.cart = []
         item.menustack.back_submenu()
 

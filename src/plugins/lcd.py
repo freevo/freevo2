@@ -153,7 +153,7 @@ class PluginInterface( freevo.Plugin ):
 
         item = self.playitem
 
-        cb = kaa.Callback(replace, locals())
+        cb = kaa.Callable(replace, locals())
 
         for w in self.current[2:]:
             args = []

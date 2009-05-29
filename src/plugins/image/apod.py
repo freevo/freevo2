@@ -102,7 +102,7 @@ class ApodMainMenuItem(freevo.Item):
         box = freevo.TextWindow(text=_('Getting picture, please wait'))
         box.show()
 
-        async = kaa.ThreadCallback(self._fetch_picture_thread)()
+        async = kaa.ThreadCallable(self._fetch_picture_thread)()
         async.connect(self._fetch_picture_finished, box)
         async.exception.connect(self._fetch_picture_error, box)
 
