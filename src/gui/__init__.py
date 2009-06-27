@@ -38,8 +38,7 @@ from window import Window
 from config import config
 
 # import all widgets
-for widget in kaa.utils.get_plugins(os.path.dirname(__file__)):
-    exec('import %s as submodule' % widget)
+kaa.utils.get_plugins(group='freevo.gui.plugins', location=__file__)
 
 window = None
 signals = None
