@@ -29,6 +29,7 @@
 #
 # -----------------------------------------------------------------------------
 
+import kaa
 import api as __api__
 import event as __event__
 for obj in dir(__event__):
@@ -46,3 +47,7 @@ for module in ('menu', 'taskmanager', 'application', 'window', 'fxditem', 'playl
             setattr(__api__, obj, getattr(module, obj))
 from api import *
 __all__ = __api__.__all__
+
+@kaa.coroutine()
+def init():
+    yield beacon.connect()

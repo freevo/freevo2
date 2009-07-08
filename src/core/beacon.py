@@ -72,11 +72,12 @@ def register_attributes(info):
                freevo_config = (dict, kaa.beacon.ATTR_SIMPLE),
                last_played = (int, kaa.beacon.ATTR_SEARCHABLE))
 
-kaa.beacon.register_filter('extmap', extmap_filter)
-try:
-    kaa.beacon.connect().wait()
-except kaa.beacon.ConnectError:
-    kaa.beacon.launch(verbose='all', autoshutdown=True).wait()
-
-# get db info and connect additional attributes
-kaa.beacon.get_db_info().connect(register_attributes)
+@kaa.coroutine()
+def connect():
+    kaa.beacon.register_filter('extmap', extmap_filter)
+    try:
+        yield kaa.beacon.connect()
+    except kaa.beacon.ConnectError:
+        yield kaa.beacon.launch(verbose='all', autoshutdown=True)
+    # get db info and connect additional attributes
+    register_attributes((yield kaa.beacon.get_db_info()))

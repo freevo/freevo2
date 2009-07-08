@@ -139,6 +139,8 @@ logger.setLevel(logging.WARNING)
 import freevo2.gui
 import freevo2.core
 
+freevo2.core.init().wait()
+
 cfgfile = os.path.expanduser('~/.freevo/freevo2.conf')
 if '-c' in sys.argv:
     cfgfile = sys.argv[sys.argv.index('-c')+1]
