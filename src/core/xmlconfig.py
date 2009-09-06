@@ -34,7 +34,7 @@ __all__ = [ 'xmlconfig' ]
 # python imports
 import os
 import stat
-import md5
+import hashlib
 from xml.dom import minidom
 
 # kaa imports
@@ -44,7 +44,7 @@ import kaa.distribution.xmlconfig
 def xmlconfig(configfile, sources, package):
 
     hashkey = [ f+str(os.stat(f)[stat.ST_MTIME]) for f in sources ]
-    hashkey = md5.new(''.join(hashkey)).hexdigest()
+    hashkey = hashlib.md5(''.join(hashkey)).hexdigest()
 
     if os.path.isfile(configfile):
         fd = open(configfile)
