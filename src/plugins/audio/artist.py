@@ -67,8 +67,8 @@ class AlbumItem(freevo.Item):
             query = dict(artist=self.artist, type='audio')
         # FIXME: monitor query for live update
         async = kaa.beacon.query(**query)
-        self.playlist = freevo.Playlist(title, async, self, type='audio')
-        self.playlist.browse()
+        self.pl = freevo.Playlist(title, async, self, type='audio')
+        self.pl.browse()
 
     def actions(self):
         """
