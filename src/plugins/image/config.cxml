@@ -7,10 +7,10 @@
             and name. To set the subdir image in your home directory and
             /image write
 
-            image.items[0].path = $(HOME)/image
-            image.items[0].name = My Home Images
-            image.items[1].path = /image
-            image.items[1].name = My Local Images
+            image.items[+].path = $(HOME)/image
+            image.items[ ].name = My Home Images
+            image.items[+].path = /image
+            image.items[ ].name = My Local Images
         </desc>
         <var name="path" type="str">
             <desc>Path of the directory / file.</desc>

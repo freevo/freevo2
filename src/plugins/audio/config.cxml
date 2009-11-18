@@ -7,10 +7,10 @@
             and name. To set the subdir audio in your home directory and
             /audio write
 
-            audio.items[0].path = $(HOME)/audio
-            audio.items[0].name = My Music
-            audio.items[1].path = /audio
-            audio.items[1].name = More Music
+            audio.items[+].path = $(HOME)/audio
+            audio.items[ ].name = My Music
+            audio.items[+].path = /audio
+            audio.items[ ].name = More Music
         </desc>
         <var name="path" type="str">
             <desc>Path of the directory / file.</desc>

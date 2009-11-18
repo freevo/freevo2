@@ -7,10 +7,10 @@
             and name. To set the subdir video in your home directory and
             /video write
 
-            video.items[0].path = $(HOME)/video
-            video.items[0].name = My Home Videos
-            video.items[1].path = /video
-            video.items[1].name = My Local Videos
+            video.items[+].path = $(HOME)/video
+            video.items[ ].name = My Home Videos
+            video.items[+].path = /video
+            video.items[ ].name = My Local Videos
         </desc>
         <var name="path" type="str">
             <desc>Path of the directory / file.</desc>
