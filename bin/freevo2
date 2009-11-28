@@ -166,6 +166,7 @@ if freevo2.core.config.debug:
     # kaa.base.
     logging.getLogger().setLevel(logging.INFO)
 
+freevo2.core.config.save(force=True)
 freevo2.core.config.watch()
 
 # Configure gui
