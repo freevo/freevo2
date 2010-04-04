@@ -29,12 +29,18 @@
 #
 # -----------------------------------------------------------------------------
 
+# python imports
+import logging
+
 # kaa imports
 import kaa
 from kaa.utils import property
 
 # gui imports
 import kaa.candy
+
+# get logging object
+log = logging.getLogger('audio')
 
 class Listing(kaa.candy.Group):
     """
@@ -152,6 +158,9 @@ class Listing(kaa.candy.Group):
         # create one label to get some information we need. This widget
         # is only to get the information, it will never be used
         menu = self.context.menu
+        if not menu:
+            log.error('no menu given')
+            return
         self.menustate = menu.state
         content = self._template()
         self._create_children()

@@ -44,9 +44,10 @@
 	    </desc>
 	</group>
 
-	<group name="series" plugin="10">
-	    <desc>Show Video TV Series</desc>
-	</group>
+	<!-- This plugin depends on kaa.webmetadata -->
+	<!-- <group name="series" plugin="10"> -->
+	<!--     <desc>Show Video TV Series</desc> -->
+	<!-- </group> -->
 
     </group>
 
