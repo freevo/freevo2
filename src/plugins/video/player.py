@@ -41,6 +41,7 @@ import kaa.popcorn
 
 # Freevo imports
 from ... import core as freevo
+from ... import gui as gui
 
 # get logging object
 log = logging.getLogger('video')
@@ -55,7 +56,7 @@ class Player(freevo.Application):
     def __init__(self):
         capabilities = (freevo.CAPABILITY_FULLSCREEN, )
         super(Player, self).__init__('video', capabilities)
-        self.player = kaa.popcorn.Player()
+        self.player = kaa.popcorn.Player(gui.window)
         # self.player.set_window(self.engine.get_window())
         self.elapsed_timer = kaa.WeakTimer(self.elapsed)
 
