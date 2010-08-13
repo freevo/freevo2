@@ -42,7 +42,10 @@ import kaa.distribution.xmlconfig
 
 
 def xmlconfig(configfile, sources, package):
-
+    """
+    Write kaa.config XML file for Freevo. Reading it again is done in
+    kaa.config without extra function here.
+    """
     hashkey = [ f+str(os.stat(f)[stat.ST_MTIME]) for f in sources ]
     hashkey = hashlib.md5(''.join(hashkey)).hexdigest()
 
