@@ -71,18 +71,21 @@ for e in events:
 # plugins is a list of known plugins loaded from pycfgfile
 # activate all of them
 num_plugins = 0
-for plugin in plugins:
-    group = config
-    for attr in plugin.split('.'):
-        group = getattr(group, attr)
-    if group.activate:
-        plugin = plugin.replace('plugin.', '').replace('..', '.')
-        num_plugins += 1
-        if isinstance(group.activate, bool):
-            activate_plugin(plugin)
-        else:
-            activate_plugin(plugin, level=group.activate)
 
+def _check_for_plugins():
+    global num_plugins
+    for plugin in plugins:
+        group = config
+        for attr in plugin.split('.'):
+            group = getattr(group, attr)
+        if group.activate:
+            plugin = plugin.replace('plugin.', '').replace('..', '.')
+            num_plugins += 1
+            if isinstance(group.activate, bool):
+                activate_plugin(plugin)
+            else:
+                activate_plugin(plugin, level=group.activate)
+        
 from resources import ResourceHandler
 
 import util

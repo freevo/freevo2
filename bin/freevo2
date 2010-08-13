@@ -139,8 +139,6 @@ logger.setLevel(logging.WARNING)
 import freevo2.gui
 import freevo2.core
 
-freevo2.core.init().wait()
-
 cfgfile = os.path.expanduser('~/.freevo/freevo2.conf')
 if '-c' in sys.argv:
     cfgfile = sys.argv[sys.argv.index('-c')+1]
@@ -168,6 +166,8 @@ if freevo2.core.config.debug:
 
 freevo2.core.config.save(force=True)
 freevo2.core.config.watch()
+
+freevo2.core.init().wait()
 
 # Configure gui
 kaa.candy.config.performance_debug = True
