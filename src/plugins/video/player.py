@@ -57,8 +57,8 @@ class Player(freevo.Application):
         capabilities = (freevo.CAPABILITY_FULLSCREEN, )
         super(Player, self).__init__('video', capabilities)
         self.player = kaa.popcorn.Player()
-        self.player.window = kaa.popcorn.PlayerIndependentWindow()
-        self.player.window.fullscreen = True
+        # FIXME: only do this if freevo is running fullscreen
+        self.player.window.set_fullscreen(True)
         self.elapsed_timer = kaa.WeakTimer(self.elapsed)
 
 
