@@ -56,7 +56,10 @@ class Player(freevo.Application):
         capabilities = (freevo.CAPABILITY_TOGGLE, freevo.CAPABILITY_PAUSE)
         super(Player, self).__init__('audio', capabilities)
         self.player = kaa.popcorn.Player()
+        self.player.window = False
         self.elapsed_timer = kaa.WeakTimer(self.elapsed)
+        self.PLAY_START = freevo.Event(freevo.PLAY_START, handler=self.eventhandler)
+        self.PLAY_END = freevo.Event(freevo.PLAY_END, handler=self.eventhandler)
 
 
     @kaa.coroutine()
@@ -100,21 +103,21 @@ class Player(freevo.Application):
         self.status = freevo.STATUS_RUNNING
 
         # Open media item and start playback
-        play_start = freevo.Event(freevo.PLAY_START, handler=self.eventhandler)
-        play_end = freevo.Event(freevo.PLAY_END, handler=self.eventhandler)
-        self.player.signals['end'].connect_once(play_end.post, self.item)
+        self.player.signals['finished'].connect_once(self.PLAY_END.post, self.item)
+        self.player.signals['stop'].connect_once(self.PLAY_END.post, self.item)
         try:
             yield self.player.open(self.item.url)
             yield self.player.play()
-            play_start.post(self.item)
+            self.PLAY_START.post(self.item)
         except kaa.popcorn.PlayerError, e:
-            self.player.signals['end'].disconnect(play_end.post, self.item)
+            self.player.signals['finished'].disconnect(self.PLAY_END.post, self.item)
+            self.player.signals['stop'].disconnect(self.PLAY_END.post, self.item)
             log.exception('video playback failed')
             # We should handle it here with a messge or something like that. To
             # make playlist work, we just send start and stop. It's ugly but it
             # should work.
-            play_start.post(self.item)
-            play_end.post(self.item)
+            self.PLAY_START.post(self.item)
+            self.PLAY_END.post(self.item)
         yield True
 
 
@@ -132,7 +135,7 @@ class Player(freevo.Application):
         """
         Callback for elapsed time changes.
         """
-        self.item.elapsed = round(self.player.position)
+        self.item.elapsed = round(self.player.stream.position)
         self.gui_context.sync()
 
 
@@ -156,6 +159,8 @@ class Player(freevo.Application):
             # Now the player has stopped (either we called self.stop() or the
             # player stopped by itself. So we need to set the application to
             # to stopped.
+            self.player.signals['finished'].disconnect(self.PLAY_END.post, self.item)
+            self.player.signals['stop'].disconnect(self.PLAY_END.post, self.item)
             self.status = freevo.STATUS_STOPPED
             self.elapsed_timer.stop()
             self.item.eventhandler(event)
@@ -164,10 +169,10 @@ class Player(freevo.Application):
             return True
 
         if event in (freevo.PAUSE, freevo.PLAY):
-            if self.player.get_state() == kaa.popcorn.STATE_PLAYING:
+            if self.player.state == kaa.popcorn.STATE_PLAYING:
                 self.suspend()
                 return True
-            if self.player.get_state() == kaa.popcorn.STATE_PAUSED:
+            if self.player.state == kaa.popcorn.STATE_PAUSED:
                 self.resume()
                 return True
             return False
@@ -193,7 +198,7 @@ class Player(freevo.Application):
         # FIXME: make sure this function is not called twice
         if not self.status == freevo.STATUS_RUNNING:
             yield False
-        if self.player.get_state() == kaa.popcorn.STATE_PAUSED:
+        if self.player.state == kaa.popcorn.STATE_PAUSED:
             yield None
         # FIXME: what happens if we send pause() the same time the file
         # is finished? This would create a race condition.
@@ -210,7 +215,7 @@ class Player(freevo.Application):
         # FIXME: make sure this function is not called twice
         if not self.status == freevo.STATUS_RUNNING:
             yield False
-        if self.player.get_state() == kaa.popcorn.STATE_PLAYING:
+        if self.player.state == kaa.popcorn.STATE_PLAYING:
             yield False
         blocked = yield self.get_resources('AUDIO')
         if blocked == False:
