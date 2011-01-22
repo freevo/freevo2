@@ -152,7 +152,7 @@ class PluginInterface(freevo.MediaPlugin, freevo.MainMenuPlugin):
         # an in beacon solution.
         item.fxdinfo = dict(node.info)
         if node.title:
-            item.set_name(node.title)
+            item.name = node.title
         # BEACON_FIXME: item.files.fxd_file  = fxd.filename
         if image:
             item.image = image

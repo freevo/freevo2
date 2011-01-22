@@ -7,12 +7,9 @@
 # This file contains a VideoItem. A VideoItem can not only hold a simple
 # video file. DVD and VCD are also VideoItems.
 #
-# TODO: o maybe split this file into file/vcd/dvd or
-#       o create better 'arg' handling in play
-#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2009 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2011 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -53,62 +50,17 @@ import player as videoplayer
 # get logging object
 log = logging.getLogger('video')
 
-# compile VIDEO_SHOW_REGEXP
-regexp = freevo.config.video.show_regexp
-VIDEO_SHOW_REGEXP_MATCH = re.compile("^.*" + regexp).match
-VIDEO_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + regexp + "[\.\- ]*").split
-
 class VideoItem(freevo.MediaItem):
     type = 'video'
 
     def __init__(self, url, parent):
         super(VideoItem, self).__init__(parent)
         self.user_stop = False
-
         self.subtitle_file     = {}         # text subtitles
         self.audio_file        = {}         # audio dubbing
-
         self.selected_subtitle = None
         self.selected_audio    = None
-
-        # set url and parse the name
         self.set_url(url)
-
-
-    def set_name(self, name):
-        """
-        Set the item name and parse additional informations after title and
-        filename is set.
-        """
-        if name:
-            self.name = name
-        else:
-            self.name = ''
-        show_name = None
-        self.tv_show = False
-
-        if self.info['episode'] and self.info['subtitle']:
-            # get informations for recordings
-            show_name = (self.name, '', self.info['episode'], \
-                         self.info['subtitle'])
-        elif VIDEO_SHOW_REGEXP_MATCH(self.name):
-            # split tv show files based on regexp
-            show_name = VIDEO_SHOW_REGEXP_SPLIT(self.name)
-            if show_name[0] and show_name[1] and show_name[2] and show_name[3]:
-                self.name = show_name[0] + u" " + show_name[1] + u"x" + \
-                            show_name[2] + u" - " + show_name[3]
-            else:
-                show_name = None
-
-        if show_name:
-            # This matches a tv show with a show name, an epsiode and
-            # a title of the specific episode
-            sn = kaa.unicode_to_str(show_name[0].lower())
-            self.tv_show = True
-            self.show_name = show_name
-            self.tv_show_name = show_name[0]
-            self.tv_show_ep = show_name[3]
-
 
     def set_url(self, url):
         """
@@ -130,15 +82,14 @@ class VideoItem(freevo.MediaItem):
             else:
                 # normal dvd or vcd
                 self.filename = ''
-
         elif self.url.endswith('.iso') and self.info['mime'] == 'video/dvd':
             # dvd iso
-            self.mode     = 'dvd'
-            self.url      = 'dvd' + self.url[4:] + '/'
-
-        # start name parser by setting name to itself
-        self.set_name(self.name)
-
+            self.mode = 'dvd'
+            self.url = 'dvd' + self.url[4:] + '/'
+        if self.info['series'] and self.info['season'] and self.info['episode'] and self.info['title']:
+            # FIXME: make this a configure option
+            self.name = '%s %sx%s - %s' % (
+                self.info['series'], self.info['season'], self.info['episode'], self.info['title'])
 
     def get_geometry(self):
         """
@@ -147,7 +98,6 @@ class VideoItem(freevo.MediaItem):
         if self.get('width') and self.get('height'):
             return '%sx%s' % (self.get('width'), self.get('height'))
         return None
-
 
     def get_aspect(self):
         """
@@ -175,12 +125,8 @@ class VideoItem(freevo.MediaItem):
                       freevo.Action(_('VCD title list'), self.dvd_vcd_title_menu) ]
         else:
             items = [ freevo.Action(_('Play'), self.play) ]
-
         # Add the configure stuff (e.g. set audio language)
-        items += configure.get_items(self)
-
-        return items
-
+        return items + configure.get_items(self)
 
     @kaa.coroutine()
     def dvd_vcd_title_menu(self):
@@ -189,7 +135,6 @@ class VideoItem(freevo.MediaItem):
         """
         # delete the submenu that got us here
         self.menustack.back_submenu(False)
-
         # build a menu
         items = []
         for track in (yield self.info.list()):
@@ -203,7 +148,6 @@ class VideoItem(freevo.MediaItem):
         moviemenu.type = 'video'
         self.menustack.pushmenu(moviemenu)
 
-
     def play(self, **kwargs):
         """
         Play the item.
@@ -212,13 +156,11 @@ class VideoItem(freevo.MediaItem):
         self.elapsed = 0
         videoplayer.play(self, **kwargs)
 
-
     def stop(self):
         """
         stop playing
         """
         videoplayer.stop()
-
 
     def eventhandler(self, event):
         """
@@ -231,7 +173,6 @@ class VideoItem(freevo.MediaItem):
                 self['last_played'] = int(time.time())
                 self.user_stop = False
         super(VideoItem, self).eventhandler(event)
-
 
 
 class VideoPlaylist(freevo.Playlist):
