@@ -97,7 +97,7 @@ class Menu(ItemList):
             c.menu = None
 
         # set new choices and selection
-        ItemList.set_items(self, items)
+        ItemList.set_items(self, items, self.selected)
 
         # set menu (self) pointer to the items
         sref = weakref(self)
