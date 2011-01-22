@@ -4,15 +4,15 @@
 # -----------------------------------------------------------------------------
 # $Id: artist.py 11339 2009-03-02 20:09:32Z dmeyer $
 #
-# This plugin adds an item 'Browse by Artists' to the audio menu. The user
-# can select an artist and after that an album of that artist (or all).
+# This plugin adds an item 'Browse TV Series' to the video menu. The user
+# can select an season and after that an episode.
 #
 # This plugin is also a simple example how to write plugins and how to use
 # kaa.beacon in freevo.
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2006-2009 Dirk Meyer, et al.
+# Copyright (C) 2006-2011 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -38,10 +38,17 @@
 # Kaa imports
 import kaa
 import kaa.beacon
+try:
+    import kaa.webmetadata
+except ImportError:
+    kaa.webmetadata = None
 
 # Freevo imports
 from ... import core as freevo
 from item import VideoItem
+
+if kaa.webmetadata:
+    kaa.webmetadata.init('~/.beacon')
 
 class SeasonItem(freevo.Item):
     """
@@ -58,12 +65,11 @@ class SeasonItem(freevo.Item):
         """
         Show all albums from the artist.
         """
-        query = yield kaa.beacon.query(tvdb_series=self.series, tvdb_season=self.season, type='video')
+        query = yield kaa.beacon.query(series=self.series, season=self.season, type='video')
         items = []
         for epsiode in query:
             v = VideoItem(epsiode, self)
-            # FIXME: maybe add the episode number
-            v.name = epsiode.get('tvdb_title')
+            v.name = epsiode.get('title')
             items.append(v)
         self.menustack.pushmenu(freevo.Menu(_('Season'), items, type='video'))
 
@@ -82,66 +88,100 @@ class SeriesItem(freevo.Item):
         super(SeriesItem, self).__init__(parent)
         self.series = series
         self.name = series
+        if kaa.webmetadata:
+            series = kaa.webmetadata.parse('thetvdb:' + self.name)
+            if series:
+                choice = -1, None
+                for poster in series[1].poster:
+                    try:
+                        rating = float(poster.get('Rating', 0))
+                    except ValueError:
+                        rating = 0
+                    if rating > choice[0]:
+                        choice = rating, poster['BannerPath']
+                self.thumbnail = freevo.Image(choice[1])
 
     @kaa.coroutine()
     def browse(self):
         """
         Show all albums from the artist.
         """
-        query = yield kaa.beacon.query(attr='tvdb_season', tvdb_series=self.series, type='video')
+        query = yield kaa.beacon.query(attr='season', series=self.series, type='video')
         items = [ SeasonItem(('Season %s') % season, self.series, season, self) for season in query ]
-        self.menustack.pushmenu(freevo.Menu(_('Season'), items, type='video'))
+        self.menustack.pushmenu(freevo.Menu(_('Season'), items))
 
     def actions(self):
         """
         Actions for this item.
         """
-        return [ freevo.Action(_('Browse Album from %s') % self.name, self.browse) ]
+        actions = [ freevo.Action(_('Seasons'), self.browse) ]
+        if kaa.webmetadata:
+            if not kaa.webmetadata.parse('thetvdb:' + self.name):
+                actions.append(freevo.Action(_('Search for metadata'), self.search_metadata))
+        return actions
 
+    @kaa.coroutine()
+    def search_metadata(self):
+        actions = []
+        result = kaa.webmetadata.search('thetvdb:' + self.name)
+        if result is None:
+            # FIXME: error handling
+            return
+        msg = freevo.TextWindow(_('Searching'))
+        msg.show()
+        try:
+            result = yield result
+            for id, name, date, description, metadata in result:
+                func = kaa.Callable(self.set_metadata, id)
+                if date:
+                    name = '%s (%s)' % (name, date)
+                actions.append(freevo.ActionItem(name, self, func, description))
+        except Exception:
+            freevo.Event(freevo.OSD_MESSAGE, _('Error')).post()
+        msg.hide()
+        if not actions:
+            freevo.Event(freevo.OSD_MESSAGE, _('Series not found')).post()
+            self.menustack.back_one_menu()
+        else:
+            self.menustack.pushmenu(freevo.Menu(_('Search Results'), actions))
 
-class VideoItemPlugin(freevo.ItemPlugin):
-    """
-    VideoItem plugin to show other episodes of the series
-    """
-    def actions(self, item):
-        """
-        Return video item actions
-        """
-        if not item.get('tvdb_series'):
-            return []
-        parent = item.parent
-        while parent:
-            if isinstance(parent, (SeasonItem, SeriesItem)):
-                return []
-            parent = parent.parent
-        return [ freevo.Action(_('More videos from "%s"') % item.get('tvdb_series'), self.browse) ]
-
-    def browse(self, item):
-        return SeriesItem(item.get('tvdb_series'), item).browse()
-
+    @kaa.coroutine()
+    def set_metadata(self, item, id):
+        msg = freevo.TextWindow(_('Fetching Metadata'))
+        msg.show()
+        try:
+            yield kaa.webmetadata.match('thetvdb:' + self.name, id)
+        except Exception, e:
+            log.exception('error fetching metadata')
+            freevo.Event(freevo.OSD_MESSAGE, _('Error')).post()
+        msg.hide()
+        self.menustack.back_one_menu()
+        self.menustack.back_one_menu()
+        items = []
+        parent = self.menustack.current.get_items()[0]
+        for series in (yield kaa.beacon.query(attr='series', type='video')):
+            items.append(SeriesItem(series, parent))
+        self.menustack.current.set_items(items)
 
 class PluginInterface(freevo.MainMenuPlugin):
     """
-    Add 'Browse by Artist' to the audio menu.
+    Add 'Browse by TV Series' to the audio menu.
     """
 
     plugin_media = 'video'
 
-    def plugin_activate(self, level):
-        freevo.activate_plugin(VideoItemPlugin(), level=40)
-
     @kaa.coroutine()
-    def series(self, parent):
+    def show(self, parent):
         """
-        Show all artists.
+        Show all series.
         """
         items = []
-        for series in (yield kaa.beacon.query(attr='tvdb_series', type='video')):
+        for series in (yield kaa.beacon.query(attr='series', type='video')):
             items.append(SeriesItem(series, parent))
-        parent.menustack.pushmenu(freevo.Menu(_('Series'), items, type='video'))
+        parent.menustack.pushmenu(freevo.Menu(_('Browse TV Series'), items, type='video'))
 
     def items(self, parent):
         """
         Return the main menu item.
         """
-        return [ freevo.ActionItem(_('Browse by TV Series'), parent, self.series) ]
+        return [ freevo.ActionItem(_('Browse TV Series'), parent, self.show) ]
