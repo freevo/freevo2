@@ -24,14 +24,6 @@
         <desc>Comma seperated list of video suffixes.</desc>
     </var>
 
-    <var name="show-regexp" 
-        default="s?([0-9]|[0-9][0-9])[xe]([0-9]|[0-9][0-9])[^0-9]">
-        <desc>
-            Regular expression to detect tv show by name, season, epsiode
-            and title. Do not change this unless you know what you are doing.
-        </desc>
-    </var>
-
     <group name="plugin">
         <desc lang="en">video plugins</desc>
 
@@ -44,10 +36,9 @@
 	    </desc>
 	</group>
 
-	<!-- This plugin depends on kaa.webmetadata -->
-	<!-- <group name="series" plugin="10"> -->
-	<!--     <desc>Show Video TV Series</desc> -->
-	<!-- </group> -->
+	<group name="series" plugin="False">
+	    <desc>Show Video TV Series</desc>
+	</group>
 
     </group>
 
