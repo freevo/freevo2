@@ -153,7 +153,6 @@ class Player(freevo.Application):
         React on some events or send them to the real player or the
         item belongig to the player
         """
-        print event
         if event == freevo.STOP:
             # Stop the player and pass the event to the item
             self.stop()
