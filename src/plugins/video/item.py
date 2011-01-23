@@ -87,8 +87,9 @@ class VideoItem(freevo.MediaItem):
             self.mode = 'dvd'
             self.url = 'dvd' + self.url[4:] + '/'
         if self.info['series'] and self.info['season'] and self.info['episode'] and self.info['title']:
-            # FIXME: make this a configure option
-            self.name = '%s %sx%s - %s' % (
+            # FIXME: make this a configure option and fix sorting if
+            # season is >9
+            self.name = '%s %dx%02d - %s' % (
                 self.info['series'], self.info['season'], self.info['episode'], self.info['title'])
 
     def get_geometry(self):
