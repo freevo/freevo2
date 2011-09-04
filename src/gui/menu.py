@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2008 Dirk Meyer, et al.
+# Copyright (C) 2008-2011 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -36,7 +36,7 @@ import kaa.candy
 # gui imports
 from application import Application
 
-class MenuType(kaa.candy.Container):
+class MenuType(kaa.candy.Group):
     """
     Menu implementation, style default
     """
@@ -46,17 +46,6 @@ class MenuType(kaa.candy.Container):
     def __init__(self, widgets, context=None):
         super(MenuType, self).__init__(None, None, widgets, context=context)
         self.cid = context.get('menu').id
-
-    def _candy_context_prepare(self, context):
-        """
-        Try if the widget is capable of handling the context.
-
-        @param context: context dict
-        """
-        if self.cid != context.get('menu').id:
-            # print 'menu change', self.context.get('menu').pos, context.get('menu').pos
-            self.cid = context.get('menu').id
-        return super(MenuType, self)._candy_context_prepare(context)
 
     @classmethod
     def candyxml_parse(cls, element):
@@ -72,10 +61,11 @@ class MenuType(kaa.candy.Container):
             kwargs = theme._elements.get(element.node)[inherit.name]._kwargs
             widgets.extend(kwargs.get('widgets'))
         widgets.extend(super(MenuType, cls).candyxml_parse(element).get('widgets'))
-        return dict(widgets=widgets)
+        return kaa.candy.XMLdict(widgets=widgets)
 
     def __del__(self):
         print 'del', self.context.get('type')
+        super(MenuType, self).__del__()
 
 class MenuApplication(Application):
     """
@@ -83,8 +73,8 @@ class MenuApplication(Application):
     """
     candyxml_style = 'menu:simple'
 
-    def __init__(self, widgets, context=None):
-        super(MenuApplication, self).__init__(widgets, context)
+    def __init__(self, widgets, background=None, context=None):
+        super(MenuApplication, self).__init__(widgets, background, context)
         self.templates = self.theme.get('menu')
         name = context.get('menu').type
         if not name in self.templates:
@@ -94,36 +84,25 @@ class MenuApplication(Application):
         self.menu.type = name
         self.add(self.menu)
 
-    def _candy_context_prepare(self, context):
-        """
-        Try if the widget is capable of handling the context. This does not
-        modify any internal variables and is thread safe.
-
-        @param context: context dict
-        """
-        if not super(MenuApplication, self)._candy_context_prepare(context):
-            return False
-        name = context.get('menu').type
+    def sync_context(self):
+        name = self.context.get('menu').type
         if not name in self.templates:
             name = 'default'
         if self.menu.type == name:
-            return True
+            return super(MenuApplication, self).sync_context()
+        # FIXME: this code should use supports_context in the MenuType
+        # itself somehow. It has to know its template and what
+        # templates we have.
         template = self.templates.get(name)
         if template == self.__template:
             # same template, just update the existing one
             self.menu.type = name
-            return True
+            return super(MenuApplication, self).sync_context()
         self.__template = template
-        menu = template(context)
-        menu.type = name
-        menu.prepare(self)
-        self.menu.userdata['context:replace'] = menu
-        return True
-
-    def _candy_replace_child(self, child, replace, context):
-        """
-        Replace child with a new one.
-        """
-        if child == self.menu:
-            self.menu = replace
-        return super(MenuApplication, self)._candy_replace_child(child, replace, context)
+        # FIXME: put new child at the same position in the stack as
+        # the old one
+        new = template(self.context)
+        new.type = name
+        self.replace(self.menu, new)
+        self.menu = new
+        super(MenuApplication, self).sync_context()

@@ -1,96 +1,73 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <theme geometry="800x600">
 
+    <script filename='scripts.py'/>
+
     <menu name="audio" style="default">
 	<alias name="audio main menu"/>
-	<container x="10" y="100" width="270" height="490">
+	<event name="replace" script="menu"/>
+	<group x="10" y="100" width="270" height="490">
 	    <rectangle color="0xcc000000" radius="30"/>
-	    <container depends="item">
-		<thumbnail x="10" y="10" width="250" height="250" thumbnail="$item.thumbnail"/>
+	    <group>
+		<thumbnail x="10" y="10" width="250" height="250" thumbnail="$item.thumbnail">
+		    <replace-on-context-change keys="item.artist item.album" script="fade"/>
+		</thumbnail>
 		<label x="10" y="280" width="230" font="Vera:20" color="0xffffff">
+		    <replace-on-context-change keys="item.name" script="fade"/>
 		    $item.name
 		</label>
 		<label x="10" y="320" width="230" font="Vera:18" color="0xffffff">
+		    <replace-on-context-change keys="item.artist" script="fade"/>
 		    $item.artist
 		</label>
 		<label x="10" y="340" width="230" font="Vera:18" color="0xffffff">
+		    <replace-on-context-change keys="item.album" script="fade"/>
 		    $item.album
 		</label>
-		<eventhandler event="show">
-		    <animate secs="0.2" behaviour="opacity" start="0" end="255"/>
-		</eventhandler>
-		<eventhandler event="hide">
-		    <animate secs="0.2" behaviour="opacity" end="100"/>
-		</eventhandler>
-	    </container>
-	</container>
-
-        <listing style="fixed-selection" x="300" y="100" width="490" height="490" spacing="6">
+	    </group>
+	</group>
+        <listing x="300" y="100" width="490" height="490" xpadding="20" ypadding="10">
 	    <label font="Vera" height="30" color="0xcccccc">
-		<properties xpadding="10" ypadding="2"/>
+		<properties opacity="150"/>
 		$item.name
 	    </label>
             <selection>
-		<properties color="0xffffff"/>
-                <rectangle color="0xa0000000" radius="30"/>
+                <rectangle color="0xa0000000" radius="30" height="40"/>
             </selection>
-	    <eventhandler event="show" condition="previous.pos &lt; next.pos">
-		<animate secs="0.2" behaviour="opacity" start="0" end="255"/>
-		<animate secs="0.2" behaviour="move" x1="320" x2="300"/>
-	    </eventhandler>
-	    <eventhandler event="show" condition="previous.pos &gt; next.pos">
-		<animate secs="0.2" behaviour="opacity" start="0" end="255"/>
-		<animate secs="0.2" behaviour="move" x1="280" x2="300"/>
-	    </eventhandler>
-	    <eventhandler event="hide" condition="previous.pos &lt; next.pos">
-		<animate secs="0.2" behaviour="opacity" start="255" end="0"/>
-		<animate secs="0.2" behaviour="move" x1="300" x2="280"/>
-	    </eventhandler>
-	    <eventhandler event="hide" condition="previous.pos &gt; next.pos">
-		<animate secs="0.2" behaviour="opacity" start="255" end="0"/>
-		<animate secs="0.2" behaviour="move" x1="300" x2="320"/>
-	    </eventhandler>
+	    <event name="replace"><![CDATA[
+                diff = 50
+                if prev.context['menu'].pos < next.context['menu'].pos:
+                    diff = -50
+                next.x -= diff
+                next.opacity = 0
+                next.animate('EASE_IN_QUAD', 0.2, x=next.x + diff, opacity=255)
+                yield prev.animate('EASE_OUT_QUAD', 0.2, x=prev.x + diff, opacity=0)
+		]]>
+	    </event>
+	    <event name="select"><![CDATA[
+	        if prev:
+                    prev.animate('EASE_OUT_QUAD', secs, opacity=130)
+                next.animate('EASE_OUT_QUAD', secs, opacity=255)
+		]]>
+	    </event>
         </listing>
-
 	<image style="icon" x="500" y="350" width="290" height="240" name="audio">
 	    <properties xalign="right" yalign="bottom" keep-aspect="true" opacity="50"/>
 	</image>
-
-	<eventhandler event="show" condition="previous.type == 'main'">
-	    <animate delay="0.2" secs="0.2" behaviour="opacity" start="0" end="255"/>
-	</eventhandler>
-	<eventhandler event="hide" condition="next.type == 'main'">
-	    <animate secs="0.2" behaviour="opacity" end="0"/>
-	</eventhandler>
     </menu>
 
     <application name="audioplayer" style="simple">
-        <image filename="../../images/blurrback.jpg" ignore-overscan="true"/>
-	<container x="40" y="100" width="720" height="270">
+        <image filename="../../images/blurrback.jpg"/>
+	<group x="40" y="100" width="720" height="270">
 	    <rectangle color="0xcc000000" radius="30"/>
 	    <thumbnail x="20" y="20" width="230" height="230" thumbnail="$item.thumbnail"/>
-	    <container x="300"  y="20" width="420" height="230">
+	    <group x="300"  y="20" width="420" height="230">
 		<label font="Vera:24" color="0xffffff">$item.title</label>
 		<label y="200" font="Vera:24" color="0xffffff">
 		    $item.elapsed / $item.length
 		</label>
-	    </container>
-	</container>
-
-	<container x="490" y="450" width="270" height="120">
-	    <rectangle color="0xcc000000" radius="30"/>
-	    <listing style="fixed-selection">
-		<properties xpadding="10"  ypadding="10" spacing="4"/>
-		<label font="Vera" height="20" color="0x000000">
-		    <properties xpadding="10"/>
-		    $item.name
-		</label>
-		<selection>
-		    <properties color="0xffffff"/>
-		    <rectangle color="0xa0000000" radius="20"/>
-		</selection>
-	    </listing>
-	</container>
+	    </group>
+	</group>
     </application>
 
 </theme>

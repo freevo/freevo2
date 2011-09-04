@@ -55,6 +55,7 @@ class TextWindow(object):
             """
             Render and show the widget
             """
+            # FIXME: add animation
             self._app = gui.show_widget('popup', context=self._ctx)
             kaa.signals['step'].disconnect(self.sync)
 
@@ -63,6 +64,7 @@ class TextWindow(object):
             Hide the widget
             """
             if self._app:
+                # FIXME: add animation
                 self._app.unparent()
             self._app = None
 

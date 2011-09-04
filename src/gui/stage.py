@@ -1,12 +1,12 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# stage.py - Clutter Stage Window
+# stage.py - Clutter Stage
 # -----------------------------------------------------------------------------
 # $Id$
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2008 Dirk Meyer, et al.
+# Copyright (C) 2008-2011 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -29,76 +29,91 @@
 #
 # -----------------------------------------------------------------------------
 
+# python imports
+import os
+import logging
+
 # kaa imports
-import kaa
-from kaa.utils import property
-
 import kaa.candy
-from config import config
 
-class Stage(kaa.candy.Group):
+# get logging object
+log = logging.getLogger('gui')
+
+class Config(object):
+
+    def load(self, config, sharedir):
+        self.freevo = config
+        self.sharedir = sharedir
+
+    def __getattr__(self, attr):
+        return getattr(self.freevo.gui, attr)
+
+# create config object
+config = Config()
+
+class Stage(kaa.candy.Stage):
     """
-    A stage holds all gui objects and keeps track of aspect ratio nand overscan
-    based scalling. This object is not based on a kaa.candy.Stage but is a
-    kaa.candy.Group instead.
+    Freevo main window
     """
+    def __init__(self):
+        super(Stage, self).__init__((int(config.display.width), int(config.display.height)), 'freevo2')
+        self.theme_prefix = ''
+        self.width, self.height = self.size
+        self.add_layer()
+        self.add_layer()
+        self.load_theme(config.theme, 'splash.xml')
+        self.app = None
 
-    candyxml_name = 'stage'
+    def load_theme(self, name=None, part=''):
+        if name == None:
+            name = config.theme
+        if self.theme_prefix:
+            for path in kaa.candy.config.imagepath[:]:
+                if path.startswith(self.theme_prefix):
+                    kaa.candy.config.imagepath.remove(path)
+        self.theme_prefix = os.path.join(config.sharedir, 'themes', name)
+        kaa.candy.config.imagepath.append(self.theme_prefix)
+        attr, self.theme = self.candyxml(self.theme_prefix + '/' + part)
+        self.theme.icons = os.path.join(config.sharedir, 'icons', attr['icons'])
+        size = int(attr['geometry'].split('x')[0]), int(attr['geometry'].split('x')[1])
+        scale_x = float(self.size[0] - ( 2 * config.display.overscan.x)) / size[0]
+        scale_y = float(self.size[1] - ( 2 * config.display.overscan.y)) / size[1]
+        for layer in self.layer[1:]:
+            layer.x = config.freevo.gui.display.overscan.x
+            layer.y = config.freevo.gui.display.overscan.y
+            layer.scale = (scale_x, scale_y)
+        # reference theme in all widgets
+        # NOTE: this bounds all widgets created from this point to the
+        # same theme. Two displays with different themes are not possible.
+        # On the other hand setting a theme this way is fast and simple.
+        kaa.candy.Widget.theme = self.theme
 
-    def __init__(self, pos=None, size=None, context=None):
-        super(Stage, self).__init__((config.stage.x, config.stage.y),
-             (config.stage.width, config.stage.height))
-        if config.stage.scale != 1.0:
-            self._queue_sync_properties('monitor-aspect')
-        self._screen = None
+    def show_application(self, name, context=None):
+        """
+        Render <application> widget with the given name and the given context.
+        """
+        app = self.theme.application.get(name)
+        if not app:
+            log.error('no application named %s', name)
+            return None
+        app = app(context)
+        self.add(app, layer=1)
+        if app.background:
+            self.add(app.background, layer=0)
+        if self.app:
+            if self.app.background:
+                self.app.background.parent = None
+            self.app.parent = None
+        self.app = app
+        return app
 
-    def _clutter_sync_properties(self):
+    def show_widget(self, name, style=None, layer=1, context=None):
         """
-        Set some simple properties of the clutter.Actor
+        Render widget with the given name
         """
-        super(Stage, self)._clutter_sync_properties()
-        if 'monitor-aspect' in self._sync_properties:
-            self._obj.set_scale(1.0, config.stage.scale)
-
-    def swap(self, widget):
-        """
-        Replace current widget with new one
-        """
-        if self._screen:
-            self.remove(self._screen)
-
-    def show_application(self, widget):
-        """
-        Show <application> widget
-        """
-        if widget:
-            widget.width = self.width
-            widget.height = self.height
-            widget.prepare(self)
         try:
-            kaa.candy.thread_enter()
-            if widget:
-                self.add(widget)
-            self.swap(widget)
-            self._screen = widget
-        finally:
-            kaa.candy.thread_leave()
-        return widget
-
-
-class ZoomStage(Stage):
-    """
-    Stage showing a zoom animation on application change.
-    """
-
-    candyxml_style = 'zoom'
-
-    def swap(self, widget):
-        """
-        Replace current widget with new one
-        """
-        if self._screen:
-            self._screen.depth += 1
-            self._screen.anchor_point = self.width / 2, self.height / 2
-            a = self._screen.animate(0.5, unparent=True)
-            a.behave('scale', (1, 1), (1.5, 1.5)).behave('opacity', 255, 0)
+            widget = self.theme.get(name)[style](context=context)
+            self.add(widget, layer=layer)
+            return widget
+        except TypeError:
+            log.error('widget %s:%s not defined in theme', name, style)

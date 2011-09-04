@@ -1,97 +1,78 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <theme geometry="800x600">
 
+    <script filename='scripts.py'/>
+
     <idlebar height="60">
-        <properties depth="3"/>
-        <image height="60" filename="../../images/idlebar.png" ignore-overscan="true"/>
-	<container>
-	    <properties xpadding="10" ypadding="10" name="content"/>
+        <image y="-20" height="75" filename="../../images/idlebar.png"/>
+	<group>
 	    <image height="80" width="200" filename="../../images/gant/logo.png">
 		<properties keep-aspect="true"/>
 	    </image>
-	    <container x="210">
+	    <group x="210" y="10" width="570" height="60">
 		<properties name="plugins"/>
-	    </container>
-	</container>
+	    </group>
+	</group>
     </idlebar>
 
     <osd y="70" height="50" font="Vera" color="0xffffff">
-        <properties depth="3" xalign="right" xpadding="10" ypadding="10"/>
+        <properties xalign="right" xpadding="10" ypadding="10"/>
     </osd>
 
     <popup font="Vera:24" color="0xffffff">
-	<container use-as="background">
-	    <rectangle x="5" y="5" width="100%" height="100%" color="0xbb111111" radius="20">
-		<properties xpadding="-10" ypadding="-10"/>
+    	<group use-as="background">
+    	    <rectangle x="5" y="5" width="100%" height="100%" color="0xbb111111" radius="20">
+    		<properties xpadding="-10" ypadding="-10"/>
+    	    </rectangle>
+    	    <rectangle color="0x001F4A95" border-color="0xcccccc" border-size="2" radius="20">
+    		<properties xpadding="-10" ypadding="-10"/>
+    	    </rectangle>
+    	</group>
+    	<button use-as="button" font="Vera:24" color="0xffffff">
+    	    <rectangle use-as="background" color="0xffffff" radius="10">
+		<properties opacity="0"/>
 	    </rectangle>
-	    <rectangle color="0x001F4A95" border-color="0xcccccc" border-size="2" radius="20">
-		<properties xpadding="-10" ypadding="-10"/>
-	    </rectangle>
-	</container>
-	<button use-as="button" font="Vera:24" color="0xbbbbbb">
-	    <rectangle use-as="background" color="0xff000000" radius="10"/>
-	    <selection>
-		<properties color="0xffffff"/>
-		<properties target="background" color="0xa0000000"/>
-	    </selection>
-	</button>
+    	</button>
+	<event name="select"><![CDATA[
+	    if prev:
+                prev.background.animate('EASE_OUT_QUAD', secs, opacity=0)
+            next.background.animate('EASE_OUT_QUAD', secs, opacity=100)
+	    ]]>
+	    </event>
     </popup>
 
     <application name="menu" style="simple">
-        <image filename="../../images/blurrback.jpg" ignore-overscan="true"/>
+        <image use-as="background" filename="../../images/blurrback.jpg"/>
     </application>
 
     <menu name="main" style="default">
-	<container y="60" width="290">
-	    <properties xpadding="20" ypadding="20"/>
-	    <rectangle color="0xcc000000">
-		<properties xpadding="-20" ypadding="-20"/>
-	    </rectangle>
-	    <listing y="50" spacing="2">
+	<group name="content" y="60" width="290">
+	    <rectangle color="0xcc000000"/>
+	    <listing x="20" y="50" xpadding="20" ypadding="50" width="250">
 		<label font="Vera" height="25" color="0x999999">
 		    <properties xalign="right" yalign="center"/>
 		    $item.name
 		</label>
-		<selection>
-		    <properties scale="1.2" color="0xffffff"/>
-		    <rectangle color="0xff000000"/>
+		<selection xpadding="20" ypadding="20">
+		    <rectangle color="0x00cccccc" height="35"/>
 		</selection>
 	    </listing>
-	    <eventhandler event="hide">
-		<animate secs="0.2" behaviour="move" x2="-300"/>
-	    </eventhandler>
-	    <eventhandler event="show">
-		<animate delay="0.2" secs="0.2" behaviour="move" x1="-300" x2="0"/>
-	    </eventhandler>
-	</container>
+	</group>
 	<image style="icon" x="500" y="350" width="290" height="240" name="$item.media_type">
 	    <properties xalign="right" yalign="bottom" keep-aspect="true"/>
 	</image>
-	<eventhandler event="show">
-	    <process-children/>
-	</eventhandler>
-	<eventhandler event="hide">
-	    <process-children/>
-	</eventhandler>
+	<event name="replace" script="menu"/>
     </menu>
 
     <menu name="default" style="default">
         <listing x="20" y="100" width="600" height="480" spacing="6">
 	    <label font="Vera" height="30" color="0xcccccc">
-		<properties xpadding="10" ypadding="2"/>
 		$item.name
 	    </label>
             <selection>
-		<properties color="0xffffff"/>
                 <rectangle color="0xa0000000" radius="20"/>
             </selection>
         </listing>
-	<eventhandler event="show" condition="previous.type == 'main'">
-	    <animate delay="0.2" secs="0.2" behaviour="opacity" start="0" end="255"/>
-	</eventhandler>
-	<eventhandler event="hide" condition="next.type == 'main'">
-	    <animate secs="0.2" behaviour="opacity" end="0"/>
-	</eventhandler>
     </menu>
 
 </theme>

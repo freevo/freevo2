@@ -1,6 +1,5 @@
 import os
 
-from kaa.utils import property
 import kaa.imlib2
 import kaa.candy
 
@@ -35,14 +34,14 @@ class Thumbnail(kaa.candy.Thumbnail):
         if not item:
             return
         self.set_thumbnail(item.get('thumbnail'))
-        if not self.has_image():
+        if not self.image:
             self._load_mimetype(item)
 
     def _try_mimetype(self, name):
         for ext in ('.png', '.jpg'):
             fname = os.path.join(self.theme.icons, 'mimetypes', name + ext)
             if os.path.isfile(fname):
-                self.set_image(fname)
+                self.image = fname
                 return True
         return False
 
@@ -69,7 +68,7 @@ class Thumbnail(kaa.candy.Thumbnail):
     def candyxml_parse(cls, element):
         """
         """
-        return kaa.candy.Imlib2Texture.candyxml_parse(element).update(
+        return kaa.candy.Widget.candyxml_parse(element).update(
             item=element.item)
 
 
@@ -79,25 +78,23 @@ class Icon(kaa.candy.Image):
 
     __name = __name_eval = None
 
-    def __init__(self, pos, size, name, context=None):
+    def __init__(self, pos, size, icon, context=None):
         super(Icon, self).__init__(pos, size, context=context)
-        if name and name.startswith('$'):
-            self.add_dependency(name)
-            name = self.context.get(name)
-        if not name:
+        if icon and icon.startswith('$'):
+            icon = self.context.get(icon)
+        if not icon:
             return
         for ext in ('.png', '.jpg'):
-            fname = os.path.join(self.theme.icons, name + ext)
+            fname = os.path.join(self.theme.icons, icon + ext)
             if os.path.isfile(fname):
-                self.set_image(fname)
-                return
+                self.image = fname
 
     @classmethod
     def candyxml_parse(cls, element):
         """
         """
-        return kaa.candy.Imlib2Texture.candyxml_parse(element).update(
-            name=element.name)
+        return kaa.candy.Widget.candyxml_parse(element).update(
+            icon=element.icon)
 
 
 class MediaImage(kaa.candy.Image):
@@ -108,18 +105,17 @@ class MediaImage(kaa.candy.Image):
 
     def __init__(self, pos, size, folder, context=None):
         super(MediaImage, self).__init__(pos, size, context=context)
-        self.add_dependency('item.media_type')
         name = self.context.get('item.media_type') or 'default'
         for name in (name, 'default'):
             for ext in ('.png', '.jpg'):
                 fname = os.path.join(self.theme.icons, folder, name + ext)
                 if os.path.isfile(fname):
-                    self.set_image(fname)
+                    self.image = fname
                     return
 
     @classmethod
     def candyxml_parse(cls, element):
         """
         """
-        return kaa.candy.Imlib2Texture.candyxml_parse(element).update(
+        return kaa.candy.Widget.candyxml_parse(element).update(
             folder=element.folder)

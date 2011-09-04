@@ -52,6 +52,8 @@ class PluginInterface(freevo.Plugin):
     def _app_change(self, app):
         if not self.widget:
             self.widget = gui.show_widget('idlebar')
+            if not self.widget:
+                return
             for p in IdleBarPlugin.plugins():
                 self.widget.connect(p)
         fullscreen = app.has_capability(freevo.CAPABILITY_FULLSCREEN)
@@ -64,13 +66,11 @@ class IdleBarPlugin(freevo.Plugin):
         if not freevo.get_plugin('idlebar'):
             freevo.activate_plugin('idlebar')
 
+    @staticmethod
     def plugins():
         """
         Static function to return all IdlebarPlugins.
         """
         return IdleBarPlugin.plugin_list
-
-    plugins = staticmethod(plugins)
-
 
 freevo.register_plugin(IdleBarPlugin)

@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <theme geometry="800x600" icons="hires">
 
-    <stage style="zoom"/>
-
     <application name="splash">
         <!-- background image -->
         <image filename="../../images/blurrsplash.jpg" ignore-overscan="true"/>

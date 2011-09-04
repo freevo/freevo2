@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2008 Dirk Meyer, et al.
+# Copyright (C) 2008-2011 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -30,7 +30,6 @@
 # -----------------------------------------------------------------------------
 
 # kaa imports
-from kaa.utils import property
 import kaa.candy
 
 class OSD(kaa.candy.Label):
@@ -48,8 +47,10 @@ class OSD(kaa.candy.Label):
         self.text = message
 
     def hide(self):
-        self.animate('0.2', unparent=True).behave('opacity', 255, 0)
+        self.opacity = 255
+        self.parent = None
+        # self.animate('0.2', unparent=True).behave('opacity', 255, 0)
 
     def show(self):
         self.opacity = 0
-        self.animate('0.2').behave('opacity', 0, 255)
+        # self.animate('0.2').behave('opacity', 0, 255)

@@ -110,6 +110,12 @@ class ImageViewer(freevo.Application):
             self.sshow_timer.start(self.item.duration)
         # Notify everyone about the viewing
         freevo.PLAY_START.post(item)
+        next = self.playlist.choices.index(self.item) + 1
+        if len(self.playlist.choices) > next:
+            # FIXME: this is still too slow! The backend needs this
+            # image while we are watching the current one to speed
+            # this up.
+            kaa.OneShotTimer(self.cache, self.playlist.choices[next]).start(0.2)
         return None
 
     def stop(self):

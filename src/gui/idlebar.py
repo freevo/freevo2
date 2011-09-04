@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2008 Dirk Meyer, et al.
+# Copyright (C) 2008-2011 Dirk Meyer, et al.
 #
 # First edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -31,15 +31,12 @@
 
 import logging
 
-from kaa.utils import property
 import kaa.candy
-
-from config import config
 
 # get logging object
 log = logging.getLogger()
 
-class Idlebar(kaa.candy.Container):
+class Idlebar(kaa.candy.Group):
     candyxml_name = 'idlebar'
 
     # properties
@@ -48,13 +45,28 @@ class Idlebar(kaa.candy.Container):
     def __init__(self, *args, **kwargs):
         super(Idlebar, self).__init__(*args, **kwargs)
         self.plugins = self.get_widget('plugins')
-        self.plugins.layout = self._candy_layout_plugins
 
     def connect(self, plugin):
         """
         Connect an idlebar plugin
         """
         plugin.connect(self.plugins)
+
+    def sync_layout(self, size):
+        """
+        Sync layout changes and calculate intrinsic size based on the
+        parent's size.
+        """
+        super(Idlebar, self).sync_layout(size)
+        x0, x1 = 0, self.plugins.width
+        for widget in self.plugins.children:
+            step = widget.intrinsic_size[0] + 20 # FIXME: using padding variable from theme
+            if widget.xalign == widget.ALIGN_RIGHT:
+                widget.x = x1 - widget.width
+                x1 -= step
+            else:
+                widget.x = x0
+                x0 += step
 
     @property
     def visible(self):
@@ -64,54 +76,8 @@ class Idlebar(kaa.candy.Container):
     def visible(self, visible):
         if self.__visible == visible:
             return
-        if visible:
-            self._show()
-        else:
-            self._hide()
         self.__visible = visible
-
-    def _show(self):
-        """
-        Show the idlebar
-        """
-        animation = self.animate(0.2)
-        animation.behave('opacity', 0, 255)
-
-    def _hide(self):
-        """
-        Hide the idlebar
-        """
-        animation = self.animate(0.2)
-        animation.behave('opacity', 255, 0)
-
-    def _candy_layout_plugins(self, widgets, spacing):
-        """
-        Layput plugin children
-        """
-        x0 = 0
-        x1 = self.plugins.inner_width + spacing
-        for widget in widgets:
-            # FIXME: this code does not respect widget.padding
-            if widget.xalign == widget.ALIGN_RIGHT:
-                widget._obj.set_x(x1)
-                x1 -= widget._obj.get_width() - spacing
-            else:
-                widget._obj.set_x(x0)
-                x0 += widget._obj.get_width() + spacing
-
-    @classmethod
-    def candyxml_parse(cls, element):
-        """
-        Parse the XML element for parameter to create the widget.
-        """
-        guicfg = config.stage
-        for c in element:
-            if c.ignore_overscan:
-                # the idlebar background. Expand by overscan
-                c._attrs['x'] = c._attrs.get('x', 0) - guicfg.overscan_x
-                c._attrs['y'] = c._attrs.get('y', 0) - guicfg.overscan_y
-                value = float(c._attrs.get('width', guicfg.width))
-                factor = value / guicfg.width
-                c._attrs['width'] = int(value + factor * 2 * guicfg.overscan_x)
-                c._attrs['height'] += guicfg.overscan_y
-        return super(Idlebar, cls).candyxml_parse(element)
+        if visible:
+            self.animate('EASE_IN_CUBIC', 0.2, opacity=255)
+        else:
+            self.animate('EASE_OUT_CUBIC', 0.2, opacity=0)

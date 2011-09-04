@@ -1,12 +1,12 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# core - Application Core
+# application - application widget
 # -----------------------------------------------------------------------------
 # $Id$
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2008 Dirk Meyer, et al.
+# Copyright (C) 2008-2011 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -31,9 +31,6 @@
 
 # gui imports
 import kaa.candy
-
-# display config
-from config import config
 
 class ApplicationStyles(kaa.candy.candyxml.Styles):
     """
@@ -61,11 +58,11 @@ class ApplicationStyles(kaa.candy.candyxml.Styles):
 # register this as application
 kaa.candy.candyxml.register(ApplicationStyles())
 
-class Application(kaa.candy.Container):
+class Application(kaa.candy.Group):
     """
     Application base class.
     """
-    class __template__(kaa.candy.Container.__template__):
+    class __template__(kaa.candy.AbstractGroup.__template__):
         @classmethod
         def candyxml_get_class(cls, element):
             name = element.name
@@ -76,25 +73,30 @@ class Application(kaa.candy.Container):
     candyxml_name = 'application'
     candyxml_style = 'default'
 
-    def __init__(self, widgets, context=None):
+    def __init__(self, widgets, background=None, context=None):
+        if kaa.candy.is_template(background):
+            background = background(context=context)
+        self.background = background
         super(Application, self).__init__(None, None, widgets, context=context)
+
+    def sync_context(self):
+        """
+        Adjust to a new context
+        """
+        super(Application, self).sync_context()
+        if not self.background:
+            return
+        if not self.background.supports_context(self.context):
+            new = self.background.__template__(context=self.context)
+            self.background.parent.replace(self.background, new)
+            self.background = new
+        else:
+            self.background.context = self.context
 
     @classmethod
     def candyxml_parse(cls, element):
         """
         Parse the XML element for parameter to create the widget.
         """
-        guicfg = config.stage
-        for c in element:
-            if c.ignore_overscan:
-                # adjust direct children that want to ignore the overscan
-                c._attrs['x'] = c._attrs.get('x', 0) - guicfg.overscan_x
-                c._attrs['y'] = c._attrs.get('y', 0) - guicfg.overscan_y
-                value = float(c._attrs.get('width', guicfg.width))
-                factor = value / guicfg.width
-                c._attrs['width'] = int(value + factor * 2 * guicfg.overscan_x)
-                value = float(c._attrs.get('height', guicfg.height))
-                factor = value / guicfg.height
-                c._attrs['height'] = int(value + factor * 2 * guicfg.overscan_y)
-        kwargs = super(Application, cls).candyxml_parse(element)
-        return dict(widgets=kwargs['widgets'])
+        attrs = super(Application, cls).candyxml_parse(element)
+        return kaa.candy.XMLdict(widgets=attrs.get('widgets'), background=attrs.get('background'))

@@ -59,7 +59,7 @@ CAPABILITY_TOGGLE     = 1
 CAPABILITY_PAUSE      = 2
 CAPABILITY_FULLSCREEN = 4
 
-class WidgetContext(dict):
+class WidgetContext(kaa.candy.Context):
     """
     Context link between Application and view
     """

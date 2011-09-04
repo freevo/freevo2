@@ -2,12 +2,12 @@
 <theme geometry="800x600">
 
     <menu name="video" style="default">
-	<container x="10" y="70" width="780" height="180">
+	<group x="10" y="70" width="780" height="180">
 	    <rectangle color="0xcc000000" radius="30"/>
 	    <thumbnail x="10" y="10" width="200" height="160" thumbnail="$item.thumbnail">
 		<properties xalign="center" yalign="center"/>
 	    </thumbnail>
-	    <container x="250" width="520">
+	    <group x="250" width="520">
 		<properties ypadding="10"/>
 		<label y="0" font="Vera:20" color="0xffffff">
 		    <properties xpadding="10"/>
@@ -17,18 +17,33 @@
 		    <properties yalign="bottom" xpadding="10"/>
 		    $item.length min.
 		</label>
-	    </container>
-	</container>
+	    </group>
+	</group>
 
-        <listing style="fixed-selection" x="10" y="280" width="780" height="310" spacing="6">
-	    <label font="Vera" height="30" color="0xcccccc">
-		<properties xpadding="10" ypadding="2"/>
+        <listing style="fixed-selection" x="10" y="280" width="780" height="310" xpadding="20" ypadding="8">
+	    <label font="Vera" height="20" color="0xffffff">
+		<properties opacity="150"/>
 		$item.name
 	    </label>
             <selection>
-		<properties color="0xffffff"/>
-                <rectangle color="0xa0000000" radius="30"/>
+                <rectangle color="0xa0000000" radius="25" height="25"/>
             </selection>
+	    <event name="replace"><![CDATA[
+                diff = 50
+                if prev.pos < next.pos:
+                    diff = -50
+                next.x -= diff
+                next.opacity = 0
+                next.animate('EASE_IN_QUAD', 0.2, x=next.x + diff, opacity=255)
+                yield prev.animate('EASE_OUT_QUAD', 0.2, x=prev.x + diff, opacity=0)
+		]]>
+	    </event>
+	    <event name="select"><![CDATA[
+	        if prev:
+                    prev.animate('EASE_OUT_QUAD', secs, opacity=130)
+                next.animate('EASE_OUT_QUAD', secs, opacity=255)
+		]]>
+	    </event>
         </listing>
 
 	<image style="icon" x="500" y="350" width="290" height="240" name="video">
@@ -36,8 +51,7 @@
 	</image>
     </menu>
 
-    <application name="videoplayer" style="simple">
-    </application>
+    <application name="videoplayer" style="simple"/>
 
 </theme>
 <!-- Keep this comment at the end of the file

@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2008 Dirk Meyer, et al.
+# Copyright (C) 2008-2011 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -34,26 +34,27 @@
 import os
 import kaa.utils
 
-from window import Window
-from config import config
+from stage import Stage, config
 
 # import all widgets
-kaa.utils.get_plugins(group='freevo.gui.plugins', location=__file__)
+for name, module in kaa.utils.get_plugins(group='freevo.gui.plugins', location=__file__).items():
+    if isinstance(module, Exception):
+        raise ImportError('error importing %s: %s' % (name, module))
 
-window = None
+stage = None
 signals = None
 
-def configure(cfg, sharedir):
+def show_window(cfg, sharedir):
     config.load(cfg, sharedir)
-    global window, signals
-    window = Window()
-    signals = window.signals
+    global stage, signals
+    stage = Stage()
+    signals = stage.signals
 
 def show_application(application, context=None):
-    return window.show_application(application, context)
+    return stage.show_application(application, context)
 
-def show_widget(name, style=None, context=None):
-    return window.render(name, style, context)
+def show_widget(name, style=None, layer=2, context=None):
+    return stage.show_widget(name, style, layer, context)
 
 def load_theme(theme=None):
-    return window.load_theme(theme)
+    return stage.load_theme(theme)

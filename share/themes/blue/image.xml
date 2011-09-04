@@ -1,32 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <theme geometry="800x600">
 
+    <script filename='scripts.py'/>
+
     <menu name="image main menu" style="default">
-        <listing x="20" y="100" width="600" height="480" spacing="6">
+        <listing x="20" y="100" width="600" height="480">
 	    <label font="Vera" height="30" color="0xcccccc">
-		<properties xpadding="10" ypadding="2"/>
 		$item.name
 	    </label>
             <selection>
-		<properties color="0xffffff"/>
-                <rectangle color="0xa0000000" radius="20"/>
+                <rectangle color="0xa0000000" radius="20" height="40"/>
             </selection>
         </listing>
 	<image style="icon" x="500" y="350" width="290" height="240" name="image">
 	    <properties xalign="right" yalign="bottom" keep-aspect="true" opacity="50"/>
 	</image>
-	<eventhandler event="show" depends="previous.type == 'main'">
-	    <animate delay="0.2" secs="0.2" behaviour="opacity" start="0" end="255"/>
-	</eventhandler>
-	<eventhandler event="hide" depends="next.type == 'main'">
-	    <animate secs="0.2" behaviour="opacity" end="100"/>
-	</eventhandler>
+	<event name="replace" script="fade"/>
     </menu>
 
     <menu name="image" style="default">
-        <listing style="grid" x="10" y="100" width="780" height="480" spacing="16">
+        <listing style="grid" x="10" y="100" width="780" height="480" xpadding="15" ypadding="15">
 	    <properties xalign="center"/>
-	    <container width="130" height="130">
+	    <group width="130" height="130">
 		<properties anchor-point="65,65" opacity="150"/>
 		<thumbnail style="mimetype" height="100" item="item">
 		    <properties xalign="center" yalign="center"/>
@@ -35,64 +30,39 @@
 		    <properties xalign="center"/>
 		    $item.name
 		</label>
-	    </container>
+	    </group>
             <selection>
-		<properties scale="1.05" opacity="255"/>
-		<container>
-		    <rectangle color="0xc0000000" x="-10" y="-10" radius="15" width="150" height="150"/>
-		</container>
+		<rectangle color="0xc0000000" radius="15" width="150" height="150"/>
             </selection>
-	    <eventhandler event="show" condition="previous.pos &lt; next.pos">
-		<animate secs="0.2" behaviour="opacity" start="0" end="255"/>
-		<animate secs="0.2" behaviour="move" x1="20" x2="0"/>
-	    </eventhandler>
-	    <eventhandler event="show" condition="previous.pos &gt; next.pos">
-		<animate secs="0.2" behaviour="opacity" start="0" end="255"/>
-		<animate secs="0.2" behaviour="move" x1="-20" x2="0"/>
-	    </eventhandler>
-	    <eventhandler event="hide" condition="previous.pos &lt; next.pos">
-		<animate secs="0.2" behaviour="opacity" start="255" end="0"/>
-		<animate secs="0.2" behaviour="move" x1="0" x2="-20"/>
-	    </eventhandler>
-	    <eventhandler event="hide" condition="previous.pos &gt; next.pos">
-		<animate secs="0.2" behaviour="opacity" start="255" end="0"/>
-		<animate secs="0.2" behaviour="move" x1="0" x2="20"/>
-	    </eventhandler>
+	    <event name="select"><![CDATA[
+	        if prev:
+                    prev.animate('EASE_OUT_QUAD', secs, opacity=130, scale_x=1, scale_y=1)
+                next.animate('EASE_OUT_QUAD', secs, opacity=255, scale_x=1.1, scale_y=1.1)
+		]]>
+	    </event>
         </listing>
-<!-- 	<image style="icon" x="500" y="350" width="290" height="240" name="image"> -->
-<!-- 	    <properties xalign="right" yalign="bottom" keep-aspect="true" opacity="50"/> -->
-<!-- 	</image> -->
+	<image style="icon" x="500" y="350" width="290" height="240" name="image">
+	    <properties xalign="right" yalign="bottom" keep-aspect="true" opacity="50"/>
+	</image>
     </menu>
 
     <application name="imageviewer" style="simple">
-	<container depends="$image">
-	    <properties name="view" ignore-overscan="true"/>
-	    <image filename="$image">
-		<properties name="image" xalign="center" yalign="center" keep-aspect="true" ignore-overscan="true"/>
-	    </image>
-	</container>
-	<container name="browser">
+	<image use-as="background" filename="$image">
+	    <replace-on-context-change keys="image" script="fade"/>
+	    <properties name="image" xalign="center" yalign="center" keep-aspect="true"/>
+	</image>
+	<group name="browser">
 	    <rectangle y="470" color="0x00000000"/>
-	    <listing style="fixed-selection" x="-50" y="480" width="900" height="110" spacing="16" selection="center">
-		<properties xalign="center"/>
-		<container width="100" height="70">
-		    <properties xalign="center" yalign="bottom"/>
-		    <thumbnail style="mimetype" width="100" height="70" item="item">
-			<properties xalign="shrink" yalign="shrink"/>
-			<reflection opacity="80"/>
-		    </thumbnail>
-		    <rectangle color="0xff000000" border_color="0xffffff" border_size="2">
-			<properties passive="True" name="border"/>
-		    </rectangle>
-		</container>
-		<selection>
-		    <properties border-color="0xff0000" target="border"/>
-		    <rectangle color="0xccffffff" width="100" height="70" radius="20">
-			<properties xpadding="-10" ypadding="-10"/>
-		    </rectangle>
+	    <listing style="fixed-selection" x="-50" y="480" width="900" height="110" selection="3" 
+		     xpadding="15" ypadding="15">
+		<thumbnail style="mimetype" item="item" width="100" height="70">
+		    <properties xalign="center" yalign="center"/>
+		</thumbnail>
+		<selection xpadding="10" ypadding="10">
+		    <rectangle color="0x444444" width="120" height="90" radius="20"/>
 		</selection>
 	    </listing>
-	</container>
+	</group>
     </application>
 
 </theme>
