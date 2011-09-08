@@ -47,10 +47,6 @@
     </menu>
 
     <application name="imageviewer" style="simple">
-	<image use-as="background" filename="$image">
-	    <replace-on-context-change keys="image" script="fade"/>
-	    <properties name="image" xalign="center" yalign="center" keep-aspect="true"/>
-	</image>
 	<group name="browser">
 	    <rectangle y="470" color="0x00000000"/>
 	    <listing style="fixed-selection" x="-50" y="480" width="900" height="110" selection="3" 

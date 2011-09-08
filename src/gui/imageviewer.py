@@ -32,6 +32,9 @@
 # python imports
 import logging
 
+# kaa imports
+import kaa.candy
+
 # gui imports
 from application import Application
 
@@ -44,14 +47,23 @@ class ImageViewer(Application):
     """
     candyxml_style = 'imageviewer:simple'
 
-    def __init__(self, widgets, background=None, context=None):
-        """
-        Create a new widget. While the imageviewer controller is a singleton
-        an object of this class is created every time Freevo switches to
-        the image viewer.
-        """
-        super(ImageViewer, self).__init__(widgets, background, context)
-        self._view = None
+    __image = None
+    __widget = None
+
+    def show(self):
+        self.sync_context()
+
+    def sync_context(self):
+        if self.context.image != self.__image:
+            if self.__widget:
+                self.__widget.parent = None
+            self.__image = self.context.image
+            self.__widget = kaa.candy.Image()
+            self.__widget.image = self.__image
+            self.__widget.xalign = self.__widget.yalign = kaa.candy.ALIGN_CENTER
+            self.__widget.keep_aspect = True
+            self.stage.add(self.__widget, layer=0)
+        super(ImageViewer, self).sync_context()
 
     # def _candy_replace_child(self, child, replace, context):
     #     """
