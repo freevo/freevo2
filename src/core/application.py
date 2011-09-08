@@ -124,6 +124,13 @@ class Application(freevo.ResourceHandler):
         for cap in capabilities:
             self.__capabilities |= cap
 
+    @property
+    def gui_widget(self):
+        """
+        Return the GUI widget if created or None
+        """
+        return self.gui_context._app
+
     def has_capability(self, capability):
         """
         Return True if the application has the given capability.
