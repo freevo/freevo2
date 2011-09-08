@@ -93,6 +93,12 @@ class Application(kaa.candy.Group):
         else:
             self.background.context = self.context
 
+    def show(self):
+        pass
+
+    def destroy(self):
+        self.parent = None
+
     @classmethod
     def candyxml_parse(cls, element):
         """

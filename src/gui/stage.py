@@ -100,10 +100,11 @@ class Stage(kaa.candy.Stage):
         self.add(app, layer=1)
         if app.background:
             self.add(app.background, layer=0)
+        app.show()
         if self.app:
             if self.app.background:
                 self.app.background.parent = None
-            self.app.parent = None
+            self.app.destroy()
         self.app = app
         return app
 
