@@ -58,8 +58,12 @@ class ImageViewer(Application):
             if self.__widget:
                 self.__widget.parent = None
             self.__image = self.context.image
-            self.__widget = kaa.candy.Image()
-            self.__widget.image = self.__image
+            if self.context.image.lower().endswith('jpg') or self.context.image.lower().endswith('jpeg'):
+                self.__widget = kaa.candy.JPG()
+                self.__widget.filename = self.__image
+            else:
+                self.__widget = kaa.candy.Image()
+                self.__widget.image = self.__image
             self.__widget.xalign = self.__widget.yalign = kaa.candy.ALIGN_CENTER
             self.__widget.keep_aspect = True
             self.stage.add(self.__widget, layer=0)

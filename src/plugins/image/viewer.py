@@ -36,7 +36,6 @@ import logging
 
 # kaa imports
 import kaa
-import kaa.imlib2
 
 # freevo imports
 from ... import core as freevo
@@ -61,20 +60,17 @@ class ImageViewer(freevo.Application):
         capabilities = (freevo.CAPABILITY_TOGGLE, freevo.CAPABILITY_FULLSCREEN)
         super(ImageViewer, self).__init__('image', capabilities)
         self.osd_mode = 0
-        self.bitmapcache = freevo.util.ObjectCache(3, desc='viewer')
         self.slideshow = True
         self.sshow_timer = kaa.OneShotTimer(self._next)
         self.signals['stop'].connect_weak(self._cleanup)
 
     def _cleanup(self):
         """
-        Application not running anymore, free cache
+        Application not running anymore
         """
         self.osd_mode = 0
         # we don't need the signalhandler anymore
         self.sshow_timer.stop()
-        # reset bitmap cache
-        self.bitmapcache = freevo.util.ObjectCache(3, desc='viewer')
 
     def _next(self):
         """
@@ -97,8 +93,7 @@ class ImageViewer(freevo.Application):
         if self.playlist:
             self.playlist.select(self.item)
         # update the screen
-        self.cache(self.item)
-        self.gui_context.image = self.bitmapcache[self.item.filename]
+        self.gui_context.image = self.item.filename
         self.gui_context.rotation = item.get('rotation') or 0
         self.gui_context.zoom = 1.0
         self.gui_context.pos = 0,0
@@ -110,12 +105,6 @@ class ImageViewer(freevo.Application):
             self.sshow_timer.start(self.item.duration)
         # Notify everyone about the viewing
         freevo.PLAY_START.post(item)
-        next = self.playlist.choices.index(self.item) + 1
-        if len(self.playlist.choices) > next:
-            # FIXME: this is still too slow! The backend needs this
-            # image while we are watching the current one to speed
-            # this up.
-            kaa.OneShotTimer(self.cache, self.playlist.choices[next]).start(0.2)
         return None
 
     def stop(self):
@@ -130,15 +119,6 @@ class ImageViewer(freevo.Application):
         event = freevo.Event(freevo.PLAY_END, self.item)
         event.set_handler(self.eventhandler)
         event.post()
-
-    def cache(self, item):
-        """
-        Cache the next image (most likely we need this)
-        """
-        if item.filename and len(item.filename) > 0 and \
-               not self.bitmapcache[item.filename]:
-            image = kaa.imlib2.Image(item.filename)
-            self.bitmapcache[item.filename] = image
 
     def eventhandler(self, event):
         """

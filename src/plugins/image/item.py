@@ -67,12 +67,6 @@ class ImageItem(freevo.MediaItem):
         """
         return [ freevo.Action(_('View Image'), self.play) ]
 
-    def cache(self):
-        """
-        Caches (loads) the next image
-        """
-        viewer.cache(self)
-
     def play(self):
         """
         View the image
