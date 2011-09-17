@@ -107,6 +107,7 @@ class Player(freevo.Application):
             # FIXME: set more properties
             if item.info.get('interlaced'):
                 self.player.config.deinterlacing = 'yes'
+            self.gui_widget.set_player(self.player)
             yield self.player.play()
             freevo.PLAY_START.post(self.item)
         except kaa.popcorn.PlayerError, e:
