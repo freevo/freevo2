@@ -54,6 +54,7 @@ class AbstractListing(kaa.candy.SelectionGrid):
         super(AbstractListing, self).__init__(pos, size, None, 'item', menu.choices,
             template, selection, kaa.candy.SelectionGrid.VERTICAL, xpadding, ypadding, context)
         self.selected = menu.selected
+        self.pos = menu.pos
         self.state = menu.state
         # A new menu means we want to be exchanged with a new version
         # of ourself and not reused.
