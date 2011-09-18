@@ -47,6 +47,7 @@ KEYBOARD_MAP = {
     'HOME'        : 'MENU',
     'G'           : 'GUIDE',
     'ESCAPE'      : 'EXIT',
+    'BACKSPACE'   : 'EXIT',
     'ESC'         : 'EXIT',
     'UP'          : 'UP',
     'DOWN'        : 'DOWN',
