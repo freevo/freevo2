@@ -41,20 +41,23 @@ import kaa.candy
 # get logging object
 log = logging.getLogger('gui')
 
-kaa.candy.Eventhandler.signatures['select'] = 'prev,next,secs'
+kaa.candy.Eventhandler.signatures['listing-select'] = 'prev,next,secs'
 
 class AbstractListing(kaa.candy.SelectionGrid):
     candyxml_name = 'listing'
     candyxml_style = 'abstract'
 
-    __eventhandler_select_item = None
+    __previous_selected = None
 
     def __init__(self, pos, size, template, selection, xpadding=None, ypadding=None, context=None):
         menu = context.get('menu')
         super(AbstractListing, self).__init__(pos, size, None, 'item', menu.choices,
             template, selection, kaa.candy.SelectionGrid.VERTICAL, xpadding, ypadding, context)
         self.selected = menu.selected
-        self.pos = menu.pos
+        # store the position of the menu in the stack. For listings
+        # not based on menus (e.g. on a playlist) pos is always 0
+        # because this kind of objects have no pos attribute
+        self.pos = getattr(menu, 'pos', None)
         self.state = menu.state
         # A new menu means we want to be exchanged with a new version
         # of ourself and not reused.
@@ -67,17 +70,15 @@ class AbstractListing(kaa.candy.SelectionGrid):
         self.template(context=context)
         return self.template(context=context)
 
-    def eventhandler_select(self, pos, secs):
-        if not self.eventhandler.get('select', None):
-            return
+    def emit_select(self, pos, secs):
         if not pos in self.item_widgets:
             self.sync_prepare()
         selected = self.item_widgets.get(pos)
-        if selected and self.__eventhandler_select_item != selected:
-            self.eventhandler.get('select')(self.__eventhandler_select_item, selected, secs)
-            self.__eventhandler_select_item = selected
-        else:
+        if not selected:
             log.error('unable to get selected item')
+        elif self.__previous_selected != selected:
+            self.emit('listing-select', self.__previous_selected, selected, secs)
+            self.__previous_selected = selected
 
     def sync_context(self):
         if self.create_grid:
@@ -128,7 +129,7 @@ class Listing(AbstractListing):
         if menu.selected_pos / self.num_items_y != self.__grid_position:
             self.__grid_position = menu.selected_pos / self.num_items_y
             self.scroll_to((0, self.__grid_position * self.num_items_y), secs)
-        self.eventhandler_select(pos, secs)
+        self.emit_select(pos, secs)
 
     def create_grid(self):
         context = self.context.copy()
@@ -160,7 +161,8 @@ class FixedSelectionListing(AbstractListing):
             self.cell_size = item_width, item_height
         item_width = item_width if item_width > 0 else self.width
         item_height = item_height if item_height > 0 else self.height
-        if self.width / item_width > 1 and self.height / item_height == 1:
+        if self.width / (item_width + self.item_padding[0]) > 1 and \
+                self.height / (item_height + self.item_padding[1]) == 1:
             self.orientation = 'horizonal'
             if not self.cell_size:
                 self.cell_size = self.item.width, self.height - self.item_padding[1]
@@ -188,10 +190,10 @@ class FixedSelectionListing(AbstractListing):
     def select(self, pos, secs):
         if self.orientation == 'vertical':
             self.scroll_to((0, pos - self.selection_pos), secs)
-            self.eventhandler_select((0, pos), secs)
+            self.emit_select((0, pos), secs)
         else:
             self.scroll_to((pos - self.selection_pos, 0), secs)
-            self.eventhandler_select((pos, 0), secs)
+            self.emit_select((pos, 0), secs)
 
     @classmethod
     def candyxml_parse(cls, element):
@@ -226,7 +228,7 @@ class GridListing(AbstractListing):
         if self.__grid_position != menu.selected_pos / (self.num_items_x * self.num_items_y):
             self.__grid_position = menu.selected_pos / (self.num_items_x * self.num_items_y)
             self.scroll_to((0, self.__grid_position * self.num_items_y), secs)
-        self.eventhandler_select(pos, 0.2)
+        self.emit_select(pos, 0.2)
 
     def sync_context(self):
         super(GridListing, self).sync_context()

@@ -32,46 +32,20 @@
 # gui imports
 import kaa.candy
 
-class ApplicationStyles(kaa.candy.candyxml.Styles):
+from widget import Widget, WidgetStyles
+
+class ApplicationStyles(WidgetStyles):
     """
-    Dict to store the different application classes based on the
-    name and the style.
+    Dict to store the different application classes
     """
     candyxml_name = 'application'
 
-    def get(self, name):
-        """
-        Get the given application class or return the default.
-        """
-        if not name in self:
-            name = 'default'
-        return super(ApplicationStyles, self).get(name)
 
-    def candyxml_parse(self, element):
-        """
-        Parse and return the class based on the given xml element.
-        """
-        for key in ('%s:%s' % (element.name, element.style), element.name, 'default'):
-            if key in self:
-                return self.get(key)
-
-# register this as application
-kaa.candy.candyxml.register(ApplicationStyles())
-
-class Application(kaa.candy.Group):
+class Application(Widget):
     """
     Application base class.
     """
-    class __template__(kaa.candy.AbstractGroup.__template__):
-        @classmethod
-        def candyxml_get_class(cls, element):
-            name = element.name
-            if element.style:
-                name += ':%s' % element.style
-            return kaa.candy.candyxml.get_class(element.node, name)
-
     candyxml_name = 'application'
-    candyxml_style = 'default'
 
     def __init__(self, widgets, background=None, context=None):
         if kaa.candy.is_template(background):
@@ -92,12 +66,6 @@ class Application(kaa.candy.Group):
             self.background = new
         else:
             self.background.context = self.context
-
-    def show(self):
-        pass
-
-    def destroy(self):
-        self.parent = None
 
     @classmethod
     def candyxml_parse(cls, element):

@@ -59,9 +59,13 @@ class Stage(kaa.candy.Stage):
         super(Stage, self).__init__((int(config.display.width), int(config.display.height)), 'freevo2')
         self.theme_prefix = ''
         self.width, self.height = self.size
+        # layer 0: background
+        # layer 1: application
         self.add_layer()
+        # layer 2: widgets
         self.add_layer()
-        self.load_theme(config.theme, 'splash.xml')
+        # layer 3: popups
+        self.add_layer()
         self.app = None
 
     def load_theme(self, name=None, part=''):
@@ -81,7 +85,8 @@ class Stage(kaa.candy.Stage):
         for layer in self.layer[1:]:
             layer.x = config.freevo.gui.display.overscan.x
             layer.y = config.freevo.gui.display.overscan.y
-            layer.scale = (scale_x, scale_y)
+            layer.scale_x = scale_x
+            layer.scale_y = scale_y
         # reference theme in all widgets
         # NOTE: this bounds all widgets created from this point to the
         # same theme. Two displays with different themes are not possible.
@@ -105,16 +110,17 @@ class Stage(kaa.candy.Stage):
             if self.app.background:
                 self.app.background.parent = None
             self.app.destroy()
+            self.app.parent = None
         self.app = app
         return app
 
-    def show_widget(self, name, style=None, layer=1, context=None):
+    def show_widget(self, name, layer=2, context=None):
         """
         Render widget with the given name
         """
         try:
-            widget = self.theme.get(name)[style](context=context)
+            widget = self.theme.get('widget')[name](context=context)
             self.add(widget, layer=layer)
             return widget
         except TypeError:
-            log.error('widget %s:%s not defined in theme', name, style)
+            log.error('widget %s not defined in theme', name)

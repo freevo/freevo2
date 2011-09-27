@@ -1,16 +1,55 @@
 <?xml version="1.0"?>
 <config name="video" plugin="20">
     <desc lang="en">video plugin</desc>
-    <list name="items">
+
+    <list name="tv">
         <desc>
             Set video items for the media menu. This is a list with path
             and name. To set the subdir video in your home directory and
             /video write
 
-            video.items[+].path = $(HOME)/video
-            video.items[ ].name = My Home Videos
-            video.items[+].path = /video
-            video.items[ ].name = My Local Videos
+            video.tv[+].path = $(HOME)/video
+            video.tv[ ].name = My Home Videos
+            video.tv[+].path = /video
+            video.tv[ ].name = My Local Videos
+        </desc>
+        <var name="path" type="str">
+            <desc>Path of the directory / file.</desc>
+        </var>
+        <var name="name" type="unicode">
+            <desc>Name in the mediamenu</desc>
+        </var>
+    </list>
+
+    <list name="movie">
+        <desc>
+            Set video items for the media menu. This is a list with path
+            and name. To set the subdir video in your home directory and
+            /video write
+
+            video.movie[+].path = $(HOME)/video
+            video.movie[ ].name = My Home Videos
+            video.movie[+].path = /video
+            video.movie[ ].name = My Local Videos
+        </desc>
+        <var name="path" type="str">
+            <desc>Path of the directory / file.</desc>
+        </var>
+        <var name="name" type="unicode">
+            <desc>Name in the mediamenu</desc>
+        </var>
+    </list>
+
+    <list name="misc">
+        <desc>
+            Set video items for the media menu. This is a list with path
+            and name. To set the subdir video in your home directory and
+            /video write
+
+            video.misc[+].path = $(HOME)/video
+            video.misc[ ].name = My Home Videos
+            video.misc[+].path = /video
+            video.misc[ ].name = My Local Videos
         </desc>
         <var name="path" type="str">
             <desc>Path of the directory / file.</desc>

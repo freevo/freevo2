@@ -83,7 +83,7 @@ class PluginInterface(freevo.MediaPlugin, freevo.MainMenuPlugin):
         """
         MainMenuPlugin.items to return the image item.
         """
-        return [ freevo.MediaMenu(parent, _('Image Main Menu'), 'image', freevo.config.image.items) ]
+        return [ freevo.MediaMenu(parent, _('Show Images'), 'image', freevo.config.image.items) ]
 
     def fxdhandler(node, parent, listing):
         """

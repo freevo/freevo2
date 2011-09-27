@@ -44,7 +44,8 @@ import kaa
 
 # freevo imports
 from ... import core as freevo
-import configure
+# FIXME: broken
+# import configure
 import player as videoplayer
 
 # get logging object
@@ -109,6 +110,9 @@ class VideoItem(freevo.MediaItem):
             return aspect[:aspect.find(' ')].replace('/', ':')
         return None
 
+    def get_episode(self):
+        if self.info['season'] and self.info['episode']:
+            return '%dx%02d' % (self.info['season'], self.info['episode'])
 
     # ------------------------------------------------------------------------
     # actions:
@@ -127,7 +131,7 @@ class VideoItem(freevo.MediaItem):
         else:
             items = [ freevo.Action(_('Play'), self.play) ]
         # Add the configure stuff (e.g. set audio language)
-        return items + configure.get_items(self)
+        return items  # FIXME: broken + configure.get_items(self)
 
     @kaa.coroutine()
     def dvd_vcd_title_menu(self):

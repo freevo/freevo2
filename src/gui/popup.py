@@ -36,9 +36,13 @@ import math
 # kaa.candy import
 import kaa.candy
 
-class Popup(kaa.candy.Group):
+from widget import Widget
 
-    candyxml_name = 'popup'
+kaa.candy.Eventhandler.signatures['button-select'] = 'prev,next,secs'
+
+class Popup(Widget):
+
+    candyxml_style = 'popup'
     context_sensitive = True
 
     selected = None
@@ -109,8 +113,7 @@ class Popup(kaa.candy.Group):
     def select(self):
         for button in self.buttons.children:
             if button.obj.selected and button != self.selected:
-                if self.eventhandler.get('select', None):
-                    self.eventhandler.get('select')(self.selected, button, 0.2)
+                button.emit('button-select', self.selected, button, 0.2)
                 self.selected = button
 
     def sync_context(self):

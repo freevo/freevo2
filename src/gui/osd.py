@@ -30,13 +30,13 @@
 # -----------------------------------------------------------------------------
 
 # kaa imports
-import kaa.candy
+from widget import Widget
 
-class OSD(kaa.candy.Label):
+class OSD(Widget):
     """
     This OSD widget is a label and it fades in and out
     """
-    candyxml_name = 'osd'
+    candyxml_style = 'osd'
 
     @property
     def message(self):
@@ -44,13 +44,4 @@ class OSD(kaa.candy.Label):
 
     @message.setter
     def message(self, message):
-        self.text = message
-
-    def hide(self):
-        self.opacity = 255
-        self.parent = None
-        # self.animate('0.2', unparent=True).behave('opacity', 255, 0)
-
-    def show(self):
-        self.opacity = 0
-        # self.animate('0.2').behave('opacity', 0, 255)
+        self.get_widget('message').text = message

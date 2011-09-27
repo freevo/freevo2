@@ -83,7 +83,7 @@ class PluginInterface(freevo.MediaPlugin, freevo.MainMenuPlugin):
         """
         MainMenuPlugin.items to return the audio item.
         """
-        return [ freevo.MediaMenu(parent, _('Audio Main Menu'), 'audio', freevo.config.audio.items) ]
+        return [ freevo.MediaMenu(parent, _('Listen to Music'), 'audio', freevo.config.audio.items) ]
 
     def fxdhandler(node, parent, listing):
         """

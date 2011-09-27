@@ -11,7 +11,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2009 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2011 Dirk Meyer, et al.
 #
 # First edition: Krister Lagerstrom <krister-freevo@kmlager.com>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -58,16 +58,6 @@ __site__ = os.path.abspath(os.path.join(os.path.dirname(__file__), __site__))
 if not __site__ in sys.path:
     sys.path.insert(0, __site__)
 
-# if len(sys.argv) == 2 and sys.argv[1] in ('-fs', '--fullscreen', '-f'):
-#     # start X server and run freevo, ignore everything else for now
-#     server_num = 0
-#     while 1:
-#         if not os.path.exists('/tmp/.X11-unix/X' + str(server_num)):
-#             break
-#         server_num += 1
-#     sys.stdin.close()
-#     os.execvp('xinit', [ 'xinit', sys.argv[0], '-force-fs',  '--', ':'+str(server_num) ])
-#
 
 #
 # kaa checking
@@ -171,18 +161,12 @@ freevo2.core.config.watch()
 
 freevo2.core.init().wait()
 
-# Configure gui
+# Prepare GUI
 freevo2.gui.show_window(freevo2.core.config, freevo2.core.FREEVO_SHARE_DIR)
-
-# Fire up splashscreen and load the plugins
-progress = freevo2.gui.show_application('splash').get_widget('plugins')
-progress.max = freevo2.core.num_plugins - 1
-
-# Load plugins
-freevo2.core.init_plugins(freevo2, progress.inc)
-
-# Prepare again, now that all plugins are loaded
 freevo2.gui.load_theme()
+
+# Load all plugins
+freevo2.core.load_plugins(freevo2)
 
 # Start menu
 freevo2.core.MainMenu()

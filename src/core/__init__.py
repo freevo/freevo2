@@ -50,5 +50,4 @@ __all__ = __api__.__all__
 
 @kaa.coroutine()
 def init():
-    api._check_for_plugins()
     yield beacon.connect()

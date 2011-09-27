@@ -100,6 +100,7 @@ class MenuWidget(freevo.Application, freevo.MenuStack):
         self.pushmenu(menu)
         self.status = freevo.STATUS_RUNNING
         self.signals['show'].connect_weak(self.refresh, True)
+        self.signals['hide'].connect_weak(self.back_submenu, True)
 
     def refresh(self, reload=False):
         if self.locked:

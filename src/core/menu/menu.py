@@ -75,9 +75,6 @@ class Menu(ItemList):
         self.reload_func = reload_func
         self.type = type
 
-        # Menu type
-        self._is_submenu = False
-
         # Autoselect menu if it has only one item
         self.autoselect = False
 
@@ -140,12 +137,6 @@ class Menu(ItemList):
                 elif event == freevo.MENU_RIGHT:
                     event = freevo.MENU_PAGEDOWN
 
-        if self.rows == 1:
-            if event == freevo.MENU_LEFT:
-                event = freevo.MENU_UP
-            if event == freevo.MENU_RIGHT:
-                event = freevo.MENU_DOWN
-
         if event == freevo.MENU_UP:
             self.select(-self.cols)
             return True
@@ -192,16 +183,13 @@ class Menu(ItemList):
             return True
 
         if event == freevo.MENU_SUBMENU:
-            if self._is_submenu or not self.stack:
+            if self.type == 'submenu' or not self.stack:
                 return False
-
             items = self.selected.subitems
             if len(items) < 2:
                 # no submenu
                 return False
-            s = Menu(self.selected.name, items)
-            s._is_submenu = True
-            self.stack.pushmenu(s)
+            self.stack.pushmenu(Menu(self.selected.name, items, type='submenu'))
             return True
 
         if event == freevo.MENU_CALL_ITEM_ACTION:

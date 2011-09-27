@@ -1,32 +1,43 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<theme geometry="800x600">
+<theme geometry="1280x720">
 
     <script filename='scripts.py'/>
 
-    <menu name="audio" style="default">
+    <menu name="audio">
 	<alias name="audio main menu"/>
 	<event name="replace" script="menu"/>
-	<group x="10" y="100" width="270" height="490">
-	    <rectangle color="0xcc000000" radius="30"/>
-	    <group>
-		<thumbnail x="10" y="10" width="250" height="250" thumbnail="$item.thumbnail">
-		    <replace-on-context-change keys="item.artist item.album" script="fade"/>
-		</thumbnail>
-		<label x="10" y="280" width="230" font="Vera:20" color="0xffffff">
-		    <replace-on-context-change keys="item.name" script="fade"/>
-		    $item.name
-		</label>
-		<label x="10" y="320" width="230" font="Vera:18" color="0xffffff">
-		    <replace-on-context-change keys="item.artist" script="fade"/>
-		    $item.artist
-		</label>
-		<label x="10" y="340" width="230" font="Vera:18" color="0xffffff">
-		    <replace-on-context-change keys="item.album" script="fade"/>
-		    $item.album
-		</label>
-	    </group>
+	<group style="condition" name="details" x="10" y="100" width="370" height="590">
+	    <event name="replace"><![CDATA[
+	        item = next.context.get('item')
+		if item and item.thumbnail:
+		    next.x = -400
+		    yield next.animate('EASE_OUT_BACK', 0.5, x=10)
+		else:
+		    yield prev.animate('EASE_IN_BACK', 0.5, x=-400)
+	    ]]>
+	    </event>
+	    <case condition="item.thumbnail">
+		<rectangle color="0x99000000" radius="30"/>
+		<group>
+		    <thumbnail x="10" y="10" width="350" height="350" thumbnail="$item.thumbnail">
+			<replace-on-context-change keys="item.artist item.album" script="fade"/>
+		    </thumbnail>
+		    <label x="10" y="380" width="330" font="Vera:20" color="0xffffff">
+			<replace-on-context-change keys="item.name" script="fade"/>
+			$item.name
+		    </label>
+		    <label x="10" y="420" width="330" font="Vera:18" color="0xffffff">
+			<replace-on-context-change keys="item.artist" script="fade"/>
+			$item.artist
+		    </label>
+		    <label x="10" y="440" width="330" font="Vera:18" color="0xffffff">
+			<replace-on-context-change keys="item.album" script="fade"/>
+			$item.album
+		    </label>
+		</group>
+	    </case>
 	</group>
-        <listing x="300" y="100" width="490" height="490" xpadding="20" ypadding="10">
+        <listing x="420" y="100" width="590" height="590" xpadding="20" ypadding="10">
 	    <label font="Vera" height="30" color="0xcccccc">
 		<properties opacity="150"/>
 		$item.name
@@ -56,7 +67,7 @@
 	</image>
     </menu>
 
-    <application name="audioplayer" style="simple">
+    <application name="audioplayer">
         <image filename="../../images/blurrback.jpg"/>
 	<group x="40" y="100" width="720" height="270">
 	    <rectangle color="0xcc000000" radius="30"/>

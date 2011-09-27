@@ -83,7 +83,14 @@ class PluginInterface(freevo.MediaPlugin, freevo.MainMenuPlugin):
         """
         MainMenuPlugin.items to return the video item.
         """
-        return [ freevo.MediaMenu(parent, _('Watch a Movie'), 'video', freevo.config.video.items) ]
+        items = []
+        if freevo.config.video.tv:
+            items.append(freevo.MediaMenu(parent, _('Watch a TV Show'), 'video', freevo.config.video.tv))
+        if freevo.config.video.movie:
+            items.append(freevo.MediaMenu(parent, _('Watch a Movie'), 'video', freevo.config.video.movie))
+        if freevo.config.video.misc:
+            items.append(freevo.MediaMenu(parent, _('Watch a Video'), 'video', freevo.config.video.misc))
+        return items
 
     def fxdhandler_movie(self, node, parent, listing):
         """

@@ -31,16 +31,14 @@
 
 import logging
 
-import kaa.candy
+from widget import Widget
 
 # get logging object
 log = logging.getLogger()
 
-class Idlebar(kaa.candy.Group):
-    candyxml_name = 'idlebar'
+class Idlebar(Widget):
 
-    # properties
-    __visible = False
+    candyxml_style = 'idlebar'
 
     def __init__(self, *args, **kwargs):
         super(Idlebar, self).__init__(*args, **kwargs)
@@ -68,16 +66,8 @@ class Idlebar(kaa.candy.Group):
                 widget.x = x0
                 x0 += step
 
-    @property
-    def visible(self):
-        return self.__visible
+    def show(self):
+        self.animate('EASE_IN_CUBIC', 0.2, opacity=255)
 
-    @visible.setter
-    def visible(self, visible):
-        if self.__visible == visible:
-            return
-        self.__visible = visible
-        if visible:
-            self.animate('EASE_IN_CUBIC', 0.2, opacity=255)
-        else:
-            self.animate('EASE_OUT_CUBIC', 0.2, opacity=0)
+    def hide(self):
+        self.animate('EASE_OUT_CUBIC', 0.2, opacity=0)

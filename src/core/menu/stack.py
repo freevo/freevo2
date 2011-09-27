@@ -77,21 +77,30 @@ class MenuStack(object):
         if refresh:
             self.refresh(True)
 
-    def back_submenu(self, refresh=True, reload=False, osd_message=''):
+    def back_submenu(self, refresh=True, reload=False):
         """
-        Delete the last menu if it is a submenu. Also refresh or reload the
-        new menu if the attributes are set to True. If osd_message is set,
-        this message will be send if the current menu is no submenu
+        Delete all submenus at the end. Also refreshes or reloads the
+        new top menu if the attributes are set to True.
         """
-        if len(self._stack) > 1 and self._stack[-1]._is_submenu:
-            self.back_one_menu(refresh)
-        elif len(self._stack) > 1 and osd_message:
-            freevo.OSD_MESSAGE.post(osd_message)
+        changed = False
+        while len(self._stack) > 0:
+            if self._stack[-1].type != 'submenu':
+                break
+            self._stack.pop()
+            changed = True
+        if changed and refresh:
+            self.refresh(reload)
 
     def pushmenu(self, menu):
         """
         Add a new Menu to the stack and show it
         """
+        if not menu.choices:
+            freevo.OSD_MESSAGE.post('directory is empty')
+            return
+        if menu.type != 'submenu':
+            # remove submenus from the stack
+            self.back_submenu(False)
         # set stack (self) pointer to menu
         menu.stack = weakref(self)
         if len(self._stack) > 0:

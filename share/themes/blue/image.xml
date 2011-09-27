@@ -1,25 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<theme geometry="800x600">
+<theme geometry="1280x720">
 
     <script filename='scripts.py'/>
 
-    <menu name="image main menu" style="default">
-        <listing x="20" y="100" width="600" height="480">
-	    <label font="Vera" height="30" color="0xcccccc">
-		$item.name
-	    </label>
-            <selection>
-                <rectangle color="0xa0000000" radius="20" height="40"/>
-            </selection>
-        </listing>
-	<image style="icon" x="500" y="350" width="290" height="240" name="image">
-	    <properties xalign="right" yalign="bottom" keep-aspect="true" opacity="50"/>
-	</image>
-	<event name="replace" script="fade"/>
-    </menu>
-
-    <menu name="image" style="default">
-        <listing style="grid" x="10" y="100" width="780" height="480" xpadding="15" ypadding="15">
+    <menu name="image">
+        <listing style="grid" x="20" y="100" width="1240" height="480" xpadding="30" ypadding="30">
 	    <properties xalign="center"/>
 	    <group width="130" height="130">
 		<properties anchor-point="65,65" opacity="150"/>
@@ -32,21 +17,24 @@
 		</label>
 	    </group>
             <selection>
-		<rectangle color="0xc0000000" radius="15" width="150" height="150"/>
+		<rectangle color="0xc0000000" radius="15" width="170" height="170"/>
             </selection>
 	    <event name="select"><![CDATA[
 	        if prev:
                     prev.animate('EASE_OUT_QUAD', secs, opacity=130, scale_x=1, scale_y=1)
-                next.animate('EASE_OUT_QUAD', secs, opacity=255, scale_x=1.1, scale_y=1.1)
+                next.animate('EASE_OUT_QUAD', secs, opacity=255, scale_x=1.2, scale_y=1.2)
 		]]>
 	    </event>
         </listing>
-	<image style="icon" x="500" y="350" width="290" height="240" name="image">
-	    <properties xalign="right" yalign="bottom" keep-aspect="true" opacity="50"/>
-	</image>
+	<group y="620" height="120">
+	    <rectangle color="0x66000000"/>
+	    <text font="Vera:20" color="0xffffff">
+		$item.name with ${item.width}x${item.height}
+	    </text>
+	</group>
     </menu>
 
-    <application name="imageviewer" style="simple">
+    <application name="imageviewer">
 	<group name="browser">
 	    <rectangle y="470" color="0x00000000"/>
 	    <listing style="fixed-selection" x="-50" y="480" width="900" height="110" selection="3" 

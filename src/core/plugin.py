@@ -97,20 +97,15 @@ class PluginLoader(object):
         for c in self._baseclasses:
             c.plugin_list.sort(cmp_func)
 
-    def init(self, module, callback = None):
+    def init(self, module):
         """
         Load and init all the plugins. The function takes the path were the
-        plugins are searched in. Optional is a callback, called after a
-        plugin is loaded. If 'plugins' is given, only plugins with the given
-        prefix are loaded.
+        plugins are searched in.
         """
         self._initialized = True
         self.path = os.path.dirname(module.__file__)
         self.import_path = module.__name__
         for name, type, level, args in self._plugin_list:
-            kaa.main.step(False, True)
-            if callback:
-                callback()
             self.__load_plugin(name, type, level, args)
         # sort plugins
         cmp_func = lambda l, o: cmp(l._plugin_level, o._plugin_level)

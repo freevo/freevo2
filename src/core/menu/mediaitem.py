@@ -240,6 +240,6 @@ class MediaItem(Item):
         if not items:
             return
         self.menustack.back_submenu(False)
-        m = Menu(_('Configure'), items)
+        m = Menu(_('Configure'), items, type='submenu')
         m.table = (80, 20)
         self.menustack.pushmenu(m)

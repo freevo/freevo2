@@ -11,7 +11,7 @@ class VideoPlayer(Application):
     """
     Widget for the video player. This is the kaa.candy part of the application
     """
-    candyxml_style = 'videoplayer:simple'
+    candyxml_style = 'videoplayer'
 
     def set_player(self, player):
         self.player = player

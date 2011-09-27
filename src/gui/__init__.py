@@ -53,8 +53,8 @@ def show_window(cfg, sharedir):
 def show_application(application, context=None):
     return stage.show_application(application, context)
 
-def show_widget(name, style=None, layer=2, context=None):
-    return stage.show_widget(name, style, layer, context)
+def show_widget(name, layer=2, context=None):
+    return stage.show_widget(name, layer, context)
 
 def load_theme(theme=None):
     return stage.load_theme(theme)

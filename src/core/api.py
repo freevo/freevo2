@@ -29,9 +29,9 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'FREEVO_SHARE_DIR', 'FREEVO_DATA_DIR', 'config', 'Plugin', 'init_plugins',
-            'activate_plugin', 'register_plugin', 'get_plugin', 'num_plugins', 'signals',
-            'util', 'ResourceHandler' ]
+__all__ = [ 'FREEVO_SHARE_DIR', 'FREEVO_DATA_DIR', 'config', 'Plugin', 'load_plugins',
+            'activate_plugin', 'register_plugin', 'get_plugin', 'signals', 'util', 
+            'ResourceHandler' ]
 
 # python imports
 import os
@@ -68,24 +68,20 @@ signals = {}
 for e in events:
     setattr(event, e, event.Event(e))
 
-# plugins is a list of known plugins loaded from pycfgfile
-# activate all of them
-num_plugins = 0
-
-def _check_for_plugins():
-    global num_plugins
+# activate plugins from config
+def load_plugins(module):
     for plugin in plugins:
         group = config
         for attr in plugin.split('.'):
             group = getattr(group, attr)
         if group.activate:
             plugin = plugin.replace('plugin.', '').replace('..', '.')
-            num_plugins += 1
             if isinstance(group.activate, bool):
                 activate_plugin(plugin)
             else:
                 activate_plugin(plugin, level=group.activate)
-        
+    init_plugins(module)
+
 from resources import ResourceHandler
 
 import util

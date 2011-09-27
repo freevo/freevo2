@@ -66,7 +66,7 @@ class PluginInterface(freevo.Plugin):
         Catch OSD_MESSAGE and display it
         """
         if self.widget is not None:
-            self.widget.hide()
+            self.widget.destroy()
         self.widget = gui.show_widget('osd')
         self.widget.message = event.arg
         self.widget.show()
@@ -78,5 +78,5 @@ class PluginInterface(freevo.Plugin):
         """
         Hide the osd
         """
-        self.widget.hide()
+        self.widget.destroy()
         self.widget = None

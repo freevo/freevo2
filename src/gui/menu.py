@@ -36,42 +36,21 @@ import kaa.candy
 # gui imports
 from application import Application
 
-class MenuType(kaa.candy.Group):
+kaa.candy.Eventhandler.signatures['submenu-show'] = 'self, menu'
+kaa.candy.Eventhandler.signatures['submenu-hide'] = 'self, menu'
+
+class MenuWidget(kaa.candy.Group):
     """
-    Menu implementation, style default
+    Menu implementation
     """
     candyxml_name = 'menu'
-    candyxml_style = 'default'
 
-    def __init__(self, widgets, context=None):
-        super(MenuType, self).__init__(None, None, widgets, context=context)
-        self.cid = context.get('menu').id
-
-    @classmethod
-    def candyxml_parse(cls, element):
-        """
-        Parse the XML element for parameter to create the widget.
-        """
-        widgets = []
-        for inherit in element.get_children('inherit'):
-            element.remove(inherit)
-            theme = element
-            while getattr(theme, '_parent', None):
-                theme = theme._parent
-            kwargs = theme._elements.get(element.node)[inherit.name]._kwargs
-            widgets.extend(kwargs.get('widgets'))
-        widgets.extend(super(MenuType, cls).candyxml_parse(element).get('widgets'))
-        return kaa.candy.XMLdict(widgets=widgets)
-
-    def __del__(self):
-        print 'del', self.context.get('type')
-        super(MenuType, self).__del__()
 
 class MenuApplication(Application):
     """
-    Menu application implementation, style simple
+    Menu application implementation
     """
-    candyxml_style = 'menu:simple'
+    candyxml_style = 'menu'
 
     def __init__(self, widgets, background=None, context=None):
         super(MenuApplication, self).__init__(widgets, background, context)
@@ -79,10 +58,22 @@ class MenuApplication(Application):
         name = context.get('menu').type
         if not name in self.templates:
             name = 'default'
-        self.__template = self.templates.get(name)
-        self.menu = self.__template(context)
+        self.menu = self.templates.get(name)(context)
         self.menu.type = name
-        self.add(self.menu)
+        self.menu.parent = self
+        self.bgmenu = None
+
+    @kaa.coroutine()
+    def hide_submenu(self, submenu, menu):
+        # FIXME: if a new menu is a different widget than the old one,
+        # we are changing the old one back here while indepenent a new
+        # menu comes in which does not know there was a submenu
+        menu.freeze_context = False
+        submenu.freeze_context = True
+        hiding = submenu.emit('submenu-hide', submenu, menu)
+        if isinstance(hiding, kaa.InProgress):
+            yield hiding
+        submenu.parent = None
 
     def sync_context(self):
         name = self.context.get('menu').type
@@ -90,19 +81,29 @@ class MenuApplication(Application):
             name = 'default'
         if self.menu.type == name:
             return super(MenuApplication, self).sync_context()
-        # FIXME: this code should use supports_context in the MenuType
-        # itself somehow. It has to know its template and what
-        # templates we have.
         template = self.templates.get(name)
-        if template == self.__template:
+        if template == self.menu.__template__:
             # same template, just update the existing one
             self.menu.type = name
             return super(MenuApplication, self).sync_context()
-        self.__template = template
-        # FIXME: put new child at the same position in the stack as
-        # the old one
+        if name != 'submenu' and self.bgmenu:
+            # we switched away from a submenu. Remove the submenu from
+            # the stack and do the function call again.
+            self.hide_submenu(self.menu, self.bgmenu)
+            self.menu = self.bgmenu
+            self.bgmenu = None
+            return self.sync_context()
         new = template(self.context)
         new.type = name
-        self.replace(self.menu, new)
-        self.menu = new
+        if name == 'submenu':
+            # switch to submenu
+            self.bgmenu = self.menu
+            self.bgmenu.freeze_context = True
+            self.menu = new
+            self.menu.parent = self
+            self.menu.emit('submenu-show', self.menu, self.bgmenu)
+        else:
+            # normal menu switch
+            self.replace(self.menu, new)
+            self.menu = new
         super(MenuApplication, self).sync_context()
