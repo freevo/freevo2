@@ -36,7 +36,7 @@ for obj in dir(__event__):
     if obj.upper() == obj or obj == 'Event':
         __api__.__all__.append(obj)
         setattr(__api__, obj, getattr(__event__, obj))
-for module in ('menu', 'taskmanager', 'application', 'window', 'fxditem', 'playlist', 'directory', 'mainmenu', 'mediamenu'):
+for module in ('menu', 'taskmanager', 'application', 'window', 'playlist', 'directory', 'mainmenu', 'mediamenu'):
     exec('import %s as module' % module)
     for obj in module.__all__:
         if obj == 'signals':

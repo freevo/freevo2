@@ -59,8 +59,6 @@ class PluginInterface(freevo.MediaPlugin, freevo.MainMenuPlugin):
         """
         Activate the plugin.
         """
-        # FIXME: fxdparser is currently broken
-        # freevo.add_fxdparser(['image'], 'slideshow', fxdhandler)
         pass
 
     def suffix(self):
@@ -84,66 +82,3 @@ class PluginInterface(freevo.MediaPlugin, freevo.MainMenuPlugin):
         MainMenuPlugin.items to return the image item.
         """
         return [ freevo.MediaMenu(parent, _('Show Images'), 'image', freevo.config.image.items) ]
-
-    def fxdhandler(node, parent, listing):
-        """
-        Parse audio specific stuff from fxd files::
-        """
-        fxd = node
-        items = []
-        dirname = os.path.dirname(fxd.getattr(None, 'filename', ''))
-        children = fxd.get_children(node, 'files')
-        if children:
-            children = children[0].children
-        # Create a list of all images for the slideshow
-        for child in children:
-            try:
-                fname  = os.path.join(dirname, kaa.unicode_to_str(fxd.gettext(child)))
-                files  = []
-                if child.name == 'directory':
-                    # for directories add all files in it
-                    recursive = fxd.getattr(child, 'recursive', 0)
-                    files = freevo.util.match_files(fname, freevo.config.image.suffix.split(','), recursive)
-                elif child.name == 'file':
-                    # add the given filename
-                    files = [ fname ]
-                # get duration until the next images comes up
-                duration = fxd.getattr(child, 'duration', 0) or freevo.config.image.viewer.duration
-                for file in files:
-                    items.append(ImageItem(file, None, duration))
-            except OSError, e:
-                print 'slideshow error:'
-                print e
-        # create the playlist based on the parsed file list
-        pl = freevo.Playlist('', items, fxd.getattr(None, 'parent', None),
-               random=fxd.getattr(node, 'random', 0), repeat=fxd.getattr(node, 'repeat', 0))
-        pl.autoplay = True
-        pl.name = fxd.getattr(node, 'title')
-        pl.image = fxd.childcontent(node, 'cover-img')
-        if pl.image:
-            pl.image = os.path.join(os.path.dirname(fxd.filename), pl.image)
-        # background music
-        children = fxd.get_children(node, 'background-music')
-        if children:
-            random   = fxd.getattr(children[0], 'random', 0)
-            children = children[0].children
-        files  = []
-        suffix = []
-        for p in freevo.MediaPlugin.plugins('audio'):
-            suffix += p.suffix()
-        for child in children:
-            try:
-                fname  = os.path.join(dirname, fxd.gettext(child))
-                if child.name == 'directory':
-                    recursive = fxd.getattr(child, 'recursive', 0)
-                    files += freevo.util.match_files(fname, suffix, recursive)
-                elif child.name == 'file':
-                    files.append(fname)
-            except OSError, e:
-                print 'playlist error:'
-                print e
-        if files:
-            pl.background_playlist = freevo.Playlist(playlist=files, random = random, repeat=True, type='audio')
-        # add item to list
-        fxd.parse_info(fxd.get_children(node, 'info', 1), pl)
-        fxd.getattr(None, 'items', []).append(pl)

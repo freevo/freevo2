@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2009 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2011 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -56,33 +56,26 @@ class Menu(ItemList):
 
     def __init__(self, heading, choices=None, reload_func = None, type = None):
         ItemList.__init__(self, choices)
-
         self.heading = heading
         self.stack   = None
-
         # unique id of the menu object
         Menu.next_id += 1
         self.id = Menu.next_id
         # position in the menu stack
         self.pos = -1
-
         # special items for the new skin to use in the view or info
         # area. If None, menu.selected will be taken
         self.infoitem = None
-
         # Called when a child menu returns. This function returns a new menu
         # or None and the old menu will be reused
         self.reload_func = reload_func
         self.type = type
-
         # Autoselect menu if it has only one item
         self.autoselect = False
-
         # how many rows and cols does the menu has
         # (will be changed by the skin code)
         self.cols = 1
         self.rows = 1
-
 
     def set_items(self, items, refresh=True):
         """
@@ -92,18 +85,14 @@ class Menu(ItemList):
         # delete ref to menu for old choices
         for c in self.choices:
             c.menu = None
-
         # set new choices and selection
         ItemList.set_items(self, items, self.selected)
-
         # set menu (self) pointer to the items
         sref = weakref(self)
         for c in self.choices:
             c.menu = sref
-
         if refresh and self.stack:
             self.stack.refresh()
-
 
     def change_item(self, old, new):
         """
@@ -113,15 +102,12 @@ class Menu(ItemList):
         old.menu = None
         new.menu = weakref(self)
 
-
     def eventhandler(self, event):
         """
         Handle events for this menu page.
         """
-
         if not self.choices:
             return False
-
         if self.cols == 1:
             if freevo.config.menu.arrow_navigation:
                 if event == freevo.MENU_LEFT:
@@ -136,39 +122,30 @@ class Menu(ItemList):
                     event = freevo.MENU_PAGEUP
                 elif event == freevo.MENU_RIGHT:
                     event = freevo.MENU_PAGEDOWN
-
         if event == freevo.MENU_UP:
             self.select(-self.cols)
             return True
-
         if event == freevo.MENU_DOWN:
             self.select(self.cols)
             return True
-
         if event == freevo.MENU_PAGEUP:
             self.select(-(self.rows * self.cols))
             return True
-
         if event == freevo.MENU_PAGEDOWN:
             self.select(self.rows * self.cols)
             return True
-
         if event == freevo.MENU_LEFT:
             self.select(-1)
             return True
-
         if event == freevo.MENU_RIGHT:
             self.select(1)
             return True
-
         if event == freevo.MENU_PLAY_ITEM and hasattr(self.selected, 'play'):
             self.selected.play()
             return True
-
         if event == freevo.MENU_CHANGE_SELECTION:
             self.select(event.arg)
             return True
-
         if event == freevo.MENU_SELECT or event == freevo.MENU_PLAY_ITEM:
             actions = self.selected._get_actions()
             if not actions:
@@ -181,7 +158,6 @@ class Menu(ItemList):
                     return result
             # in any case, return True because this event is handled here
             return True
-
         if event == freevo.MENU_SUBMENU:
             if self.type == 'submenu' or not self.stack:
                 return False
@@ -191,7 +167,6 @@ class Menu(ItemList):
                 return False
             self.stack.pushmenu(Menu(self.selected.name, items, type='submenu'))
             return True
-
         if event == freevo.MENU_CALL_ITEM_ACTION:
             log.info('calling action %s' % event.arg)
             for action in self.selected._get_actions():
@@ -199,5 +174,4 @@ class Menu(ItemList):
                     return action() or True
             log.info('action %s not found' % event.arg)
             return True
-
         return False

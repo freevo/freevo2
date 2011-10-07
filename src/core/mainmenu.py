@@ -35,9 +35,6 @@
 
 __all__ = [ 'MainMenuItem', 'MainMenu', 'MainMenuPlugin' ]
 
-# kaa imports
-from kaa.utils import property
-
 # freevo imports
 import api as freevo
 

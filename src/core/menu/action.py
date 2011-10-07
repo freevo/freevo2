@@ -16,7 +16,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2005-2009 Dirk Meyer, et al.
+# Copyright (C) 2005-2011 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -62,7 +62,6 @@ class Action(object):
         self.kwargs = {}
         self.item = None
 
-
     def __call__(self):
         """
         call the function
@@ -72,12 +71,11 @@ class Action(object):
         # If self.item is set, pass it to the function as first parameter.
         # Check if the function is a member function of that item. If it
         # is, don't pass the item.
-        if not self.item or (hasattr(self.function, 'im_self') and \
-                             self.function.im_self == self.item):
+        if not self.item or \
+                (hasattr(self.function, 'im_self') and self.function.im_self == self.item):
             return self.function(*self.args, **self.kwargs)
         # pass item as first parameter
         return self.function(self.item, *self.args, **self.kwargs)
-
 
     def parameter(self, *args, **kwargs):
         """

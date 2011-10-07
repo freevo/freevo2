@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2005-2009 Dirk Meyer, et al.
+# Copyright (C) 2005-2011 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -30,7 +30,7 @@
 # -----------------------------------------------------------------------------
 
 __all__ = [ 'Files', 'Item', 'ActionItem', 'ItemList', 'MediaItem', 'Action',
-            'Menu', 'GridMenu', 'MenuStack', 'ItemPlugin', 'MediaPlugin', 'Image' ]
+            'Menu', 'MenuStack', 'ItemPlugin', 'MediaPlugin' ]
 
 # import the submodules
 from files import Files
@@ -39,7 +39,5 @@ from listing import ItemList
 from mediaitem import MediaItem
 from action import Action
 from menu import Menu
-from gridmenu import GridMenu
 from stack import MenuStack
 from plugin import ItemPlugin, MediaPlugin
-from image import Image

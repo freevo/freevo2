@@ -38,7 +38,6 @@ import logging
 
 # kaa imports
 import kaa
-from kaa.utils import property
 
 # freevo imports
 from .. import gui
@@ -64,16 +63,16 @@ class WidgetContext(kaa.candy.Context):
     Context link between Application and view
     """
     def __init__(self, name):
-        self._ctx = {}
+        self._ctx = kaa.candy.context()
         self._name = name
-        self._app = None
+        self.widget = None
         self._changed = False
 
     def show(self):
         """
         Render the widget
         """
-        self._app = gui.show_application(self._name, self._ctx)
+        self.widget = gui.show_application(self._name, self._ctx)
         self._changed = False
         kaa.signals['step'].disconnect(self.sync)
 
@@ -81,8 +80,8 @@ class WidgetContext(kaa.candy.Context):
         """
         Update the widget
         """
-        if self._app:
-            self._app.context = self._ctx
+        if self.widget:
+            self.widget.context = self._ctx
         self._changed = False
 
     def __getattr__(self, attr):
@@ -129,7 +128,7 @@ class Application(freevo.ResourceHandler):
         """
         Return the GUI widget if created or None
         """
-        return self.gui_context._app
+        return self.gui_context.widget
 
     def has_capability(self, capability):
         """

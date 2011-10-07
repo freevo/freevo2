@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2007-2009 Dirk Meyer, et al.
+# Copyright (C) 2007-2011 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -50,22 +50,18 @@ class ItemPlugin(freevo.Plugin):
         """
         return []
 
-
     def eventhandler(self, item, event):
         """
         Additional eventhandler for this item.
         """
         return False
 
-
+    @staticmethod
     def plugins(subtype=''):
         """
         Static function to return all ItemPlugins.
         """
         return [ x for x in ItemPlugin.plugin_list if x.plugin_media in (None, subtype) ]
-
-    plugins = staticmethod(plugins)
-
 
 
 class MediaPlugin(freevo.Plugin):
@@ -82,13 +78,11 @@ class MediaPlugin(freevo.Plugin):
         """
         return []
 
-
     def get(self, parent, files):
         """
         return a list of items based on the files
         """
         return []
-
 
     def count(self, parent, listing):
         """
@@ -99,7 +93,7 @@ class MediaPlugin(freevo.Plugin):
             c += len(listing.get(t))
         return c
 
-
+    @staticmethod
     def plugins(media_type=None):
         """
         Static function to return all MediaPlugins for the given media_type.
@@ -112,9 +106,6 @@ class MediaPlugin(freevo.Plugin):
             if not p.possible_media_types or media_type in p.possible_media_types:
                 ret.append(p)
         return ret
-
-    plugins = staticmethod(plugins)
-
 
 # register base class
 freevo.register_plugin(MediaPlugin)

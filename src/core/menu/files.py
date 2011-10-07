@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2003-2009 Dirk Meyer, et al.
+# Copyright (C) 2003-2011 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -49,10 +49,8 @@ class Files(object):
     """
     def __init__(self):
         self.files     = []
-        self.fxd_file  = ''
         self.image     = ''
         self.read_only = False
-
 
     def append(self, filename):
         """
@@ -60,13 +58,11 @@ class Files(object):
         """
         self.files.append(filename)
 
-
     def get(self):
         """
         Return all files.
         """
         return self.files
-
 
     def copy_possible(self):
         """
@@ -74,17 +70,15 @@ class Files(object):
         """
         return self.files != []
 
-
     def copy(self, destdir):
         """
         Copy all files to destdir.
         """
-        for f in self.files + [ self.fxd_file, self.image ]:
+        for f in self.files + [ self.image ]:
             if f:
                 if not os.path.isdir(destdir):
                     os.makedirs(destdir)
                 shutil.copy(f, destdir)
-
 
     def move_possible(self):
         """
@@ -92,17 +86,16 @@ class Files(object):
         """
         return self.files and not self.read_only
 
-
     def move(self, destdir):
         """
         Move all files to destdir.
         """
-        for f in self.files + [ self.fxd_file, self.image ]:
-            if f:
-                if not os.path.isdir(destdir):
-                    os.makedirs(destdir)
-                os.system('mv "%s" "%s"' % (f, destdir))
-
+        for f in self.files + [ self.image ]:
+            if not f:
+                continue
+            if not os.path.isdir(destdir):
+                os.makedirs(destdir)
+            os.system('mv "%s" "%s"' % (f, destdir))
 
     def delete_possible(self):
         """
@@ -110,12 +103,11 @@ class Files(object):
         """
         return self.files and not self.read_only
 
-
     def delete(self):
         """
         Delete all files.
         """
-        for filename in self.files + [ self.fxd_file, self.image ]:
+        for filename in self.files + [ self.image ]:
             if not filename:
                 continue
             try:

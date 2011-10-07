@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2009 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2011 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -56,9 +56,7 @@ class MediaItem(Item):
         Item.__init__(self, parent)
         self.url = 'null://'
         self.filename = None
-        self.fxdinfo = {}
         self.elapsed = 0
-
 
     def set_url(self, url):
         """
@@ -67,15 +65,12 @@ class MediaItem(Item):
         """
         if not isinstance(url, kaa.beacon.Item):
             raise RuntimeError('MediaItem.set_url needs a beacon item')
-
         self.info = url
         self.url = url.url
         self.files = Files()
         if self.info.get('read_only'):
             self.files.read_only = True
-
         self.mode = self.url[:self.url.find('://')]
-
         if self.mode == 'file':
             # The url is based on a file. We can search for images
             # and extra attributes here
@@ -89,7 +84,6 @@ class MediaItem(Item):
                 self.name = self.info.get('title')
             if not self.name:
                 self.name = kaa.str_to_unicode(self.info.get('name'))
-
         else:
             # Mode is not file, it has to be a network url. Other
             # types like dvd are handled inside the derivated class
@@ -99,7 +93,6 @@ class MediaItem(Item):
             if not self.name:
                 self.name = kaa.str_to_unicode(self.url)
 
-
     def _format_time(self, time, hours=False):
         """
         Format time string
@@ -107,7 +100,6 @@ class MediaItem(Item):
         if int(time / 3600) or hours:
             return '%d:%02d:%02d' % ( time / 3600, (time % 3600) / 60, time % 60)
         return '%02d:%02d' % (time / 60, time % 60)
-
 
     def get_length(self, style='clock'):
         """
@@ -121,7 +113,6 @@ class MediaItem(Item):
             raise AttributeError('unknown length style %s' % style)
         except ValueError:
             return ''
-
 
     def get_elapsed(self, style='clock'):
         """
@@ -144,7 +135,6 @@ class MediaItem(Item):
                 return 0
         raise AttributeError('unknown length style %s' % style)
 
-
     def get_id(self):
         """
         Return a unique id of the item. This id should be the same when the
@@ -152,11 +142,9 @@ class MediaItem(Item):
         """
         return self.url
 
-
     def __repr__(self):
         name = str(self.__class__)
         return "<%s %s>" % (name[name.rfind('.')+1:-2], self.url)
-
 
     def sort(self, mode='name'):
         """
@@ -176,20 +164,17 @@ class MediaItem(Item):
             return self.name.lower()
         return Item.sort(self, mode)
 
-
     def cache(self):
         """
         Caches (loads) the next item
         """
         pass
 
-
     def play(self):
         """
         Play the item
         """
         pass
-
 
     def stop(self):
         """
@@ -202,13 +187,11 @@ class MediaItem(Item):
     # configure submenu
     # ======================================================================
 
-
     def get_configure_items(self):
         """
         Return configure options for this item.
         """
         raise RuntimeError('item can not be configured')
-
 
     def _set_configure_var(self, var, name, choices):
         """
@@ -224,7 +207,6 @@ class MediaItem(Item):
         item.name = name + '\t'  + current
         # rebuild menu
         self.menustack.refresh(True)
-
 
     def configure(self):
         """

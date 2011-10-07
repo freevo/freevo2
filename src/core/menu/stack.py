@@ -40,7 +40,6 @@ import logging
 
 # kaa imports
 import kaa
-from kaa.utils import property
 from kaa.weakref import weakref
 
 # freevo imports
@@ -169,17 +168,14 @@ class MenuStack(object):
         if result:
             self.refresh()
             return result
-
         if event == freevo.MENU_GOTO_MAINMENU:
             while len(self._stack) > 1:
                 self._stack.pop()
             self.refresh()
             return True
-
         if event == freevo.MENU_BACK_ONE_MENU:
             self.back_one_menu()
             return True
-
         if event == freevo.MENU_GOTO_MEDIA:
             # TODO: it would be nice to remember the current menu stack
             # but that is something we have to do inside mediamenu if it
@@ -194,7 +190,6 @@ class MenuStack(object):
                     item.actions()[0]()
                     return True
             return True
-
         if event == freevo.MENU_GOTO_MENU:
             # TODO: add some doc, example:
             # input.eventmap[menu][5] = MENU_GOTO_MENU /Watch a Movie/My Home Videos
@@ -212,7 +207,6 @@ class MenuStack(object):
                     break
             self.locked = False
             self.refresh()
-
         if not menu.choices:
             # handle empty menus
             if event in ( freevo.MENU_SELECT, freevo.MENU_SUBMENU, freevo.MENU_PLAY_ITEM):

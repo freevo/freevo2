@@ -11,7 +11,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2007-2009 Dirk Meyer, et al.
+# Copyright (C) 2007-2011 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -52,7 +52,6 @@ class ItemList(object):
     def __init__(self, choices=None, selected=None):
         # state, will increase on every item change
         self.state = 0
-
         # set items
         self.choices = []
         self.selected = None
@@ -61,33 +60,26 @@ class ItemList(object):
         if choices is not None:
             self.set_items(choices, selected)
 
-
-
     def set_items(self, items, selected=None):
         """
         Set/replace the items.
         """
         # increase state variable
         self.state += 1
-
         # set new choices and selection
         self.choices = items
-
         # select given item
         if selected is not None:
             return self.select(selected)
-
         # try to reset selection in case we had one
         if not self.selected:
             # no old selection
             if len(self.choices):
                 return self.select(self.choices[0])
             return self.select(None)
-
         if self.selected in self.choices:
             # item is still there, reuse it
             return self.select(self.selected)
-
         for c in self.choices:
             if c.get_id() == self.selected_id:
                 # item with the same id is there, use it
@@ -100,7 +92,6 @@ class ItemList(object):
         # no item in the list
         return self.select(None)
 
-
     def select(self, item):
         """
         Set the selection to a specific item in the list. If item in an int
@@ -109,14 +100,12 @@ class ItemList(object):
         if self.selected == item:
             # nothing changed
             return True
-
         if not self.choices or item is None:
             # We have no choices and can't select. This could happen
             # when a Directory Item has no Items
             self.selected = None
             self.selected_pos = -1
             return True
-
         if isinstance(item, Item):
             # select item
             if not item in self.choices:
@@ -131,20 +120,17 @@ class ItemList(object):
         p = min(max(0, self.selected_pos + item), len(self.choices) - 1)
         return ItemList.select(self, self.choices[p])
 
-
     def get_items(self):
         """
         Return the list of items.
         """
         return self.choices
 
-
     def get_selection(self):
         """
         Return current selected item.
         """
         return self.selected
-
 
     def change_item(self, old, new):
         """

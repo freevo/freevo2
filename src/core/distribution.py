@@ -115,98 +115,98 @@ class i18n (core.Command):
         if not self.compile_only:
             print 'updating pot file'
 
-            # for freevo main package: get the skin settings
-            fxd_strings = {}
-            if self.app == 'freevo':
-                for file in ([ os.path.join('share/skins/main', fname)
-                               for fname in os.listdir('share/skins/main') ]):
-                    if not file.endswith('.fxd'):
-                        continue
-                    f = open(file)
-                    data = f.readlines()
-                    f.close()
-                    for i in range(len(data)):
-                        # find main menu names
-                        if 0 < data[i].find('<item label') < \
-                               data[i].find('name'):
-                            text = data[i][data[i].find('name="')+6:]
-                            text = text[:text.find('"')]
-                            if fxd_strings.has_key(text):
-                                fxd_strings[text].append('%s:%s' % (file, i))
-                            else:
-                                fxd_strings[text] = [ '%s:%s' % (file, i) ]
-                            continue
+            # # for freevo main package: get the skin settings
+            # fxd_strings = {}
+            # if self.app == 'freevo':
+            #     for file in ([ os.path.join('share/skins/main', fname)
+            #                    for fname in os.listdir('share/skins/main') ]):
+            #         if not file.endswith('.fxd'):
+            #             continue
+            #         f = open(file)
+            #         data = f.readlines()
+            #         f.close()
+            #         for i in range(len(data)):
+            #             # find main menu names
+            #             if 0 < data[i].find('<item label') < \
+            #                    data[i].find('name'):
+            #                 text = data[i][data[i].find('name="')+6:]
+            #                 text = text[:text.find('"')]
+            #                 if fxd_strings.has_key(text):
+            #                     fxd_strings[text].append('%s:%s' % (file, i))
+            #                 else:
+            #                     fxd_strings[text] = [ '%s:%s' % (file, i) ]
+            #                 continue
 
-                        # find <text></text>
-                        if data[i][:-1].find('<text') == -1:
-                            continue
-                        text = data[i][:-1]
-                        if data[i][:-1].find('>') == -1:
-                            text += data[i+1][:-1]
-                        if text.find('/>') > 0 or text.find('</text>') == -1:
-                            continue
-                        text = text[text.find('>')+1:text.find('</text>')]
-                        if not text.strip(' /():-_"\'') or text == 'x':
-                            continue
+            #             # find <text></text>
+            #             if data[i][:-1].find('<text') == -1:
+            #                 continue
+            #             text = data[i][:-1]
+            #             if data[i][:-1].find('>') == -1:
+            #                 text += data[i+1][:-1]
+            #             if text.find('/>') > 0 or text.find('</text>') == -1:
+            #                 continue
+            #             text = text[text.find('>')+1:text.find('</text>')]
+            #             if not text.strip(' /():-_"\'') or text == 'x':
+            #                 continue
 
-                        # strip ' ' at the beginnig and ' ', ': ', ':',
-                        # ',' or ', ' at the end
-                        text = text.strip(' ').rstrip(' :,')
+            #             # strip ' ' at the beginnig and ' ', ': ', ':',
+            #             # ',' or ', ' at the end
+            #             text = text.strip(' ').rstrip(' :,')
 
-                        if fxd_strings.has_key(text):
-                            fxd_strings[text].append('%s:%s' % (file, i))
-                        else:
-                            fxd_strings[text] = [ '%s:%s' % (file, i) ]
+            #             if fxd_strings.has_key(text):
+            #                 fxd_strings[text].append('%s:%s' % (file, i))
+            #             else:
+            #                 fxd_strings[text] = [ '%s:%s' % (file, i) ]
 
-            # update
-            if os.path.isfile('freevo_config.py'):
-                freevo_config = '../freevo_config.py'
-            else:
-                freevo_config = ''
-            os.system('(cd src ; find . -name "*.*py" | xargs xgettext -L ' + \
-                      'Python -o ../i18n/%s.pot %s)' % \
-                      (self.app, freevo_config))
+            # # update
+            # if os.path.isfile('freevo_config.py'):
+            #     freevo_config = '../freevo_config.py'
+            # else:
+            #     freevo_config = ''
+            # os.system('(cd src ; find . -name "*.*py" | xargs xgettext -L ' + \
+            #           'Python -o ../i18n/%s.pot %s)' % \
+            #           (self.app, freevo_config))
 
-            # for freevo main package: check skin
-            if self.app == 'freevo':
-                # load pot file into mem
-                f = open('i18n/freevo.pot')
-                data = f.readlines()
-                f.close()
+            # # for freevo main package: check skin
+            # if self.app == 'freevo':
+            #     # load pot file into mem
+            #     f = open('i18n/freevo.pot')
+            #     data = f.readlines()
+            #     f.close()
 
-                # search for duplicates from freevo.pot and skin
-                f = open('i18n/freevo.pot', 'w')
-                for line in data:
-                    if line.find('msgid "') == 0:
-                        text = line[line.find('"')+1:line.rfind('"')]
-                        if text in fxd_strings:
-                            for found in fxd_strings[text]:
-                                f.write('#: %s\n' % found)
-                            del fxd_strings[text]
-                    f.write(line)
+            #     # search for duplicates from freevo.pot and skin
+            #     f = open('i18n/freevo.pot', 'w')
+            #     for line in data:
+            #         if line.find('msgid "') == 0:
+            #             text = line[line.find('"')+1:line.rfind('"')]
+            #             if text in fxd_strings:
+            #                 for found in fxd_strings[text]:
+            #                     f.write('#: %s\n' % found)
+            #                 del fxd_strings[text]
+            #         f.write(line)
 
-                # write skin strings
-                for text in fxd_strings:
-                    f.write('\n')
-                    for line in fxd_strings[text]:
-                        f.write('#: %s\n' % line)
-                    f.write('msgid "%s"\nmsgstr ""\n' % text)
-                f.close()
+            #     # write skin strings
+            #     for text in fxd_strings:
+            #         f.write('\n')
+            #         for line in fxd_strings[text]:
+            #             f.write('#: %s\n' % line)
+            #         f.write('msgid "%s"\nmsgstr ""\n' % text)
+            #     f.close()
 
         if not self.no_merge and not self.compile_only:
             print 'updating po files'
             print '',
-            for file in ([ os.path.join('i18n', fname) \
-                           for fname in os.listdir('i18n') ]):
-                if os.path.isdir(file) and not file.endswith('.svn'):
-                    txt = file
-                    for i in range(len(file), 10):
-                        txt += '.'
-                    print txt,
-                    sys.stdout.flush()
-                    file = os.path.join(file, 'LC_MESSAGES/%s.po' % self.app)
-                    os.system('msgmerge --update --backup=off %s i18n/%s.pot'\
-                              % (file, self.app))
+            # for file in ([ os.path.join('i18n', fname) \
+            #                for fname in os.listdir('i18n') ]):
+            #     if os.path.isdir(file) and not file.endswith('.svn'):
+            #         txt = file
+            #         for i in range(len(file), 10):
+            #             txt += '.'
+            #         print txt,
+            #         sys.stdout.flush()
+            #         file = os.path.join(file, 'LC_MESSAGES/%s.po' % self.app)
+            #         os.system('msgmerge --update --backup=off %s i18n/%s.pot'\
+            #                   % (file, self.app))
             print
 
         # po to mo conversion

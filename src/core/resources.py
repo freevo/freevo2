@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2007-2009 Dirk Meyer, et al.
+# Copyright (C) 2007-2011 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -32,7 +32,6 @@
 # kaa imports
 import kaa
 
-
 class ResourceHandler(object):
     """
     The ResourceHandler inherit from it if you want to use resources that need
@@ -53,7 +52,6 @@ class ResourceHandler(object):
         """
         if not hasattr(self, '_ressources_suspended'):
             self._ressources_suspended = []
-
         blocked = {}
         blocking = []
         for r in resources:
@@ -68,12 +66,10 @@ class ResourceHandler(object):
                 # TODO: return bad ressources so the app could
                 # try to reserve resources without that bad one.
                 yield False
-
         if blocked and not kwargs.get('force'):
             # failed to reserve but it would be possible, return list
             # of blocking resources
             yield blocked
-
         # suspend modules (if any)
         for module in blocking:
             if not module in self._ressources_suspended:
@@ -81,7 +77,6 @@ class ResourceHandler(object):
             answer = module.suspend()
             if isinstance(answer, kaa.InProgress):
                 yield answer
-
         # since get_resources is decorated with the locking
         # keyword, no other application or plugin could have
         # gotten the ressources we need and we are free to
@@ -98,7 +93,6 @@ class ResourceHandler(object):
         if kwargs.get('force'):
             yield True
         yield {}
-
 
     def free_resources(self, resume=False):
         """
@@ -119,20 +113,17 @@ class ResourceHandler(object):
         # clear list with suspended since all resumed
         self._ressources_suspended = []
 
-
     def can_suspend(self):
         """
         Return if it is possible for this handler to release its resource.
         """
         return False
 
-
     def suspend(self):
         """
         Suspend this resource handler. Should free all the resources.
         """
         return False
-
 
     def resume(self):
         """

@@ -102,7 +102,7 @@ class SeriesItem(freevo.Item):
                         rating = 0
                     if rating > choice[0]:
                         choice = rating, poster.url
-                self.thumbnail = freevo.Image(choice[1])
+                self.thumbnail = choice[1]
                 self.description = series.overview
 
     @kaa.coroutine()

@@ -10,7 +10,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2009 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2011 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -49,13 +49,6 @@ from action import Action
 # get logging object
 log = logging.getLogger()
 
-class Properties(object):
-    def __init__(self, item):
-        self.__item = item
-
-    def __getattr__(self, attr):
-        return self.__item.get(attr)
-
 class Item(object):
     """
     Item class. This is the base class for all items in the menu. It's a
@@ -63,6 +56,19 @@ class Item(object):
     """
     type = None
 
+    class Properties(object):
+        """
+        Properties class to access the variables from an item as
+        simple member. This is used for the GUI code
+        """
+        def __init__(self, item):
+            self.__item = weakref(item)
+    
+        def __getattr__(self, attr):
+            if not self.__item:
+                return None
+            return self.__item.get(attr)
+    
     def __init__(self, parent):
         """
         Init the item. Sets all needed variables, if parent is given also
@@ -80,7 +86,7 @@ class Item(object):
 
     @property
     def properties(self):
-        return Properties(self)
+        return Item.Properties(self)
 
     @property
     def image(self):
@@ -262,7 +268,7 @@ class Item(object):
 
     def __setitem__(self, key, value):
         """
-        set the value of 'key' to 'val'
+        Set the value of 'key' to 'val'
         """
         if key.startswith('mem:'):
             # temp setting only in memory

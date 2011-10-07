@@ -430,12 +430,6 @@ class PluginInterface(freevo.MediaPlugin):
     """
     Plugin class for playlist items
     """
-    def __init__(self):
-        super(PluginInterface, self).__init__()
-        # add fxd parser callback
-        freevo.add_fxdparser([], 'playlist', self.fxdhandler)
-
-
     def suffix(self):
         """
         return the list of suffixes this class handles
@@ -457,50 +451,6 @@ class PluginInterface(freevo.MediaPlugin):
                                       type=media_type))
         return items
 
-
-    def fxdhandler(self, node, parent, listing):
-        """
-        Parse playlist specific stuff from fxd files::
-          <?xml version="1.0" ?>
-          <freevo>
-            <playlist title="foo" random="1|0" repeat="1|0">
-              <cover-img>foo.jpg</cover-img>
-              <files>
-                <directory recursive="1|0">path</directory>
-                <file>filename</file>
-              </files>
-              <info>
-                <description>A nice description</description>
-              </info>
-            </playlist>
-          </freevo>
-        """
-        # FIXME: code is broken
-        return []
-        items = []
-        for c in node.children:
-            if not c.name == 'files':
-                continue
-            for file in c.children:
-                if file.name in ('file', 'directory'):
-                    f = kaa.unicode_to_str(file.content)
-                    filename = os.path.join(node.dirname, f)
-                    # FIXME: unable to yield in fxdhandler
-                    query = kaa.beacon.query(filename=filename)
-                if file.name == 'directory':
-                    recursive = file.getattr('recursive') == '1'
-                    # FIXME: list returns InProgress
-                    query = query.get().list(recursive=recursive)
-                items.append(query)
-
-        # create playlist object
-        media_type = getattr(parent, 'media_type', None)
-        pl = Playlist(node.title, items, parent, media_type,
-                      random=node.getattr('random') == '1',
-                      repeat=node.getattr('repeat') == '1')
-        pl.image = node.image
-        pl.info  = node.info
-        return pl
 
 
 # load the MediaPlugin
