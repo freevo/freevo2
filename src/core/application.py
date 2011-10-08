@@ -58,30 +58,31 @@ CAPABILITY_TOGGLE     = 1
 CAPABILITY_PAUSE      = 2
 CAPABILITY_FULLSCREEN = 4
 
-class WidgetContext(kaa.candy.Context):
+class WidgetContext(object):
     """
     Context link between Application and view
     """
     def __init__(self, name):
-        self._ctx = kaa.candy.context()
+        self._ctx = kaa.candy.Context()
         self._name = name
-        self.widget = None
+        self._widget = None
         self._changed = False
 
-    def show(self):
+    def create_widget(self):
         """
         Render the widget
         """
-        self.widget = gui.show_application(self._name, self._ctx)
-        self._changed = False
         kaa.signals['step'].disconnect(self.sync)
+        self._widget = gui.show_application(self._name, self._ctx)
+        self._changed = False
 
     def sync(self):
         """
         Update the widget
         """
-        if self.widget:
-            self.widget.context = self._ctx
+        if not self._widget or not self._changed:
+            return
+        self._widget.context = self._ctx
         self._changed = False
 
     def __getattr__(self, attr):
@@ -94,9 +95,8 @@ class WidgetContext(kaa.candy.Context):
         """
         Set context attribute
         """
-        if attr.startswith('_'):
-            super(WidgetContext, self).__setattr__(attr, value)
-            return
+        if attr.startswith('_') or attr == 'widget':
+            return super(WidgetContext, self).__setattr__(attr, value)
         if not self._changed:
             self._changed = True
             kaa.signals['step'].connect_first_once(self.sync)
@@ -119,16 +119,16 @@ class Application(freevo.ResourceHandler):
         self.__status = STATUS_IDLE
         self.__eventmap = eventmap
         self.__capabilities = 0
-        self.gui_context = WidgetContext(self.name)
+        self.context = WidgetContext(self.name)
         for cap in capabilities:
             self.__capabilities |= cap
 
     @property
-    def gui_widget(self):
+    def widget(self):
         """
         Return the GUI widget if created or None
         """
-        return self.gui_context.widget
+        return self.context._widget
 
     def has_capability(self, capability):
         """
@@ -175,14 +175,13 @@ class Application(freevo.ResourceHandler):
         Set a new eventmap for the event handler
         """
         self.__eventmap = eventmap
-        taskmanager.set_focus()
+        taskmanager.sync()
 
     def eventhandler(self, event):
         """
         Eventhandler for this application
         """
-        error = 'Error, no eventhandler defined for %s' % self.application
-        raise AttributeError(error)
+        raise RuntimeError('no eventhandler defined for %s' % self.name)
 
     def stop(self):
         """
@@ -196,4 +195,4 @@ class Application(freevo.ResourceHandler):
         """
         String for debugging.
         """
-        return self.name
+        return '<Freevo.Application %s>' % self.name

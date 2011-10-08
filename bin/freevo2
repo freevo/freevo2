@@ -161,14 +161,16 @@ freevo2.core.config.watch()
 
 freevo2.core.init().wait()
 
-# Prepare GUI
+# prepare GUI
 freevo2.gui.show_window(freevo2.core.config, freevo2.core.FREEVO_SHARE_DIR)
-freevo2.gui.load_theme()
 
-# Load all plugins
+# load all plugins
 freevo2.core.load_plugins(freevo2)
 
-# Start menu
+# load theme
+freevo2.gui.load_theme()
+
+# start menu
 freevo2.core.MainMenu()
 
 def garbage_collect():

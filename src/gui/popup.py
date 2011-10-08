@@ -29,6 +29,8 @@
 #
 # -----------------------------------------------------------------------------
 
+__all__ = [ 'Popup', 'Button' ]
+
 # python imports
 import copy
 import math

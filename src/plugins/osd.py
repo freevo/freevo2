@@ -45,6 +45,7 @@ from .. import gui
 # get logging object
 log = logging.getLogger()
 
+
 class PluginInterface(freevo.Plugin):
     """
     OSD plugin.
@@ -67,8 +68,7 @@ class PluginInterface(freevo.Plugin):
         """
         if self.widget is not None:
             self.widget.destroy()
-        self.widget = gui.show_widget('osd')
-        self.widget.message = event.arg
+        self.widget = gui.show_widget('osd', context={'message': event.arg})
         self.widget.show()
         # Start hide timer for 2 seconds.
         # If already active, the timer will be reset.

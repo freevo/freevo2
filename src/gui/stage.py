@@ -29,6 +29,8 @@
 #
 # -----------------------------------------------------------------------------
 
+__all__ = [ 'Stage', 'config' ]
+
 # python imports
 import os
 import logging

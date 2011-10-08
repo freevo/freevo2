@@ -110,10 +110,6 @@ class VideoItem(freevo.MediaItem):
             return aspect[:aspect.find(' ')].replace('/', ':')
         return None
 
-    def get_episode(self):
-        if self.info['season'] and self.info['episode']:
-            return '%dx%02d' % (self.info['season'], self.info['episode'])
-
     # ------------------------------------------------------------------------
     # actions:
 

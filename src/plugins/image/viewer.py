@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2006 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2011 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -36,15 +36,76 @@ import logging
 
 # kaa imports
 import kaa
+import kaa.candy
 
 # freevo imports
 from ... import core as freevo
+from ... import gui
 
 # get logging object
 log = logging.getLogger('image')
 
 # global viewer, will be set to the ImageViewer
 viewer = None
+
+class Widget(gui.Application):
+    """
+    Widget for the Imageviewer. This is the kaa.candy part of the application
+    """
+    candyxml_style = 'imageviewer'
+
+    __image = None
+    __widget = None
+
+    def show(self):
+        self.sync_context()
+
+    def sync_context(self):
+        if self.context.image != self.__image:
+            if self.__widget:
+                self.__widget.parent = None
+            self.__image = self.context.image
+            self.__widget = kaa.candy.Image()
+            self.__widget.image = self.__image
+            self.__widget.xalign = self.__widget.yalign = kaa.candy.ALIGN_CENTER
+            self.__widget.keep_aspect = True
+            self.stage.add(self.__widget, layer=0)
+        super(Widget, self).sync_context()
+
+    #     if view is not self._view:
+    #         self._zoom = 1.0
+    #         self._rotation = 0
+    #         self._view = view
+    #         self._view.anchor_point = self.width / 2, self.height / 2
+    #         self._pos = 0, 0
+    #     animation = None
+    #     # FIXME: if we do not zoom, we should upload a downscaled
+    #     # version of the image to make it faster.
+    #     if self._zoom != self.context.zoom:
+    #         self._zoom = self.context.zoom
+    #         animation = view.animate(0.2)
+    #         animation.behave('scale', view.scale, (self._zoom, self._zoom))
+    #     if self._pos != self.context.pos:
+    #         if not animation:
+    #             animation = view.animate(0.2)
+    #         self._pos = self.context.pos
+    #         animation.behave('move', (view.x, view.y), (-self._pos[0], -self._pos[1]))
+    #     if self._rotation != self.context.rotation:
+    #         self._rotation = self.context.rotation
+    #         image = self.get_widget('image')
+    #         image.rotation = self._rotation
+    #         # Update image geometry. This is not a good solution but it helps
+    #         # keeping the image in the view area. This is why there is a container
+    #         # around the image widget: to keep everything working even when having
+    #         # a rotated image.
+    #         if self._rotation % 180:
+    #             image.x = (self.width - self.height) / 2
+    #             image.y = -image.x
+    #             image.width, image.height = self.height, self.width
+    #         else:
+    #             image.x = image.y = 0
+    #             image.width, image.height = self.width, self.height
+
 
 class ImageViewer(freevo.Application):
     """
@@ -77,7 +138,7 @@ class ImageViewer(freevo.Application):
         Send PLAY_END to show next image.
         """
         event = freevo.Event(freevo.PLAY_END, self.item)
-        event.set_handler(self.eventhandler)
+        event.handler = self.eventhandler
         event.post()
 
     def view(self, item):
@@ -93,11 +154,11 @@ class ImageViewer(freevo.Application):
         if self.playlist:
             self.playlist.select(self.item)
         # update the screen
-        self.gui_context.image = self.item.filename
-        self.gui_context.rotation = item.get('rotation') or 0
-        self.gui_context.zoom = 1.0
-        self.gui_context.pos = 0,0
-        self.gui_context.menu = self.playlist
+        self.context.image = self.item.filename
+        self.context.rotation = item.get('rotation') or 0
+        self.context.zoom = 1.0
+        self.context.pos = 0,0
+        self.context.menu = self.playlist
         self.status = freevo.STATUS_RUNNING
         # start timer
         if self.item.duration and self.slideshow and \
@@ -117,7 +178,7 @@ class ImageViewer(freevo.Application):
         # set status to stopping
         self.status = freevo.STATUS_STOPPING
         event = freevo.Event(freevo.PLAY_END, self.item)
-        event.set_handler(self.eventhandler)
+        event.handler = self.eventhandler
         event.post()
 
     def eventhandler(self, event):
@@ -158,37 +219,37 @@ class ImageViewer(freevo.Application):
         if event == freevo.IMAGE_ROTATE:
             # rotate image
             if event.arg == 'left':
-                self.gui_context.rotation = (self.gui_context.rotation + 270) % 360
+                self.context.rotation = (self.context.rotation + 270) % 360
             else:
-                self.gui_context.rotation = (self.gui_context.rotation + 90) % 360
+                self.context.rotation = (self.context.rotation + 90) % 360
             return True
 
         if event in (freevo.ZOOM, freevo.ZOOM_IN, freevo.ZOOM_OUT):
-            zoom = self.gui_context.zoom
+            zoom = self.context.zoom
             if event == freevo.ZOOM:
-                self.gui_context.zoom = event.arg
+                self.context.zoom = event.arg
             if event == freevo.ZOOM_IN:
-                self.gui_context.zoom += event.arg
+                self.context.zoom += event.arg
             if event == freevo.ZOOM_OUT:
-                self.gui_context.zoom = max(1.0, self.gui_context.zoom + event.arg)
-            if self.gui_context.zoom > 1.01:
+                self.context.zoom = max(1.0, self.context.zoom + event.arg)
+            if self.context.zoom > 1.01:
                 if zoom == 1.0:
                     self.eventmap = 'image_zoom'
                 # update position based on scaling
-                factor = float(self.gui_context.zoom) / zoom
-                x, y = self.gui_context.pos
-                self.gui_context.pos = int(x * factor), int(y * factor)
+                factor = float(self.context.zoom) / zoom
+                x, y = self.context.pos
+                self.context.pos = int(x * factor), int(y * factor)
             else:
                 if zoom > 1.0:
                     self.eventmap = 'image'
-                self.gui_context.zoom = 1.0
-                self.gui_context.pos = 0,0
+                self.context.zoom = 1.0
+                self.context.pos = 0,0
             return True
 
         if event == freevo.IMAGE_MOVE:
             # move inside a zoomed image
-            x, y = self.gui_context.pos
-            self.gui_context.pos = x + event.arg[0], y + event.arg[1]
+            x, y = self.context.pos
+            self.context.pos = x + event.arg[0], y + event.arg[1]
             return True
 
         if event == freevo.TOGGLE_OSD:

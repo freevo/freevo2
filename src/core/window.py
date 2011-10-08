@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2007-2009 Dirk Meyer, et al.
+# Copyright (C) 2007-2011 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -51,28 +51,28 @@ class TextWindow(object):
         """
         Context link between Window and view
         """
-        def show(self):
+        def create_widget(self):
             """
             Render and show the widget
             """
-            self.widget = gui.show_widget('popup', layer=3, context=self._ctx)
             kaa.signals['step'].disconnect(self.sync)
-            self.widget.show()
+            self._widget = gui.show_widget('popup', layer=3, context=self._ctx)
+            self._widget.show()
 
-        def hide(self):
+        def destroy_widget(self):
             """
             Hide the widget
             """
-            if self.widget:
-                self.widget.destroy()
-            self.widget = None
+            if self._widget:
+                self._widget.destroy()
+            self._widget = None
 
 
     def __init__(self, text):
         self.__eventmap = 'input'
         self.__visible = False
-        self.gui_context = TextWindow.WidgetContext('popup')
-        self.gui_context.text = text
+        self.context = TextWindow.WidgetContext('popup')
+        self.context.text = text
 
     def show(self):
         """
@@ -82,7 +82,7 @@ class TextWindow(object):
             return
         self.__visible = True
         taskmanager.add_window(self)
-        self.gui_context.show()
+        self.context.create_widget()
 
     def hide(self):
         """
@@ -92,7 +92,7 @@ class TextWindow(object):
             return
         self.__visible = False
         taskmanager.remove_window(self)
-        self.gui_context.hide()
+        self.context.destroy_widget()
 
     def eventhandler(self, event):
         """
@@ -113,7 +113,7 @@ class TextWindow(object):
         Set the eventmap for the window
         """
         self.__eventmap = eventmap
-        taskmanager.set_focus()
+        taskmanager.sync()
 
 
 class Button(kaa.Signal):
@@ -134,7 +134,7 @@ class MessageWindow(TextWindow):
     def __init__(self, text, button=_('OK')):
         super(MessageWindow, self).__init__(text)
         self.button = Button(button)
-        self.gui_context.buttons = [ self.button ]
+        self.context.buttons = [ self.button ]
 
     def eventhandler(self, event):
         """
@@ -159,7 +159,7 @@ class ConfirmWindow(TextWindow):
         self.buttons = []
         for text in buttons:
             self.buttons.append(Button(text, len(self.buttons) == default_choice))
-        self.gui_context.buttons = self.buttons
+        self.context.buttons = self.buttons
         self.selected = self.buttons[default_choice]
 
     def eventhandler(self, event):
@@ -178,7 +178,7 @@ class ConfirmWindow(TextWindow):
                 index = index - 1
             self.selected = self.buttons[index]
             self.selected.selected = True
-            self.gui_context.sync()
+            self.context.sync()
             return True
         elif event == freevo.INPUT_ENTER:
             self.selected.emit()

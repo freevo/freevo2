@@ -29,6 +29,8 @@
 #
 # -----------------------------------------------------------------------------
 
+__all__ = [ 'Application', 'ApplicationStyles' ]
+
 # gui imports
 import kaa.candy
 

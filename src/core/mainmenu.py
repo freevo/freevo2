@@ -103,15 +103,15 @@ class MenuWidget(freevo.Application, freevo.MenuStack):
         if self.locked:
             return
         freevo.MenuStack.refresh(self, reload)
-        if self.gui_context.menu != self.current:
-            self.gui_context.previous = self.gui_context.menu
-            self.gui_context.next = self.current
-            self.gui_context.menu = self.current
-            self.gui_context.type = self.current.type
+        if self.context.menu != self.current:
+            self.context.previous = self.context.menu
+            self.context.next = self.current
+            self.context.menu = self.current
+            self.context.type = self.current.type
         # set item to currently selected (or None for an empty menu)
-        self.gui_context.item = None
+        self.context.item = None
         if self.current.selected:
-            self.gui_context.item = self.current.selected.properties
+            self.context.item = self.current.selected.properties
 
     def eventhandler(self, event):
         """

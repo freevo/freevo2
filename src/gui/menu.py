@@ -29,6 +29,8 @@
 #
 # -----------------------------------------------------------------------------
 
+__all__ = [ 'MenuWidget', 'MenuApplication' ]
+
 # kaa imports
 import kaa
 import kaa.candy

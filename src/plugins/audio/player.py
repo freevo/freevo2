@@ -98,8 +98,8 @@ class Player(freevo.Application):
             self.playlist.select(self.item)
 
         # Set the current item to the gui engine
-        self.gui_context.item = self.item.properties
-        self.gui_context.menu = self.playlist
+        self.context.item = self.item.properties
+        self.context.menu = self.playlist
         self.status = freevo.STATUS_RUNNING
 
         # Open media item and start playback
@@ -136,7 +136,7 @@ class Player(freevo.Application):
         Callback for elapsed time changes.
         """
         self.item.elapsed = round(self.player.stream.position)
-        self.gui_context.sync()
+        self.context.sync()
 
 
     def eventhandler(self, event):

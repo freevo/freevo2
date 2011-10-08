@@ -1,3 +1,5 @@
+__all__ = [ 'Thumbnail', 'Icon', 'MediaImage' ]
+
 import os
 
 import kaa.imlib2

@@ -17,8 +17,9 @@
 
     <widget name="osd">
 	<properties opacity="0"/>
-	<label name="message" x="60" width="1200" y="70" height="30" font="Vera" color="0xffffff">
+	<label x="60" width="1200" y="70" height="30" font="Vera" color="0xffffff">
 	    <properties xalign="right"/>
+	    ${message}
 	</label>
 	<event name="show"><![CDATA[
             yield self.animate('EASE_IN_QUAD', 0.2, opacity=255)

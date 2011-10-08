@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2005-2007 Dirk Meyer, et al.
+# Copyright (C) 2005-2011 Dirk Meyer, et al.
 #
 # First edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -38,18 +38,67 @@ from ... import gui
 # get logging object
 log = logging.getLogger()
 
+class Widget(gui.Widget):
+    """
+    Idlebar candy widget
+    """
+
+    candyxml_style = 'idlebar'
+
+    def __init__(self, *args, **kwargs):
+        super(Widget, self).__init__(*args, **kwargs)
+        self.plugins = self.get_widget('plugins')
+
+    def connect(self, plugin):
+        """
+        Connect an idlebar plugin
+        """
+        plugin.connect(self.plugins)
+
+    def sync_layout(self, size):
+        """
+        Sync layout changes and calculate intrinsic size based on the
+        parent's size.
+        """
+        super(Widget, self).sync_layout(size)
+        x0, x1 = 0, self.plugins.width
+        for widget in self.plugins.children:
+            step = widget.intrinsic_size[0] + 20 # FIXME: using padding variable from theme
+            if widget.xalign == widget.ALIGN_RIGHT:
+                widget.x = x1 - widget.width
+                x1 -= step
+            else:
+                widget.x = x0
+                x0 += step
+
+    def show(self):
+        """
+        Show the widget
+        """
+        # FIXME: use settings from theme
+        self.animate('EASE_IN_CUBIC', 0.2, opacity=255)
+
+    def hide(self):
+        """
+        Hide the widget
+        """
+        # FIXME: use settings from theme
+        self.animate('EASE_OUT_CUBIC', 0.2, opacity=0)
+
+
 class PluginInterface(freevo.Plugin):
     """
+    Generic plugin showing the idlebar itself
     """
     def plugin_activate(self, level):
         """
         init the idlebar
         """
         # register for signals
-        freevo.signals['application-change'].connect(self._app_change)
+        freevo.signals['application-change'].connect(self.application_change)
         self.widget = None
 
-    def _app_change(self, app):
+    def application_change(self, app):
         if not self.widget:
             self.widget = gui.show_widget('idlebar')
             if not self.widget:
@@ -61,6 +110,9 @@ class PluginInterface(freevo.Plugin):
 
 
 class IdleBarPlugin(freevo.Plugin):
+    """
+    A plugin for the idlebar
+    """
     def __init__(self):
         super(IdleBarPlugin, self).__init__()
         if not freevo.get_plugin('idlebar'):
@@ -73,4 +125,5 @@ class IdleBarPlugin(freevo.Plugin):
         """
         return IdleBarPlugin.plugin_list
 
+# register the new plugin type
 freevo.register_plugin(IdleBarPlugin)

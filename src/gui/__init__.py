@@ -29,6 +29,8 @@
 #
 # -----------------------------------------------------------------------------
 
+__all__ = []
+
 # Note: nothing in this module does import anything from freevo
 
 import os
@@ -37,9 +39,12 @@ import kaa.utils
 from stage import Stage, config
 
 # import all widgets
-for name, module in kaa.utils.get_plugins(group='freevo.gui.plugins', location=__file__).items():
+for name, module in kaa.utils.get_plugins(group='freevo.gui', location=__file__).items():
     if isinstance(module, Exception):
         raise ImportError('error importing %s: %s' % (name, module))
+    for widget in module.__all__:
+        __all__.append(widget)
+        globals()[widget] = getattr(module, widget)
 
 stage = None
 signals = None

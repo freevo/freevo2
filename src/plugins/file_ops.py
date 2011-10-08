@@ -9,7 +9,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
+# Copyright (C) 2002-2011 Krister Lagerstrom, Dirk Meyer, et al.
 # Please see the file doc/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -37,12 +37,10 @@ from .. import core as freevo
 # get logging object
 log = logging.getLogger()
 
-
 class PluginInterface(freevo.ItemPlugin):
     """
     Small plugin to delete files
     """
-
     def actions(self, item):
         """
         Create list of possible actions
@@ -50,27 +48,20 @@ class PluginInterface(freevo.ItemPlugin):
         if not item.parent or not item.parent.type == 'dir':
             # only activate this for directory listings
             return []
-
         if not hasattr(item, 'files') or not item.files:
-            # no files to operate one
+            # no files to operate on
             return []
-
         actions = []
-
         if item.files.delete_possible():
-            a = freevo.Action(_('Delete'), self.delete, 'delete')
-            actions.append(a)
-
+            actions.append(freevo.Action(_('Delete'), self.delete, 'delete'))
         return actions
-
 
     def delete(self, item):
         txt = _('Do you wish to delete\n \'%s\'?') % item.name
         box = freevo.ConfirmWindow(txt, default_choice=1)
-        box.buttons[0].connect(self._delete, item)
+        box.buttons[0].connect(self.do_delete, item)
         box.show()
 
-
-    def _delete(self, item):
+    def do_delete(self, item):
         item.files.delete()
         item.menustack.back_submenu(True, True)

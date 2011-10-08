@@ -10,7 +10,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2005-2009 Dirk Meyer, et al.
+# Copyright (C) 2005-2011 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -57,22 +57,28 @@ STATUS_STOPPED  = 'stopped'
 
 CAPABILITY_TOGGLE = 1
 
-class TaskManager(object):
+class TaskManager(kaa.Object):
     """
     This is the main application for Freevo, handling applications
     with an event handler and the event mapping.
     """
+
+    __kaasignals__ = {
+        'application-change':
+            '''
+            Emitted when the current application changes
+            '''
+    }
+
     def __init__(self):
+        super(TaskManager, self).__init__()
         self.applications = []
         self.current = None
         self.windows = []
         self.eventmap = None
-        # callback for events
-        kaa.EventHandler(self.handle).register()
-        # Signals
-        self.signals = { 'application-change': kaa.Signal() }
+        kaa.EventHandler(self.eventhandler).register()
 
-    def set_focus(self):
+    def sync(self):
         """
         Set new focus (input mapping, application show/hide)
         """
@@ -90,7 +96,7 @@ class TaskManager(object):
         log.info('switch application from %s to %s' % (self.current, app))
         self.signals['application-change'].emit(app)
         app.signals['show'].emit()
-        app.gui_context.show()
+        app.context.create_widget()
         if self.current:
             self.current.signals['hide'].emit()
         self.current = app
@@ -104,7 +110,7 @@ class TaskManager(object):
         if len(self.applications) == 0:
             # just add the application
             self.applications.append(app)
-            self.set_focus()
+            self.sync()
             return True
         # check about the old app if it is marked as removed
         # or if it is the same application as before
@@ -123,7 +129,7 @@ class TaskManager(object):
         else:
             # no stopped application, just append to the list
             self.applications.append(app)
-        self.set_focus()
+        self.sync()
 
     def hide_application(self, app):
         """
@@ -139,14 +145,14 @@ class TaskManager(object):
             return
         # remove from list and set new focus
         self.applications.pop()
-        self.set_focus()
+        self.sync()
 
     def add_window(self, window):
         """
         Add a window above all applications
         """
         self.windows.append(window)
-        self.set_focus()
+        self.sync()
 
     def remove_window(self, window):
         """
@@ -155,9 +161,9 @@ class TaskManager(object):
         if not window in self.windows:
             return
         self.windows.remove(window)
-        self.set_focus()
+        self.sync()
 
-    def handle(self, event):
+    def eventhandler(self, event):
         """
         Event handling function.
         """
@@ -166,7 +172,7 @@ class TaskManager(object):
                self.applications[-1].has_capability(CAPABILITY_TOGGLE):
             log.info('Toggle application')
             self.applications.insert(0, self.applications.pop())
-            self.set_focus()
+            self.sync()
             return True
         result = None
         if event.handler:

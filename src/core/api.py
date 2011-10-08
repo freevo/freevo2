@@ -30,8 +30,7 @@
 # -----------------------------------------------------------------------------
 
 __all__ = [ 'FREEVO_SHARE_DIR', 'FREEVO_DATA_DIR', 'config', 'Plugin', 'load_plugins',
-            'activate_plugin', 'register_plugin', 'get_plugin', 'signals', 'util', 
-            'ResourceHandler' ]
+            'activate_plugin', 'register_plugin', 'get_plugin', 'signals', 'ResourceHandler' ]
 
 # python imports
 import os
@@ -84,5 +83,4 @@ def load_plugins(module):
 
 from resources import ResourceHandler
 
-import util
 import beacon

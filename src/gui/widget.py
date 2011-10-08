@@ -1,3 +1,5 @@
+__all__ = [ 'Widget', 'WidgetStyles' ]
+
 import kaa.candy
 
 kaa.candy.Eventhandler.signatures['widget-show'] = 'self'

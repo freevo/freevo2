@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2009 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2011 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -38,27 +38,9 @@ class Event(kaa.Event):
     activate some action.
     """
     def __init__(self, name, *args, **kwargs):
-        kaa.Event.__init__(self, name, *args)
-        self.handler = None
-        if 'handler' in kwargs:
-            self.handler = kwargs['handler']
+        super(Event, self).__init__(name, *args)
+        self.handler = kwargs.get('handler', None)
         self.source = 'system'
-
-
-    def set_handler(self, handler):
-        """
-        Set a specific handler for the event.
-        """
-        self.handler = handler
-
-
-    def __int__(self):
-        """
-        Return the event as int (the last char of the name will be returned
-        as integer value. FIXME: remove this function!
-        """
-        return int(self.name[-1])
-
 
     def post(self, *args, **kwargs):
         """
