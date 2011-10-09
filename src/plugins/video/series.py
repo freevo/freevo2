@@ -59,6 +59,7 @@ class SeasonItem(freevo.Item):
         self.series = series
         self.season = season
         self.name = name
+        self.poster = parent.poster
 
     @kaa.coroutine()
     def browse(self):
@@ -92,7 +93,7 @@ class SeriesItem(freevo.Item):
         self.series = series
         self.name = series
         if kaa.webmetadata:
-            series = kaa.webmetadata.parse('thetvdb:' + self.name)
+            series = kaa.webmetadata.tv.series(self.name)
             if series:
                 choice = -1, None
                 for poster in series.posters:
@@ -102,7 +103,7 @@ class SeriesItem(freevo.Item):
                         rating = 0
                     if rating > choice[0]:
                         choice = rating, poster.url
-                self.thumbnail = choice[1]
+                self.poster = choice[1]
                 self.description = series.overview
 
     @kaa.coroutine()

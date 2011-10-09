@@ -2,8 +2,21 @@ __all__ = [ 'Thumbnail', 'Icon', 'MediaImage' ]
 
 import os
 
+import kaa.beacon
 import kaa.imlib2
 import kaa.candy
+
+
+class Image(kaa.candy.Image):
+
+    candyxml_style = None
+
+    def get_cachefile(self, url):
+        """
+        Return the cache filename for the given url
+        """
+        return kaa.beacon.md5url(url, 'images')
+
 
 class Thumbnail(kaa.candy.Thumbnail):
     candyxml_style = 'mimetype'
@@ -74,7 +87,7 @@ class Thumbnail(kaa.candy.Thumbnail):
             item=element.item)
 
 
-class Icon(kaa.candy.Image):
+class Icon(Image):
 
     candyxml_style = 'icon'
 
@@ -99,7 +112,7 @@ class Icon(kaa.candy.Image):
             icon=element.icon)
 
 
-class MediaImage(kaa.candy.Image):
+class MediaImage(Image):
 
     candyxml_style = 'media'
 

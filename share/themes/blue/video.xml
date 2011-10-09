@@ -9,13 +9,20 @@
 	<rectangle name="background" y="520" height="200" color="0x66000000"/>
 	<event name="create"><![CDATA[
             background = widget.get_widget('background')
-            if widget.context.get('item').get('series'):
+            if widget.context.get('item').get('series') or widget.context.get('item').get('description'):
                 background.y = 520
             else:
                 background.y = 660
 	    ]]>
 	</event>
 	<group x="10" y="530" width="1260" height="180">
+	    <group style="condition" x="1180" y="130" width="60" height="60">
+		<case condition="item.autobookmark_resume">
+		    <image url="icons/pause.png">
+			<properties opacity="50"/>
+		    </image>
+		</case>
+	    </group>
 	    <group style="condition" x="350" y="150" width="900" height="30">
 		<case condition="item.type" value="directory">
 		    <label font="Vera:18" color="0xffffff">
@@ -35,7 +42,7 @@
 	    <group style="condition" x="10" y="10" width="900" height="140">
 		<event name="replace"><![CDATA[
                     background = next.parent.parent.get_widget('background')
-                    if next.context.get('item').get('series'):
+                    if next.context.get('item').get('series') or next.context.get('item').get('description'):
                         background.animate('EASE_IN_QUAD', 0.2, y=520)
                     else:
                         background.animate('EASE_IN_QUAD', 0.2, y=660)
@@ -64,7 +71,23 @@
 			$item.description
 		    </text>
 		</case>
+		<case condition="item.description">
+		    <text width="1240" font="Vera:18" color="0xffffff">
+			<replace-on-context-change keys="item.description" script="fade"/>
+			$item.description
+		    </text>
+		</case>
 	    </group>
+	</group>
+
+	<group style="condition">
+	    <case condition="item.poster">
+		<rectangle x="910" y="85" width="280" height="410" color="0xa0000000" radius="8"/>
+		<!-- <rectangle x="897" y="87" width="306" height="406" color="0x000000"/> -->
+		<image x="915" y="90" width="270" height="400" url="$item.poster">
+		    <replace-on-context-change keys="item.poster" script="fade"/>
+		</image>
+	    </case>
 	</group>
 
         <listing style="fixed-selection" x="10" y="100" width="780" height="380"
@@ -93,10 +116,6 @@
 		]]>
 	    </event>
         </listing>
-
-	<image style="icon" x="500" y="350" width="290" height="240" name="video">
-	    <properties xalign="right" yalign="bottom" keep-aspect="true" opacity="50"/>
-	</image>
     </menu>
 
     <application name="videoplayer"/>
