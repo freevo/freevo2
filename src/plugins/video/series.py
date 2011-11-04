@@ -35,6 +35,9 @@
 #
 # -----------------------------------------------------------------------------
 
+# python imports
+import logging
+
 # Kaa imports
 import kaa
 import kaa.beacon
@@ -47,8 +50,11 @@ except ImportError:
 from ... import core as freevo
 from item import VideoItem
 
+# get logging object
+log = logging.getLogger('video')
+
 if kaa.webmetadata:
-    kaa.webmetadata.init('~/.beacon')
+    kaa.webmetadata.init()
 
 class SeasonItem(freevo.Item):
     """
@@ -92,6 +98,7 @@ class SeriesItem(freevo.Item):
         super(SeriesItem, self).__init__(parent)
         self.series = series
         self.name = series
+        self.poster = None
         if kaa.webmetadata:
             series = kaa.webmetadata.tv.series(self.name)
             if series:
@@ -120,52 +127,51 @@ class SeriesItem(freevo.Item):
         Actions for this item.
         """
         actions = [ freevo.Action(_('Seasons'), self.browse) ]
-        # if kaa.webmetadata:
-        #     if not kaa.webmetadata.parse('thetvdb:' + self.name):
-        #         actions.append(freevo.Action(_('Search for metadata'), self.search_metadata))
+        if kaa.webmetadata:
+            if not self.description and not self.poster:
+                actions.append(freevo.Action(_('Search for metadata'), self.search_metadata))
+            else:
+                actions.append(freevo.Action(_('Change metadata'), self.search_metadata))
         return actions
 
-    # @kaa.coroutine()
-    # def search_metadata(self):
-    #     actions = []
-    #     result = kaa.webmetadata.search('thetvdb:' + self.name)
-    #     if result is None:
-    #         # FIXME: error handling
-    #         return
-    #     msg = freevo.TextWindow(_('Searching'))
-    #     msg.show()
-    #     try:
-    #         result = yield result
-    #         for id, name, date, description, metadata in result:
-    #             func = kaa.Callable(self.set_metadata, id)
-    #             if date:
-    #                 name = '%s (%s)' % (name, date)
-    #             actions.append(freevo.ActionItem(name, self, func, description))
-    #     except Exception:
-    #         freevo.Event(freevo.OSD_MESSAGE, _('Error')).post()
-    #     msg.hide()
-    #     if not actions:
-    #         freevo.Event(freevo.OSD_MESSAGE, _('Series not found')).post()
-    #         self.menustack.back_submenu()
-    #     else:
-    #         self.menustack.pushmenu(freevo.Menu(_('Search Results'), actions))
+    @kaa.coroutine()
+    def search_metadata(self):
+        actions = []
+        msg = freevo.TextWindow(_('Searching'))
+        msg.show()
+        try:
+            for result in (yield kaa.webmetadata.tv.search(None, dict(series=self.name))):
+                item = freevo.ActionItem(result.name, self, kaa.Callable(self.set_metadata, result), result.overview)
+                if result.posters:
+                    item.poster = result.posters[0]
+                item.type = 'series'
+                actions.append(item)
+        except Exception:
+            log.exception('search_metadata')
+            freevo.Event(freevo.OSD_MESSAGE, _('Error')).post()
+            yield
+        msg.hide()
+        if not actions:
+            freevo.Event(freevo.OSD_MESSAGE, _('Series not found')).post()
+            self.menustack.back_submenu()
+        else:
+            self.menustack.pushmenu(freevo.Menu(_('Search Results'), actions, type='video'))
 
-    # @kaa.coroutine()
-    # def set_metadata(self, item, id):
-    #     msg = freevo.TextWindow(_('Fetching Metadata'))
-    #     msg.show()
-    #     try:
-    #         yield kaa.webmetadata.match('thetvdb:' + self.name, id)
-    #     except Exception, e:
-    #         log.exception('error fetching metadata')
-    #         freevo.Event(freevo.OSD_MESSAGE, _('Error')).post()
-    #     msg.hide()
-    #     self.menustack.back_submenu()
-    #     items = []
-    #     parent = self.menustack.current.get_items()[0]
-    #     for series in (yield kaa.beacon.query(attr='series', type='video')):
-    #         items.append(SeriesItem(series, parent))
-    #     self.menustack.current.set_items(items)
+    @kaa.coroutine()
+    def set_metadata(self, item, result):
+        msg = freevo.TextWindow(_('Fetching Metadata'))
+        msg.show()
+        try:
+            yield kaa.webmetadata.match(None, result, dict(series=self.name))
+        except Exception, e:
+            log.exception('error fetching metadata')
+            freevo.Event(freevo.OSD_MESSAGE, _('Error')).post()
+        msg.hide()
+        self.menustack.back_one_menu()
+        items = []
+        for series in (yield kaa.beacon.query(attr='series', type='video')):
+            items.append(SeriesItem(series, self.parent))
+        self.menustack.current.set_items(items)
 
 class PluginInterface(freevo.MainMenuPlugin):
     """
