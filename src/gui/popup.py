@@ -97,13 +97,14 @@ class Popup(Widget):
         self.width = width + 2 * padding_x
         self.height = self.buttons.y + button_height + padding_y
         # layout buttons
-        button_width = (width / len(self.buttons.children)) - padding_x
-        button_x = 0
-        for button in self.buttons.children:
-            button.x = button_x
-            button_x += button_width + padding_x
-            button.width = button_width
-            button.height = button_height
+        if self.buttons.children:
+            button_width = (width / len(self.buttons.children)) - padding_x
+            button_x = 0
+            for button in self.buttons.children:
+                button.x = button_x
+                button_x += button_width + padding_x
+                button.width = button_width
+                button.height = button_height
         self.x = max((self.parent.width - self.width) / 2, 0)
         self.y = max((self.parent.height - self.height) / 3, 0)
         # and re-layout again
