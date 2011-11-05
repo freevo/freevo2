@@ -53,8 +53,6 @@ from item import VideoItem
 # get logging object
 log = logging.getLogger('video')
 
-if kaa.webmetadata:
-    kaa.webmetadata.init()
 
 class SeasonItem(freevo.Item):
     """
