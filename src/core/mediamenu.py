@@ -67,11 +67,11 @@ class MediaMenu(freevo.MainMenuItem):
                 # kaa.config object
                 filename = filename.path.replace('$(HOME)', os.environ.get('HOME'))
             filename = os.path.abspath(filename)
-            if os.path.isdir(filename) and \
-                   not os.environ.get('NO_CRAWLER') and \
-                   not filename == os.environ.get('HOME') and \
-                   not filename == '/':
-                kaa.beacon.monitor(filename)
+            #if os.path.isdir(filename) and \
+            #       not os.environ.get('NO_CRAWLER') and \
+            #       not filename == os.environ.get('HOME') and \
+            #       not filename == '/':
+            #    kaa.beacon.monitor(filename)
 
     @kaa.coroutine()
     def _get_items(self):
