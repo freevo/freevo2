@@ -116,7 +116,7 @@ class PluginInterface( freevo.Plugin ):
 
 
     def set_application(self, app):
-        name = str(app)
+        name = app.name
         widgets = self.screens.get(name)
         if not widgets:
             log.error('no lcd screen for %s %s' % (name, self.screens.keys()))
