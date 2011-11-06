@@ -375,6 +375,9 @@ class Directory(freevo.Playlist):
         if self.menu_type and self.menu_type in config.add_random_playlist and len(play_items) > 1:
             pl = freevo.Playlist(_('Random playlist'), play_items, self, random=True, type=self.media_type)
             pl.autoplay = True
+            pl.image = self.image
+            pl.artist = self.get('artist')
+            pl.album = self.get('album')
             items = [ pl ] + items
         return items
 

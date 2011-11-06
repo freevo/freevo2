@@ -16,12 +16,12 @@
 		    yield prev.animate('EASE_IN_BACK', 0.5, x=-400)
 	    ]]>
 	    </event>
-	    <case condition="item.thumbnail">
+	    <case condition="item.image">
 		<rectangle color="0x99000000" radius="30"/>
 		<group>
-		    <thumbnail x="10" y="10" width="350" height="350" thumbnail="$item.thumbnail">
+		    <image x="10" y="10" width="350" height="350" filename="$item.image">
 			<replace-on-context-change keys="item.artist item.album" script="fade"/>
-		    </thumbnail>
+		    </image>
 		    <label x="10" y="380" width="330" font="Vera:20" color="0xffffff">
 			<replace-on-context-change keys="item.name" script="fade"/>
 			$item.name
