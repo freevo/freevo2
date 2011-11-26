@@ -1,7 +1,15 @@
 Stuff that needs to be done before 2.0pre1
 
-o kaa.candy
-o Support non X11 based outputs
+o GUI
+  - music player
+  - image viewer
+  - add/delete files in view
+  - choose tv images
+o beacon:
+  - monitor directory configure
+  - scan everything at least once
+o music player
+  - playlist skip
 o Watch TV
 o Fix broken plugins from WIP
 o Fix DVD support
