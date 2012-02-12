@@ -135,8 +135,9 @@ class Player(freevo.Application):
         """
         Callback for elapsed time changes.
         """
-        self.item.elapsed = round(self.player.stream.position)
-        self.context.sync()
+        if self.item.elapsed != round(self.player.stream.position):
+            self.item.elapsed = round(self.player.stream.position)
+            self.context.sync()
 
 
     def eventhandler(self, event):

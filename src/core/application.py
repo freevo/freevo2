@@ -76,11 +76,11 @@ class WidgetContext(object):
         self._widget = gui.show_application(self._name, self._ctx)
         self._changed = False
 
-    def sync(self):
+    def sync(self, force=True):
         """
         Update the widget
         """
-        if not self._widget or not self._changed:
+        if not self._widget or not (self._changed or force):
             return
         self._widget.context = self._ctx
         self._changed = False
@@ -99,7 +99,7 @@ class WidgetContext(object):
             return super(WidgetContext, self).__setattr__(attr, value)
         if not self._changed:
             self._changed = True
-            kaa.signals['step'].connect_first_once(self.sync)
+            kaa.signals['step'].connect_first_once(self.sync, force=False)
         self._ctx[attr] = value
 
 
