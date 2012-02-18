@@ -220,7 +220,7 @@ class GridListing(AbstractListing):
         self.select((pos % self.num_items_x, pos / self.num_items_y), 0)
 
     def clear(self):
-        super(Listing, self).clear()
+        super(GridListing, self).clear()
         pos = self.context.get('menu').selected_pos
         self.select((pos % self.num_items_x, pos / self.num_items_y), 0)
 
