@@ -160,7 +160,7 @@ class SeriesItem(freevo.Item):
         msg = freevo.TextWindow(_('Fetching Metadata'))
         msg.show()
         try:
-            yield kaa.webmetadata.match(None, result, dict(series=self.name))
+            yield kaa.webmetadata.tv.add_series_by_search_result(result, alias=self.name)
         except Exception, e:
             log.exception('error fetching metadata')
             freevo.Event(freevo.OSD_MESSAGE, _('Error')).post()
