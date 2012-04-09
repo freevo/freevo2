@@ -88,6 +88,13 @@
 		    <replace-on-context-change keys="item.poster" script="fade"/>
 		</image>
 	    </case>
+	    <case condition="not item.poster and item.image and not item.series and not item.description">
+		<rectangle x="960" y="485" width="280" height="154" color="0xa0000000" radius="8"/>
+		<image x="965" y="490" width="270" height="144" url="$item.image">
+		    <replace-on-context-change keys="item.image" script="fade"/>
+		</image>
+	    </case>
+	    <event name="replace" script="fade"/>
 	</group>
 
         <listing style="fixed-selection" x="10" y="100" width="780" height="380"
