@@ -43,6 +43,9 @@ import logging.config
 import logging.handlers
 import gettext
 
+from gi.repository import GObject
+from gi.repository import Clutter as clutter
+
 # get logging object
 log = logging.getLogger()
 
