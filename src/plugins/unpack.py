@@ -92,6 +92,8 @@ class PluginInterface(freevo.MediaPlugin):
     """
     A media plugin for zip and rar archives.
     """
+    
+    @property
     def suffix(self):
         """
         Return the list of suffixes this class handles
@@ -104,7 +106,7 @@ class PluginInterface(freevo.MediaPlugin):
         Return a list of items based on the files
         """
         items = []
-        for suffix in self.suffix():
+        for suffix in self.suffix:
             for file in listing.get(suffix):
                 items.append(ArchiveItem(file.filename, parent))
         return items

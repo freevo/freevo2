@@ -94,13 +94,13 @@ class PluginInterface(freevo.ItemPlugin):
             return False
 
         # seek to the given position
-        if event == freevo.PLAY_START and self._seek:
+        if event == freevo.PLAY_START and self._seek and event.arg == item:
             freevo.Event(freevo.SEEK, self._seek).post()
             self._seek = 0
             return False
 
         # auto bookmark delete
-        if event == freevo.PLAY_END:
+        if event == freevo.PLAY_END and event.arg == item:
             if self._ignore_end:
                 self._ignore_end = False
             else:

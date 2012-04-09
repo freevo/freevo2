@@ -61,6 +61,7 @@ class PluginInterface(freevo.MediaPlugin, freevo.MainMenuPlugin):
         """
         pass
 
+    @property
     def suffix(self):
         """
         return the list of suffixes this class handles
@@ -72,7 +73,7 @@ class PluginInterface(freevo.MediaPlugin, freevo.MainMenuPlugin):
         return a list of items based on the files
         """
         items = []
-        for suffix in self.suffix():
+        for suffix in self.suffix:
             for file in listing.get(suffix):
                 items.append(ImageItem(file, parent))
         return items

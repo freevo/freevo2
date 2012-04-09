@@ -72,6 +72,7 @@ class MediaPlugin(freevo.Plugin):
     """
     possible_media_types = []
 
+    @property
     def suffix(self):
         """
         return the list of suffixes this class handles
@@ -89,7 +90,7 @@ class MediaPlugin(freevo.Plugin):
         return how many items will be build on files
         """
         c = 0
-        for t in self.suffix():
+        for t in self.suffix:
             c += len(listing.get(t))
         return c
 

@@ -74,11 +74,11 @@ class Item(object):
         Init the item. Sets all needed variables, if parent is given also
         inherit some settings from there.
         """
-        self.name = u''
-        self.description  = ''
-        self.info = {}
+        self._name = u''
+        self._description  = ''
         self._mem = {}
         self._image = None
+        self.info = {}
         self.menu = None
         self.parent = None
         if parent:
@@ -89,11 +89,19 @@ class Item(object):
         return Item.Properties(self)
 
     @property
+    def name(self):
+        return self._name or self.info.get('name')
+
+    @name.setter
+    def name(self, name):
+        self._name = name
+
+    @property
     def image(self):
         if self._image:
             return self._image
         thumb = self.info.get('thumbnail')
-        if thumb:
+        if thumb and not thumb.failed:
             return thumb.image
         return None
 
@@ -101,7 +109,15 @@ class Item(object):
     def image(self, image):
         self._image = image
 
-    def get_id(self):
+    @property
+    def description(self):
+        return self._description or self.info.get('description')
+
+    @description.setter
+    def description(self, description):
+        self._description = description
+
+    def uid(self):
         """
         Return a unique id of the item. This id should be the same when the
         item is rebuild later with the same information
@@ -199,13 +215,6 @@ class Item(object):
         # nothing to do
         return False
 
-    def get_name(self):
-        """
-        Return name of the item.
-        Used by the generic Item.get function.
-        """
-        return self.name
-
     def get_cfg(self, var):
         """
         Return stored config variable value.
@@ -252,13 +261,14 @@ class Item(object):
             func = getattr(self, 'get_' + attr, None)
             if func is not None:
                 return func()
+        # try member attribute
+        if hasattr(self, attr):
+            return getattr(self, attr, None)
         # try beacon
         r = self.info.get(attr)
         if r not in (None, ''):
             return r
-        # try item attribute
-        # TODO: is this needed?
-        return getattr(self, attr, None)
+        return None
 
     def __getitem__(self, attr):
         """
@@ -295,6 +305,7 @@ class Item(object):
             self.info['freevo_cache'] = [ mtime, cache ]
             return
         self.info[key] = value
+
 
 
 class ActionItem(Item, Action):

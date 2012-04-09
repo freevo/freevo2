@@ -122,8 +122,7 @@ class Player(freevo.Application):
         # self.engine.set_item(self.item)
         self.status = freevo.STATUS_RUNNING
         self.is_in_menu = False
-        self.player.signals['finished'].connect_once(freevo.PLAY_END.post, self.item)
-        self.player.signals['stop'].connect_once(freevo.PLAY_END.post, self.item)
+        self.player.signals['finished'].connect_once(freevo.PLAY_END.post, self.item).ignore_caller_args = True
         try:
             yield self.player.open(self.item.url)
             # FIXME: set more properties
@@ -134,7 +133,6 @@ class Player(freevo.Application):
             freevo.PLAY_START.post(self.item)
         except kaa.popcorn.PlayerError, e:
             self.player.signals['finished'].disconnect(freevo.PLAY_END.post, self.item)
-            self.player.signals['stop'].disconnect(freevo.PLAY_END.post, self.item)
             log.exception('video playback failed')
             # We should handle it here with a messge or something like that. To
             # make playlist work, we just send start and stop. It's ugly but it
@@ -182,12 +180,11 @@ class Player(freevo.Application):
             self.elapsed_timer.start(0.2)
             self.item.eventhandler(event)
             return True
-        if event == freevo.PLAY_END:
+        if event == freevo.PLAY_END and event.arg == self.item:
             # Now the player has stopped (either we called self.stop() or the
             # player stopped by itself. So we need to set the application to
             # to stopped.
             self.player.signals['finished'].disconnect(freevo.PLAY_END.post, self.item)
-            self.player.signals['stop'].disconnect(freevo.PLAY_END.post, self.item)
             self.status = freevo.STATUS_STOPPED
             self.elapsed_timer.stop()
             self.item.eventhandler(event)

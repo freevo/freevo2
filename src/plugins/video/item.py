@@ -87,13 +87,13 @@ class VideoItem(freevo.MediaItem):
             # dvd iso
             self.mode = 'dvd'
             self.url = 'dvd' + self.url[4:] + '/'
-        if self.info['series'] and self.info['season'] and self.info['episode'] and self.info['title']:
-            # FIXME: make this a configure option and fix sorting if
-            # season is >9
+        if self.get('series') and self.get('season') and self.get('episode') and self.get('title'):
+            # FIXME: make this a configure option and fix sorting if season is >9
             self.name = '%s %dx%02d - %s' % (
-                self.info['series'], self.info['season'], self.info['episode'], self.info['title'])
+                self.get('series'), self.get('season'), self.get('episode'), self.get('title'))
 
-    def get_geometry(self):
+    @property
+    def geometry(self):
         """
         Return width x height of the image or None
         """
@@ -101,7 +101,8 @@ class VideoItem(freevo.MediaItem):
             return '%sx%s' % (self.get('width'), self.get('height'))
         return None
 
-    def get_aspect(self):
+    @property
+    def aspect(self):
         """
         Return aspect as string or None if unknown
         """
@@ -118,36 +119,37 @@ class VideoItem(freevo.MediaItem):
         """
         return a list of possible actions on this item.
         """
-        if self.url.startswith('dvd://') and self.url[-1] == '/':
-            items = [ freevo.Action(_('Play DVD'), self.play),
-                      freevo.Action(_('DVD title list'), self.dvd_vcd_title_menu) ]
-        elif self.url == 'vcd://':
-            items = [ freevo.Action(_('Play VCD'), self.play),
-                      freevo.Action(_('VCD title list'), self.dvd_vcd_title_menu) ]
-        else:
-            items = [ freevo.Action(_('Play'), self.play) ]
-        # Add the configure stuff (e.g. set audio language)
-        return items  # FIXME: broken + configure.get_items(self)
+        return [ freevo.Action(_('Play'), self.play) ]
+        # if self.url.startswith('dvd://') and self.url[-1] == '/':
+        #     items = [ freevo.Action(_('Play DVD'), self.play),
+        #               freevo.Action(_('DVD title list'), self.dvd_vcd_title_menu) ]
+        # elif self.url == 'vcd://':
+        #     items = [ freevo.Action(_('Play VCD'), self.play),
+        #               freevo.Action(_('VCD title list'), self.dvd_vcd_title_menu) ]
+        # else:
+        #     items = [ freevo.Action(_('Play'), self.play) ]
+        # # Add the configure stuff (e.g. set audio language)
+        # return items  # FIXME: broken + configure.get_items(self)
 
-    @kaa.coroutine()
-    def dvd_vcd_title_menu(self):
-        """
-        Generate special menu for DVD/VCD/SVCD content
-        """
-        # delete the submenu that got us here
-        self.menustack.back_submenu(False)
-        # build a menu
-        items = []
-        for track in (yield self.info.list()):
-            if not track.get('length') or not track.get('audio'):
-                # bad track, skip it
-                continue
-            track = VideoItem(track, self)
-            track.name = _('Play Title %s') % track.info.get('name')
-            items.append(track)
-        moviemenu = freevo.Menu(self.name, items)
-        moviemenu.type = 'video'
-        self.menustack.pushmenu(moviemenu)
+    # @kaa.coroutine()
+    # def dvd_vcd_title_menu(self):
+    #     """
+    #     Generate special menu for DVD/VCD/SVCD content
+    #     """
+    #     # delete the submenu that got us here
+    #     self.menustack.back_submenu(False)
+    #     # build a menu
+    #     items = []
+    #     for track in (yield self.info.list()):
+    #         if not track.get('length') or not track.get('audio'):
+    #             # bad track, skip it
+    #             continue
+    #         track = VideoItem(track, self)
+    #         track.name = _('Play Title %s') % track.info.get('name')
+    #         items.append(track)
+    #     moviemenu = freevo.Menu(self.name, items)
+    #     moviemenu.type = 'video'
+    #     self.menustack.pushmenu(moviemenu)
 
     def play(self, **kwargs):
         """
@@ -179,9 +181,9 @@ class VideoItem(freevo.MediaItem):
 class VideoPlaylist(freevo.Playlist):
     type = 'video'
 
-    def get_id(self):
+    def uid(self):
         """
         Return a unique id of the item. This id should be the same when the
         item is rebuild later with the same informations
         """
-        return ''.join([ c.get_id() for c in self.choices ])
+        return ''.join([ c.uid() for c in self.choices ])

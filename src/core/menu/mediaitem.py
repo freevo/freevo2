@@ -135,7 +135,7 @@ class MediaItem(Item):
                 return 0
         raise AttributeError('unknown length style %s' % style)
 
-    def get_id(self):
+    def uid(self):
         """
         Return a unique id of the item. This id should be the same when the
         item is rebuild later with the same informations

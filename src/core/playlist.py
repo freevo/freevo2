@@ -430,27 +430,25 @@ class PluginInterface(freevo.MediaPlugin):
     """
     Plugin class for playlist items
     """
+    
+    @property
     def suffix(self):
         """
         return the list of suffixes this class handles
         """
         return freevo.config.playlist.suffix
 
-
     def get(self, parent, listing):
         """
         return a list of items based on the files
         """
         items = []
-
         # get media_type from parent
         media_type = getattr(parent, 'media_type', None)
-        for suffix in self.suffix():
+        for suffix in self.suffix:
             for filename in listing.get(suffix):
-                items.append(Playlist(playlist=filename.filename, parent=parent,
-                                      type=media_type))
+                items.append(Playlist(playlist=filename.filename, parent=parent, type=media_type))
         return items
-
 
 
 # load the MediaPlugin

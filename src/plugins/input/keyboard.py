@@ -45,6 +45,7 @@ log = logging.getLogger('input')
 KEYBOARD_MAP = {
     'F1'          : 'SLEEP',
     'HOME'        : 'MENU',
+    'MENU'        : 'ENTER',
     'G'           : 'GUIDE',
     'ESCAPE'      : 'EXIT',
     'BACKSPACE'   : 'EXIT',
@@ -84,6 +85,7 @@ KEYBOARD_MAP = {
     'P'           : 'PLAY',
     'F'           : 'FFWD',
     'U'           : 'PAUSE',
+    'PAUSE'       : 'PAUSE',
     'S'           : 'STOP',
     'F6'          : 'REC',
     '.'           : 'EJECT',
@@ -112,6 +114,11 @@ class PluginInterface(InputPlugin):
         """
         Callback to handle the x11 keys.
         """
+        ## print keycode
+        if keycode in (276, 269025044):
+            keycode = 'PAUSE'
+        if keycode in (277, 269025045):
+            keycode = 'STOP'
         if isinstance(keycode, int):
             log.debug('Bad keycode %s' % keycode)
             return True
