@@ -61,6 +61,8 @@ class VideoItem(freevo.MediaItem):
         self.audio_file        = {}         # audio dubbing
         self.selected_subtitle = None
         self.selected_audio    = None
+        self.metadata          = None
+        self.player            = str(freevo.config.video.player.default)
         self.set_url(url)
 
     def set_url(self, url):
@@ -151,13 +153,13 @@ class VideoItem(freevo.MediaItem):
     #     moviemenu.type = 'video'
     #     self.menustack.pushmenu(moviemenu)
 
-    def play(self, **kwargs):
+    def play(self):
         """
         Play the item.
         """
         # call the player to play the item
         self.elapsed = 0
-        videoplayer.play(self, **kwargs)
+        videoplayer.play(self)
 
     def stop(self):
         """

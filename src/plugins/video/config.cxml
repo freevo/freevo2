@@ -63,6 +63,21 @@
         <desc>Comma seperated list of video suffixes.</desc>
     </var>
 
+    <group name="player">
+        <var name="default" default="gstreamer">
+	    <desc>Default video player (gstreamer or mplayer)</desc>
+        </var>
+        <group name="mplayer">
+	    <desc>Setting when using mplayer as video player</desc>
+	    <var name="passthrough" default="False">
+	        <desc>Passthrough AC3 and DTS bitstreams</desc>
+	    </var>
+	    <var name="vdpau" default="False">
+	        <desc>Enable VDPAU playback (NVIDIA only)</desc>
+	    </var>
+        </group>
+    </group>
+
     <group name="plugin">
         <desc lang="en">video plugins</desc>
 
@@ -72,6 +87,12 @@
 		position when playback is stopped and add a resume option to the
 		item menu. If the plugin level is lower than 10 resume will be the
 		default option.
+	    </desc>
+	</group>
+
+	<group name="configure" plugin="50">
+	    <desc>
+	        Configure video playback
 	    </desc>
 	</group>
 

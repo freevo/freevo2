@@ -37,7 +37,8 @@ import logging
 # kaa imports
 import kaa
 import kaa.utils
-import kaa.popcorn
+import kaa.candy
+import kaa.metadata
 
 # Freevo imports
 from ... import core as freevo
@@ -45,32 +46,6 @@ from ... import gui as gui
 
 # get logging object
 log = logging.getLogger('video')
-
-
-class Widget(gui.Application):
-    """
-    Widget for the video player. This is the kaa.candy part of the application
-    """
-    candyxml_style = 'videoplayer'
-
-    def set_player(self, player):
-        """
-        Set the player object to connect/disconnect its signals
-        """
-        self.player = player
-        self.player.signals['key-pressed'].connect(gui.signals['key-press'].emit)
-
-    def show(self):
-        """
-        Hook when the video player widget is activated
-        """
-        pass
-
-    def destroy(self):
-        """
-        Hook when the video player widget is destroyed
-        """
-        self.player.signals['key-pressed'].disconnect(gui.signals['key-press'].emit)
 
 
 class Player(freevo.Application):
@@ -83,13 +58,9 @@ class Player(freevo.Application):
     def __init__(self):
         capabilities = (freevo.CAPABILITY_FULLSCREEN, )
         super(Player, self).__init__('video', capabilities)
-        self.player = kaa.popcorn.Player()
-        # FIXME: only do this if freevo is running fullscreen
-        self.player.window.set_fullscreen(True)
-        self.elapsed_timer = kaa.WeakTimer(self.elapsed)
 
     @kaa.coroutine()
-    def play(self, item, player=None):
+    def play(self, item):
         """
         play an item
         """
@@ -107,6 +78,7 @@ class Player(freevo.Application):
             # Freevo is in shutdown mode, do not start a new player, the old
             # only stopped because of the shutdown.
             yield False
+        self.context.item = item
         # Try to get VIDEO and AUDIO resources. The ressouces will be freed
         # by the system when the application switches to STATUS_STOPPED or
         # STATUS_IDLE.
@@ -122,24 +94,24 @@ class Player(freevo.Application):
         # self.engine.set_item(self.item)
         self.status = freevo.STATUS_RUNNING
         self.is_in_menu = False
-        self.player.signals['finished'].connect_once(freevo.PLAY_END.post, self.item).ignore_caller_args = True
-        try:
-            yield self.player.open(self.item.url)
-            # FIXME: set more properties
-            if item.info.get('interlaced'):
-                self.player.config.deinterlacing = 'yes'
-            self.widget.set_player(self.player)
-            yield self.player.play()
-            freevo.PLAY_START.post(self.item)
-        except kaa.popcorn.PlayerError, e:
-            self.player.signals['finished'].disconnect(freevo.PLAY_END.post, self.item)
-            log.exception('video playback failed')
-            # We should handle it here with a messge or something like that. To
-            # make playlist work, we just send start and stop. It's ugly but it
-            # should work.
-            freevo.PLAY_START.post(self.item)
-            freevo.PLAY_END.post(self.item)
+        self.eventmap = 'video'
+        if not self.item.metadata:
+            self.item.metadata = kaa.metadata.parse(self.item.filename)
+        if not self.item.selected_audio:
+            self.item.selected_audio = 0
+        freevo.PLAY_START.post(self.item)
+        self.player = kaa.candy.Video(url=item.filename, size=gui.stage.size, player=item.player)
+        self.player.config['mplayer.vdpau'] = bool(freevo.config.video.player.mplayer.vdpau)
+        gui.stage.layer[0].add(self.player)
+        self.player.set_audio(self.item.selected_audio)
+        # self.player.seek(20, self.player.SEEK_PERCENTAGE)
+        self.player.signals['finished'].connect_weak_once(freevo.PLAY_END.post, self.item)
+        self.player.signals['progress'].connect_weak(self.set_elapsed)
+        self.player.play()
         yield True
+
+    def set_elapsed(self, pos):
+        self.item.elapsed = pos
 
     def stop(self):
         """
@@ -147,24 +119,9 @@ class Player(freevo.Application):
         """
         if self.status != freevo.STATUS_RUNNING:
             return True
-        self.player.stop()
         self.status = freevo.STATUS_STOPPING
-
-    def elapsed(self):
-        """
-        Callback for elapsed time changes.
-        """
-        # FIXME: no dvdnav support ATM
-        # if self.player.is_in_menu() != self.is_in_menu:
-        #     self.is_in_menu = not self.is_in_menu
-        #     if self.is_in_menu:
-        #         self.eventmap = 'dvdnav'
-        #     else:
-        self.eventmap = 'video'
-        # FIXME: if item does not start at position 0 the start time
-        # must be taken into consideration for elapsed. This happens for
-        # TS files from DVB sources.
-        self.item.elapsed = round(self.player.stream.position)
+        self.player.stop()
+        # freevo.PLAY_END.post(self.item)
 
     def eventhandler(self, event):
         """
@@ -177,31 +134,38 @@ class Player(freevo.Application):
             self.item.eventhandler(event)
             return True
         if event == freevo.PLAY_START:
-            self.elapsed_timer.start(0.2)
             self.item.eventhandler(event)
             return True
         if event == freevo.PLAY_END and event.arg == self.item:
             # Now the player has stopped (either we called self.stop() or the
             # player stopped by itself. So we need to set the application to
             # to stopped.
-            self.player.signals['finished'].disconnect(freevo.PLAY_END.post, self.item)
+            self.player.unparent()
             self.status = freevo.STATUS_STOPPED
-            self.elapsed_timer.stop()
             self.item.eventhandler(event)
             if self.status == freevo.STATUS_STOPPED:
                 self.status = freevo.STATUS_IDLE
             return True
         if event in (freevo.PAUSE, freevo.PLAY):
-            if self.player.state == kaa.popcorn.STATE_PLAYING:
+            if self.player.state == kaa.candy.STATE_PLAYING:
                 self.player.pause()
                 return True
-            if self.player.state == kaa.popcorn.STATE_PAUSED:
+            if self.player.state == kaa.candy.STATE_PAUSED:
                 self.player.resume()
                 return True
             return False
         if event == freevo.SEEK:
-            self.player.seek(int(event.arg), kaa.popcorn.SEEK_RELATIVE)
+            self.player.seek(int(event.arg), kaa.candy.SEEK_RELATIVE)
             return True
+        if event == freevo.VIDEO_NEXT_AUDIOLANG:
+            self.item.selected_audio += 1
+            if self.item.selected_audio >= len(self.item.metadata.audio):
+                self.item.selected_audio = 0
+            self.player.set_audio(self.item.selected_audio)
+            lang = self.item.metadata.audio[self.item.selected_audio].language or \
+                '#%s' % self.item.selected_audio
+            freevo.Event(freevo.OSD_MESSAGE, _('Audio %s' % lang)).post()
+
         ## if event == freevo.VIDEO_TOGGLE_INTERLACE:
         ##     interlaced = not self.player.get_property('deinterlace')
         ##     self.item.info['interlaced'] = interlaced
