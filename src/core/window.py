@@ -56,7 +56,7 @@ class TextWindow(object):
             Render and show the widget
             """
             kaa.signals['step'].disconnect(self.sync)
-            self._widget = gui.show_widget('popup', layer=3, context=self._ctx)
+            self._widget = gui.show_widget('popup', layer=4, context=self._ctx)
             self._widget.show()
 
         def destroy_widget(self):
