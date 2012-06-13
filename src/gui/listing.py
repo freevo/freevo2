@@ -87,6 +87,13 @@ class AbstractListing(kaa.candy.SelectionGrid):
             self.create_grid()
         menu = self.context.get('menu')
         if self.state != menu.state:
+            if self.items == menu.choices:
+                # kaa.candy has no way to redraw items in a grid and
+                # clears it when the items list changes. Since the
+                # state may only indicate that a text inside the menu
+                # changes we have to force a redraw here. This should
+                # be fixed in future versions.
+                self.clear()
             self.items = menu.choices
             self.state = menu.state
 
