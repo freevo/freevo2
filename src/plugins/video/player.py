@@ -54,6 +54,7 @@ class Player(freevo.Application):
     """
 
     name = 'videoplayer'
+    player = None
 
     def __init__(self):
         capabilities = (freevo.CAPABILITY_FULLSCREEN, )
@@ -121,7 +122,6 @@ class Player(freevo.Application):
             return True
         self.status = freevo.STATUS_STOPPING
         self.player.stop()
-        # freevo.PLAY_END.post(self.item)
 
     def eventhandler(self, event):
         """
@@ -140,60 +140,35 @@ class Player(freevo.Application):
             # Now the player has stopped (either we called self.stop() or the
             # player stopped by itself. So we need to set the application to
             # to stopped.
-            self.player.unparent()
+            if self.player:
+                self.player.unparent()
+                self.player = None
             self.status = freevo.STATUS_STOPPED
             self.item.eventhandler(event)
             if self.status == freevo.STATUS_STOPPED:
                 self.status = freevo.STATUS_IDLE
             return True
-        if event in (freevo.PAUSE, freevo.PLAY):
-            if self.player.state == kaa.candy.STATE_PLAYING:
-                self.player.pause()
+        if self.player:
+            # player control makes only sense if the player is still running
+            if event in (freevo.PAUSE, freevo.PLAY):
+                if self.player.state == kaa.candy.STATE_PLAYING:
+                    self.player.pause()
+                    return True
+                if self.player.state == kaa.candy.STATE_PAUSED:
+                    self.player.resume()
+                    return True
+                return False
+            if event == freevo.SEEK:
+                self.player.seek(int(event.arg), kaa.candy.SEEK_RELATIVE)
                 return True
-            if self.player.state == kaa.candy.STATE_PAUSED:
-                self.player.resume()
-                return True
-            return False
-        if event == freevo.SEEK:
-            self.player.seek(int(event.arg), kaa.candy.SEEK_RELATIVE)
-            return True
-        if event == freevo.VIDEO_NEXT_AUDIOLANG:
-            self.item.selected_audio += 1
-            if self.item.selected_audio >= len(self.item.metadata.audio):
-                self.item.selected_audio = 0
-            self.player.set_audio(self.item.selected_audio)
-            lang = self.item.metadata.audio[self.item.selected_audio].language or \
-                '#%s' % self.item.selected_audio
-            freevo.Event(freevo.OSD_MESSAGE, _('Audio %s' % lang)).post()
-
-        ## if event == freevo.VIDEO_TOGGLE_INTERLACE:
-        ##     interlaced = not self.player.get_property('deinterlace')
-        ##     self.item.info['interlaced'] = interlaced
-        ##     self.player.set_property('deinterlace', interlaced)
-        ##     if interlaced:
-        ##         freevo.Event(freevo.OSD_MESSAGE, _('Turn on deinterlacing')).post()
-        ##     else:
-        ##         freevo.Event(freevo.OSD_MESSAGE, _('Turn off deinterlacing')).post()
-        ##     return True
-        ## if event == freevo.VIDEO_CHANGE_ASPECT:
-        ##     modes = kaa.popcorn.SCALE_METHODS
-        ##     current = self.player.get_property('scale')
-        ##     if current in modes:
-        ##         idx = (modes.index(current) + 1) % len(modes)
-        ##         log.info('change scale to %s', modes[idx])
-        ##         self.player.set_property('scale', modes[idx])
-        ##     return True
-        ## if event in (freevo.NEXT, freevo.PREV):
-        ##     self.player.nav_command(str(event).lower())
-        ##     return True
-        ## if event == freevo.DVDNAV_MENU:
-        ##     self.player.nav_command('menu1')
-        ##     return True
-        ## if str(event).startswith('DVDNAV_'):
-        ##     # dvd navigation commands
-        ##     self.player.nav_command(str(event)[7:].lower())
-        ##     return True
-        # give it to the item
+            if event == freevo.VIDEO_NEXT_AUDIOLANG:
+                self.item.selected_audio += 1
+                if self.item.selected_audio >= len(self.item.metadata.audio):
+                    self.item.selected_audio = 0
+                self.player.set_audio(self.item.selected_audio)
+                lang = self.item.metadata.audio[self.item.selected_audio].language or \
+                    '#%s' % self.item.selected_audio
+                freevo.Event(freevo.OSD_MESSAGE, _('Audio %s' % lang)).post()
         return self.item.eventhandler(event)
 
 
