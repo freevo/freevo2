@@ -42,7 +42,6 @@ import kaa.metadata
 
 # Freevo imports
 from ... import core as freevo
-from ... import gui as gui
 
 # get logging object
 log = logging.getLogger('video')
@@ -79,7 +78,8 @@ class Player(freevo.Application):
             # Freevo is in shutdown mode, do not start a new player, the old
             # only stopped because of the shutdown.
             yield False
-        self.context.item = item
+        self.context.item = item.properties
+        self.context.candy_player = item.player
         # Try to get VIDEO and AUDIO resources. The ressouces will be freed
         # by the system when the application switches to STATUS_STOPPED or
         # STATUS_IDLE.
@@ -101,9 +101,15 @@ class Player(freevo.Application):
         if not self.item.selected_audio:
             self.item.selected_audio = 0
         freevo.PLAY_START.post(self.item)
-        self.player = kaa.candy.Video(url=item.filename, size=gui.stage.size, player=item.player)
+        # update GUI to a blank screen
+        yield kaa.NotFinished
+        # get the player object; each play() call has its own player
+        # unless it is a playlist, in this case we want to reuse the
+        # player
+        self.player = self.widget.stage.get_widget('player')
+        self.player.url = item.filename
+        self.player.config['mplayer.passthrough'] = bool(freevo.config.video.player.mplayer.passthrough)
         self.player.config['mplayer.vdpau'] = bool(freevo.config.video.player.mplayer.vdpau)
-        gui.stage.layer[0].add(self.player)
         self.player.set_audio(self.item.selected_audio)
         # self.player.seek(20, self.player.SEEK_PERCENTAGE)
         self.player.signals['finished'].connect_weak_once(freevo.PLAY_END.post, self.item)
@@ -112,7 +118,9 @@ class Player(freevo.Application):
         yield True
 
     def set_elapsed(self, pos):
-        self.item.elapsed = pos
+        if self.item.elapsed != round(pos):
+            self.item.elapsed = round(pos)
+            self.context.sync()
 
     def stop(self):
         """
@@ -141,7 +149,6 @@ class Player(freevo.Application):
             # player stopped by itself. So we need to set the application to
             # to stopped.
             if self.player:
-                self.player.unparent()
                 self.player = None
             self.status = freevo.STATUS_STOPPED
             self.item.eventhandler(event)
@@ -150,15 +157,21 @@ class Player(freevo.Application):
             return True
         if self.player:
             # player control makes only sense if the player is still running
+            if event == freevo.TOGGLE_OSD:
+                self.widget.osd_toggle('info')
             if event in (freevo.PAUSE, freevo.PLAY):
                 if self.player.state == kaa.candy.STATE_PLAYING:
+                    self.widget.osd_show('pause')
                     self.player.pause()
                     return True
                 if self.player.state == kaa.candy.STATE_PAUSED:
+                    self.widget.osd_hide('pause')
                     self.player.resume()
                     return True
                 return False
             if event == freevo.SEEK:
+                if not self.widget.osd_visible('info'):
+                    self.widget.osd_show('seek', autohide=2)
                 self.player.seek(int(event.arg), kaa.candy.SEEK_RELATIVE)
                 return True
             if event == freevo.VIDEO_NEXT_AUDIOLANG:

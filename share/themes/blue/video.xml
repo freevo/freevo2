@@ -125,8 +125,67 @@
         </listing>
     </menu>
 
-    <application name="videoplayer"/>
+    <application name="videoplayer">
+	<video name="player" use-as="background"/>
 
+	<widget use-as="pause">
+	    <image x="300" width="620" url="icons/pause.png">
+		<properties opacity="50"/>
+	    </image>
+	    <event name="show"><![CDATA[
+	        self.stage.get_widget('player').animate('EASE_OUT_QUAD', 0.2, opacity=100)
+                return self.animate('EASE_IN_QUAD', 0.2, opacity=255)
+                ]]>
+	    </event>
+	    <event name="hide"><![CDATA[
+	        self.stage.get_widget('player').animate('EASE_IN_QUAD', 0.2, opacity=255)
+                return self.animate('EASE_OUT_QUAD', 0.2, opacity=0)
+                ]]>
+	    </event>
+	</widget>
+
+	<widget y="-150" height="100" use-as="seek">
+	    <rectangle x="-10" width="1300" height="80" color="0x66000000"/>
+	    <image x="10" y="30" height="80" width="200" filename="../../images/gant/logo.png">
+		<properties keep-aspect="true"/>
+	    </image>
+	    <label x="1030" y="35" width="180" font="Vera" height="25" color="0xffffff">
+		<properties xalign="right"/>
+		$item.elapsed  / $item.length
+	    </label>
+	    <event name="show"><![CDATA[
+                return self.animate('EASE_OUT_QUAD', 0.2, y=-20)
+                ]]>
+	    </event>
+	    <event name="hide"><![CDATA[
+                return self.animate('EASE_IN_QUAD', 0.2, y=-150)
+                ]]>
+	    </event>
+	</widget>
+
+	<widget y="720" height="200" use-as="info">
+	    <rectangle x="-10" y="40" width="1300" height="135" color="0x66000000"/>
+	    <image x="30" width="135" height="200" url="$item.poster"/>
+	    <label x="200" y="50" width="1000" font="Vera" height="25" color="0xffffff">
+		$item.title
+	    </label>
+	    <text x="200" y="90" width="800" height="80" font="Vera:18" color="0xffffff">
+		$item.description
+	    </text>
+	    <label x="1030" y="150" width="180" font="Vera" height="20" color="0xffffff">
+		<properties xalign="right"/>
+		$item.elapsed  / $item.length
+	    </label>
+	    <event name="show"><![CDATA[
+                return self.animate('EASE_OUT_BACK', 0.2, y=500)
+                ]]>
+	    </event>
+	    <event name="hide"><![CDATA[
+                return self.animate('EASE_IN_BACK', 0.2, y=720)
+                ]]>
+	    </event>
+	</widget>
+    </application>
 </theme>
 <!-- Keep this comment at the end of the file
 Local variables:
