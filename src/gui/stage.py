@@ -62,13 +62,11 @@ class Stage(kaa.candy.Stage):
         self.theme_prefix = ''
         self.width, self.height = self.size
         # layer 0: unscaled
-        # layer 1: background
+        # layer 1: application
         self.add_layer()
-        # layer 2: application
+        # layer 2: widgets
         self.add_layer()
-        # layer 3: widgets
-        self.add_layer()
-        # layer 4: popups
+        # layer 3: popups
         self.add_layer()
         self.app = None
 
@@ -109,9 +107,9 @@ class Stage(kaa.candy.Stage):
             log.error('no application named %s', name)
             return None
         app = app(context)
-        self.add(app, layer=2)
+        self.add(app, layer=1)
         if app.background:
-            self.add(app.background, layer=1)
+            self.add(app.background, layer=0)
         app.show()
         if self.app:
             if self.app.background:
@@ -121,7 +119,7 @@ class Stage(kaa.candy.Stage):
         self.app = app
         return app
 
-    def show_widget(self, name, layer=3, context=None):
+    def show_widget(self, name, layer=2, context=None):
         """
         Render widget with the given name
         """
