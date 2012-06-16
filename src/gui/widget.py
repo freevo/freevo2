@@ -50,9 +50,15 @@ class Widget(kaa.candy.Group):
             self.hide()
 
     def show(self):
+        if self.__visible:
+            return
+        self.__visible = True
         return self.emit('widget-show', self)
 
     def hide(self):
+        if not self.__visible:
+            return
+        self.__visible = False
         return self.emit('widget-hide', self)
 
     @kaa.coroutine()
