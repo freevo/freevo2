@@ -43,17 +43,74 @@ class ApplicationStyles(WidgetStyles):
     candyxml_name = 'application'
 
 
+class OSD(object):
+    def __init__(self, template):
+        self.template = template
+        self.widget = None
+
+    @kaa.coroutine()
+    def toggle(self, parent):
+        if self.widget and self.widget.visible:
+            res = self.hide()
+        else:
+            res = self.show(parent)
+        if isinstance(res, kaa.InProgress):
+            yield res
+        
+    def show(self, parent):
+        if not self.widget:
+            self.widget = self.template(context=parent.context)
+            self.widget.parent = parent
+        return self.widget.show()
+
+    @kaa.coroutine()
+    def hide(self):
+        res = self.widget.hide()
+        if isinstance(res, kaa.InProgress):
+            yield res
+        if not self.widget.visible:
+            self.widget.destroy()
+            self.widget = None
+        
+        
 class Application(Widget):
     """
     Application base class.
     """
     candyxml_name = 'application'
 
-    def __init__(self, widgets, background=None, context=None):
+    def __init__(self, widgets, background=None, context=None, **osd_templates):
         if kaa.candy.is_template(background):
             background = background(context=context)
         self.background = background
+        self.osd_widgets = {}
+        for key, template in osd_templates.items():
+            self.osd_widgets[key] = OSD(template)
         super(Application, self).__init__(None, None, widgets, context=context)
+
+    def osd_show(self, name):
+        """
+        Show the OSD with the given name
+        """
+        widget = self.osd_widgets.get(name)
+        if widget:
+            return widget.show(self)
+
+    def osd_hide(self, name):
+        """
+        Hide the OSD with the given name
+        """
+        widget = self.osd_widgets.get(name)
+        if widget:
+            return widget.hide()
+
+    def osd_toggle(self, name):
+        """
+        Toggle the OSD with the given name
+        """
+        widget = self.osd_widgets.get(name)
+        if widget:
+            return widget.toggle(self)
 
     def sync_context(self):
         """
@@ -74,5 +131,5 @@ class Application(Widget):
         """
         Parse the XML element for parameter to create the widget.
         """
-        attrs = super(Application, cls).candyxml_parse(element)
-        return kaa.candy.XMLdict(widgets=attrs.get('widgets'), background=attrs.get('background'))
+        attrs = super(Application, cls).candyxml_parse(element).remove('pos', 'size')
+        return kaa.candy.XMLdict(**attrs)
