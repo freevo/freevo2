@@ -68,11 +68,11 @@
     </menu>
 
     <application name="audioplayer">
-        <image filename="../../images/blurrback.jpg"/>
-	<group x="40" y="100" width="1200" height="500">
-	    <rectangle color="0xcc000000" radius="30"/>
-	    <thumbnail x="20" y="20" width="460" height="460" thumbnail="$item.thumbnail"/>
-	    <group x="500" y="20" width="700" height="230">
+	<audio name="player" visualisation="true" use-as="background"/>
+	<group x="40" y="80" width="440" height="610">
+	    <rectangle color="0x66000000" radius="30"/>
+	    <thumbnail x="20" y="20" width="400" height="400" thumbnail="$item.thumbnail"/>
+	    <group x="20" y="450" width="700" height="230">
 		<label y="0" font="Vera:24" color="0xffffff">
 		    $item.name
 		</label>
@@ -82,7 +82,7 @@
 		<label y="90" font="Vera:18" color="0xffffff">
 		    Album: $item.album
 		</label>
-		<label x="560" y="435" font="Vera:18" color="0xffffff">
+		<label y="120" font="Vera:18" color="0xffffff">
 		    $item.elapsed / $item.length
 		</label>
 	    </group>

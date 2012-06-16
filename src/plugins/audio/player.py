@@ -41,7 +41,6 @@ import kaa.popcorn
 
 # Freevo imports
 from ... import core as freevo
-from ... import gui
 
 # get logging object
 log = logging.getLogger('audio')
@@ -96,13 +95,11 @@ class Player(freevo.Application):
         self.context.item = self.item.properties
         self.context.menu = self.playlist
         self.status = freevo.STATUS_RUNNING
+        # update GUI
+        yield kaa.NotFinished
         # Open media item and start playback
-        self.player = kaa.candy.Video(url=item.filename, size=gui.stage.size)
-        # FIXME: that should be done by the theme engine using an
-        # audio element. That element should also create self.player
-        # and should have a goom option. Choosing mplayer makes no
-        # sense, gstreamer can play all audio I know of.
-        gui.stage.layer[0].add(self.player)
+        self.player = self.widget.stage.get_widget('player')
+        self.player.url = item.filename
         self.player.signals['finished'].connect_weak_once(freevo.PLAY_END.post, self.item)
         self.player.signals['progress'].connect_weak(self.set_elapsed)
         self.player.play()
@@ -142,8 +139,6 @@ class Player(freevo.Application):
             # Now the player has stopped (either we called self.stop() or the
             # player stopped by itself. So we need to set the application to
             # to stopped.
-            if self.player:
-                self.player.unparent()
             self.status = freevo.STATUS_STOPPED
             self.item.eventhandler(event)
             if self.status == freevo.STATUS_STOPPED:
