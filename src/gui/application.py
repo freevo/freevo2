@@ -63,8 +63,14 @@ class OSD(object):
             self.widget.parent = parent
         return self.widget.show()
 
+    @property
+    def visible(self):
+        return self.widget and self.widget.visible
+
     @kaa.coroutine()
     def hide(self):
+        if not self.widget:
+            yield None
         res = self.widget.hide()
         if isinstance(res, kaa.InProgress):
             yield res
@@ -82,16 +88,23 @@ class Application(Widget):
     def __init__(self, widgets, background=None, context=None, **osd_templates):
         if kaa.candy.is_template(background):
             background = background(context=context)
+        self.timer = None
         self.background = background
         self.osd_widgets = {}
         for key, template in osd_templates.items():
             self.osd_widgets[key] = OSD(template)
         super(Application, self).__init__(None, None, widgets, context=context)
 
-    def osd_show(self, name):
+    def osd_show(self, name, autohide=None):
         """
         Show the OSD with the given name
         """
+        if self.timer:
+            self.timer.stop()
+            self.timer = None
+        if autohide:
+            self.timer = kaa.Timer(self.osd_hide, name)
+            self.timer.start(autohide)
         widget = self.osd_widgets.get(name)
         if widget:
             return widget.show(self)
@@ -111,6 +124,13 @@ class Application(Widget):
         widget = self.osd_widgets.get(name)
         if widget:
             return widget.toggle(self)
+
+    def osd_visible(self, name):
+        """
+        Return if the OSD with the given name is visible
+        """
+        widget = self.osd_widgets.get(name)
+        return widget and widget.visible
 
     def sync_context(self):
         """
