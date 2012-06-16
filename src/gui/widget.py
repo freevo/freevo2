@@ -43,7 +43,6 @@ class Widget(kaa.candy.Group):
     def visible(self, visible):
         if self.__visible == visible:
             return
-        self.__visible = visible
         if visible:
             self.show()
         else:

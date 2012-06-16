@@ -13,6 +13,14 @@
 		<properties name="plugins"/>
 	    </group>
 	</group>
+	<event name="show"><![CDATA[
+            yield self.animate('EASE_IN_QUAD', 0.2, opacity=255)
+	    ]]>
+	</event>
+	<event name="hide"><![CDATA[
+            yield self.animate('EASE_OUT_QUAD', 0.2, opacity=0)
+	    ]]>
+	</event>
     </widget>
 
     <widget name="osd">

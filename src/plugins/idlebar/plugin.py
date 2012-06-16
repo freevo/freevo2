@@ -71,20 +71,6 @@ class Widget(gui.Widget):
                 widget.x = x0
                 x0 += step
 
-    def show(self):
-        """
-        Show the widget
-        """
-        # FIXME: use settings from theme
-        self.animate('EASE_IN_CUBIC', 0.2, opacity=255)
-
-    def hide(self):
-        """
-        Hide the widget
-        """
-        # FIXME: use settings from theme
-        self.animate('EASE_OUT_CUBIC', 0.2, opacity=0)
-
 
 class PluginInterface(freevo.Plugin):
     """
@@ -107,6 +93,9 @@ class PluginInterface(freevo.Plugin):
                 self.widget.connect(p)
         fullscreen = app.has_capability(freevo.CAPABILITY_FULLSCREEN)
         self.widget.visible = not fullscreen
+
+    def show(self):
+        self.widget.visible = True
 
 
 class IdleBarPlugin(freevo.Plugin):
