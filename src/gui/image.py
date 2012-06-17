@@ -61,7 +61,7 @@ class Thumbnail(kaa.candy.Thumbnail):
         return False
 
     def _load_mimetype(self, item):
-        if item.type == 'dir':
+        if item.type == 'directory':
             if self._try_mimetype('folder_%s' % item.media_type):
                 return
             return self._try_mimetype('folder')

@@ -2,11 +2,8 @@
 # -----------------------------------------------------------------------------
 # player.py - the Freevo video player
 # -----------------------------------------------------------------------------
-# $Id$
-#
-# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2007-2011 Dirk Meyer, et al.
+# Copyright (C) 2007-2012 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -96,10 +93,9 @@ class Player(freevo.Application):
         self.status = freevo.STATUS_RUNNING
         self.is_in_menu = False
         self.eventmap = 'video'
-        if not self.item.metadata:
-            self.item.metadata = kaa.metadata.parse(self.item.filename)
         if not self.item.selected_audio:
             self.item.selected_audio = 0
+        self.item.elapsed_secs = 0
         freevo.PLAY_START.post(self.item)
         # update GUI to a blank screen
         yield kaa.NotFinished
@@ -108,8 +104,10 @@ class Player(freevo.Application):
         # player
         self.player = self.widget.stage.get_widget('player')
         self.player.url = item.filename
-        self.player.config['mplayer.passthrough'] = bool(freevo.config.video.player.mplayer.passthrough)
-        self.player.config['mplayer.vdpau'] = bool(freevo.config.video.player.mplayer.vdpau)
+        self.player.config['mplayer.passthrough'] = \
+            bool(freevo.config.video.player.mplayer.passthrough)
+        self.player.config['mplayer.vdpau'] = \
+            bool(freevo.config.video.player.mplayer.vdpau)
         self.player.set_audio(self.item.selected_audio)
         # self.player.seek(20, self.player.SEEK_PERCENTAGE)
         self.player.signals['finished'].connect_weak_once(freevo.PLAY_END.post, self.item)
@@ -118,8 +116,11 @@ class Player(freevo.Application):
         yield True
 
     def set_elapsed(self, pos):
-        if self.item.elapsed != round(pos):
-            self.item.elapsed = round(pos)
+        """
+        Callback from kaa.candy to update the playtime
+        """
+        if self.item.elapsed_secs != round(pos):
+            self.item.elapsed_secs = round(pos)
             self.context.sync()
 
     def stop(self):
@@ -175,11 +176,13 @@ class Player(freevo.Application):
                 self.player.seek(int(event.arg), kaa.candy.SEEK_RELATIVE)
                 return True
             if event == freevo.VIDEO_NEXT_AUDIOLANG:
+                # FIXME: cache this or add it to beacon
+                metadata = kaa.metadata.parse(self.item.filename)
                 self.item.selected_audio += 1
-                if self.item.selected_audio >= len(self.item.metadata.audio):
+                if self.item.selected_audio >= len(metadata.audio):
                     self.item.selected_audio = 0
                 self.player.set_audio(self.item.selected_audio)
-                lang = self.item.metadata.audio[self.item.selected_audio].language or \
+                lang = metadata.audio[self.item.selected_audio].language or \
                     '#%s' % self.item.selected_audio
                 freevo.Event(freevo.OSD_MESSAGE, _('Audio %s' % lang)).post()
         return self.item.eventhandler(event)

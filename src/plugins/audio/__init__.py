@@ -41,7 +41,7 @@ import os
 from ... import core as freevo
 
 # AudioItem
-from item import AudioItem, AudioDiskItem
+from item import AudioItem
 
 
 class PluginInterface(freevo.MediaPlugin, freevo.MainMenuPlugin):
@@ -70,12 +70,7 @@ class PluginInterface(freevo.MediaPlugin, freevo.MainMenuPlugin):
         items = []
         for suffix in self.suffix:
             for file in listing.get(suffix):
-                # FIXME: better url detection
-                if not file.isfile and not file.isdir and \
-                       not file.url.startswith('http'):
-                    items.append(AudioDiskItem(file, parent))
-                else:
-                    items.append(AudioItem(file, parent))
+                items.append(AudioItem(file, parent))
         return items
 
     def items(self, parent):

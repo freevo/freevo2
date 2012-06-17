@@ -94,6 +94,7 @@ class Player(freevo.Application):
         # Set the current item to the gui engine
         self.context.item = self.item.properties
         self.context.menu = self.playlist
+        self.item.elapsed_secs = 0
         self.status = freevo.STATUS_RUNNING
         # update GUI
         yield kaa.NotFinished
@@ -118,8 +119,8 @@ class Player(freevo.Application):
         """
         Callback for elapsed time changes.
         """
-        if self.item.elapsed != round(pos):
-            self.item.elapsed = round(pos)
+        if self.item.elapsed_secs != round(pos):
+            self.item.elapsed_secs = round(pos)
             self.context.sync()
 
     def eventhandler(self, event):

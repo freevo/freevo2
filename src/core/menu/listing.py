@@ -81,7 +81,7 @@ class ItemList(object):
             # item is still there, reuse it
             return self.select(self.selected)
         for c in self.choices:
-            if c.uid() == self.selected_id:
+            if c.uid == self.selected_id:
                 # item with the same id is there, use it
                 return self.select(c)
         if self.choices:
@@ -114,7 +114,7 @@ class ItemList(object):
                 return False
             self.selected = item
             self.selected_pos = self.choices.index(item)
-            self.selected_id  = self.selected.uid()
+            self.selected_id  = self.selected.uid
             return True
         # select relative
         p = min(max(0, self.selected_pos + item), len(self.choices) - 1)

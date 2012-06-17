@@ -2,8 +2,6 @@
 # -----------------------------------------------------------------------------
 # item.py - Item class for the menu
 # -----------------------------------------------------------------------------
-# $Id$
-#
 # This file contains a basic item for the menu and a special one for items
 # based on media content. There is also a base class for actions to be
 # returned by the actions() function.
@@ -54,6 +52,23 @@ class Item(object):
     Item class. This is the base class for all items in the menu. It's a
     template for other info items like VideoItem, AudioItem and ImageItem
     """
+    class __metaclass__(type):
+        """
+        Metaclass to register cached variables
+        """
+        def __new__(meta, name, bases, attrs):
+            cls = type.__new__(meta, name, bases, attrs)
+            if hasattr(cls, 'CACHED_ATTRIBUTES'):
+                for prop in cls.CACHED_ATTRIBUTES:
+                    cls.register_attribute(prop)
+                delattr(cls, 'CACHED_ATTRIBUTES')
+            if hasattr(cls, 'CACHED_ATTRIBUTES_MTIME'):
+                for prop in cls.CACHED_ATTRIBUTES_MTIME:
+                    cls.register_attribute(prop, True)
+                delattr(cls, 'CACHED_ATTRIBUTES_MTIME')
+            return cls
+
+    # item type
     type = None
 
     class Properties(object):
@@ -63,21 +78,20 @@ class Item(object):
         """
         def __init__(self, item):
             self.__item = weakref(item)
-    
+
         def __getattr__(self, attr):
             if not self.__item:
                 return None
             return self.__item.get(attr)
-    
+
     def __init__(self, parent):
         """
         Init the item. Sets all needed variables, if parent is given also
         inherit some settings from there.
         """
-        self._name = u''
-        self._description  = ''
-        self._mem = {}
-        self._image = None
+        self.__name = u''
+        self.__description  = ''
+        self.__image = None
         self.info = {}
         self.menu = None
         self.parent = None
@@ -90,16 +104,16 @@ class Item(object):
 
     @property
     def name(self):
-        return self._name or self.info.get('name')
+        return self.__name or self.info.get('name')
 
     @name.setter
     def name(self, name):
-        self._name = name
+        self.__name = name
 
     @property
     def image(self):
-        if self._image:
-            return self._image
+        if self.__image:
+            return self.__image
         thumb = self.info.get('thumbnail')
         if thumb and not thumb.failed:
             return thumb.image
@@ -107,16 +121,17 @@ class Item(object):
 
     @image.setter
     def image(self, image):
-        self._image = image
+        self.__image = image
 
     @property
     def description(self):
-        return self._description or self.info.get('description')
+        return self.__description or self.info.get('description')
 
     @description.setter
     def description(self, description):
-        self._description = description
+        self.__description = description
 
+    @property
     def uid(self):
         """
         Return a unique id of the item. This id should be the same when the
@@ -215,42 +230,74 @@ class Item(object):
         # nothing to do
         return False
 
-    def get_cfg(self, var):
-        """
-        Return stored config variable value.
-        Used by the generic Item.get function.
-        """
-        cfg = self.info.get('freevo_config', {})
-        return cfg.get(var)
+    #
+    # generic get and set function
+    #
 
-    def get_cache(self, var):
-        """
-        Return stored cache variable value.
-        Used by the generic Item.get function.
-        """
+    def __get_mtime_attribute(self, attr):
         # freevo_config attribute in beacon
         mtime, cache = self.info.get('freevo_cache', ( 0, {} ))
         if mtime == self.info.get('mtime'):
-            return cache.get(var)
+            return cache.get(attr)
         # cache not up-to-date, delete it
         self.info['freevo_cache'] = [ self.info.get('mtime'), {} ]
         return None
+
+    def __set_mtime_attribute(self, attr, value):
+        # freevo_config attribute in beacon
+        mtime, cache = self.info.get('freevo_cache', ( 0, {} ))
+        if mtime != self.info.get('mtime'):
+            print 'clear cache', self
+            cache = {}
+        cache[attr] = value
+        # set again to notify beacon
+        self.info['freevo_cache'] = [ mtime, cache ]
+
+    def __get_store_attribute(self, attr, func):
+        """
+        Return stored config variable value.
+        """
+        value = self.info.get('freevo_config', {}).get(attr)
+        if func:
+            value = func(self, attr, value)
+        return value
+
+    def __set_store_attribute(self, attr, value):
+        store = self.info.get('freevo_config', {})
+        store[attr] = value
+        # set again to notify beacon
+        self.info['freevo_config'] = store
+
+    @classmethod
+    def register_attribute(cls, attr, depends_on_mtime=False, func=None):
+        """
+        Register a new attribute to the item
+        """
+        if hasattr(cls, attr):
+            raise AttributeError('%s already defined' % attr)
+        if depends_on_mtime:
+            setattr(cls, attr, property(
+                    lambda self: cls.__get_mtime_attribute(self, attr),
+                    lambda self, value: cls.__set_mtime_attribute(self, attr, value)))
+        else:
+            setattr(cls, attr, property(
+                    lambda self: cls.__get_store_attribute(self, attr, func),
+                    lambda self, value: cls.__set_store_attribute(self, attr, value)))
+            if func:
+                setattr(cls, attr + '__value', property(
+                        lambda self: cls.__get_store_attribute(self, attr, None)))
 
     def get(self, attr):
         """
         Return the specific attribute
         """
-        if attr[:7] == 'parent(' and attr[-1] == ')' and self.parent:
-            return self.parent[attr[7:-1]]
         if attr[:4] == 'len(' and attr[-1] == ')':
             value = self[attr[4:-1]]
             if value == None or value == '':
                 return 0
             return len(value)
-        if attr in self._mem:
-            # temp memory override
-            return self._mem.get(attr)
         if attr.find(':') > 0:
+            log.warning('using %s is deprecated' % attr)
             # get function with parameter
             keys = attr.split(':')
             func = getattr(self, 'get_' + keys[0], None)
@@ -260,6 +307,7 @@ class Item(object):
             # get function without parameter
             func = getattr(self, 'get_' + attr, None)
             if func is not None:
+                log.warning('using %s is deprecated' % attr)
                 return func()
         # try member attribute
         if hasattr(self, attr):
@@ -280,30 +328,6 @@ class Item(object):
         """
         Set the value of 'key' to 'val'
         """
-        if key.startswith('mem:'):
-            # temp setting only in memory
-            self._mem[key[4:]] = value
-            return
-        if key.startswith('cfg:'):
-            # freevo_config attribute in beacon
-            key = key[4:]
-            cfg = self.info.get('freevo_config', {})
-            cfg[key] = value
-            if key in self._mem:
-                # remove mem setting
-                del self._mem[key]
-            # set again to notify beacon
-            self.info['freevo_config'] = cfg
-            return
-        if key.startswith('cache:'):
-            # freevo_config attribute in beacon
-            mtime, cache = self.info.get('freevo_cache', ( 0, {} ))
-            if mtime != self.info.get('mtime'):
-                cache = {}
-            cache[key[6:]] = value
-            # set again to notify beacon
-            self.info['freevo_cache'] = [ mtime, cache ]
-            return
         self.info[key] = value
 
 

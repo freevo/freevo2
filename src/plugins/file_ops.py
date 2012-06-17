@@ -45,7 +45,7 @@ class PluginInterface(freevo.ItemPlugin):
         """
         Create list of possible actions
         """
-        if not item.parent or not item.parent.type == 'dir':
+        if not item.parent or not item.parent.type == 'directory':
             # only activate this for directory listings
             return []
         if not hasattr(item, 'files') or not item.files:

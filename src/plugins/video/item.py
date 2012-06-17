@@ -2,14 +2,8 @@
 # -----------------------------------------------------------------------------
 # videoitem.py - Item for video objects
 # -----------------------------------------------------------------------------
-# $Id$
-#
-# This file contains a VideoItem. A VideoItem can not only hold a simple
-# video file. DVD and VCD are also VideoItems.
-#
-# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2011 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2012 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -32,11 +26,10 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'VideoItem', 'VideoPlaylist' ]
+__all__ = [ 'VideoItem' ]
 
 # python imports
 import logging
-import re
 import time
 
 # kaa imports
@@ -44,8 +37,6 @@ import kaa
 
 # freevo imports
 from ... import core as freevo
-# FIXME: broken
-# import configure
 import player as videoplayer
 
 # get logging object
@@ -54,41 +45,23 @@ log = logging.getLogger('video')
 class VideoItem(freevo.MediaItem):
     type = 'video'
 
+    metadata = None
+    user_stop = False
+
+    # cached attributes
+    CACHED_ATTRIBUTES_MTIME = ['selected_audio']
+
     def __init__(self, url, parent):
         super(VideoItem, self).__init__(parent)
-        self.user_stop = False
-        self.subtitle_file     = {}         # text subtitles
-        self.audio_file        = {}         # audio dubbing
-        self.selected_subtitle = None
-        self.selected_audio    = None
-        self.metadata          = None
-        self.player            = str(freevo.config.video.player.default)
+        self.player = str(freevo.config.video.player.default)
         self.set_url(url)
 
     def set_url(self, url):
         """
         Sets a new url to the item. Always use this function and not set 'url'
-        directly because this functions also changes other attributes, like
-        filename and mode
+        directly because this functions also changes other attributes.
         """
         super(VideoItem, self).set_url(url)
-        if self.url.startswith('dvd://') or self.url.startswith('vcd://'):
-            if self.info.filename:
-                # dvd on harddisc, add '/' for xine
-                self.url = self.url + '/'
-                self.filename = self.info.filename
-                self.files    = freevo.Files()
-                self.files.append(self.filename)
-            elif self.url.rfind('.iso') + 4 == self.url.rfind('/'):
-                # dvd or vcd iso
-                self.filename = self.url[5:self.url.rfind('/')]
-            else:
-                # normal dvd or vcd
-                self.filename = ''
-        elif self.url.endswith('.iso') and self.info['mime'] == 'video/dvd':
-            # dvd iso
-            self.mode = 'dvd'
-            self.url = 'dvd' + self.url[4:] + '/'
         if self.get('series') and self.get('season') and self.get('episode') and self.get('title'):
             # FIXME: make this a configure option and fix sorting if season is >9
             self.name = '%s %dx%02d - %s' % (
@@ -113,52 +86,16 @@ class VideoItem(freevo.MediaItem):
             return aspect[:aspect.find(' ')].replace('/', ':')
         return None
 
-    # ------------------------------------------------------------------------
-    # actions:
-
-
     def actions(self):
         """
         return a list of possible actions on this item.
         """
         return [ freevo.Action(_('Play'), self.play) ]
-        # if self.url.startswith('dvd://') and self.url[-1] == '/':
-        #     items = [ freevo.Action(_('Play DVD'), self.play),
-        #               freevo.Action(_('DVD title list'), self.dvd_vcd_title_menu) ]
-        # elif self.url == 'vcd://':
-        #     items = [ freevo.Action(_('Play VCD'), self.play),
-        #               freevo.Action(_('VCD title list'), self.dvd_vcd_title_menu) ]
-        # else:
-        #     items = [ freevo.Action(_('Play'), self.play) ]
-        # # Add the configure stuff (e.g. set audio language)
-        # return items  # FIXME: broken + configure.get_items(self)
-
-    # @kaa.coroutine()
-    # def dvd_vcd_title_menu(self):
-    #     """
-    #     Generate special menu for DVD/VCD/SVCD content
-    #     """
-    #     # delete the submenu that got us here
-    #     self.menustack.back_submenu(False)
-    #     # build a menu
-    #     items = []
-    #     for track in (yield self.info.list()):
-    #         if not track.get('length') or not track.get('audio'):
-    #             # bad track, skip it
-    #             continue
-    #         track = VideoItem(track, self)
-    #         track.name = _('Play Title %s') % track.info.get('name')
-    #         items.append(track)
-    #     moviemenu = freevo.Menu(self.name, items)
-    #     moviemenu.type = 'video'
-    #     self.menustack.pushmenu(moviemenu)
 
     def play(self):
         """
         Play the item.
         """
-        # call the player to play the item
-        self.elapsed = 0
         videoplayer.play(self)
 
     def stop(self):
@@ -178,14 +115,3 @@ class VideoItem(freevo.MediaItem):
                 self['last_played'] = int(time.time())
                 self.user_stop = False
         super(VideoItem, self).eventhandler(event)
-
-
-class VideoPlaylist(freevo.Playlist):
-    type = 'video'
-
-    def uid(self):
-        """
-        Return a unique id of the item. This id should be the same when the
-        item is rebuild later with the same informations
-        """
-        return ''.join([ c.uid() for c in self.choices ])

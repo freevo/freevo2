@@ -2,11 +2,8 @@
 # -----------------------------------------------------------------------------
 # resume.py - Plugin to handle resume playback
 # -----------------------------------------------------------------------------
-# $Id$
-#
-# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2007 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2012 Dirk Meyer, et al.
 #
 # First Edition: Aubin Paul <aubin@outlyer.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -45,9 +42,8 @@ log = logging.getLogger()
 # variable to store the auto resume
 RESUME = 'autobookmark_resume'
 
-if not 'epydoc' in sys.modules:
-    kaa.beacon.register_file_type_attrs('video',
-        autobookmark_resume = (int, kaa.beacon.ATTR_SIMPLE))
+kaa.beacon.register_file_type_attrs('video',
+    autobookmark_resume = (int, kaa.beacon.ATTR_SIMPLE))
 
 
 class PluginInterface(freevo.ItemPlugin):
@@ -84,21 +80,19 @@ class PluginInterface(freevo.ItemPlugin):
         """
         # auto bookmark store
         if event == freevo.STOP:
-            if item.mode == 'file' and item.elapsed:
+            if item.mode == 'file' and item.elapsed_secs:
                 # this will store in kaa.beacon
                 log.info('auto-bookmark store')
-                item[RESUME]= item.elapsed
+                item[RESUME]= item.elapsed_secs
                 self._ignore_end = True
             else:
                 log.info('auto-bookmark not supported for this item')
             return False
-
         # seek to the given position
         if event == freevo.PLAY_START and self._seek and event.arg == item:
             freevo.Event(freevo.SEEK, self._seek).post()
             self._seek = 0
             return False
-
         # auto bookmark delete
         if event == freevo.PLAY_END and event.arg == item:
             if self._ignore_end:
@@ -106,5 +100,4 @@ class PluginInterface(freevo.ItemPlugin):
             else:
                 item[RESUME] = None
             return False
-
         return False

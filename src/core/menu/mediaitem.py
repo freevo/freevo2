@@ -47,16 +47,27 @@ from menu import Menu
 log = logging.getLogger()
 
 
+def format_time(time, hours=False):
+    """
+    Format time string
+    """
+    if int(time / 3600) or hours:
+        return '%d:%02d:%02d' % ( time / 3600, (time % 3600) / 60, time % 60)
+    return '%02d:%02d' % (time / 60, time % 60)
+
+
 class MediaItem(Item):
     """
     This item is for a media. It's only a template for image, video
     or audio items
     """
+
+    elapsed_secs = 0
+
     def __init__(self, parent):
         Item.__init__(self, parent)
         self.url = 'null://'
         self.filename = None
-        self.elapsed = 0
 
     def set_url(self, url):
         """
@@ -76,12 +87,6 @@ class MediaItem(Item):
             # and extra attributes here
             self.filename = self.url[7:]
             self.files.append(self.filename)
-
-            # FIXME: this is slow. Maybe handle this in the gui code
-            # and choose to print self.info.get('name')
-            if self.parent and \
-                   self.parent['config:use_metadata'] in (None, True):
-                self.name = self.info.get('title')
             if not self.name:
                 self.name = kaa.str_to_unicode(self.info.get('name'))
         else:
@@ -93,58 +98,56 @@ class MediaItem(Item):
             if not self.name:
                 self.name = kaa.str_to_unicode(self.url)
 
-    def _format_time(self, time, hours=False):
-        """
-        Format time string
-        """
-        if int(time / 3600) or hours:
-            return '%d:%02d:%02d' % ( time / 3600, (time % 3600) / 60, time % 60)
-        return '%02d:%02d' % (time / 60, time % 60)
-
-    def get_length(self, style='clock'):
+    @property
+    def length(self):
         """
         Return the length of the item as formated unicode string.
         """
         try:
-            if style == 'clock':
-                return self._format_time(self.info.get('length'))
-            if style == 'min':
-                return '%d min' % (int(self.info.get('length')) / 60)
-            raise AttributeError('unknown length style %s' % style)
+            return format_time(self.info.get('length'))
         except ValueError:
             return ''
 
-    def get_elapsed(self, style='clock'):
+    @property
+    def length_min(self):
         """
-        Return the elapsed time of the item. If style is percent the
-        return value is an integer.
+        Return the length of the item as formated unicode string.
         """
-        # FIXME: handle elapsed > length
-        if style == 'clock':
-            try:
-                return self._format_time(self.elapsed)
-            except ValueError:
-                return None
-        if style == 'percent':
-            try:
-                length = int(self.info.get('length'))
-                if not hasattr(self, 'elapsed') or not length:
-                    return 0
-                return min(100 * self.elapsed / length, 100)
-            except ValueError:
-                return 0
-        raise AttributeError('unknown length style %s' % style)
+        try:
+            return _('%d min') % (int(self.info.get('length')) / 60)
+        except ValueError:
+            return ''
 
+    @property
+    def elapsed(self):
+        """
+        Return the elapsed time of the item.
+        """
+        try:
+            return format_time(self.elapsed_secs)
+        except ValueError:
+            return None
+
+    @property
+    def elapsed_percent(self):
+        """
+        Return the elapsed time of the item.
+        """
+        try:
+            length = int(self.info.get('length'))
+            if not self.elapsed_secs or not length:
+                return 0
+            return min(100 * self.elapsed_secs / length, 100)
+        except ValueError:
+            return 0
+
+    @property
     def uid(self):
         """
         Return a unique id of the item. This id should be the same when the
         item is rebuild later with the same informations
         """
         return self.url
-
-    def __repr__(self):
-        name = str(self.__class__)
-        return "<%s %s>" % (name[name.rfind('.')+1:-2], self.url)
 
     def sort(self, mode='name'):
         """
@@ -182,46 +185,9 @@ class MediaItem(Item):
         """
         pass
 
-
-    # ======================================================================
-    # configure submenu
-    # ======================================================================
-
-    def get_configure_items(self):
+    def __repr__(self):
         """
-        Return configure options for this item.
+        Represantation string for debugging
         """
-        raise RuntimeError('item can not be configured')
-
-    def _set_configure_var(self, var, name, choices):
-        """
-        Update the variable update the menu.
-        """
-        # update value
-        dbvar = 'cfg:%s' % var.lower()
-        current = MediaItem.get_cfg(self, var.lower()) or 'auto'
-        current = choices[(choices.index(current) + 1) % len(choices)]
-        self[dbvar] = current
-        # change name
-        item = self.menustack.current.selected
-        item.name = name + '\t'  + current
-        # rebuild menu
-        self.menustack.refresh(True)
-
-    def configure(self):
-        """
-        Show the configure dialog for the item.
-        """
-        items = []
-        for i, name, values, descr in self.get_configure_items():
-            current = MediaItem.get_cfg(self, i.lower()) or 'auto'
-            action = ActionItem(name + '\t'  + current, self,
-                                self._set_configure_var, descr)
-            action.parameter(var=i, name=name, choices=list(values))
-            items.append(action)
-        if not items:
-            return
-        self.menustack.back_submenu(False)
-        m = Menu(_('Configure'), items, type='submenu')
-        m.table = (80, 20)
-        self.menustack.pushmenu(m)
+        name = str(self.__class__)
+        return "<%s %s>" % (name[name.rfind('.')+1:-2], self.url)
