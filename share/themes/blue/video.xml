@@ -85,6 +85,7 @@
 		<rectangle x="910" y="85" width="280" height="410" color="0xa0000000" radius="8"/>
 		<!-- <rectangle x="897" y="87" width="306" height="406" color="0x000000"/> -->
 		<image x="915" y="90" width="270" height="400" url="$item.poster">
+		    <properties load-async="True"/>
 		    <replace-on-context-change keys="item.poster" script="fade"/>
 		</image>
 	    </case>
@@ -165,7 +166,9 @@
 
 	<widget y="720" height="200" use-as="info">
 	    <rectangle x="-10" y="40" width="1300" height="135" color="0x66000000"/>
-	    <image x="30" width="135" height="200" url="$item.poster"/>
+	    <image x="30" width="135" height="200" url="$item.poster">
+		<properties load-async="True"/>
+	    </image>
 	    <label x="200" y="50" width="1000" font="Vera" height="25" color="0xffffff">
 		$item.title
 	    </label>
