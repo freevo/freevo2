@@ -93,8 +93,10 @@ class Player(freevo.Application):
         self.status = freevo.STATUS_RUNNING
         self.is_in_menu = False
         self.eventmap = 'video'
-        if not self.item.selected_audio:
+        if self.item.selected_audio == None:
             self.item.selected_audio = 0
+        if self.item.selected_sub == None:
+            self.item.selected_sub = -1
         self.item.elapsed_secs = 0
         freevo.PLAY_START.post(self.item)
         # update GUI to a blank screen
@@ -103,12 +105,13 @@ class Player(freevo.Application):
         # unless it is a playlist, in this case we want to reuse the
         # player
         self.player = self.widget.stage.get_widget('player')
-        self.player.url = item.filename
+        self.player.url = item.filename or item.url
         self.player.config['mplayer.passthrough'] = \
             bool(freevo.config.video.player.mplayer.passthrough)
         self.player.config['mplayer.vdpau'] = \
             bool(freevo.config.video.player.mplayer.vdpau)
         self.player.set_audio(self.item.selected_audio)
+        self.player.set_subtitle(self.item.selected_sub)
         # self.player.seek(20, self.player.SEEK_PERCENTAGE)
         self.player.signals['finished'].connect_weak_once(freevo.PLAY_END.post, self.item)
         self.player.signals['progress'].connect_weak(self.set_elapsed)
@@ -185,6 +188,19 @@ class Player(freevo.Application):
                 lang = metadata.audio[self.item.selected_audio].language or \
                     '#%s' % self.item.selected_audio
                 freevo.Event(freevo.OSD_MESSAGE, _('Audio %s' % lang)).post()
+            if event == freevo.VIDEO_NEXT_SUBTITLE:
+                # FIXME: cache this or add it to beacon
+                metadata = kaa.metadata.parse(self.item.filename)
+                self.item.selected_sub += 1
+                if self.item.selected_sub >= len(metadata.subtitles):
+                    self.item.selected_sub = -1
+                self.player.set_subtitle(self.item.selected_sub)
+                if self.item.selected_sub == -1:
+                    lang = _('off')
+                else:
+                    lang = metadata.subtitles[self.item.selected_sub].language or \
+                        '#%s' % self.item.selected_sub
+                freevo.Event(freevo.OSD_MESSAGE, _('Subtitle %s' % lang)).post()
         return self.item.eventhandler(event)
 
 

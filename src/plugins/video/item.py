@@ -49,7 +49,7 @@ class VideoItem(freevo.MediaItem):
     user_stop = False
 
     # cached attributes
-    CACHED_ATTRIBUTES_MTIME = ['selected_audio']
+    CACHED_ATTRIBUTES_MTIME = ['selected_audio', 'selected_sub']
 
     def __init__(self, url, parent):
         super(VideoItem, self).__init__(parent)
