@@ -143,7 +143,7 @@ class Item(object):
         """
         Returns the string how to sort this item
         """
-        if mode == 'name':
+        if mode == 'name' or mode == None:
             return self.name.lower()
         if mode == 'smart':
             name = self.name
