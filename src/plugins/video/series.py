@@ -192,4 +192,8 @@ class PluginInterface(freevo.MainMenuPlugin):
         """
         Return the main menu item.
         """
+        if freevo.config.video.tv and not parent.media_subtype == 'tv':
+            # there is a special TV entry in the main menu but the
+            # parent is a different video item
+            return []
         return [ freevo.ActionItem(_('Browse TV Series'), parent, self.show) ]

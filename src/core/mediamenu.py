@@ -54,9 +54,10 @@ class MediaMenu(freevo.MainMenuItem):
     This is the main menu for different media types. It displays the
     default directories, the beacon mountpoints, and sub-plugins.
     """
-    def __init__(self, parent, title, type, items):
+    def __init__(self, parent, title, type, items, subtype=None):
         super(MediaMenu, self).__init__(parent)
         self.media_type = type
+        self.media_subtype = subtype
         self.item_menu = None
         kaa.beacon.signals['media.add'].connect_weak(self.media_change)
         kaa.beacon.signals['media.remove'].connect_weak(self.media_change)

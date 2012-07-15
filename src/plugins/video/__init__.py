@@ -84,9 +84,9 @@ class PluginInterface(freevo.MediaPlugin, freevo.MainMenuPlugin):
         """
         items = []
         if freevo.config.video.tv:
-            items.append(freevo.MediaMenu(parent, _('Watch a TV Show'), 'video', freevo.config.video.tv))
+            items.append(freevo.MediaMenu(parent, _('Watch a TV Show'), 'video', freevo.config.video.tv, 'tv'))
         if freevo.config.video.movie:
-            items.append(freevo.MediaMenu(parent, _('Watch a Movie'), 'video', freevo.config.video.movie))
+            items.append(freevo.MediaMenu(parent, _('Watch a Movie'), 'video', freevo.config.video.movie, 'movie'))
         if freevo.config.video.misc:
-            items.append(freevo.MediaMenu(parent, _('Watch a Video'), 'video', freevo.config.video.misc))
+            items.append(freevo.MediaMenu(parent, _('Watch a Video'), 'video', freevo.config.video.misc, 'misc'))
         return items
