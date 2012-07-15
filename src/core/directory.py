@@ -53,8 +53,8 @@ def _find_start_string(s1, s2):
     """
     Find similar start in both strings
     """
-    ret = ''
-    tmp = ''
+    ret = u''
+    tmp = u''
     while True:
         if len(s1) < 2 or len(s2) < 2:
             return ret
@@ -272,12 +272,12 @@ class Directory(freevo.Playlist):
         if self.config2value('hide_played'):
             play_items = [ p for p in play_items if not p.info.get('last_played') ]
         # remove same beginning from all play_items
-        substr = ''
+        substr = u''
         if len(play_items) > 4 and len(play_items[0].name) > 5:
-            substr = play_items[0].name[:-5].lower()
+            substr = kaa.base.py3_str(play_items[0].name[:-5].lower())
             for i in play_items[1:]:
                 if len(i.name) > 5:
-                    substr = _find_start_string(i.name.lower(), substr)
+                    substr = _find_start_string(kaa.base.py3_str(i.name.lower()), substr)
                     if not substr or len(substr) < 10:
                         break
                 else:
