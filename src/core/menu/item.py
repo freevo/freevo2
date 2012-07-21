@@ -104,7 +104,11 @@ class Item(object):
 
     @property
     def name(self):
-        return self.__name or self.info.get('name')
+        if not self.__name:
+            self.__name = self.info.get('title')
+        if not self.__name:
+            self.__name = self.info.get('name')
+        return self.__name
 
     @name.setter
     def name(self, name):
