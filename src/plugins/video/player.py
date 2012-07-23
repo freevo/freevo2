@@ -193,6 +193,11 @@ class Player(freevo.Application):
                     self.widget.osd_show('seek', autohide=2)
                 self.player.seek(int(event.arg), kaa.candy.SEEK_RELATIVE)
                 return True
+            if event == freevo.VIDEO_CHANGE_ASPECT:
+                self.player.set_aspect(kaa.candy.NEXT)
+                # lang = self.streaminfo['audio'][self.item.selected_audio] or \
+                #     '#%s' % self.item.selected_audio
+                # freevo.Event(freevo.OSD_MESSAGE, _('Audio %s' % lang)).post()
             if event == freevo.VIDEO_NEXT_AUDIOLANG:
                 self.item.selected_audio = self.player.set_audio(kaa.candy.NEXT)
                 lang = self.streaminfo['audio'][self.item.selected_audio] or \
