@@ -83,7 +83,7 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
         self.autoplay = autoplay
         self.repeat = repeat
         self.media_type = type
-        self.next_pos = None
+        self.next = None
         self._playlist_valid = playlist == []
         self._random = random
         # create a basic info object
@@ -242,7 +242,7 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
             log.warning('empty playlist')
             yield False
         self._randomize()
-        self.next_pos = 0
+        self.next = self.choices[0]
         freevo.PLAY_START.post(self)
         self._play_next()
 
@@ -256,9 +256,9 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
 
     def _play_next(self):
         """
-        Play the next item (defined by self.next_pos).
+        Play the next item (defined by self.next).
         """
-        self.select(self.choices[self.next_pos])
+        self.select(self.next)
         if hasattr(self.selected, 'play'):
             # play the item
             self.selected.play()
@@ -267,7 +267,7 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
         # get all actions and select the first one, but this won't be
         # right. Maybe this action opens a menu and nothing more. So
         # it is play or skip.
-        if self.next_pos is not None:
+        if self.next is not None:
             return self._play_next(self)
         return True
 
@@ -275,7 +275,7 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
         """
         stop playing
         """
-        self.next_pos = None
+        self.next = None
         if self.selected:
             self.selected.stop()
 
@@ -290,9 +290,11 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
             # update menu
             self.selected.menu.select(self.selected)
         # get next item
-        self.next_pos = (self.selected_pos+1) % len(self.choices)
-        if self.next_pos == 0 and not self.repeat == Playlist.REPEAT_PLAYLIST:
-            self.next_pos = None
+        pos = (self.selected_pos+1) % len(self.choices)
+        if pos == 0 and not self.repeat == Playlist.REPEAT_PLAYLIST:
+            self.next = None
+        else:
+            self.next = self.choices[pos]
 
     def eventhandler(self, event):
         """
@@ -302,9 +304,8 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
             if event.arg in self.choices:
                 self.select(event.arg)
             # a new item started playing, cache next (if supported)
-            if self.next_pos is not None and \
-                   hasattr(self.choices[self.next_pos], 'cache'):
-                self.choices[self.next_pos].cache()
+            if self.next is not None and hasattr(self.next, 'cache'):
+                self.next.cache()
             return True
         if not self.selected:
             # There is no selected item. All following functions need
@@ -328,7 +329,7 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
                 # Repeat current item
                 self.selected.play()
                 return True
-            if self.next_pos is not None:
+            if self.next is not None:
                 # Play next item
                 self._play_next()
                 return True
@@ -337,7 +338,7 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
             freevo.PLAY_END.post(self)
             return True
         if event == freevo.PLAYLIST_NEXT:
-            if self.next_pos is not None:
+            if self.next is not None:
                 # Stop current item, the next one will start when the
                 # current one sends the stop event
                 self.selected.stop()
@@ -348,7 +349,7 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
             if self.selected_pos:
                 # This is not the first item. Set next item to previous
                 # one and stop the current item
-                self.next_pos = self.selected_pos - 1
+                self.next = self.choices[self.selected_pos - 1]
                 self.selected.stop()
                 return True
             # No previous item
