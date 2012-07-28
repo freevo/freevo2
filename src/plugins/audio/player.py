@@ -101,9 +101,10 @@ class Player(freevo.Application):
         # Open media item and start playback
         self.player = self.widget.stage.get_widget('player')
         self.player.url = item.filename
-        self.player.signals['finished'].connect_weak_once(freevo.PLAY_END.post, self.item)
+        self.player.signals['finished'].connect_weak_once(self.PLAY_END.post, self.item)
         self.player.signals['progress'].connect_weak(self.set_elapsed)
         self.player.play()
+        self.PLAY_START.post(self.item)
         yield True
 
     def stop(self):
@@ -128,7 +129,7 @@ class Player(freevo.Application):
         React on some events or send them to the real player or the
         item belongig to the player
         """
-        if event == freevo.STOP and self.status != freevo.STATUS_RUNNING:
+        if event == freevo.STOP and self.status == freevo.STATUS_RUNNING:
             # Stop the player and pass the event to the item
             self.stop()
             self.item.eventhandler(event)

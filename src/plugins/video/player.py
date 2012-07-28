@@ -75,11 +75,6 @@ class Player(freevo.Application):
             # Freevo is in shutdown mode, do not start a new player, the old
             # only stopped because of the shutdown.
             yield False
-        self.context.item = item.properties
-        if item.url.startswith('dvd://'):
-            # kaa.candy does not support dvd playback with gstreamer
-            item.player = 'mplayer'
-        self.context.candy_player = item.player
         # Try to get VIDEO and AUDIO resources. The ressouces will be freed
         # by the system when the application switches to STATUS_STOPPED or
         # STATUS_IDLE.
@@ -91,6 +86,13 @@ class Player(freevo.Application):
         self.playlist = self.item.playlist
         if self.playlist:
             self.playlist.select(self.item)
+        # Set the current item to the gui engine
+        self.context.item = self.item.properties
+        self.context.menu = self.playlist
+        if item.url.startswith('dvd://'):
+            # kaa.candy does not support dvd playback with gstreamer
+            item.player = 'mplayer'
+        self.context.candy_player = item.player
         # set the current item to the gui engine
         # self.engine.set_item(self.item)
         self.status = freevo.STATUS_RUNNING
