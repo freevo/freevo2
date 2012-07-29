@@ -296,7 +296,7 @@ class Directory(freevo.Playlist):
             pl_items.sort(_sortfunc(self.config2value('sort_method')))
         play_items.sort(_sortfunc(self.config2value('sort_method')))
         if self.config2value('isplaylist'):
-            self.set_playlist(play_items)
+            self.set_items(play_items)
         # build a list of all items
         items = dir_items + pl_items + play_items
         # random playlist
@@ -416,7 +416,7 @@ class Directory(freevo.Playlist):
             return value
         if isinstance(self.parent, Directory):
             # return the value from the parent (auto)
-            return getattr(self.parent, attr)
+            return self.parent.config2value(attr)
         # auto and no parent, use config file values
         if attr == 'sort_method':
             if self.menu_type == 'tv':

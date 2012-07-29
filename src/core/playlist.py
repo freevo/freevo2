@@ -76,33 +76,25 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
         freevo.MediaItem.__init__(self, parent)
         freevo.ItemList.__init__(self)
         self.name = kaa.str_to_unicode(name)
-
         if self.type == 'tv':
             type = 'video'
-
         # variables only for Playlist
-        self._playlist    = playlist
-        self.autoplay     = autoplay
-        self.repeat       = repeat
-        self.media_type   = type
-        self.next_pos     = None
-        # if playlist is empty (like for directory items) the playlist
-        # is always valid. The inheriting class has to make sure when
-        # it calls set_playlist
+        self._playlist = playlist
+        self.autoplay = autoplay
+        self.repeat = repeat
+        self.media_type = type
+        self.next = None
         self._playlist_valid = playlist == []
-        self.background_playlist = None
         self._random = random
-
         # create a basic info object
         self.info = {}
 
-
-    def set_playlist(self, playlist):
+    def set_items(self, items, selected=None):
         """
-        Set a new playlist.
+        Set/replace the items.
         """
-        self.set_items(playlist, 0)
-
+        super(Playlist, self).set_items(items, selected)
+        self._playlist_valid = True
 
     def _read_m3u(self, plsname, content):
         """
@@ -110,14 +102,12 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
         """
         pl_lines = [ l for l in content if not l.startswith('#') ]
         curdir = os.path.dirname(plsname)
-
         playlist = []
         for line in pl_lines:
             line = line.replace('\\', '/').strip()
             if os.path.exists(os.path.join(curdir,line)):
                 playlist.append(os.path.join(curdir,line))
         return playlist
-
 
     def _read_pls(self, plsname, content):
         """
@@ -132,14 +122,12 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
             if numchars > 0:
                 pl_lines[pos] = line[numchars:]
         curdir = os.path.dirname(plsname)
-
         playlist = []
         for line in pl_lines:
             line = line.replace('\\', '/').strip()
             if os.path.exists(os.path.join(curdir,line)):
                 playlist.append(os.path.join(curdir,line))
         return playlist
-
 
     @kaa.coroutine(policy=kaa.POLICY_SINGLETON)
     def _playlist_create_items(self):
@@ -148,15 +136,11 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
         will load the playlist file or expand directories
         """
         self._playlist_valid = True
-
-        # create a basic info object
         items = []
-
         if isinstance(self._playlist, kaa.InProgress):
             # something not finished, wait
             # This may happen for a beacon query
             self._playlist = yield self._playlist
-
         if isinstance(self._playlist, (str, unicode)):
             # playlist is a filename, load the file and create playlist
             self.set_url(self._playlist)
@@ -172,39 +156,31 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
             except (OSError, IOError), e:
                 log.error('playlist error: %s' % e)
                 self._playlist = []
-
         if isinstance(self._playlist, kaa.beacon.Query):
             self._playlist = [ self._playlist ]
-
         # Note: playlist is a list of Items, strings (filenames) or a
         # beacon query now.
-
         plugins = freevo.MediaPlugin.plugins(self.media_type)
         for item in self._playlist:
-
             if isinstance(item, freevo.Item):
                 # Item object, correct parent
                 item = copy.copy(item)
                 item.parent = weakref(self)
                 items.append(item)
                 continue
-
             if not isinstance(item, kaa.beacon.Query):
                 # make item a beacon query
                 item = yield kaa.beacon.query(filename=item)
-
             playlist = []
             fitems = item.get(filter='extmap')
             for p in plugins:
                 playlist.extend(p.get(self, fitems))
-
             # sort beacon query on url
             playlist.sort(lambda x,y: cmp(x.url, y.url))
             # add to playlist
             items.extend(playlist)
         self.set_items(items, 0)
         self._playlist = []
-
 
     def _randomize(self):
         """
@@ -221,7 +197,6 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
         self.set_items(randomized, 0)
         return True
 
-
     def get(self, attr):
         """
         return the specific attribute
@@ -229,7 +204,6 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
         if not self._playlist_valid:
             self._playlist_create_items()
         return freevo.MediaItem.get(self, attr)
-
 
     def actions(self):
         """
@@ -245,7 +219,6 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
             items.append(freevo.Action(_('Random play all items'), self._play_random))
         return items
 
-
     @kaa.coroutine()
     def browse(self):
         """
@@ -258,7 +231,6 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
         menu = freevo.Menu(self.name, self.choices, type = self.media_type)
         self.menustack.pushmenu(menu)
 
-
     @kaa.coroutine()
     def play(self):
         """
@@ -269,16 +241,10 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
         if not self.choices:
             log.warning('empty playlist')
             yield False
-        # randomize if needed
         self._randomize()
-        if self.background_playlist:
-            self.background_playlist.play()
-        # FIXME: add random code
-        self.next_pos = 0
-        # Send a PLAY_START event for ourself
+        self.next = self.choices[0]
         freevo.PLAY_START.post(self)
         self._play_next()
-
 
     def _play_random(self):
         """
@@ -288,40 +254,30 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
                  type=self.media_type, random=True,
                  repeat=self.repeat).play()
 
-
     def _play_next(self):
         """
-        Play the next item (defined by self.next_pos).
+        Play the next item (defined by self.next).
         """
-        self.select(self.choices[self.next_pos])
-
+        self.select(self.next)
         if hasattr(self.selected, 'play'):
             # play the item
             self.selected.play()
             return True
-
         # The item has no play function. It would be possible to just
         # get all actions and select the first one, but this won't be
         # right. Maybe this action opens a menu and nothing more. So
         # it is play or skip.
-        if self.next_pos is not None:
+        if self.next is not None:
             return self._play_next(self)
         return True
-
 
     def stop(self):
         """
         stop playing
         """
-        self.next_pos = None
-        if self.background_playlist:
-            self.background_playlist.stop()
-            self.background_playlist = None
+        self.next = None
         if self.selected:
-            item = self.selected
-            self.selected = None
-            item.stop()
-
+            self.selected.stop()
 
     def select(self, item):
         """
@@ -330,43 +286,33 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
         freevo.ItemList.select(self, item)
         if self.selected is None:
             return False
-
         if self.selected.menu and self.selected in self.selected.menu.choices:
             # update menu
             self.selected.menu.select(self.selected)
-
         # get next item
-        self.next_pos = (self.selected_pos+1) % len(self.choices)
-        if self.next_pos == 0 and not self.repeat == Playlist.REPEAT_PLAYLIST:
-            self.next_pos = None
-
-
-    @property
-    def playlist(self):
-        """
-        Return playlist object.
-        """
-        return self
-
+        pos = (self.selected_pos+1) % len(self.choices)
+        if pos == 0 and not self.repeat == Playlist.REPEAT_PLAYLIST:
+            self.next = None
+        else:
+            self.next = self.choices[pos]
 
     def eventhandler(self, event):
         """
         Handle playlist specific events
         """
         if event == freevo.PLAY_START:
+            if event.arg in self.choices:
+                self.select(event.arg)
             # a new item started playing, cache next (if supported)
-            if self.next_pos is not None and \
-                   hasattr(self.choices[self.next_pos], 'cache'):
-                self.choices[self.next_pos].cache()
+            if self.next is not None and hasattr(self.next, 'cache'):
+                self.next.cache()
             return True
-
         if not self.selected:
             # There is no selected item. All following functions need
             # with self.selected so pass the event to the parent now.
             if event == freevo.PLAY_END:
                 event = freevo.Event(freevo.PLAY_END, self)
             return freevo.MediaItem.eventhandler(self, event)
-
         if event == freevo.PLAYLIST_TOGGLE_REPEAT:
             self.repeat += 1
             if self.repeat == Playlist.REPEAT_ITEM:
@@ -378,59 +324,48 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
                 arg = _('Repeat Off')
             freevo.OSD_MESSAGE.post(arg)
             return True
-
-        if event == freevo.PLAY_END:
+        if event == freevo.PLAY_END and event.arg and event.arg in self.choices:
             if self.repeat == Playlist.REPEAT_ITEM:
                 # Repeat current item
                 self.selected.play()
                 return True
-            if self.next_pos is not None:
+            if self.next is not None:
                 # Play next item
                 self._play_next()
                 return True
             # Nothing to play
             self.selected = None
-            # Call stop() again here. We need that to stop the bg playlist
-            # but it is not good because stop() is called from the outside
-            # and will result in this PLAY_END.
-            self.stop()
-            # Send a PLAY_END event for ourself
             freevo.PLAY_END.post(self)
             return True
-
         if event == freevo.PLAYLIST_NEXT:
-            if self.next_pos is not None:
+            if self.next is not None:
                 # Stop current item, the next one will start when the
                 # current one sends the stop event
                 self.selected.stop()
                 return True
             # No next item
             freevo.OSD_MESSAGE.post(_('No Next Item In Playlist'))
-
         if event == freevo.PLAYLIST_PREV:
             if self.selected_pos:
                 # This is not the first item. Set next item to previous
                 # one and stop the current item
-                self.next_pos = self.selected_pos - 1
+                self.next = self.choices[self.selected_pos - 1]
                 self.selected.stop()
                 return True
             # No previous item
             freevo.OSD_MESSAGE.post(_('no previous item in playlist'))
-
         if event == freevo.STOP:
             # Stop playing and send event to parent item
             self.stop()
-
         # give the event to the next eventhandler in the list
         return freevo.MediaItem.eventhandler(self, event)
-
 
 
 class PluginInterface(freevo.MediaPlugin):
     """
     Plugin class for playlist items
     """
-    
+
     @property
     def suffix(self):
         """

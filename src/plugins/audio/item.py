@@ -71,7 +71,7 @@ class AudioItem(freevo.MediaItem):
                 track = int(self.info.get('trackno'))
             except (ValueError, KeyError, TypeError):
                 track = 0
-            return u'%20d %s' % (track, self.name.lower())
+            return u'%20d %s' % (track, kaa.py3_str(self.name.lower()))
         return super(AudioItem, self).sort(mode)
 
     def actions(self):

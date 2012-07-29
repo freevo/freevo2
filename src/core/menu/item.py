@@ -216,8 +216,8 @@ class Item(object):
         """
         Return playlist object.
         """
-        if self.parent:
-            return self.parent.playlist
+        if hasattr(self.parent, 'choices') and self in self.parent.choices:
+            return self.parent
         return None
 
     def eventhandler(self, event):
