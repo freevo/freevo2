@@ -55,11 +55,14 @@ def show_window(cfg, sharedir):
     stage = Stage()
     signals = stage.signals
 
-def show_application(application, context=None):
-    return stage.show_application(application, context)
+def show_application(application, fullscreen, context):
+    return stage.show_application(application, fullscreen, context)
 
-def show_widget(name, layer=2, context=None):
-    return stage.show_widget(name, layer, context)
+def show_widget(name, context=None):
+    return stage.show_widget(name, context)
+
+def destroy_application(layer):
+    return stage.destroy_application(layer)
 
 def load_theme(theme=None):
     return stage.load_theme(theme)

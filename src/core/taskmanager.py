@@ -96,7 +96,7 @@ class TaskManager(kaa.Object):
         log.info('switch application from %s to %s' % (self.current, app))
         self.signals['application-change'].emit(app)
         app.signals['show'].emit()
-        app.context.create_widget()
+        app.context.create_widget(app.has_capability(freevo.CAPABILITY_FULLSCREEN))
         if self.current:
             self.current.signals['hide'].emit()
         self.current = app
@@ -136,6 +136,7 @@ class TaskManager(kaa.Object):
         Remove application from stack.
         """
         log.info('hide application %s' % app)
+        app.context.remove_widget()
         if not app in self.applications:
             # already gone (maybe by show_application of a new one)
             return

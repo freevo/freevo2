@@ -58,17 +58,11 @@ class Stage(kaa.candy.Stage):
     Freevo main window
     """
     def __init__(self):
-        super(Stage, self).__init__((int(config.display.width), int(config.display.height)), 'freevo2')
+        size = (int(config.display.width), int(config.display.height))
+        super(Stage, self).__init__(size, 'freevo2')
         self.theme_prefix = ''
         self.width, self.height = self.size
-        # layer 0: unscaled
-        # layer 1: application
-        self.add_layer()
-        # layer 2: widgets
-        self.add_layer()
-        # layer 3: popups
-        self.add_layer()
-        self.app = None
+        self.applications = []
 
     def load_theme(self, name=None, part=''):
         if name == None:
@@ -81,51 +75,60 @@ class Stage(kaa.candy.Stage):
         kaa.candy.config.imagepath.append(self.theme_prefix)
         attr, self.theme = self.candyxml(self.theme_prefix + '/' + part)
         self.theme.icons = os.path.join(config.sharedir, 'icons', attr['icons'])
-        size = int(attr['geometry'].split('x')[0]), int(attr['geometry'].split('x')[1])
-        scale_x = float(self.size[0] - ( 2 * config.display.overscan.x)) / size[0]
-        scale_y = float(self.size[1] - ( 2 * config.display.overscan.y)) / size[1]
-        for layer in self.layer[1:]:
-            layer.x = config.freevo.gui.display.overscan.x
-            layer.y = config.freevo.gui.display.overscan.y
-            layer.scale_x = scale_x
-            layer.scale_y = scale_y
-        self.layer[0].scale_x = 1.0
-        self.layer[0].scale_y = 1.0
-        self.layer[0].width, self.layer[0].height = self.size
         # reference theme in all widgets
         # NOTE: this bounds all widgets created from this point to the
         # same theme. Two displays with different themes are not possible.
         # On the other hand setting a theme this way is fast and simple.
         kaa.candy.Widget.theme = self.theme
+        kaa.candy.Widget.ssize = self.size
+        # Create the defined layers
+        self.applications_idx = None
+        for c in self.theme.get('freevo')[None]().children[:]:
+            c = c(ssize=self.size)
+            if c.name == 'application':
+                self.applications_idx = self.layer[-1]
+                continue
+            self.add_layer(c)
 
-    def show_application(self, name, context=None):
+    def show_application(self, application, fullscreen, context):
         """
         Render <application> widget with the given name and the given context.
         """
-        app = self.theme.application.get(name)
-        if not app:
-            log.error('no application named %s', name)
-            return None
-        app = app(context)
-        self.add(app, layer=1)
-        if app.background:
-            self.add(app.background, layer=0)
-        app.show()
-        if self.app:
-            if self.app.background:
-                self.app.background.parent = None
-            self.app.destroy()
-            self.app.parent = None
-        self.app = app
-        return app
+        if isinstance(application, (str, unicode)):
+            tmp = self.theme.application.get(application)
+            if not tmp:
+                return log.error('no application named %s', application)
+            application = tmp(size=self.size, context=context)
+            self.add_layer(application, sibling=self.applications_idx)
+        else:
+            application.visible = True
+            self.applications.remove(application)
+        # TODO: add show/hide/remove/unparent/whatever here
+        for l in self.layer:
+            l.visible = not fullscreen
+            if l == self.applications_idx:
+                break
+        if self.applications:
+            self.applications[-1].visible = False
+        self.applications.append(application)
+        return application
 
-    def show_widget(self, name, layer=2, context=None):
+    def show_widget(self, name, context=None):
         """
         Render widget with the given name
         """
         try:
             widget = self.theme.get('widget')[name](context=context)
-            self.add(widget, layer=layer)
-            return widget
+            for c in self.layer:
+                if c.name == widget.layer:
+                    c.add(widget)
+                    return widget
+            log.error('widget %s has no valid layer %s' % (widget, widget.layer))
         except TypeError:
             log.error('widget %s not defined in theme', name)
+
+    def destroy_application(self, app):
+        """
+        """
+        self.destroy_layer(app)
+        self.applications.remove(app)

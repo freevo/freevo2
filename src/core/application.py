@@ -68,13 +68,19 @@ class WidgetContext(object):
         self._widget = None
         self._changed = False
 
-    def create_widget(self):
+    def create_widget(self, fullscreen):
         """
         Render the widget
         """
         kaa.signals['step'].disconnect(self.sync)
-        self._widget = gui.show_application(self._name, self._ctx)
+        self._widget = gui.show_application(self._widget or self._name, fullscreen, self._ctx)
         self._changed = False
+
+    def remove_widget(self):
+        """
+        Remove the widget
+        """
+        self._widget = gui.destroy_application(self._widget)
 
     def sync(self, force=True):
         """

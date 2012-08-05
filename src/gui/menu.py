@@ -54,15 +54,18 @@ class MenuApplication(Application):
     """
     candyxml_style = 'menu'
 
-    def __init__(self, widgets, background=None, context=None):
-        super(MenuApplication, self).__init__(widgets, background, context)
+    def __init__(self, size, widgets, background=None, context=None):
+        super(MenuApplication, self).__init__(size, widgets, background, context)
         self.templates = self.theme.get('menu')
         name = context.get('menu').type
         if not name in self.templates:
             name = 'default'
+        for c in self.children:
+            if c.candyxml_name == 'content':
+                self.content = c
         self.menu = self.templates.get(name)(context)
         self.menu.type = name
-        self.menu.parent = self
+        self.menu.parent = c
         self.bgmenu = None
 
     @kaa.coroutine()
@@ -102,10 +105,10 @@ class MenuApplication(Application):
             self.bgmenu = self.menu
             self.bgmenu.freeze_context = True
             self.menu = new
-            self.menu.parent = self
+            self.menu.parent = self.content
             self.menu.emit('submenu-show', self.menu, self.bgmenu)
         else:
             # normal menu switch
-            self.replace(self.menu, new)
+            self.content.replace(self.menu, new)
             self.menu = new
         super(MenuApplication, self).sync_context()

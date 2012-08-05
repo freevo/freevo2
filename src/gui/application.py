@@ -49,18 +49,19 @@ class OSD(object):
         self.widget = None
 
     @kaa.coroutine()
-    def toggle(self, parent):
+    def toggle(self, parent, application):
         if self.widget and self.widget.visible:
             res = self.hide()
         else:
-            res = self.show(parent)
+            res = self.show(parent, application)
         if isinstance(res, kaa.InProgress):
             yield res
         
-    def show(self, parent):
+    def show(self, parent, application):
         if not self.widget:
             self.widget = self.template(context=parent.context)
             self.widget.parent = parent
+            self.widget.application = application
         return self.widget.show()
 
     @property
@@ -79,13 +80,18 @@ class OSD(object):
             self.widget = None
         
         
-class Application(Widget):
+class Application(kaa.candy.Layer):
     """
     Application base class.
     """
     candyxml_name = 'application'
 
-    def __init__(self, widgets, background=None, context=None, **osd_templates):
+    class __template__(kaa.candy.AbstractGroup.__template__):
+        @classmethod
+        def candyxml_get_class(cls, element):
+            return kaa.candy.candyxml.get_class(element.node, element.name)
+
+    def __init__(self, size, widgets, background=None, context=None, **osd_templates):
         if kaa.candy.is_template(background):
             background = background(context=context)
         self.timer = None
@@ -93,7 +99,7 @@ class Application(Widget):
         self.osd_widgets = {}
         for key, template in osd_templates.items():
             self.osd_widgets[key] = OSD(template)
-        super(Application, self).__init__(None, None, widgets, context=context)
+        super(Application, self).__init__(size, widgets, context)
 
     def osd_show(self, name, autohide=None):
         """
@@ -107,7 +113,7 @@ class Application(Widget):
             self.timer.start(autohide)
         widget = self.osd_widgets.get(name)
         if widget:
-            return widget.show(self)
+            return widget.show(self.get_widget('osd'), self)
 
     def osd_hide(self, name):
         """
@@ -123,7 +129,7 @@ class Application(Widget):
         """
         widget = self.osd_widgets.get(name)
         if widget:
-            return widget.toggle(self)
+            return widget.toggle(self.get_widget('osd'), self)
 
     def osd_visible(self, name):
         """

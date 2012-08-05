@@ -49,8 +49,8 @@ class Popup(Widget):
 
     selected = None
 
-    def __init__(self, text, font, color, background, button_template, context=None):
-        super(Popup, self).__init__(context=context)
+    def __init__(self, text, font, color, background, button_template, layer=None, context=None):
+        super(Popup, self).__init__(layer=layer, context=context)
         if kaa.candy.is_template(background):
             background = background()
         self.background = background
@@ -130,7 +130,8 @@ class Popup(Widget):
         """
         parameter = super(Popup, cls).candyxml_parse(element)
         return kaa.candy.XMLdict(background=parameter.get('background'), color=element.color,
-            font=element.font, text='', button_template=parameter.get('button'))
+            font=element.font, text='', button_template=parameter.get('button'),
+            layer=element.layer)
 
 class Button(kaa.candy.AbstractGroup):
 
