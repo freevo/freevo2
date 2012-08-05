@@ -35,6 +35,10 @@ class Widget(kaa.candy.Group):
         def candyxml_get_class(cls, element):
             return kaa.candy.candyxml.get_class(element.node, element.name)
 
+    def __init__(self, pos=None, size=None, widgets=[], layer=None, context=None):
+        super(Widget, self).__init__(pos, size, widgets, context)
+        self.layer = layer
+
     @property
     def visible(self):
         return self.__visible
@@ -66,3 +70,10 @@ class Widget(kaa.candy.Group):
         if isinstance(hiding, kaa.InProgress):
             yield hiding
         self.parent = None
+
+    @classmethod
+    def candyxml_parse(cls, element):
+        """
+        Parse the candyxml element for parameter to create the widget.
+        """
+        return super(Widget, cls).candyxml_parse(element).update(layer=element.layer)
