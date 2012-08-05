@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<theme geometry="1280x720">
+<theme>
 
     <script filename='scripts.py'/>
 
@@ -127,19 +127,23 @@
     </menu>
 
     <application name="videoplayer">
-	<video name="player" use-as="background"/>
+	<video name="player"/>
+
+	<group style="scaled" name="osd">
+	    <properties screen-width="1280" screen-height="720"/>
+	</group>
 
 	<widget use-as="pause">
 	    <image x="300" width="620" url="icons/pause.png">
 		<properties opacity="50"/>
 	    </image>
 	    <event name="show"><![CDATA[
-	        self.stage.get_widget('player').animate('EASE_OUT_QUAD', 0.2, opacity=100)
+	        self.application.get_widget('player').animate('EASE_OUT_QUAD', 0.2, opacity=100)
                 return self.animate('EASE_IN_QUAD', 0.2, opacity=255)
                 ]]>
 	    </event>
 	    <event name="hide"><![CDATA[
-	        self.stage.get_widget('player').animate('EASE_IN_QUAD', 0.2, opacity=255)
+	        self.application.get_widget('player').animate('EASE_IN_QUAD', 0.2, opacity=255)
                 return self.animate('EASE_OUT_QUAD', 0.2, opacity=0)
                 ]]>
 	    </event>

@@ -1,9 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<theme geometry="1280x720" icons="hires">
+<theme icons="hires">
 
     <script filename='scripts.py'/>
 
-    <widget name="idlebar" height="60">
+    <freevo>
+	<layer name="background">
+	    <image filename="../../images/blurrback.jpg"/>
+	</layer>
+
+	<layer name="application"/>
+
+	<layer width="1280" height="720" name="widgets"/>
+
+	<layer width="1280" height="720" name="popup"/>
+
+    </freevo>
+
+    <widget name="idlebar" height="60" layer="widgets">
         <image y="-20" height="75" filename="../../images/idlebar.png"/>
 	<group>
 	    <image name="logo" height="80" width="200" filename="../../images/gant/logo.png">
@@ -23,7 +36,7 @@
 	</event>
     </widget>
 
-    <widget name="osd">
+    <widget name="osd" layer="widgets">
 	<properties opacity="0"/>
 	<label x="60" width="1200" y="70" height="30" font="Vera" color="0xffffff">
 	    <properties xalign="right"/>
@@ -39,7 +52,7 @@
 	</event>
     </widget>
 
-    <widget name="popup" font="Vera:24" color="0xffffff">
+    <widget name="popup" font="Vera:24" color="0xffffff" layer="popup">
     	<group use-as="background">
     	    <rectangle x="5" y="5" width="100%" height="100%" color="0xbb111111" radius="20">
     		<properties xpadding="-10" ypadding="-10"/>
@@ -75,9 +88,9 @@
     </widget>
 
     <application name="menu">
-	<group use-as="background">
-	    <image filename="../../images/blurrback.jpg"/>
-	</group>
+	<content width="1280" height="720">
+	    <properties screen-width="1280" screen-height="720"/>
+	</content>
     </application>
 
     <menu name="main">
