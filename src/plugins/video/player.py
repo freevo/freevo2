@@ -53,7 +53,7 @@ class Player(freevo.Application):
     player = None
 
     def __init__(self):
-        capabilities = (freevo.CAPABILITY_FULLSCREEN, )
+        capabilities = (freevo.CAPABILITY_TOGGLE, freevo.CAPABILITY_FULLSCREEN, )
         super(Player, self).__init__('video', capabilities)
 
     @kaa.coroutine()
@@ -109,7 +109,7 @@ class Player(freevo.Application):
         # unless it is a playlist, in this case we want to reuse the
         # player
         self.streaminfo = None
-        self.player = self.widget.stage.get_widget('player')
+        self.player = self.widget.get_widget('player')
         self.player.url = item.filename or item.url
         self.player.config['mplayer.passthrough'] = \
             bool(freevo.config.video.player.mplayer.passthrough)

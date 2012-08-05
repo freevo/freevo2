@@ -99,7 +99,7 @@ class Player(freevo.Application):
         # update GUI
         yield kaa.NotFinished
         # Open media item and start playback
-        self.player = self.widget.stage.get_widget('player')
+        self.player = self.widget.get_widget('player')
         self.player.url = item.filename
         self.player.signals['finished'].connect_weak_once(self.PLAY_END.post, self.item)
         self.player.signals['progress'].connect_weak(self.set_elapsed)
