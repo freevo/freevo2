@@ -169,10 +169,15 @@
 	</widget>
 
 	<widget y="720" height="200" use-as="info">
-	    <rectangle x="-10" y="40" width="1300" height="135" color="0x66000000"/>
-	    <image x="30" width="135" height="200" url="$item.poster">
-		<properties load-async="True"/>
-	    </image>
+	    <rectangle x="-10" y="40" width="1300" height="135" color="0x55000000"/>
+	    <group style="condition">
+		<case condition="item.poster">
+		    <rectangle x="28" y="-2" width="139" height="204" color="0x000000"/>
+		    <image x="30" width="135" height="200" url="$item.poster">
+			<properties load-async="True"/>
+		    </image>
+		</case>
+	    </group>
 	    <label x="200" y="50" width="1000" font="Vera" height="25" color="0xffffff">
 		$item.title
 	    </label>

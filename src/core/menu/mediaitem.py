@@ -87,14 +87,10 @@ class MediaItem(Item):
             # and extra attributes here
             self.filename = self.url[7:]
             self.files.append(self.filename)
-            if not self.name:
-                self.name = kaa.str_to_unicode(self.info.get('name'))
         else:
             # Mode is not file, it has to be a network url. Other
             # types like dvd are handled inside the derivated class
             self.filename = ''
-            if not self.name:
-                self.name = self.info.get('title')
             if not self.name:
                 self.name = kaa.str_to_unicode(self.url)
 
