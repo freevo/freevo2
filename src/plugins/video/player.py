@@ -110,7 +110,7 @@ class Player(freevo.Application):
         # player
         self.streaminfo = None
         self.player = self.widget.get_widget('player')
-        self.player.url = item.filename or item.url
+        self.player.uri = item.filename or item.url
         self.player.config['mplayer.passthrough'] = \
             bool(freevo.config.video.player.mplayer.passthrough)
         self.player.config['mplayer.vdpau'] = \
