@@ -94,4 +94,11 @@
         </var>
     </group>
 
+    <group name="httpserver" plugin="false">
+        <desc>
+	  HTTP server to control Freevo
+        </desc>
+        <var name="port" default="8080"/>
+    </group>
+
 </config>
