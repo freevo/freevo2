@@ -56,6 +56,12 @@ class MenuStack(object):
     def __init__(self):
         self._stack = []
         self.locked = False
+        if not hasattr(self, 'signals'):
+            # The main menu inherits from appication which already
+            # defines self.signals. ther menus need this because we
+            # want to add a refresh signal
+            self.signals = kaa.Signals()
+        self.signals['refresh'] = kaa.Signal()
 
     def back_to_menu(self, menu, refresh=True):
         """
@@ -128,8 +134,8 @@ class MenuStack(object):
             # do not show a menu with only one item. Go back to
             # the previous page
             log.info('delete menu with only one item')
-            return self.back_one_menu()
-        if reload and menu.reload_func:
+            self.back_one_menu()
+        elif reload and menu.reload_func:
             # The menu has a reload function. Call it to rebuild
             # this menu. If the functions returns something, replace
             # the old menu with the returned one.
@@ -138,7 +144,7 @@ class MenuStack(object):
                 # FIXME: is this special case needed?
                 self._stack[-1] = new_menu
                 menu = new_menu
-        return
+        self.signals['refresh'].emit()
 
     def __getitem__(self, attr):
         """
