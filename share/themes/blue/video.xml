@@ -135,7 +135,7 @@
 
 	<widget use-as="pause">
 	    <image x="300" width="620" url="icons/pause.png">
-		<properties opacity="50"/>
+		<properties opacity="50" keep-aspect="true"/>
 	    </image>
 	    <event name="show"><![CDATA[
 	        self.application.get_widget('player').animate('EASE_OUT_QUAD', 0.2, opacity=100)
