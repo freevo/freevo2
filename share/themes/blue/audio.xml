@@ -87,6 +87,11 @@
 		    $item.elapsed / $item.length
 		</label>
 	    </group>
+	    <event name="create"><![CDATA[
+	        yield kaa.delay(5)
+	        widget.animate('EASE_IN_QUAD', 1, opacity=0)
+	    ]]>
+	</event>
 	</group>
     </application>
 
