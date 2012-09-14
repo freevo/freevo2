@@ -1,89 +1,142 @@
-<!DOCTYPE html> 
-<html> 
-<head> 
-	<title>Freevo</title> 
-	
-	<meta name="viewport" content="width=device-width, initial-scale=1"> 
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Freevo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="jquery/jquery.mobile-1.2.0-beta.1.min.css" />
+    <script src="jquery/jquery-1.8.1.min.js"></script>
+    <script src="jquery/jquery.mobile-1.2.0-beta.1.min.js"></script>
+</head>
+<body>
 
-	<link rel="stylesheet" href="jquery/jquery.mobile-1.2.0-beta.1.min.css" />
-	<script src="jquery/jquery-1.8.1.min.js"></script>
-	<script src="jquery/jquery.mobile-1.2.0-beta.1.min.js"></script>
-</head> 
-<body> 
+<div data-role="page" id="page-menu">
 
-<div data-role="page">
+    <div data-role="header" data-position="fixed" data-tap-toggle="false">
+        <h1>Freevo Menu</h1>
+    </div><!-- /header -->
 
-	<div data-role="header" data-position="fixed" data-tap-toggle="false">
-		<h1>Freevo</h1>
-	</div><!-- /header -->
-
-	<div data-role="content" id="content">	
-	</div><!-- /content -->
-
-	<div data-role="footer" data-position="fixed"
-	     data-transition="none" data-fullscreen="true" data-tap-toggle="false">
-	  <div data-role="navbar">
-	    <!-- navbar is wrong here, we need a button bar -->
-	    <ul id="navbar">
-	      <li id='BACK'><a href="#">Back</a></li>
-	      <li id='HOME'><a href="#">Home</a></li>
-	      <li id='SUBMENU'><a href="#">Submenu</a></li>
-	    </ul>
-	  </div><!-- /navbar -->
-	  <script>
-            var current = 1;
-            $('#navbar').delegate("li", "click", function (e) {
-                    current = $(this);
-	            // this does not work
+    <div data-role="content">
+        <ul data-role="listview" data-inset="true" data-filter="true" id="menu">
+	    <script>
+            $('#menu').delegate("li", "click", function (e) {
+                    $(this).addClass("ui-btn-active");
                     $.ajax({
                       url: "/select/" + $(this).attr('id'),
                       cache: false,
-                      complete: function () {
-                    current.children('a').removeClass("ui-btn-active");
-            }
                     });
+		});
+	    </script>
+	</ul>
+    </div>
+
+    <div data-role="footer" data-position="fixed"
+	 data-transition="none" data-fullscreen="true" data-tap-toggle="false">
+        <div data-role="navbar">
+	    <ul id="navbar">
+	        <li><a href="#" url="select/back">Back</a></li>
+	        <li><a href="#" url="select/home">Home</a></li>
+	        <li><a href="#" url="select/submenu">Submenu</a></li>
+	    </ul>
+	</div>
+    </div>
+    <script>
+        var current;
+        $('#page-menu').delegate("a", "click", function (e) {
+            current = $(this);
+            $.ajax({
+                url: $(this).attr('url'),
+                cache: false,
+                complete: function () {
+                    current.removeClass("ui-btn-active");
+                }
             });
-	  </script>
-	</div><!-- /footer -->
-</div><!-- /page -->
+        });
+    </script>
+</div>
+
+<div data-role="page" id="page-player">
+    <div data-role="header" data-position="fixed" data-tap-toggle="false">
+        <h1>Freevo</h1>
+    </div>
+
+    <div data-role="content" id="content-player">
+    </div>
+
+    <div data-role="footer" data-position="fixed"
+	 data-transition="none" data-fullscreen="true" data-tap-toggle="false">
+        <div data-role="navbar">
+	    <ul>
+	        <li><a href="#" url="event/STOP">Stop</a></li>
+	    </ul>
+	</div>
+    </div>
+
+    <script>
+        var current;
+        $('#page-player').delegate("a", "click", function (e) {
+                current = $(this);
+                $.ajax({
+                  url: $(this).attr('url'),
+                  cache: false,
+                  complete: function () {
+                      current.removeClass("ui-btn-active");
+                  }
+                });
+        });
+    </script>
+</div>
 
 </body>
 </html>
 
- <script>
+<script>
 
 var known = 'None';
+var page = 'menu'
+var start = new Date().getTime();
 
 (function fillSectionsPage() {
 
+    start = new Date().getTime();
     $.ajax({
         url: '/view?known=' + known,
         dataType: 'json',
         cache: false,
         success: function(data) {
 
-            $('#content').empty()
-            $('#content').append('<ul data-role="listview" data-inset="true" data-filter="true" id="list"></ul>');
+            if (data.type != page) {
+                if (data.type == 'menu') {
+                    $.mobile.changePage( "#page-" + data.type, { transition: "slidedown"} );
+                } else {
+                    $.mobile.changePage( "#page-player", { transition: "slideup"} );
+                };
+                page = data.type;
+            };
 
-            var items = '';
-            $.each(data.menu, function(index, item){
-                 items += '<li id="' + item.id + '">' + item.name + '</li>';
-            });
-
-            $('#list').append(items);
-            $('#list').delegate("li", "click", function (e) {
-                    $.ajax({
-                      url: "/select/" + $(this).attr('id'),
-                      cache: false,
-                    });
-		});
-            $('#list').listview();
+            if (data.type == 'menu') {
+                var items = '';
+                $.each(data.menu, function(index, item){
+                     items += '<li id="' + item.id + '">' + item.name + '</li>';
+                });
+                $('#menu').empty()
+                $('#menu').append(items);
+                $('#menu').listview('refresh');
+            };
+            if (data.type == 'audioplayer') {
+                $('#content-player').empty()
+                $('#content-player').append('<h1>' + data.title + '<h1>');
+                $('#content-player').append('<h2>' + data.artist + '<h2>');
+                $('#content-player').append('<h2>' + data.album + '<h2>');
+            };
             known = data.status;
+            fillSectionsPage();
         },
         error: function() {
-            // FIXME: wait some seconds before trying again!
+            if ((new Date().getTime() - start) > 2000) {
+                fillSectionsPage();
+            }
         },
-        complete: fillSectionsPage, timeout: 30000});
+        timeout: 60000});
 })();
 
 </script>

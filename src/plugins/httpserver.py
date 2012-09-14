@@ -16,10 +16,13 @@ class PluginInterface( freevo.Plugin ):
     application = None
     last_view = 0, ''
 
+    __signals_connected = False
+
     def __init__(self):
         """
         """
         super(PluginInterface, self).__init__()
+        self.signals = kaa.Signals('update')
         port = freevo.config.plugin.httpserver.port
         self.server = HTTPServer(("", port))
         self.server.serve_forever()
@@ -32,31 +35,34 @@ class PluginInterface( freevo.Plugin ):
 
     def application_change(self, app):
         self.application = app
-
-    def event(self, path):
-        freevo.Event(path).post()
-        return "text/plain", "OK"
-
-    def _get_menu(self):
-        items = []
-        for pos, item in enumerate(self.application.current.choices):
-            items.append({'name': item.name, 'id': pos})
-        return { 'type': 'menu', 'menu': items }
+        if app.name == 'menu' and not self.__signals_connected:
+            freevo.signals['application-change'].connect(self.signals['update'].emit)
+            self.application.signals['refresh'].connect(self.signals['update'].emit)
+            self.__signals_connected = True
+            
+    def _get_view(self):
+        if self.application and self.application.name == 'menu':
+            items = []
+            for pos, item in enumerate(self.application.current.choices):
+                items.append({'name': item.name, 'id': pos})
+            return { 'type': 'menu', 'menu': items }
+        if self.application and self.application.name == 'audioplayer':
+            properties = self.application.item.properties
+            return { 'type': 'audioplayer', 'title': properties.title, 'artist': properties.artist, 'album': properties.album }
+        return { 'type': 'unknown' }
 
     @kaa.coroutine()
     def view(self, path, known=None, **attributes):
-        if self.application and self.application.name == 'menu':
-            while True:
-                result = self._get_menu()
-                if not known or known != str(self.last_view[0]):
-                    result['status'] = self.last_view[0]
-                    yield "application/json", json.dumps(result)
-                # we need to wait for a menu update
-                yield kaa.inprogress(self.application.signals['refresh'])
-                result = str(self._get_menu())
-                if result != self.last_view[1]:
-                    self.last_view = self.last_view[0] + 1, result
-        yield "application/json", ""
+        while True:
+            result = self._get_view()
+            if not known or known != str(self.last_view[0]):
+                result['status'] = self.last_view[0]
+                yield "application/json", json.dumps(result)
+            # we need to wait for an update
+            yield kaa.inprogress(self.signals['update'])
+            result = str(self._get_view())
+            if result != self.last_view[1]:
+                self.last_view = self.last_view[0] + 1, result
 
     @kaa.coroutine()
     def select(self, path, **attributes):
@@ -75,4 +81,9 @@ class PluginInterface( freevo.Plugin ):
                 actions = menu.selected._get_actions()
                 if actions:
                     actions[0]()
-        yield "text/plain", ""
+        yield "application/json", "{}"
+
+    def event(self, path, **attributes):
+        freevo.Event(path).post()
+        yield "application/json", "{}"
+
