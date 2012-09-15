@@ -124,6 +124,18 @@ class Player(freevo.Application):
             self.item.elapsed_secs = round(pos)
             self.context.sync()
 
+    def get_json(self, httpserver):
+        """
+        Return a dict with attributes about the application used by
+        the provided httpserver to send to a remote controlling
+        client.
+        """
+        properties = self.item.properties
+        return { 'title': properties.title, 
+                 'artist': properties.artist, 
+                 'album': properties.album
+               }
+
     def eventhandler(self, event):
         """
         React on some events or send them to the real player or the

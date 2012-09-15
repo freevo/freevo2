@@ -2,8 +2,6 @@ import logging
 import kaa
 from kaa.base.net.httpserver import HTTPServer
 
-import json
-
 # freevo imports
 from .. import core as freevo
 
@@ -26,9 +24,9 @@ class PluginInterface( freevo.Plugin ):
         port = freevo.config.plugin.httpserver.port
         self.server = HTTPServer(("", port))
         self.server.serve_forever()
-        self.server.add_handler('/event/', self.event)
-        self.server.add_handler('/view', self.view)
-        self.server.add_handler('/select/', self.select)
+        self.server.add_json_handler('/event/', self.event)
+        self.server.add_json_handler('/view', self.view)
+        self.server.add_json_handler('/select/', self.select)
         self.server.add_static('/', freevo.FREEVO_SHARE_DIR + '/httpserver/simple.html')
         self.server.add_static('/jquery', freevo.FREEVO_SHARE_DIR + '/httpserver/jquery')
         freevo.signals['application-change'].connect(self.application_change)
@@ -39,30 +37,21 @@ class PluginInterface( freevo.Plugin ):
             freevo.signals['application-change'].connect(self.signals['update'].emit)
             self.application.signals['refresh'].connect(self.signals['update'].emit)
             self.__signals_connected = True
-            
-    def _get_view(self):
-        if self.application and self.application.name == 'menu':
-            items = []
-            for pos, item in enumerate(self.application.current.choices):
-                items.append({'name': item.name, 'id': pos})
-            return { 'type': 'menu', 'menu': items }
-        if self.application and self.application.name == 'audioplayer':
-            properties = self.application.item.properties
-            return { 'type': 'audioplayer', 'title': properties.title, 'artist': properties.artist, 'album': properties.album }
-        return { 'type': 'unknown' }
 
     @kaa.coroutine()
     def view(self, path, known=None, **attributes):
         while True:
-            result = self._get_view()
             if not known or known != str(self.last_view[0]):
+                result = self.application.get_json(self)
+                result['type'] = self.application.name
                 result['status'] = self.last_view[0]
-                yield "application/json", json.dumps(result)
+                yield result
             # we need to wait for an update
             yield kaa.inprogress(self.signals['update'])
-            result = str(self._get_view())
-            if result != self.last_view[1]:
-                self.last_view = self.last_view[0] + 1, result
+            result = self.application.get_json(self)
+            result['type'] = self.application.name
+            if str(result) != self.last_view[1]:
+                self.last_view = self.last_view[0] + 1, str(result)
 
     @kaa.coroutine()
     def select(self, path, **attributes):
@@ -81,9 +70,9 @@ class PluginInterface( freevo.Plugin ):
                 actions = menu.selected._get_actions()
                 if actions:
                     actions[0]()
-        yield "application/json", "{}"
+        yield {}
 
     def event(self, path, **attributes):
         freevo.Event(path).post()
-        yield "application/json", "{}"
+        yield {}
 
