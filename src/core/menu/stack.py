@@ -165,6 +165,17 @@ class MenuStack(object):
         """
         return self._stack[-1]
 
+    def get_json(self, httpserver):
+        """
+        Return a dict with attributes about the menu used by
+        the provided httpserver to send to a remote controlling
+        client.
+        """
+        items = []
+        for pos, item in enumerate(self.current.choices):
+            items.append({'name': item.name, 'id': pos})
+        return { 'menu': items }
+
     def eventhandler(self, event):
         """
         Eventhandler for menu control

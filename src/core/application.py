@@ -197,6 +197,14 @@ class Application(freevo.ResourceHandler):
         """
         self.__status = STATUS_STOPPED
 
+    def get_json(self, httpserver):
+        """
+        Return a dict with attributes about the application used by
+        the provided httpserver to send to a remote controlling
+        client.
+        """
+        return {}
+
     def __repr__(self):
         """
         String for debugging.

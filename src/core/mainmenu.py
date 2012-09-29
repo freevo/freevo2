@@ -113,6 +113,14 @@ class MenuWidget(freevo.Application, freevo.MenuStack):
         if self.current.selected:
             self.context.item = self.current.selected.properties
 
+    def get_json(self, httpserver):
+        """
+        Return a dict with attributes about the application used by
+        the provided httpserver to send to a remote controlling
+        client.
+        """
+        return freevo.MenuStack.get_json(self, httpserver)
+
     def eventhandler(self, event):
         """
         Eventhandler for menu control
