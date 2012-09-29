@@ -35,7 +35,6 @@ import logging
 import kaa
 import kaa.utils
 import kaa.candy
-import kaa.metadata
 
 # Freevo imports
 from ... import core as freevo
@@ -44,7 +43,7 @@ from ... import core as freevo
 log = logging.getLogger('video')
 
 
-class Player(freevo.Application):
+class Player(freevo.Player):
     """
     Video player object.
     """
@@ -61,50 +60,19 @@ class Player(freevo.Application):
         """
         play an item
         """
-        if not self.status in (freevo.STATUS_IDLE, freevo.STATUS_STOPPED):
-            # Already running, stop the current player by sending a STOP
-            # event. The event will also get to the playlist behind the
-            # current item and the whole list will be stopped.
-            freevo.Event(freevo.STOP, handler=self.eventhandler).post()
-            # Now wait for our own 'stop' signal
-            yield kaa.inprogress(self.signals['stop'])
-            if not self.status in (freevo.STATUS_IDLE, freevo.STATUS_STOPPED):
-                log.error('unable to stop current video playback')
-                yield False
-        if not kaa.main.is_running():
-            # Freevo is in shutdown mode, do not start a new player, the old
-            # only stopped because of the shutdown.
+        if not (yield super(Player, self).play(item, ['AUDIO', 'VIDEO'])):
             yield False
-        # Try to get VIDEO and AUDIO resources. The ressouces will be freed
-        # by the system when the application switches to STATUS_STOPPED or
-        # STATUS_IDLE.
-        if (yield self.get_resources('AUDIO', 'VIDEO', force=True)) == False:
-            log.error("Can't get resource AUDIO, VIDEO")
-            yield False
-        # store item and playlist
-        self.item = item
-        self.playlist = self.item.playlist
-        if self.playlist:
-            self.playlist.select(self.item)
-        # Set the current item to the gui engine
-        self.context.item = self.item.properties
-        self.context.menu = self.playlist
         if item.url.startswith('dvd://'):
             # kaa.candy does not support dvd playback with gstreamer
             item.player = 'mplayer'
+        # FIXME: this handle is kind of ugly. Must be fixed in
+        # kaa.candy supporting player changes before play()
         self.context.candy_player = item.player
-        # set the current item to the gui engine
-        # self.engine.set_item(self.item)
-        self.status = freevo.STATUS_RUNNING
         self.eventmap = 'video'
         if self.item.selected_audio == None:
             self.item.selected_audio = 0
         if self.item.selected_sub == None:
             self.item.selected_sub = -1
-        self.item.elapsed_secs = 0
-        freevo.PLAY_START.post(self.item)
-        # update GUI to a blank screen
-        yield kaa.NotFinished
         # get the player object; each play() call has its own player
         # unless it is a playlist, in this case we want to reuse the
         # player
@@ -122,19 +90,12 @@ class Player(freevo.Application):
             self.player.set_audio(self.item.selected_audio)
             self.player.set_subtitle(self.item.selected_sub)
         # self.player.seek(20, self.player.SEEK_PERCENTAGE)
-        self.player.signals['finished'].connect_weak_once(freevo.PLAY_END.post, self.item)
+        self.player.signals['finished'].connect_weak_once(self.PLAY_END.post, self.item)
         self.player.signals['progress'].connect_weak(self.set_elapsed)
         self.player.signals['streaminfo'].connect_weak(self.set_streaminfo)
         self.player.play()
+        self.PLAY_START.post(self.item)
         yield True
-
-    def set_elapsed(self, pos):
-        """
-        Callback from kaa.candy to update the playtime
-        """
-        if self.item.elapsed_secs != round(pos):
-            self.item.elapsed_secs = round(pos)
-            self.context.sync()
 
     def set_streaminfo(self, streaminfo):
         """
@@ -143,13 +104,10 @@ class Player(freevo.Application):
         self.streaminfo = streaminfo
         self.eventmap = 'dvdnav' if streaminfo['is_menu'] else 'video'
 
-    def stop(self):
+    def do_stop(self):
         """
         Stop playing.
         """
-        if self.status != freevo.STATUS_RUNNING:
-            return True
-        self.status = freevo.STATUS_STOPPING
         self.player.stop()
 
     def eventhandler(self, event):
@@ -157,65 +115,50 @@ class Player(freevo.Application):
         React on some events or send them to the real player or the
         item belongig to the player
         """
-        if event == freevo.STOP:
-            # Stop the player and pass the event to the item
-            self.stop()
-            self.item.eventhandler(event)
-            return True
-        if event == freevo.PLAY_START:
-            self.item.eventhandler(event)
-            return True
-        if event == freevo.PLAY_END and event.arg == self.item:
-            # Now the player has stopped (either we called self.stop() or the
-            # player stopped by itself. So we need to set the application to
-            # to stopped.
-            if self.player:
+        if super(Player, self).eventhandler(event):
+            # Generic start/stop handling
+            if event == freevo.PLAY_END and self.player:
                 self.player = None
-            self.status = freevo.STATUS_STOPPED
-            self.item.eventhandler(event)
-            if self.status == freevo.STATUS_STOPPED:
-                self.status = freevo.STATUS_IDLE
             return True
-        if self.player:
-            # player control makes only sense if the player is still running
-            if event == freevo.TOGGLE_OSD:
-                self.widget.osd_toggle('info')
-            if event in (freevo.PAUSE, freevo.PLAY):
-                if self.player.state == kaa.candy.STATE_PLAYING:
-                    self.widget.osd_show('pause')
-                    self.player.pause()
-                    return True
-                if self.player.state == kaa.candy.STATE_PAUSED:
-                    self.widget.osd_hide('pause')
-                    self.player.resume()
-                    return True
-                return False
-            if event == freevo.SEEK:
-                if not self.widget.osd_visible('info'):
-                    self.widget.osd_show('seek', autohide=2)
-                self.player.seek(int(event.arg), kaa.candy.SEEK_RELATIVE)
+        if not self.player:
+            # No player object and therefore, no playback control
+            return self.item.eventhandler(event)
+        # player control makes only sense if the player is still running
+        if event == freevo.TOGGLE_OSD:
+            self.widget.osd_toggle('info')
+        if event in (freevo.PAUSE, freevo.PLAY):
+            if self.player.state == kaa.candy.STATE_PLAYING:
+                self.widget.osd_show('pause')
+                self.player.pause()
                 return True
-            if event == freevo.VIDEO_CHANGE_ASPECT:
-                self.player.set_aspect(kaa.candy.NEXT)
-                # lang = self.streaminfo['audio'][self.item.selected_audio] or \
-                #     '#%s' % self.item.selected_audio
-                # freevo.Event(freevo.OSD_MESSAGE, _('Audio %s' % lang)).post()
-            if event == freevo.VIDEO_NEXT_AUDIOLANG:
-                self.item.selected_audio = self.player.set_audio(kaa.candy.NEXT)
-                lang = self.streaminfo['audio'][self.item.selected_audio] or \
-                    '#%s' % self.item.selected_audio
-                freevo.Event(freevo.OSD_MESSAGE, _('Audio %s' % lang)).post()
-            if event == freevo.VIDEO_NEXT_SUBTITLE:
-                self.item.selected_sub = self.player.set_subtitle(kaa.candy.NEXT)
-                if self.item.selected_sub == -1:
-                    lang = _('off')
-                else:
-                    lang = self.streaminfo['subtitle'][self.item.selected_sub] or \
-                    '#%s' % self.item.selected_sub
-                freevo.Event(freevo.OSD_MESSAGE, _('Subtitle %s' % lang)).post()
-            if str(event).startswith('DVDNAV_'):
-                self.player.nav_command(str(event)[7:].lower())
+            if self.player.state == kaa.candy.STATE_PAUSED:
+                self.widget.osd_hide('pause')
+                self.player.resume()
                 return True
+            return False
+        if event == freevo.SEEK:
+            if not self.widget.osd_visible('info'):
+                self.widget.osd_show('seek', autohide=2)
+            self.player.seek(int(event.arg), kaa.candy.SEEK_RELATIVE)
+            return True
+        if event == freevo.VIDEO_CHANGE_ASPECT:
+            self.player.set_aspect(kaa.candy.NEXT)
+        if event == freevo.VIDEO_NEXT_AUDIOLANG:
+            self.item.selected_audio = self.player.set_audio(kaa.candy.NEXT)
+            lang = self.streaminfo['audio'][self.item.selected_audio] or \
+                '#%s' % self.item.selected_audio
+            freevo.Event(freevo.OSD_MESSAGE, _('Audio %s' % lang)).post()
+        if event == freevo.VIDEO_NEXT_SUBTITLE:
+            self.item.selected_sub = self.player.set_subtitle(kaa.candy.NEXT)
+            if self.item.selected_sub == -1:
+                lang = _('off')
+            else:
+                lang = self.streaminfo['subtitle'][self.item.selected_sub] or \
+                '#%s' % self.item.selected_sub
+            freevo.Event(freevo.OSD_MESSAGE, _('Subtitle %s' % lang)).post()
+        if str(event).startswith('DVDNAV_'):
+            self.player.nav_command(str(event)[7:].lower())
+            return True
         return self.item.eventhandler(event)
 
 
