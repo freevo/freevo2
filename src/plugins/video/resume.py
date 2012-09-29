@@ -90,6 +90,8 @@ class PluginInterface(freevo.ItemPlugin):
             return False
         # seek to the given position
         if event == freevo.PLAY_START and self._seek and event.arg == item:
+            # FIXME: the event shows the OSD. Find a way to manipulate
+            # the player directly
             freevo.Event(freevo.SEEK, self._seek).post()
             self._seek = 0
             return False
