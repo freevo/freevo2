@@ -28,6 +28,11 @@ class WidgetStyles(kaa.candy.candyxml.Styles):
 class Widget(kaa.candy.Group):
     candyxml_name = 'widget'
 
+    # This variable can be False (not visible), True (visible) and
+    # 'showing' and 'hiding' for the transitions. The later translate
+    # to True in the visible property to make sure kaa.candy does not
+    # delete the item because the flag is False and we need a way to
+    # determain if we are about to be visisble or hidden.
     __visible = False
 
     class __template__(kaa.candy.AbstractGroup.__template__):
@@ -41,28 +46,36 @@ class Widget(kaa.candy.Group):
 
     @property
     def visible(self):
-        return self.__visible
+        return bool(self.__visible)
 
     @visible.setter
     def visible(self, visible):
-        if self.__visible == visible:
+        if bool(self.__visible) == visible:
             return
         if visible:
             self.show()
         else:
             self.hide()
 
+    @kaa.coroutine()
     def show(self):
-        if self.__visible:
-            return
+        if self.__visible in ('showing', True):
+            yield None
+        self.__visible = 'showing'
+        showing = self.emit('widget-show', self)
+        if isinstance(showing, kaa.InProgress):
+            yield showing
         self.__visible = True
-        return self.emit('widget-show', self)
 
+    @kaa.coroutine()
     def hide(self):
-        if not self.__visible:
-            return
+        if self.__visible in ('hiding', False):
+            yield None
+        self.__visible = 'hiding'
+        hiding = self.emit('widget-hide', self)
+        if isinstance(hiding, kaa.InProgress):
+            yield hiding
         self.__visible = False
-        return self.emit('widget-hide', self)
 
     @kaa.coroutine()
     def destroy(self):

@@ -36,6 +36,9 @@ import kaa.candy
 
 from widget import Widget, WidgetStyles
 
+kaa.candy.Eventhandler.signatures['system'] = 'widget,event'
+
+
 class ApplicationStyles(WidgetStyles):
     """
     Dict to store the different application classes
@@ -47,39 +50,41 @@ class OSD(object):
     def __init__(self, template):
         self.template = template
         self.widget = None
+        self.__visible = False
 
-    @kaa.coroutine()
     def toggle(self, parent, application):
-        if self.widget and self.widget.visible:
-            res = self.hide()
+        if self.visible:
+            return self.hide()
         else:
-            res = self.show(parent, application)
-        if isinstance(res, kaa.InProgress):
-            yield res
-        
+            return self.show(parent, application)
+
     def show(self, parent, application):
+        if self.__visible:
+            return None
         if not self.widget:
             self.widget = self.template(context=parent.context)
             self.widget.parent = parent
             self.widget.application = application
+        self.__visible = True
         return self.widget.show()
 
     @property
     def visible(self):
-        return self.widget and self.widget.visible
+        return self.__visible
 
     @kaa.coroutine()
     def hide(self):
-        if not self.widget:
+        if not self.__visible or not self.widget:
             yield None
-        res = self.widget.hide()
-        if isinstance(res, kaa.InProgress):
-            yield res
-        if not self.widget.visible:
+        self.__visible = False
+        hiding = self.widget.hide()
+        if isinstance(hiding, kaa.InProgress):
+            yield hiding
+        if not self.widget.visible and not self.__visible:
             self.widget.destroy()
             self.widget = None
-        
-        
+
+
 class Application(kaa.candy.Layer):
     """
     Application base class.
@@ -101,7 +106,7 @@ class Application(kaa.candy.Layer):
             self.osd_widgets[key] = OSD(template)
         super(Application, self).__init__(size, widgets, context)
 
-    def osd_show(self, name, autohide=None):
+    def osd_show(self, name, autohide=None, parent=None):
         """
         Show the OSD with the given name
         """
@@ -109,11 +114,13 @@ class Application(kaa.candy.Layer):
             self.timer.stop()
             self.timer = None
         if autohide:
-            self.timer = kaa.Timer(self.osd_hide, name)
+            self.timer = kaa.OneShotTimer(self.osd_hide, name)
             self.timer.start(autohide)
         widget = self.osd_widgets.get(name)
         if widget:
-            return widget.show(self.get_widget('osd'), self)
+            if not parent:
+                parent = self.get_widget('osd')
+            return widget.show(parent, self)
 
     def osd_hide(self, name):
         """
@@ -159,3 +166,9 @@ class Application(kaa.candy.Layer):
         """
         attrs = super(Application, cls).candyxml_parse(element).remove('pos', 'size')
         return kaa.candy.XMLdict(**attrs)
+
+    def eventhandler(self, event):
+        """
+        Hook into all Freevo events to react on them in the GUI.
+        """
+        self.emit('system', self, event)
