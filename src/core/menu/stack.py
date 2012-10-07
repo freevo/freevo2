@@ -192,9 +192,17 @@ class MenuStack(object):
                 attributes['line1'] = properties.name
                 attributes['line2'] = ''
                 attributes['image'] = httpserver.register_image(item.get_thumbnail_attribute('poster'))
-            elif properties.artist:
-                attributes['line1'] = properties.title
-                attributes['line2'] = '%s - %s' % (properties.artist, properties.album)
+            elif properties.artist and properties.title:
+                if item.type == 'directory':
+                    if properties.title != properties.artist:
+                        attributes['line1'] = properties.title
+                        attributes['line2'] = properties.artist
+                    else:
+                        attributes['line1'] = properties.title
+                        attributes['line2'] = ''
+                else:
+                    attributes['line1'] = properties.title
+                    attributes['line2'] = '%s - %s' % (properties.artist, properties.album)
             else:
                 attributes['line1'] = item.name
                 attributes['line2'] = ''
