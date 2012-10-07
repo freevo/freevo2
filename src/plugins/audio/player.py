@@ -63,6 +63,7 @@ class Player(freevo.Player):
         """
         if not (yield super(Player, self).play(item, ['AUDIO'])):
             yield False
+        log.info('start playing %s', self.item.filename)
         # Open media item and start playback
         self.player = self.widget.get_widget('player')
         self.player.uri = item.filename
