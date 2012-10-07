@@ -110,6 +110,25 @@ class Player(freevo.Player):
         """
         self.player.stop()
 
+    def get_json(self, httpserver):
+        """
+        Return a dict with attributes about the application used by
+        the provided httpserver to send to a remote controlling
+        client.
+        """
+        properties = self.item.properties
+        image = httpserver.register_image(properties.image)
+        poster = httpserver.register_image(self.item.get_thumbnail_attribute('poster'))
+        return { 'title': properties.title, 
+                 'series': properties.series, 
+                 'season': properties.season, 
+                 'episode': properties.episode,
+                 'description': properties.description,
+                 'imdb': properties.imdb,
+                 'image': image,
+                 'poster': poster,
+               }
+
     def eventhandler(self, event):
         """
         React on some events or send them to the real player or the

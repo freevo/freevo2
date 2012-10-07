@@ -6,6 +6,18 @@
     <link rel="stylesheet" href="jquery/jquery.mobile-1.2.0-beta.1.min.css" />
     <script src="jquery/jquery-1.8.1.min.js"></script>
     <script src="jquery/jquery.mobile-1.2.0-beta.1.min.js"></script>
+
+    <style media="screen" type="text/css">
+
+.ui-li-screenshot {
+        float: left; 
+        padding-right: 20px;        
+        width: 124px; height: 70px;
+        text-align: center; 
+        vertical-align: middle; 
+}
+
+    </style>
 </head>
 <body>
 
@@ -16,6 +28,7 @@
     </div><!-- /header -->
 
     <div data-role="content">
+        <br/>
         <ul data-role="listview" data-inset="true" data-filter="true" id="menu">
 	    <script>
             $('#menu').delegate("li", "click", function (e) {
@@ -27,6 +40,7 @@
 		});
 	    </script>
 	</ul>
+        <br/>
     </div>
 
     <div data-role="footer" data-position="fixed"
@@ -116,11 +130,39 @@ var start = new Date().getTime();
             if (data.type == 'menu') {
                 var items = '';
                 $.each(data.menu, function(index, item){
-                     items += '<li id="' + item.id + '">' + item.name + '</li>';
+                     items += '<li id="' + item.id + '">';
+                     if (item.image) {
+                         //items += '<p class="ui-li-screenshot"><img src="' + item.image + '?size=small"/></p>\n';
+                         items += '<img src="' + item.image + '?size=small"/>\n';
+                     }
+                     items += '<h3>' + item.line1 + '</h3>\n';
+                     items += '<p>' + item.line2 + '</p>';
+                     //items += '<p>' + item.name + '</p>;
+                     items += '</li>';
                 });
                 $('#menu').empty()
                 $('#menu').append(items);
                 $('#menu').listview('refresh');
+            };
+            if (data.type == 'videoplayer') {
+                $('#content-player').empty();
+                c = '<br><div class="ui-grid-a"><div class="ui-block-a">';
+                if (data.series) {
+                    c += '<h1>' + data.title + '</h1>';
+                    c += '<h2>' + data.series + '</h2>';
+                } else {
+                    c += '<h1>' + data.title + '</h1>';
+                }
+                if (data.description) {
+                    c += '<p>' + data.description + '</p>';
+                }
+                if (data.imdb) {
+                    c += '<a href="http://www.imdb.com/title/' + data.imdb + '">IMDB</a>';
+                }
+                c += '</div><div class="ui-block-b">';
+                c += '<center><img src="' + data.poster + '?size=normal"</></center>';
+                c += '</div></div>';
+                $('#content-player').append(c);
             };
             if (data.type == 'audioplayer') {
                 $('#content-player').empty()

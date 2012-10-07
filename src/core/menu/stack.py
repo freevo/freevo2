@@ -172,8 +172,33 @@ class MenuStack(object):
         client.
         """
         items = []
+        series = None
+        # get the various poster used in case they are all the
+        # same. If they are, use the image thumbnail for TV shows
+        poster = []
+        for item in self.current.choices:
+            if item.properties.poster and not item.properties.poster in poster:
+                poster.append(item.properties.poster)
         for pos, item in enumerate(self.current.choices):
-            items.append({'name': item.name, 'id': pos})
+            properties = item.properties
+            image = httpserver.register_image(properties.thumbnail)
+            attributes = {'name': item.name, 'id': pos, 'image': image, 'type': item.type}
+            if properties.series and properties.season and properties.episode:
+                attributes['line1'] = properties.title
+                attributes['line2'] = '%s %sx%02d' % (properties.series, properties.season, properties.episode)
+                if len(poster) > 1:
+                    attributes['image'] = httpserver.register_image(item.get_thumbnail_attribute('poster'))
+            elif properties.poster:
+                attributes['line1'] = properties.name
+                attributes['line2'] = ''
+                attributes['image'] = httpserver.register_image(item.get_thumbnail_attribute('poster'))
+            elif properties.artist:
+                attributes['line1'] = properties.title
+                attributes['line2'] = '%s - %s' % (properties.artist, properties.album)
+            else:
+                attributes['line1'] = item.name
+                attributes['line2'] = ''
+            items.append(attributes)
         return { 'menu': items }
 
     def eventhandler(self, event):
