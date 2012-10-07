@@ -4,48 +4,48 @@
     <script filename='scripts.py'/>
 
     <menu name="audio">
-	<alias name="audio main menu"/>
-	<event name="replace" script="menu"/>
-	<group style="condition" name="details" x="10" y="100" width="370" height="590">
-	    <event name="replace"><![CDATA[
-	        item = next.context.get('item')
-		if item and item.thumbnail:
-		    next.x = -400
-		    yield next.animate('EASE_OUT_BACK', 0.5, x=10)
-		else:
-		    yield prev.animate('EASE_IN_BACK', 0.5, x=-400)
-	    ]]>
-	    </event>
-	    <case condition="item.image">
-		<rectangle color="0x99000000" radius="30"/>
-		<group>
-		    <image x="10" y="10" width="350" height="350" filename="$item.image">
-			<replace-on-context-change keys="item.artist item.album" script="fade"/>
-		    </image>
-		    <label x="10" y="380" width="330" font="Vera:20" color="0xffffff">
-			<replace-on-context-change keys="item.name" script="fade"/>
-			$item.name
-		    </label>
-		    <label x="10" y="420" width="330" font="Vera:18" color="0xffffff">
-			<replace-on-context-change keys="item.artist" script="fade"/>
-			$item.artist
-		    </label>
-		    <label x="10" y="440" width="330" font="Vera:18" color="0xffffff">
-			<replace-on-context-change keys="item.album" script="fade"/>
-			$item.album
-		    </label>
-		</group>
-	    </case>
-	</group>
+        <alias name="audio main menu"/>
+        <event name="replace" script="menu"/>
+        <group style="condition" name="details" x="10" y="100" width="370" height="590">
+            <event name="replace"><![CDATA[
+                item = next.context.get('item')
+                if item and item.thumbnail:
+                    next.x = -400
+                    yield next.animate('EASE_OUT_BACK', 0.5, x=10)
+                else:
+                    yield prev.animate('EASE_IN_BACK', 0.5, x=-400)
+            ]]>
+            </event>
+            <case condition="item.image">
+                <rectangle color="0x99000000" radius="30"/>
+                <group>
+                    <image x="10" y="10" width="350" height="350" filename="$item.image">
+                        <replace-on-context-change keys="item.artist item.album" script="fade"/>
+                    </image>
+                    <label x="10" y="380" width="330" font="Vera:20" color="0xffffff">
+                        <replace-on-context-change keys="item.name" script="fade"/>
+                        $item.name
+                    </label>
+                    <label x="10" y="420" width="330" font="Vera:18" color="0xffffff">
+                        <replace-on-context-change keys="item.artist" script="fade"/>
+                        $item.artist
+                    </label>
+                    <label x="10" y="440" width="330" font="Vera:18" color="0xffffff">
+                        <replace-on-context-change keys="item.album" script="fade"/>
+                        $item.album
+                    </label>
+                </group>
+            </case>
+        </group>
         <listing x="420" y="100" width="590" height="590" xpadding="20" ypadding="10">
-	    <label font="Vera" height="30" color="0xcccccc">
-		<properties opacity="150"/>
-		$item.name
-	    </label>
+            <label font="Vera" height="30" color="0xcccccc">
+                <properties opacity="150"/>
+                $item.name
+            </label>
             <selection>
                 <rectangle color="0xa0000000" radius="30" height="40"/>
             </selection>
-	    <event name="replace"><![CDATA[
+            <event name="replace"><![CDATA[
                 diff = 50
                 if prev.context['menu'].pos < next.context['menu'].pos:
                     diff = -50
@@ -53,46 +53,83 @@
                 next.opacity = 0
                 next.animate('EASE_IN_QUAD', 0.2, x=next.x + diff, opacity=255)
                 yield prev.animate('EASE_OUT_QUAD', 0.2, x=prev.x + diff, opacity=0)
-		]]>
-	    </event>
-	    <event name="select"><![CDATA[
-	        if prev:
+                ]]>
+            </event>
+            <event name="select"><![CDATA[
+                if prev:
                     prev.animate('EASE_OUT_QUAD', secs, opacity=130)
                 next.animate('EASE_OUT_QUAD', secs, opacity=255)
-		]]>
-	    </event>
+                ]]>
+            </event>
         </listing>
-	<image style="icon" x="500" y="350" width="290" height="240" name="audio">
-	    <properties xalign="right" yalign="bottom" keep-aspect="true" opacity="50"/>
-	</image>
+        <image style="icon" x="500" y="350" width="290" height="240" name="audio">
+            <properties xalign="right" yalign="bottom" keep-aspect="true" opacity="50"/>
+        </image>
     </menu>
 
     <application name="audioplayer">
-	<audio name="player" visualisation="true"/>
-	<group style="scaled" x="40" y="80" width="440" height="610">
-	    <properties screen-width="1280" screen-height="720"/>
-	    <rectangle color="0x66000000" radius="30"/>
-	    <thumbnail x="20" y="20" width="400" height="400" thumbnail="$item.thumbnail"/>
-	    <group x="20" y="450" width="700" height="230">
-		<label y="0" font="Vera:24" color="0xffffff">
-		    $item.name
-		</label>
-		<label y="60" font="Vera:18" color="0xffffff">
-		    Artist: $item.artist
-		</label>
-		<label y="90" font="Vera:18" color="0xffffff">
-		    Album: $item.album
-		</label>
-		<label y="120" font="Vera:18" color="0xffffff">
-		    $item.elapsed / $item.length
-		</label>
-	    </group>
-	    <event name="create"><![CDATA[
-	        yield kaa.delay(5)
-	        widget.animate('EASE_IN_QUAD', 1, opacity=0)
-	    ]]>
-	</event>
-	</group>
+        <audio name="player" visualisation="true"/>
+
+	<!--
+	    The audio player uses goom as visualisation and it looks
+	    much better if nothing else is visible. Therefore, all the
+	    other information is defined as widget and shown on demand
+	    (see eventhandler)
+	-->
+        <widget use-as="osd">
+            <group style="scaled" x="20" y="450" width="700" height="140">
+                <properties screen-width="1280" screen-height="720"/>
+                <replace-on-context-change key="item.artist item.album item.name"/>
+                <rectangle color="0x66000000" radius="20"/>
+                <thumbnail x="20" y="20" width="100" height="100" thumbnail="$item.thumbnail"/>
+                <group x="140" y="20" width="520" height="100">
+                    <label y="0" font="Vera:24" color="0xffffff">
+                        $item.name
+                    </label>
+                    <label y="40" font="Vera:18" color="0xffffff">
+                        $item.artist
+                    </label>
+                    <label y="70" width="400" font="Vera:18" color="0xffffff">
+                        $item.album
+                    </label>
+                    <label y="70" font="Vera:18" color="0xffffff">
+                        <properties xalign="right"/>
+                        $item.elapsed / $item.length
+                    </label>
+                </group>
+            </group>
+            <event name="show"><![CDATA[
+                self.opacity=0
+                return self.animate('EASE_IN_QUAD', 0.5, opacity=255)
+                ]]>
+            </event>
+            <event name="hide"><![CDATA[
+                return self.animate('EASE_IN_QUAD', 0.5, opacity=0)
+                ]]>
+            </event>
+        </widget>
+	<!--
+	    The audio player does not define itself as fullscreen and
+	    therefore, the idlebar is visible. But this theme wants a
+	    fullscreen visualisation effect and therefore, we hide it
+	    here in the theme.
+	-->
+        <event name="create"><![CDATA[
+            idlebar = widget.stage.get_widget('idlebar')
+            if idlebar:
+                idlebar.hide()
+        ]]>
+        </event>
+	<!--
+	   Show the OSD widget from above when a new file starts or
+	   the user seeked to a new position. Auto-hide the widget
+	   after 5 seconds.
+	-->
+        <event name="system"><![CDATA[
+            if event == 'SEEK' or event == 'PLAY_START':
+                widget.osd_show('osd', parent=widget, autohide=5)
+        ]]>
+        </event>
     </application>
 
 </theme>
