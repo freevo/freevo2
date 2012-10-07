@@ -143,6 +143,14 @@ class Item(object):
         """
         return self.name
 
+    def get_thumbnail_attribute(self, attribute):
+        """
+        Return a thumbnail object for the given attribute (e.g. movie
+        poster). The attribute mist be an image filename.
+        """
+        if hasattr(self.info, 'get_thumbnail_attribute'):
+            return self.info.get_thumbnail_attribute(attribute)
+
     def sort(self, mode='name'):
         """
         Returns the string how to sort this item
