@@ -97,10 +97,11 @@ def xmlconfig(configfile, sources, package):
                     position = position + child.getAttribute('name') + '.'
                     return get_parent(child, name, position)
         for name in name[len(position):].strip(' .').split('.'):
-            node = doc.createElement('group')
-            node.setAttribute('name', name)
-            parent.appendChild(node)
-            parent = node
+            if name:
+                node = doc.createElement('group')
+                node.setAttribute('name', name)
+                parent.appendChild(node)
+                parent = node
         return parent
 
     for m in modules:
