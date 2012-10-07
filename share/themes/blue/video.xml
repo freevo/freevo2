@@ -4,43 +4,43 @@
     <script filename='scripts.py'/>
 
     <menu name="video">
-	<alias name="video main menu"/>
-	<event name="replace" script="menu"/>
-	<rectangle name="background" y="520" height="200" color="0x66000000"/>
-	<event name="create"><![CDATA[
+        <alias name="video main menu"/>
+        <event name="replace" script="menu"/>
+        <rectangle name="background" y="520" height="200" color="0x66000000"/>
+        <event name="create"><![CDATA[
             background = widget.get_widget('background')
             if widget.context.get('item').get('series') or widget.context.get('item').get('description'):
                 background.y = 520
             else:
                 background.y = 660
-	    ]]>
-	</event>
-	<group x="10" y="530" width="1260" height="180">
-	    <group style="condition" x="1180" y="130" width="60" height="60">
-		<case condition="item.autobookmark_resume">
-		    <image url="icons/pause.png">
-			<properties opacity="50"/>
-		    </image>
-		</case>
-	    </group>
-	    <group style="condition" x="350" y="150" width="900" height="30">
-		<case condition="item.type" value="directory">
-		    <label font="Vera:18" color="0xffffff">
-			<properties xalign="right"/>
-			$item.num_items Items
-		    </label>
-		</case>
-		<case condition="item.length">
-		    <label font="Vera:18" color="0xffffff">
-			<properties xalign="right"/>
-			$item.length min.
-		    </label>
-		</case>
-	    </group>
-	</group>
-	<group x="10" y="530" width="1260" height="180">
-	    <group style="condition" x="10" y="10" width="900" height="140">
-		<event name="replace"><![CDATA[
+            ]]>
+        </event>
+        <group x="10" y="530" width="1260" height="180">
+            <group style="condition" x="1180" y="130" width="60" height="60">
+                <case condition="item.autobookmark_resume">
+                    <image url="icons/pause.png">
+                        <properties opacity="50"/>
+                    </image>
+                </case>
+            </group>
+            <group style="condition" x="350" y="150" width="900" height="30">
+                <case condition="item.type" value="directory">
+                    <label font="Vera:18" color="0xffffff">
+                        <properties xalign="right"/>
+                        $item.num_items Items
+                    </label>
+                </case>
+                <case condition="item.length">
+                    <label font="Vera:18" color="0xffffff">
+                        <properties xalign="right"/>
+                        $item.length min.
+                    </label>
+                </case>
+            </group>
+        </group>
+        <group x="10" y="530" width="1260" height="180">
+            <group style="condition" x="10" y="10" width="900" height="140">
+                <event name="replace"><![CDATA[
                     background = next.parent.parent.get_widget('background')
                     if next.context.get('item').get('series') or next.context.get('item').get('description'):
                         background.animate('EASE_IN_QUAD', 0.2, y=520)
@@ -49,65 +49,64 @@
                     next.y += 180
                     next.animate('EASE_IN_QUAD', 0.2, y=next.y-180)
                     yield prev.animate('EASE_OUT_QUAD', 0.2, y=prev.y+180)
-		    ]]>
-		</event>
-		<case condition="item.type" value="series">
-		    <text width="1240" font="Vera:18" color="0xffffff">
-			<replace-on-context-change keys="item.description" script="fade"/>
-			$item.description
-		    </text>
-		</case>
-		<case condition="item.series">
-		    <thumbnail x="10" width="285" thumbnail="$item.thumbnail">
-			<replace-on-context-change keys="item" script="fade"/>
-			<properties xalign="center" yalign="center"/>
-		    </thumbnail>
-		    <label x="350" y="0" font="Vera" height="25" color="0xffffff">
-			<replace-on-context-change keys="item.title" script="fade"/>
-			$item.title
-		    </label>
-		    <text x="350" y="40" height="80" font="Vera:18" color="0xffffff">
-			<replace-on-context-change keys="item.description" script="fade"/>
-			$item.description
-		    </text>
-		</case>
-		<case condition="item.description">
-		    <text width="1240" font="Vera:18" color="0xffffff">
-			<replace-on-context-change keys="item.description" script="fade"/>
-			$item.description
-		    </text>
-		</case>
-	    </group>
-	</group>
+                    ]]>
+                </event>
+                <case condition="item.type" value="series">
+                    <text width="1240" font="Vera:18" color="0xffffff">
+                        <replace-on-context-change keys="item.description" script="fade"/>
+                        $item.description
+                    </text>
+                </case>
+                <case condition="item.series">
+                    <thumbnail x="10" width="285" thumbnail="$item.thumbnail">
+                        <replace-on-context-change keys="item" script="fade"/>
+                        <properties xalign="center" yalign="center"/>
+                    </thumbnail>
+                    <label x="350" y="0" font="Vera" height="25" color="0xffffff">
+                        <replace-on-context-change keys="item.title" script="fade"/>
+                        $item.title
+                    </label>
+                    <text x="350" y="40" height="80" font="Vera:18" color="0xffffff">
+                        <replace-on-context-change keys="item.description" script="fade"/>
+                        $item.description
+                    </text>
+                </case>
+                <case condition="item.description">
+                    <text width="1240" font="Vera:18" color="0xffffff">
+                        <replace-on-context-change keys="item.description" script="fade"/>
+                        $item.description
+                    </text>
+                </case>
+            </group>
+        </group>
 
-	<group style="condition">
-	    <case condition="item.poster">
-		<rectangle x="910" y="85" width="280" height="410" color="0xa0000000" radius="8"/>
-		<!-- <rectangle x="897" y="87" width="306" height="406" color="0x000000"/> -->
-		<image x="915" y="90" width="270" height="400" url="$item.poster">
-		    <properties load-async="True"/>
-		    <replace-on-context-change keys="item.poster" script="fade"/>
-		</image>
-	    </case>
-	    <case condition="not item.poster and item.image and not item.series and not item.description">
-		<rectangle x="960" y="485" width="280" height="154" color="0xa0000000" radius="8"/>
-		<image x="965" y="490" width="270" height="144" url="$item.image">
-		    <replace-on-context-change keys="item.image" script="fade"/>
-		</image>
-	    </case>
-	    <event name="replace" script="fade"/>
-	</group>
+        <group style="condition">
+            <case condition="item.poster">
+                <rectangle x="910" y="85" width="280" height="410" color="0xa0000000" radius="8"/>
+                <!-- <rectangle x="897" y="87" width="306" height="406" color="0x000000"/> -->
+                <image x="915" y="90" width="270" height="400" url="$item.poster">
+                    <properties load-async="True"/>
+                    <replace-on-context-change keys="item.poster" script="fade"/>
+                </image>
+            </case>
+            <case condition="not item.poster and item.image and not item.series and not item.description">
+                <rectangle x="960" y="485" width="280" height="154" color="0xa0000000" radius="8"/>
+                <image x="965" y="490" width="270" height="144" url="$item.image">
+                    <replace-on-context-change keys="item.image" script="fade"/>
+                </image>
+            </case>
+            <event name="replace" script="fade"/>
+        </group>
 
-        <listing style="fixed-selection" x="10" y="100" width="780" height="380"
-		 xpadding="20" ypadding="10">
-	    <label font="Vera" height="25" color="0xffffff">
-		<properties opacity="150"/>
-		$item.name
-	    </label>
+        <listing style="fixed-selection" x="10" y="100" width="780" height="380" xpadding="20" ypadding="10">
+            <label font="Vera" height="25" color="0xffffff">
+                <properties opacity="150"/>
+                $item.name
+            </label>
             <selection>
                 <rectangle color="0xa0000000" radius="25" height="30"/>
             </selection>
-	    <event name="replace"><![CDATA[
+            <event name="replace"><![CDATA[
                 diff = 50
                 if prev.pos < next.pos:
                     diff = -50
@@ -115,88 +114,88 @@
                 next.opacity = 0
                 next.animate('EASE_IN_QUAD', 0.2, x=next.x + diff, opacity=255)
                 yield prev.animate('EASE_OUT_QUAD', 0.2, x=prev.x + diff, opacity=0)
-		]]>
-	    </event>
-	    <event name="select"><![CDATA[
-	        if prev:
+                ]]>
+            </event>
+            <event name="select"><![CDATA[
+                if prev:
                     prev.animate('EASE_OUT_QUAD', secs, opacity=130)
                 next.animate('EASE_OUT_QUAD', secs, opacity=255)
-		]]>
-	    </event>
+                ]]>
+            </event>
         </listing>
     </menu>
 
     <application name="videoplayer">
-	<video name="player"/>
+        <video name="player"/>
 
-	<group style="scaled" name="osd">
-	    <properties screen-width="1280" screen-height="720"/>
-	</group>
+        <osd>
+            <properties screen-width="1280" screen-height="720"/>
 
-	<widget use-as="pause">
-	    <image x="300" width="620" url="icons/pause.png">
-		<properties opacity="50" keep-aspect="true"/>
-	    </image>
-	    <event name="show"><![CDATA[
-	        self.application.get_widget('player').animate('EASE_OUT_QUAD', 0.2, opacity=100)
-                return self.animate('EASE_IN_QUAD', 0.2, opacity=255)
-                ]]>
-	    </event>
-	    <event name="hide"><![CDATA[
-	        self.application.get_widget('player').animate('EASE_IN_QUAD', 0.2, opacity=255)
-                return self.animate('EASE_OUT_QUAD', 0.2, opacity=0)
-                ]]>
-	    </event>
-	</widget>
+            <widget use-as="pause">
+                <image x="300" width="620" url="icons/pause.png">
+                    <properties opacity="50" keep-aspect="true"/>
+                </image>
+                <event name="show"><![CDATA[
+                    self.application.get_widget('player').animate('EASE_OUT_QUAD', 0.2, opacity=100)
+                    return self.animate('EASE_IN_QUAD', 0.2, opacity=255)
+                    ]]>
+                </event>
+                <event name="hide"><![CDATA[
+                    self.application.get_widget('player').animate('EASE_IN_QUAD', 0.2, opacity=255)
+                    return self.animate('EASE_OUT_QUAD', 0.2, opacity=0)
+                    ]]>
+                </event>
+            </widget>
 
-	<widget y="-150" height="100" use-as="seek">
-	    <rectangle x="-10" width="1300" height="80" color="0x66000000"/>
-	    <image x="10" y="30" height="80" width="200" filename="../../images/gant/logo.png">
-		<properties keep-aspect="true"/>
-	    </image>
-	    <label x="1030" y="35" width="180" font="Vera" height="25" color="0xffffff">
-		<properties xalign="right"/>
-		$item.elapsed  / $item.length
-	    </label>
-	    <event name="show"><![CDATA[
-                return self.animate('EASE_OUT_QUAD', 0.2, y=-20)
-                ]]>
-	    </event>
-	    <event name="hide"><![CDATA[
-                return self.animate('EASE_IN_QUAD', 0.2, y=-150)
-                ]]>
-	    </event>
-	</widget>
+            <widget y="-150" height="100" use-as="seek">
+                <rectangle x="-10" width="1300" height="80" color="0x66000000"/>
+                <image x="10" y="30" height="80" width="200" filename="../../images/gant/logo.png">
+                    <properties keep-aspect="true"/>
+                </image>
+                <label x="1030" y="35" width="180" font="Vera" height="25" color="0xffffff">
+                    <properties xalign="right"/>
+                    $item.elapsed  / $item.length
+                </label>
+                <event name="show"><![CDATA[
+                    return self.animate('EASE_OUT_QUAD', 0.2, y=-20)
+                    ]]>
+                </event>
+                <event name="hide"><![CDATA[
+                    return self.animate('EASE_IN_QUAD', 0.2, y=-150)
+                    ]]>
+                </event>
+            </widget>
 
-	<widget y="720" height="200" use-as="info">
-	    <rectangle x="-10" y="40" width="1300" height="135" color="0x55000000"/>
-	    <group style="condition">
-		<case condition="item.poster">
-		    <rectangle x="28" y="-2" width="139" height="204" color="0x000000"/>
-		    <image x="30" width="135" height="200" url="$item.poster">
-			<properties load-async="True"/>
-		    </image>
-		</case>
-	    </group>
-	    <label x="200" y="50" width="1000" font="Vera" height="25" color="0xffffff">
-		$item.title
-	    </label>
-	    <text x="200" y="90" width="800" height="80" font="Vera:18" color="0xffffff">
-		$item.description
-	    </text>
-	    <label x="1030" y="150" width="180" font="Vera" height="20" color="0xffffff">
-		<properties xalign="right"/>
-		$item.elapsed  / $item.length
-	    </label>
-	    <event name="show"><![CDATA[
-                return self.animate('EASE_OUT_BACK', 0.2, y=500)
-                ]]>
-	    </event>
-	    <event name="hide"><![CDATA[
-                return self.animate('EASE_IN_BACK', 0.2, y=720)
-                ]]>
-	    </event>
-	</widget>
+            <widget y="720" height="200" use-as="info">
+                <rectangle x="-10" y="40" width="1300" height="135" color="0x55000000"/>
+                <group style="condition">
+                    <case condition="item.poster">
+                        <rectangle x="28" y="-2" width="139" height="204" color="0x000000"/>
+                        <image x="30" width="135" height="200" url="$item.poster">
+                            <properties load-async="True"/>
+                        </image>
+                    </case>
+                </group>
+                <label x="200" y="50" width="1000" font="Vera" height="25" color="0xffffff">
+                    $item.title
+                </label>
+                <text x="200" y="90" width="800" height="80" font="Vera:18" color="0xffffff">
+                    $item.description
+                </text>
+                <label x="1030" y="150" width="180" font="Vera" height="20" color="0xffffff">
+                    <properties xalign="right"/>
+                    $item.elapsed  / $item.length
+                </label>
+                <event name="show"><![CDATA[
+                    return self.animate('EASE_OUT_BACK', 0.2, y=500)
+                    ]]>
+                </event>
+                <event name="hide"><![CDATA[
+                    return self.animate('EASE_IN_BACK', 0.2, y=720)
+                    ]]>
+                </event>
+            </widget>
+        </osd>
     </application>
 </theme>
 <!-- Keep this comment at the end of the file

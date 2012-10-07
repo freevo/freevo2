@@ -187,8 +187,7 @@ class TaskManager(kaa.Object):
         if not result:
             # handle by the current application
             result = self.applications[-1].eventhandler(event=event)
-            if result:
-                self.applications[-1].widget.eventhandler(event)
+            self.applications[-1].widget.eventhandler(event)
         # FIXME: This function has to return True or it will be
         # deleted from the kaa eventhandler. The kaa event code is not
         # aware of InProgress objects so if result is an InProgress

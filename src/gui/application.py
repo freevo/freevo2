@@ -46,45 +46,6 @@ class ApplicationStyles(WidgetStyles):
     candyxml_name = 'application'
 
 
-class OSD(object):
-    def __init__(self, template):
-        self.template = template
-        self.widget = None
-        self.__visible = False
-
-    def toggle(self, parent, application):
-        if self.visible:
-            return self.hide()
-        else:
-            return self.show(parent, application)
-
-    def show(self, parent, application):
-        if self.__visible:
-            return None
-        if not self.widget:
-            self.widget = self.template(context=parent.context)
-            self.widget.parent = parent
-            self.widget.application = application
-        self.__visible = True
-        return self.widget.show()
-
-    @property
-    def visible(self):
-        return self.__visible
-
-    @kaa.coroutine()
-    def hide(self):
-        if not self.__visible or not self.widget:
-            yield None
-        self.__visible = False
-        hiding = self.widget.hide()
-        if isinstance(hiding, kaa.InProgress):
-            yield hiding
-        if not self.widget.visible and not self.__visible:
-            self.widget.destroy()
-            self.widget = None
-
-
 class Application(kaa.candy.Layer):
     """
     Application base class.
@@ -105,45 +66,39 @@ class Application(kaa.candy.Layer):
         for key, template in osd_templates.items():
             self.osd_widgets[key] = OSD(template)
         super(Application, self).__init__(size, widgets, context)
-
+        self.osd_layer = None
+        for child in self.children:
+            if child.candyxml_name == 'osd':
+                self.osd_layer = child
+                
     def osd_show(self, name, autohide=None, parent=None):
         """
         Show the OSD with the given name
         """
-        if self.timer:
-            self.timer.stop()
-            self.timer = None
-        if autohide:
-            self.timer = kaa.OneShotTimer(self.osd_hide, name)
-            self.timer.start(autohide)
-        widget = self.osd_widgets.get(name)
-        if widget:
-            if not parent:
-                parent = self.get_widget('osd')
-            return widget.show(parent, self)
+        if self.osd_layer:
+            return self.osd_layer.osd_show(name, autohide)
 
     def osd_hide(self, name):
         """
         Hide the OSD with the given name
         """
-        widget = self.osd_widgets.get(name)
-        if widget:
-            return widget.hide()
+        if self.osd_layer:
+            return self.osd_layer.osd_hide(name)
 
     def osd_toggle(self, name):
         """
         Toggle the OSD with the given name
         """
-        widget = self.osd_widgets.get(name)
-        if widget:
-            return widget.toggle(self.get_widget('osd'), self)
+        if self.osd_layer:
+            return self.osd_layer.osd_toggle(name)
 
     def osd_visible(self, name):
         """
         Return if the OSD with the given name is visible
         """
-        widget = self.osd_widgets.get(name)
-        return widget and widget.visible
+        if self.osd_layer:
+            return self.osd_layer.osd_visible(name)
+        return False
 
     def sync_context(self):
         """
