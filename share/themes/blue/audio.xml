@@ -109,7 +109,20 @@
 	    </widget>
 	</osd>
 	<!--
-	    The audio player does not define itself as fullscreen and
+	    Show the OSD widget from above when a new file starts or
+	    the user seeked to a new position. Auto-hide the widget
+	    after 5 seconds.
+	-->
+        <event name="system"><![CDATA[
+            if event == 'SEEK' or event == 'PLAY_START':
+                widget.osd_show('info', autohide=5)
+        ]]>
+        </event>
+	<!--
+	    Since the first PLAY_START may not be catched when the
+	    widget is created we also hook into the create signal.
+
+            The audio player does not define itself as fullscreen and
 	    therefore, the idlebar is visible. But this theme wants a
 	    fullscreen visualisation effect and therefore, we hide it
 	    here in the theme.
@@ -118,22 +131,8 @@
             idlebar = widget.stage.get_widget('idlebar')
             if idlebar:
                 idlebar.hide()
-        ]]>
-        </event>
-	<!--
-	   Show the OSD widget from above when a new file starts or
-	   the user seeked to a new position. Auto-hide the widget
-	   after 5 seconds. Since the first PLAY_START may not be
-	   catched here we also hook into the create signal.
-	-->
-        <event name="system"><![CDATA[
-            if event == 'SEEK' or event == 'PLAY_START':
-                widget.osd_show('info', autohide=2)
-        ]]>
-        </event>
-        <event name="create"><![CDATA[
             yield kaa.delay(0.1)
-            widget.osd_show('info', autohide=2)
+            widget.osd_show('info', autohide=5)
         ]]>
         </event>
     </application>

@@ -65,7 +65,8 @@ class Widget(kaa.candy.Group):
         showing = self.emit('widget-show', self)
         if isinstance(showing, kaa.InProgress):
             yield showing
-        self.__visible = True
+        if self.__visible == 'showing':
+            self.__visible = True
 
     @kaa.coroutine()
     def hide(self):
@@ -75,7 +76,8 @@ class Widget(kaa.candy.Group):
         hiding = self.emit('widget-hide', self)
         if isinstance(hiding, kaa.InProgress):
             yield hiding
-        self.__visible = False
+        if self.__visible == 'hiding':
+            self.__visible = False
 
     @kaa.coroutine()
     def destroy(self):
