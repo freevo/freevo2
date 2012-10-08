@@ -181,6 +181,11 @@ class TaskManager(kaa.Object):
             # function and do not pass it on the the normal
             # handling.
             result = event.handler(event=event) or True
+            if event.handler == self.applications[-1].eventhandler:
+                # handler is the current visible application, also
+                # pass to the GUI code just as without the special
+                # handler.
+                self.applications[-1].widget.eventhandler(event)
         if not result and len(self.windows):
             # maybe handled by the current popup
             result = self.windows[-1].eventhandler(event=event)
