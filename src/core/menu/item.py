@@ -108,7 +108,7 @@ class Item(object):
             self.__name = self.info.get('title')
         if not self.__name:
             self.__name = self.info.get('name')
-        return self.__name or ''
+        return self.__name or u''
 
     @name.setter
     def name(self, name):
