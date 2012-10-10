@@ -82,7 +82,16 @@ class MenuApplication(Application):
 
     def sync_context(self):
         name = self.context.get('menu').type
-        if not name in self.templates:
+        issubmenu = False
+        if name == 'submenu':
+            issubmenu = True
+            if self.menu.type.endswith('submenu'):
+                # same template, just update the existing one
+                return super(MenuApplication, self).sync_context()
+            if self.menu.type + '+submenu' in self.templates:
+                # there is a special kind of submenu definition
+                name = self.menu.type + '+submenu'
+        elif not name in self.templates:
             name = 'default'
         if self.menu.type == name:
             return super(MenuApplication, self).sync_context()
@@ -91,7 +100,7 @@ class MenuApplication(Application):
             # same template, just update the existing one
             self.menu.type = name
             return super(MenuApplication, self).sync_context()
-        if name != 'submenu' and self.bgmenu:
+        if not issubmenu and self.bgmenu:
             # we switched away from a submenu. Remove the submenu from
             # the stack and do the function call again.
             self.hide_submenu(self.menu, self.bgmenu)
@@ -100,7 +109,7 @@ class MenuApplication(Application):
             return self.sync_context()
         new = template(self.context)
         new.type = name
-        if name == 'submenu':
+        if issubmenu:
             # switch to submenu
             self.bgmenu = self.menu
             self.bgmenu.freeze_context = True

@@ -80,7 +80,7 @@
             </group>
         </group>
 
-        <group style="condition">
+        <group style="condition" name="right-image">
             <case condition="item.poster">
                 <rectangle x="910" y="85" width="280" height="410" color="0xa0000000" radius="8"/>
                 <!-- <rectangle x="897" y="87" width="306" height="406" color="0x000000"/> -->
@@ -123,6 +123,37 @@
                 ]]>
             </event>
         </listing>
+    </menu>
+
+    <menu name="video+submenu">
+	<event name="submenu-show"><![CDATA[
+	    self.x = 1300
+	    menu.animate('EASE_OUT_QUAD', 0.2, opacity=100)
+	    yield menu.get_widget('right-image').animate('EASE_OUT_QUAD', 0.2, opacity=0)
+	    yield self.animate('EASE_OUT_BACK', 0.3, x=800)
+            ]]>
+	</event>
+	<event name="submenu-hide"><![CDATA[
+	    yield self.animate('EASE_IN_BACK', 0.3, x=1300)
+	    menu.get_widget('right-image').animate('EASE_OUT_QUAD', 0.2, opacity=255)
+	    yield menu.animate('EASE_OUT_QUAD', 0.2, opacity=255)
+            ]]>
+	</event>
+	<listing y="100" width="400" height="480" xpadding="20" ypadding="10">
+	    <label font="Vera" height="25" color="0xffffff">
+		<properties opacity="150"/>
+		$item.name
+	    </label>
+	    <selection>
+		<rectangle color="0xa0000000" radius="25" height="30"/>
+	    </selection>
+	    <event name="select"><![CDATA[
+	        if prev:
+                    prev.animate('EASE_OUT_QUAD', secs, opacity=150)
+                next.animate('EASE_OUT_QUAD', secs, opacity=255)
+		]]>
+	    </event>
+	</listing>
     </menu>
 
     <application name="videoplayer">
