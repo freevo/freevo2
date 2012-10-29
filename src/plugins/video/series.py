@@ -72,7 +72,7 @@ class SeasonItem(freevo.Item):
         """
         query = yield kaa.beacon.query(series=self.series, season=self.season, type='video')
         items = []
-        for epsiode in query:
+        for epsiode in sorted(query, key=lambda x: x.get('episode')):
             v = VideoItem(epsiode, self)
             v.name = epsiode.get('title')
             items.append(v)
@@ -117,7 +117,7 @@ class SeriesItem(freevo.Item):
         Show all albums from the artist.
         """
         query = yield kaa.beacon.query(attr='season', series=self.series, type='video')
-        items = [ SeasonItem(('Season %s') % season, self.series, season, self) for season in query ]
+        items = [ SeasonItem(('Season %s') % season, self.series, season, self) for season in sorted(query)]
         self.menustack.pushmenu(freevo.Menu(_('Season'), items, type='video'))
 
     def actions(self):
