@@ -76,13 +76,17 @@ class PluginInterface( freevo.Plugin ):
         """
         super(PluginInterface, self).__init__()
         self.lcd = kaa.display.LCD()
-        self.lcd.signals['connected'].connect_once(self._connected)
+        self.lcd.signals['connected'].connect(self._connected)
         self.running = False
         self.current = []
         self.timer = kaa.Timer(self.update)
 
 
     def _connected(self, width, height):
+        if self.running:
+            del self.current
+            self.set_application(freevo.taskmanager.current)
+            return True
         self.running = True
 
         self.height = height
