@@ -28,9 +28,6 @@
 
 __all__ = [ 'PluginInterface' ]
 
-# kaa imports
-import kaa.popcorn
-
 # freevo imports
 from ... import core as freevo
 

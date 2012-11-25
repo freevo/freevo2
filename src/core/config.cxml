@@ -93,6 +93,4 @@
         </var>
     </group>
 
-    <extern name="player" module="kaa.popcorn"/>
-
 </config>

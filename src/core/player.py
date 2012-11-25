@@ -37,7 +37,6 @@ import logging
 # kaa imports
 import kaa
 import kaa.utils
-import kaa.popcorn
 
 # Freevo imports
 import api as freevo
