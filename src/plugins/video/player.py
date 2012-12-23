@@ -60,14 +60,15 @@ class Player(freevo.Player):
         """
         play an item
         """
+        if not item.player in kaa.candy.POSSIBLE_PLAYER:
+            # FIXME: find a fallback player here
+            freevo.Event(freevo.OSD_MESSAGE, _('Unsupported player: %s' % item.player)).post()
+            yield False
         if not (yield super(Player, self).play(item, ['AUDIO', 'VIDEO'])):
             yield False
         if item.url.startswith('dvd://'):
             # kaa.candy does not support dvd playback with gstreamer
             item.player = 'mplayer'
-        # FIXME: this handle is kind of ugly. Must be fixed in
-        # kaa.candy supporting player changes before play()
-        self.context.candy_player = item.player
         self.eventmap = 'video'
         if self.item.selected_audio == None:
             self.item.selected_audio = 0
@@ -78,6 +79,7 @@ class Player(freevo.Player):
         # player
         self.streaminfo = None
         self.player = self.widget.get_widget('player')
+        self.player.player = item.player
         self.player.uri = item.filename or item.url
         self.player.config['mplayer.passthrough'] = \
             bool(freevo.config.video.player.mplayer.passthrough)
@@ -119,9 +121,9 @@ class Player(freevo.Player):
         properties = self.item.properties
         image = httpserver.register_image(properties.image)
         poster = httpserver.register_image(self.item.get_thumbnail_attribute('poster'))
-        return { 'title': properties.title, 
-                 'series': properties.series, 
-                 'season': properties.season, 
+        return { 'title': properties.title,
+                 'series': properties.series,
+                 'season': properties.season,
                  'episode': properties.episode,
                  'description': properties.description,
                  'imdb': properties.imdb,

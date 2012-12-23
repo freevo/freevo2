@@ -61,6 +61,10 @@ class Player(freevo.Player):
         """
         play an item
         """
+        if not 'gstreamer' in kaa.candy.POSSIBLE_PLAYER:
+            # FIXME: find a fallback player here
+            freevo.Event(freevo.OSD_MESSAGE, _('Unsupported player: gstreamer')).post()
+            yield False
         if not (yield super(Player, self).play(item, ['AUDIO'])):
             yield False
         log.info('start playing %s', self.item.filename)
@@ -86,8 +90,8 @@ class Player(freevo.Player):
         client.
         """
         properties = self.item.properties
-        return { 'title': properties.title, 
-                 'artist': properties.artist, 
+        return { 'title': properties.title,
+                 'artist': properties.artist,
                  'album': properties.album
                }
 
