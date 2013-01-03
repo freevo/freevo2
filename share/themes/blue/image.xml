@@ -35,18 +35,23 @@
     </menu>
 
     <application name="imageviewer">
-	<group name="browser">
-	    <rectangle y="470" color="0x00000000"/>
-	    <listing style="fixed-selection" x="-50" y="480" width="900" height="110" selection="3" 
-		     xpadding="15" ypadding="15">
-		<thumbnail style="mimetype" item="item" width="100" height="70">
-		    <properties xalign="center" yalign="center"/>
-		</thumbnail>
-		<selection xpadding="10" ypadding="10">
-		    <rectangle color="0x444444" width="120" height="90" radius="20"/>
-		</selection>
-	    </listing>
-	</group>
+	<photo name="player"/>
+
+        <osd>
+            <properties screen-width="1280" screen-height="720"/>
+            <widget use-as="browser">
+		<rectangle y="470" color="0x00000000"/>
+		<listing style="fixed-selection" x="-50" y="480" width="900" height="110"
+			 selection="3" xpadding="15" ypadding="15">
+		    <thumbnail style="mimetype" item="item" width="100" height="70">
+			<properties xalign="center" yalign="center"/>
+		    </thumbnail>
+		    <selection xpadding="10" ypadding="10">
+			<rectangle color="0x444444" width="120" height="90" radius="20"/>
+		    </selection>
+		</listing>
+	    </widget>
+	</osd>
     </application>
 
 </theme>
