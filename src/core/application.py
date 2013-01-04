@@ -62,19 +62,21 @@ class WidgetContext(object):
     """
     Context link between Application and view
     """
+
+    _instances = []
+    _changed = False
+
     def __init__(self, name):
         self._ctx = kaa.candy.Context()
         self._name = name
         self._widget = None
-        self._changed = False
+        WidgetContext._instances.append(kaa.weakref.weakref(self))
 
     def create_widget(self, fullscreen):
         """
         Render the widget
         """
-        kaa.signals['step'].disconnect(self.sync)
         self._widget = gui.show_application(self._widget or self._name, fullscreen, self._ctx)
-        self._changed = False
 
     def remove_widget(self):
         """
@@ -82,14 +84,19 @@ class WidgetContext(object):
         """
         self._widget = gui.destroy_application(self._widget)
 
-    def sync(self, force=True):
+    @classmethod
+    def sync(cls, force=True):
         """
-        Update the widget
+        Update all widgets
         """
-        if not self._widget or not (self._changed or force):
+        if not (cls._changed or force):
             return
-        self._widget.context = self._ctx
-        self._changed = False
+        cls._changed = False
+        for obj in cls._instances[:]:
+            if not obj:
+                cls._instances.remove(obj)
+            elif obj._widget:
+                obj._widget.context = obj._ctx
 
     def __getattr__(self, attr):
         """
@@ -104,7 +111,7 @@ class WidgetContext(object):
         if attr.startswith('_') or attr == 'widget':
             return super(WidgetContext, self).__setattr__(attr, value)
         if not self._changed:
-            self._changed = True
+            WidgetContext._changed = True
             kaa.signals['step'].connect_first_once(self.sync, force=False)
         self._ctx[attr] = value
 
