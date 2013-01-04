@@ -34,11 +34,13 @@ __all__ = [ 'PhotoGroup' ]
 
 import os
 import tempfile
+import random
 
 import kaa
 import kaa.imlib2
 
 from gi.repository import Clutter as clutter
+from gi.repository import GObject as gobject
 
 # candy backend import
 import candy
@@ -61,6 +63,8 @@ class PhotoGroup(candy.Widget):
         self.obj.show()
         self.textures = {}
         self.current = None
+        self.previous = None
+        self.previous_animation = None
 
     @kaa.threaded('candy::photo')
     def loadimage_async(self, filename):
@@ -85,9 +89,99 @@ class PhotoGroup(candy.Widget):
         self.textures[filename] = t, width, height
         self.showimage()
 
+    def start_animation_scale(self, duration, x, y, factor):
+        self.current.set_scale(factor*5, factor*5)
+        self.current.save_easing_state()
+        self.current.set_easing_duration(duration)
+        self.current.set_scale(factor, factor)
+        self.current.restore_easing_state()
+        if self.previous:
+            self.previous.save_easing_state()
+            self.previous.set_easing_duration(duration)
+            self.previous.set_scale(0.1, 0.1)
+            self.previous.restore_easing_state()
+
+    def start_animation_move_x(self, duration, x, y, factor):
+        self.current.set_property('x', x + self.width)
+        self.current.save_easing_state()
+        self.current.set_easing_duration(duration)
+        self.current.set_property('x', x)
+        self.current.restore_easing_state()
+        if self.previous:
+            self.previous.save_easing_state()
+            self.previous.set_easing_duration(duration)
+            self.previous.set_property('x', -self.width)
+            self.previous.restore_easing_state()
+        
+    def start_animation_rotate(self, duration, x, y, factor):
+        self.current.set_property('rotation-angle-x', 90)
+        self.current.set_property('rotation-angle-y', 90)
+        self.current.set_property('rotation-angle-z', self.rotation-90)
+        self.current.save_easing_state()
+        self.current.set_easing_duration(duration)
+        self.current.set_property('rotation-angle-x', 0)
+        self.current.set_property('rotation-angle-y', 0)
+        self.current.set_property('rotation-angle-z', self.rotation)
+        self.current.restore_easing_state()
+        if self.previous:
+            self.previous.save_easing_state()
+            self.previous.set_easing_duration(duration / 2)
+            self.previous.set_property('opacity', 0)
+            self.previous.restore_easing_state()
+        
+    def start_animation_scale_move(self, duration, x, y, factor):
+        if self.previous:
+            self.previous.set_property('opacity', 0)
+        self.current.set_property('scale_x', factor*5)
+        self.current.set_property('scale_y', factor*5)
+        self.current.set_property('x', x-self.width/5)
+        self.current.set_property('y', y-self.height/5)
+        self.current.set_property('opacity', 0)
+        
+        self.current.save_easing_state()
+        self.current.set_easing_duration(200)
+        self.current.set_property('opacity', 255)
+        self.current.restore_easing_state()
+                    
+        self.current.save_easing_state()
+        self.current.set_easing_duration(duration*0.8)
+        self.current.set_position(x, y)
+        self.current.restore_easing_state()
+        
+        self.current.save_easing_state()
+        self.current.set_easing_duration(duration/2)
+        self.current.set_scale(factor*1.8, factor*1.8)
+        self.current.restore_easing_state()
+        
+        self.current.save_easing_state()
+        self.current.set_easing_delay(duration/2)
+        self.current.set_easing_duration(duration/2)
+        self.current.set_scale(factor, factor)
+        self.current.restore_easing_state()
+
+    def start_animation_rotation_x(self, duration, x, y, factor):
+        self.current.set_property('rotation-angle-x', 90)
+        self.current.animatev(clutter.AnimationMode.EASE_OUT_QUAD, duration, ['rotation-angle-x'], [ 0 ])
+        if self.previous:
+            self.previous.animatev(clutter.AnimationMode.EASE_OUT_QUAD, 200, ['opacity'], [ 0 ])
+            
+    def start_animation_rotation_y(self, duration, x, y, factor):
+        self.current.set_property('rotation-angle-y', 90)
+        self.current.animatev(clutter.AnimationMode.EASE_OUT_QUAD, duration, ['rotation-angle-y'], [ 0 ])
+        if self.previous:
+            self.previous.animatev(clutter.AnimationMode.EASE_OUT_QUAD, 200, ['opacity'], [ 0 ])
+            
+        
+    def animation_finished(self):
+        if self.previous:
+            self.obj.remove_actor(self.previous)
+        self.previous = None
+        self.showimage()
+        return False
+
     def showimage(self):
-        if not self.filename in self.textures:
-            # not loaded yet, wait
+        if not self.filename in self.textures or self.previous:
+            # either not loaded or animation still in progress
             return
         width, height = self.textures[self.filename][1:]
         factor = 1
@@ -96,21 +190,40 @@ class PhotoGroup(candy.Widget):
         if self.current != self.textures[self.filename][0]:
             # new photo
             if self.current:
-                # TODO: add animation
-                self.obj.remove_actor(self.current)
+                self.previous = self.current
             self.current, width, height = self.textures[self.filename]
-            self.current.set_position(0, 0)
+            x = y = 0
             if width < self.width:
-                self.current.set_x((self.width - width) / 2)
+                x = (self.width - width) / 2
             if height < self.height:
-                self.current.set_y((self.height - height) / 2)
+                y = (self.height - height) / 2
+
+            self.current.set_position(x, y)
             self.current.set_size(width, height)
             self.current.set_property('pivot-point', CENTER)
-            self.current.show()
-            self.obj.add_actor(self.current)
+            self.current.set_property('opacity', 255)
             self.current.set_scale(factor, factor)
             self.current.set_property('rotation-angle-z', self.rotation)
             self.current_rotation = self.rotation
+
+            if not self.previous:
+                self.current.set_property('opacity', 0)
+                self.current.save_easing_state()
+                self.current.set_easing_duration(200)
+                self.current.set_property('opacity', 255)
+                self.current.restore_easing_state()
+            else:
+                duration = 1000
+                a = self.previous_animation
+                while a == self.previous_animation:
+                    a = random.choice([ a for a in dir(self) if a.startswith('start_animation') ])
+                self.previous_animation = a
+                getattr(self, a)(duration, x, y, factor)
+                gobject.timeout_add(duration, self.animation_finished)
+                    
+            self.current.show()
+            self.obj.add_actor(self.current)
+
         elif self.current_rotation != self.rotation:
             # rotation changed
             if self.rotation == 0 and self.current_rotation == 270:
