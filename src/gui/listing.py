@@ -224,7 +224,7 @@ class GridListing(AbstractListing):
         self.cell_size = self.example_item.size
         super(GridListing, self).create_grid()
         pos = self.context.get('menu').selected_pos
-        self.select((pos % self.num_items_x, pos / self.num_items_y), 0)
+        self.select((pos % self.num_items_x, pos / self.num_items_x), 0)
 
     def clear(self):
         super(GridListing, self).clear()
