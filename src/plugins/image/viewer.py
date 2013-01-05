@@ -2,11 +2,8 @@
 # -----------------------------------------------------------------------------
 # viewer.py - Freevo image viewer
 # -----------------------------------------------------------------------------
-# $Id$
-#
-# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2011 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2013 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -48,12 +45,12 @@ log = logging.getLogger('image')
 # global viewer, will be set to the ImageViewer
 viewer = None
 
-class Photo(kaa.candy.Widget):
+class Widget(kaa.candy.Widget):
     """
-    Photo widget
+    Imageviewer widget for kaa.candy
     """
     candyxml_name = 'photo'
-    candy_backend = 'backend.PhotoGroup'
+    candy_backend = 'backend.Widget'
     attributes = [ 'cached', 'filename', 'rotation' ]
 
 
@@ -70,20 +67,18 @@ class ImageViewer(freevo.Player):
         """
         capabilities = (freevo.CAPABILITY_TOGGLE, freevo.CAPABILITY_FULLSCREEN)
         super(ImageViewer, self).__init__('image', capabilities)
-        self.osd_mode = 0
         self.slideshow = True
-        self.sshow_timer = kaa.OneShotTimer(self._next)
-        self.signals['stop'].connect_weak(self._cleanup)
+        self.sshow_timer = kaa.OneShotTimer(self.slideshow_next)
+        self.signals['stop'].connect_weak(self.application_stop)
 
-    def _cleanup(self):
+    def application_stop(self):
         """
         Application not running anymore
         """
-        self.osd_mode = 0
         # we don't need the signalhandler anymore
         self.sshow_timer.stop()
 
-    def _next(self):
+    def slideshow_next(self):
         """
         Send PLAY_END to show next image.
         """

@@ -32,10 +32,12 @@
 
 __all__ = [ 'PhotoGroup' ]
 
+# Python imports
 import os
 import tempfile
 import random
 
+# kaa imports
 import kaa
 import kaa.imlib2
 
@@ -51,9 +53,9 @@ CENTER = clutter.Point()
 CENTER.x = 0.5
 CENTER.y = 0.5
 
-class PhotoGroup(candy.Widget):
+class Widget(candy.Widget):
     """
-    Texture
+    Backend widget class
     """
     def create(self):
         """
@@ -68,6 +70,9 @@ class PhotoGroup(candy.Widget):
 
     @kaa.threaded('candy::photo')
     def loadimage_async(self, filename):
+        """
+        Load the image in an extra thread
+        """
         # clutter has problems with large images and may
         # crash. Theerefore, we load the images using kaa.imlib2 and
         # scale them before loading them into clutter.
@@ -83,6 +88,9 @@ class PhotoGroup(candy.Widget):
 
     @kaa.threaded(kaa.GOBJECT)
     def loadimage_clutter(self, filename, cachefile, width, height):
+        """
+        Load the image into a clutter texture
+        """
         t = clutter.Texture.new()
         t.set_from_file(cachefile)
         os.unlink(cachefile)
@@ -90,6 +98,9 @@ class PhotoGroup(candy.Widget):
         self.showimage()
 
     def start_animation_scale(self, duration, x, y, factor):
+        """
+        Animation function
+        """
         self.current.set_scale(factor*5, factor*5)
         self.current.save_easing_state()
         self.current.set_easing_duration(duration)
@@ -102,6 +113,9 @@ class PhotoGroup(candy.Widget):
             self.previous.restore_easing_state()
 
     def start_animation_move_x(self, duration, x, y, factor):
+        """
+        Animation function
+        """
         self.current.set_property('x', x + self.width)
         self.current.save_easing_state()
         self.current.set_easing_duration(duration)
@@ -112,8 +126,11 @@ class PhotoGroup(candy.Widget):
             self.previous.set_easing_duration(duration)
             self.previous.set_property('x', -self.width)
             self.previous.restore_easing_state()
-        
+
     def start_animation_rotate(self, duration, x, y, factor):
+        """
+        Animation function
+        """
         self.current.set_property('rotation-angle-x', 90)
         self.current.set_property('rotation-angle-y', 90)
         self.current.set_property('rotation-angle-z', self.rotation-90)
@@ -128,8 +145,11 @@ class PhotoGroup(candy.Widget):
             self.previous.set_easing_duration(duration / 2)
             self.previous.set_property('opacity', 0)
             self.previous.restore_easing_state()
-        
+
     def start_animation_scale_move(self, duration, x, y, factor):
+        """
+        Animation function
+        """
         if self.previous:
             self.previous.set_property('opacity', 0)
         self.current.set_property('scale_x', factor*5)
@@ -137,22 +157,22 @@ class PhotoGroup(candy.Widget):
         self.current.set_property('x', x-self.width/5)
         self.current.set_property('y', y-self.height/5)
         self.current.set_property('opacity', 0)
-        
+
         self.current.save_easing_state()
         self.current.set_easing_duration(200)
         self.current.set_property('opacity', 255)
         self.current.restore_easing_state()
-                    
+
         self.current.save_easing_state()
         self.current.set_easing_duration(duration*0.8)
         self.current.set_position(x, y)
         self.current.restore_easing_state()
-        
+
         self.current.save_easing_state()
         self.current.set_easing_duration(duration/2)
         self.current.set_scale(factor*1.8, factor*1.8)
         self.current.restore_easing_state()
-        
+
         self.current.save_easing_state()
         self.current.set_easing_delay(duration/2)
         self.current.set_easing_duration(duration/2)
@@ -160,19 +180,27 @@ class PhotoGroup(candy.Widget):
         self.current.restore_easing_state()
 
     def start_animation_rotation_x(self, duration, x, y, factor):
+        """
+        Animation function
+        """
         self.current.set_property('rotation-angle-x', 90)
         self.current.animatev(clutter.AnimationMode.EASE_OUT_QUAD, duration, ['rotation-angle-x'], [ 0 ])
         if self.previous:
             self.previous.animatev(clutter.AnimationMode.EASE_OUT_QUAD, 200, ['opacity'], [ 0 ])
-            
+
     def start_animation_rotation_y(self, duration, x, y, factor):
+        """
+        Animation function
+        """
         self.current.set_property('rotation-angle-y', 90)
         self.current.animatev(clutter.AnimationMode.EASE_OUT_QUAD, duration, ['rotation-angle-y'], [ 0 ])
         if self.previous:
             self.previous.animatev(clutter.AnimationMode.EASE_OUT_QUAD, 200, ['opacity'], [ 0 ])
-            
-        
+
     def animation_finished(self):
+        """
+        Callback when the animation is finished
+        """
         if self.previous:
             self.obj.remove_actor(self.previous)
         self.previous = None
@@ -180,6 +208,9 @@ class PhotoGroup(candy.Widget):
         return False
 
     def showimage(self):
+        """
+        Show the current image (gobject thread)
+        """
         if not self.filename in self.textures or self.previous:
             # either not loaded or animation still in progress
             return
@@ -197,7 +228,6 @@ class PhotoGroup(candy.Widget):
                 x = (self.width - width) / 2
             if height < self.height:
                 y = (self.height - height) / 2
-
             self.current.set_position(x, y)
             self.current.set_size(width, height)
             self.current.set_property('pivot-point', CENTER)
@@ -205,14 +235,15 @@ class PhotoGroup(candy.Widget):
             self.current.set_scale(factor, factor)
             self.current.set_property('rotation-angle-z', self.rotation)
             self.current_rotation = self.rotation
-
             if not self.previous:
+                # fade in
                 self.current.set_property('opacity', 0)
                 self.current.save_easing_state()
                 self.current.set_easing_duration(200)
                 self.current.set_property('opacity', 255)
                 self.current.restore_easing_state()
             else:
+                # transition between images
                 duration = 1000
                 a = self.previous_animation
                 while a == self.previous_animation:
@@ -220,10 +251,8 @@ class PhotoGroup(candy.Widget):
                 self.previous_animation = a
                 getattr(self, a)(duration, x, y, factor)
                 gobject.timeout_add(duration, self.animation_finished)
-                    
             self.current.show()
             self.obj.add_actor(self.current)
-
         elif self.current_rotation != self.rotation:
             # rotation changed
             if self.rotation == 0 and self.current_rotation == 270:
@@ -239,7 +268,7 @@ class PhotoGroup(candy.Widget):
         """
         Render the widget (gobject thread)
         """
-        super(PhotoGroup, self).update(modified)
+        super(Widget, self).update(modified)
         if 'cached' in modified:
             for f in self.cached:
                 if not f in self.textures:
