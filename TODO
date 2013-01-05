@@ -1,23 +1,26 @@
 Stuff that needs to be done before 2.0pre1
 
-o HTTP
-  - Extra menu stack
 o GUI
-  - music player
-  - image viewer
+  - improve image viewer
   - add/delete files in view
-  - choose tv images
-  - Webbrowser
+  - choose tv images (webinfo)
   - Video submenu
+  - Overlay menu in video (subtitles, etc)
 o beacon:
   - monitor directory configure
   - scan everything at least once
   - monitor without prev. check
 o music player
   - playlist manager
+o candy
+  - xrandr support
+  - video in group
+  - audio player volume
+  - Webbrowser
+  - Fix DVD support
+o HTTP
+  - Extra menu stack
 o Watch TV
 o Fix broken plugins from WIP
-o Fix DVD support
-o xrandr support
-o every plugin gets an XML file
-o Overlay menu in video (subtitles, etc)
+o Nice to Have:
+  - Trailer support for videos based on themoviedb / imdb
