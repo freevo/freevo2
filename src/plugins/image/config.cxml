@@ -55,12 +55,6 @@
 	<group name="calendar" plugin="10">
 	    <desc>Show image files by date</desc>
 	</group>
-
-	<!-- FIXME: this plugin is currently broken
-	<group name="apod" plugin="20">
-	    <desc>Astronomy Picture of the Day</desc>
-	</group>
-	-->
     </group>
 
 </config>
