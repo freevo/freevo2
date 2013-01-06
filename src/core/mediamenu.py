@@ -55,6 +55,9 @@ class MediaMenu(freevo.MainMenuItem):
     This is the main menu for different media types. It displays the
     default directories, the beacon mountpoints, and sub-plugins.
     """
+
+    __scanning = []
+
     def __init__(self, parent, title, type, items, subtype=None):
         super(MediaMenu, self).__init__(parent)
         self.media_type = type
@@ -65,7 +68,7 @@ class MediaMenu(freevo.MainMenuItem):
         self.name = title
         self._items = items
         for filename in self._items:
-            if hasattr(filename, 'scan') and filename.scan:
+            if hasattr(filename, 'scan'):
                 self._check_for_rescan(filename.path.replace('$(HOME)', os.environ.get('HOME')), filename.scan)
             if hasattr(filename, 'path'):
                 # kaa.config object
@@ -77,17 +80,22 @@ class MediaMenu(freevo.MainMenuItem):
         """
         Return items for the menu.
         """
-        if os.path.isdir(filename):
-            data = (yield kaa.beacon.query(filename=filename)).get()
-            if interval == -1:
-                kaa.beacon.monitor(filename)
-            elif data.get('last_crawl', 0) == 0:
-                # directory not known, force scan
-                kaa.beacon.scan(filename)
-            elif (time.time() - data.get('last_crawl', 0)) / 3600 > interval:
-                # FIXME: if Freevo is running longer than 'interval'
-                # hours we need to re-trigger the scan here.
-                kaa.beacon.scan(filename)
+        if filename in self.__scanning or not os.path.isdir(filename):
+            return
+        self.__scanning.append(filename)
+        data = (yield kaa.beacon.query(filename=filename)).get()
+        if interval == -1:
+            log.info('add monitor %s' % filename)
+            kaa.beacon.monitor(filename)
+        elif data.get('last_crawl', 0) == 0:
+            # directory not known, force scan
+            log.info('initial scan %s' % filename)
+            kaa.beacon.scan(filename)
+        elif (time.time() - data.get('last_crawl', 0)) / 3600 > interval:
+            # FIXME: if Freevo is running longer than 'interval'
+            # hours we need to re-trigger the scan here.
+            log.info('scan %s' % filename)
+            kaa.beacon.scan(filename)
 
     @kaa.coroutine()
     def _get_items(self):
