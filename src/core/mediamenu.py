@@ -81,7 +81,10 @@ class MediaMenu(freevo.MainMenuItem):
             data = (yield kaa.beacon.query(filename=filename)).get()
             if interval == -1:
                 kaa.beacon.monitor(filename)
-            if (time.time() - data.get('last_crawl', 0)) / 3600 > interval:
+            elif data.get('last_crawl', 0) == 0:
+                # directory not known, force scan
+                kaa.beacon.scan(filename)
+            elif (time.time() - data.get('last_crawl', 0)) / 3600 > interval:
                 # FIXME: if Freevo is running longer than 'interval'
                 # hours we need to re-trigger the scan here.
                 kaa.beacon.scan(filename)
