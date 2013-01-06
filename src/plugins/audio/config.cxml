@@ -18,6 +18,14 @@
         <var name="name" type="unicode">
             <desc>Name in the mediamenu</desc>
         </var>
+        <var name="scan" type="int" default="0">
+            <desc>
+	      Hours between automatic rescan. If the value is 0, the
+	      directory will only be scanned if not known to
+	      Freevo. If set to -1 the directory and all
+	      subdirectories will be monitored for changes.
+	    </desc>
+        </var>
     </list>
     <var name="suffix" default="mp3,ogg,wav,m4a,wma,aac,flac,mka,ac3">
         <desc>Comma seperated list of audio suffixes.</desc>

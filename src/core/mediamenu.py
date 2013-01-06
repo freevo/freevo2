@@ -36,6 +36,7 @@ __all__ = [ 'MediaMenu' ]
 
 # python imports
 import os
+import time
 import logging
 
 # kaa imports
@@ -64,15 +65,26 @@ class MediaMenu(freevo.MainMenuItem):
         self.name = title
         self._items = items
         for filename in self._items:
+            if hasattr(filename, 'scan') and filename.scan:
+                self._check_for_rescan(filename.path.replace('$(HOME)', os.environ.get('HOME')), filename.scan)
             if hasattr(filename, 'path'):
                 # kaa.config object
                 filename = filename.path.replace('$(HOME)', os.environ.get('HOME'))
             filename = os.path.abspath(filename)
-            #if os.path.isdir(filename) and \
-            #       not os.environ.get('NO_CRAWLER') and \
-            #       not filename == os.environ.get('HOME') and \
-            #       not filename == '/':
-            #    kaa.beacon.monitor(filename)
+
+    @kaa.coroutine()
+    def _check_for_rescan(self, filename, interval):
+        """
+        Return items for the menu.
+        """
+        if os.path.isdir(filename):
+            data = (yield kaa.beacon.query(filename=filename)).get()
+            if interval == -1:
+                kaa.beacon.monitor(filename)
+            if (time.time() - data.get('last_crawl', 0)) / 3600 > interval:
+                # FIXME: if Freevo is running longer than 'interval'
+                # hours we need to re-trigger the scan here.
+                kaa.beacon.scan(filename)
 
     @kaa.coroutine()
     def _get_items(self):
