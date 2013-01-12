@@ -42,6 +42,7 @@ from .. import core as freevo
 
 # get shutdown config
 config = freevo.config.plugin.shutdown
+system = freevo.system.manager
 
 class ShutdownItem(freevo.MainMenuItem):
     """
@@ -51,19 +52,28 @@ class ShutdownItem(freevo.MainMenuItem):
         """
         return a list of actions for this item
         """
-        if config.confirm:
-            items = [ freevo.Action(_('Shutdown Freevo'), self.confirm_freevo),
-                      freevo.Action(_('Shutdown system'), self.confirm_system),
-                      freevo.Action(_('Restart Freevo'), self.confirm_freevo_restart),
-                      freevo.Action(_('Restart system'), self.confirm_sys_restart) ]
-        else:
-            items = [ freevo.Action(_('Shutdown Freevo'), self.shutdown_freevo),
-                      freevo.Action(_('Shutdown system'), self.shutdown_system),
-                      freevo.Action(_('Restart Freevo'), self.shutdown_freevo_restart),
-                      freevo.Action(_('Restart system'), self.shutdown_sys_restart) ]
+        def choose_cb(confirm, noconfirm):
+            if config.confirm:
+                return confirm
+            return noconfirm
+
+        items = [ freevo.Action(_('Shutdown Freevo'), choose_cb(self.confirm_freevo, system.exit)),
+                  freevo.Action(_('Restart Freevo'), choose_cb(self.confirm_freevo_restart, system.restart))]
+
+        if system.can_suspend():
+            items.append(freevo.Action(_('Suspend system'), choose_cb(self.confirm_suspend, system.suspend)))
+
+        if system.can_hibernate():
+            items.append(freevo.Action(_('Hibernate system'), choose_cb(self.confirm_hibernate, system.hibernate)))
+
+        if system.can_shutdown():
+            items.append(freevo.Action(_('Shutdown system'), choose_cb(self.confirm_system, system.shutdown)))
+
+        if system.can_reboot():
+            items.append(freevo.Action(_('Restart system'), choose_cb(self.confirm_sys_restart, system.restart)))
 
         if config.default == 'system':
-            items = [ items[1], items[0], items[2] ]
+            items = items[2:] + items[:2]
 
         return items
 
@@ -74,7 +84,7 @@ class ShutdownItem(freevo.MainMenuItem):
         """
         what = _('Do you really want to shut down Freevo?')
         box = freevo.ConfirmWindow(what, default_choice=1)
-        box.buttons[0].connect(self.shutdown_freevo)
+        box.buttons[0].connect(system.exit)
         box.show()
 
 
@@ -84,7 +94,7 @@ class ShutdownItem(freevo.MainMenuItem):
         """
         what = _('Do you really want to shut down the system?')
         box = freevo.ConfirmWindow(what, default_choice=1)
-        box.buttons[0].connect(self.shutdown_system)
+        box.buttons[0].connect(system.shutdown)
         box.show()
 
 
@@ -94,7 +104,7 @@ class ShutdownItem(freevo.MainMenuItem):
         """
         what = _('Do you really want to restart Freevo?')
         box = freevo.ConfirmWindow(what, default_choice=1)
-        box.buttons[0].connect(self.shutdown_freevo_restart)
+        box.buttons[0].connect(system.restart)
         box.show()
 
 
@@ -104,59 +114,26 @@ class ShutdownItem(freevo.MainMenuItem):
         """
         what = _('Do you really want to restart the system?')
         box = freevo.ConfirmWindow(what, default_choice=1)
-        box.buttons[0].connect(self.shutdown_sys_restart)
+        box.buttons[0].connect(system.reboot)
         box.show()
 
-
-    def show_gui_message(self, text):
+    def confirm_suspend(self):
         """
-        Clear the screen and show the message.
+        Pops up a ConfirmWindow.
         """
-        pass
-#         size = gui.get_display().width, gui.get_display().height
-#         msg = widgets.Text(text, (0, 0), size,
-#                            theme.font('default'), align_h='center',
-#                            align_v='center')
-#         gui.get_display().clear()
-#         gui.get_display().add_child(msg)
-#         gui.get_display().update()
+        what = _('Do you really want to suspend the system?')
+        box = freevo.ConfirmWindow(what, default_choice=1)
+        box.buttons[0].connect(system.suspend)
+        box.show()
 
-        
-    def shutdown_freevo(self):
+    def confirm_hibernate(self):
         """
-        shutdown freevo, don't shutdown the system
+        Pops up a ConfirmWindow.
         """
-        self.show_gui_message(_('shutting down...'))
-        kaa.OneShotTimer(sys.exit, 0).start(0.01)
-
-
-    def shutdown_system(self):
-        """
-        shutdown the complete system
-        """
-        self.show_gui_message(_('shutting down system...'))
-        kaa.OneShotTimer(os.system, config.command.halt).start(1)
-
-
-    def shutdown_freevo_restart(self):
-        """
-        restart freevo
-        """
-        self.show_gui_message(_('restart...'))
-        kaa.main.signals['shutdown'].connect(os.execvp, sys.argv[0], sys.argv)
-        kaa.OneShotTimer(sys.exit, 0).start(1)
-
-
-    def shutdown_sys_restart(self):
-        """
-        restart the complete system
-        """
-        self.show_gui_message(_('restarting system...'))
-        kaa.OneShotTimer(os.system, config.command.restart).start(1)
-
-
-
-
+        what = _('Do you really want to hibernate the system?')
+        box = freevo.ConfirmWindow(what, default_choice=1)
+        box.buttons[0].connect(system.hibernate)
+        box.show()
 
 #
 # the plugin is defined here

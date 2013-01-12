@@ -93,4 +93,32 @@
         </var>
     </group>
 
+    <group name="system">
+        <desc>System settings</desc>
+
+        <var name="shutdown-command" type="str">
+            <desc>
+                Custom command to shutdown the system.
+                For example:
+                    shutdown -P now
+            </desc>
+        </var>
+        <var name="reboot-command" type="str">
+            <desc>
+                Custom command to reboot the system.
+                For example:
+                    shutdown -r now
+            </desc>
+        </var>
+        <var name="suspend-command" type="str">
+            <desc>
+                Custom command to suspend the system.
+            </desc>
+        </var>
+        <var name="hibernate-command" type="str">
+            <desc>
+                Custom command to hibernate the system.
+            </desc>
+        </var>
+    </group>
 </config>
