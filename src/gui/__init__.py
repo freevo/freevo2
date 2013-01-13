@@ -48,12 +48,19 @@ for name, module in kaa.utils.get_plugins(group='freevo.gui', location=__file__)
 
 stage = None
 signals = None
+active = False
 
 def show_window(cfg, sharedir):
     config.load(cfg, sharedir)
-    global stage, signals
+    global stage, signals, active
     stage = Stage()
     signals = stage.signals
+    active = True
+
+def set_active(state):
+    global active
+    stage.set_active(state)
+    active = state
 
 def show_application(application, fullscreen, context):
     return stage.show_application(application, fullscreen, context)

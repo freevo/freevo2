@@ -43,6 +43,7 @@ import kaa
 
 # freevo imports
 import api as freevo
+from .. import gui
 
 # the logging object
 log = logging.getLogger()
@@ -76,6 +77,7 @@ class TaskManager(kaa.Object):
         self.current = None
         self.windows = []
         self.eventmap = None
+        self.set_busy = kaa.OneShotTimer(gui.set_active, False)
         kaa.EventHandler(self.eventhandler).register()
 
     def sync(self):
@@ -198,8 +200,13 @@ class TaskManager(kaa.Object):
         # aware of InProgress objects so if result is an InProgress
         # object we wait here using step().
         if isinstance(result, kaa.InProgress):
+            self.set_busy.start(0.5)
             while not result.finished:
                 kaa.main.step()
+            self.set_busy.stop()
+            if not gui.active:
+                gui.set_active(True)
+
 
 # create the global object
 taskmanager = TaskManager()
