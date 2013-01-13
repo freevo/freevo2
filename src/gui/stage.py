@@ -59,7 +59,7 @@ class Stage(kaa.candy.Stage):
     """
     def __init__(self):
         size = (int(config.display.width), int(config.display.height))
-        super(Stage, self).__init__(size, 'freevo2')
+        super(Stage, self).__init__(size, 'freevo2', os.path.expanduser('~/.freevo/log/candy'))
         self.theme_prefix = ''
         self.width, self.height = self.size
         self.applications = []
