@@ -16,14 +16,6 @@
                 <value>freevo</value>
             </values>
         </var>
-        <group name="command">
-            <var name="halt" default="shutdown -P now">
-                <desc>command to execute on system shutdown</desc>
-            </var>
-            <var name="restart" default="shutdown -r now">
-                <desc>command to execute on system restart</desc>
-            </var>
-        </group>
     </group>
 
     <group name="file_ops" plugin="30">
