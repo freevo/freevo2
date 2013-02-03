@@ -78,6 +78,7 @@ class Player(freevo.Player):
         # unless it is a playlist, in this case we want to reuse the
         # player
         self.streaminfo = None
+        self.context.stereo = item.get('stereo')
         self.player = self.widget.get_widget('player')
         self.player.player = item.player
         self.player.uri = item.filename or item.url

@@ -42,15 +42,26 @@ class ScaledGroup(kaa.candy.Group):
     candyxml_name = 'group'
     candyxml_style = 'scaled'
 
-    def __set_screen_width(self, value):
+    __screen_width = None
+    __screen_height = None
+
+    @property
+    def screen_width(self):
+        return self.__screen_width
+
+    @screen_width.setter
+    def screen_width(self, value):
+        self.__screen_width = int(value)
         self.scale_x = float(self.ssize[0] - ( 2 * config.display.overscan.x)) / int(value)
 
-    screen_width = property(None, __set_screen_width)
+    @property
+    def screen_height(self):
+        return self.__screen_height
 
-    def __set_screen_height(self, value):
+    @screen_height.setter
+    def screen_height(self, value):
+        self.__screen_height = int(value)
         self.scale_y = float(self.ssize[1] - ( 2 * config.display.overscan.y)) / int(value)
-
-    screen_height = property(None, __set_screen_height)
 
 
 class Freevo(ScaledGroup):
@@ -114,7 +125,7 @@ class OSD(ScaledGroup):
                 return None
             if not self.widget:
                 self.widget = self.template(context=parent.context)
-                self.widget.parent = parent
+                self.widget.parent = parent.master
                 self.widget.application = kaa.weakref.weakref(application)
             self.__visible = True
             return self.widget.show()
@@ -138,11 +149,42 @@ class OSD(ScaledGroup):
 
     def __init__(self, pos=None, size=None, widgets=[], context=None, **osd_templates):
         super(OSD, self).__init__(pos, size, widgets, context)
+        self.master = kaa.candy.Group((0,0), context=context)
+        self.master.parent = self
+        self.clone = None
         self.timer = None
         self.osd_widgets = {}
+        self.stereo = None
         for key, template in osd_templates.items():
             self.osd_widgets[key] = OSD.WidgetWrapper(template)
 
+    def sync_context(self):
+        super(OSD, self).sync_context()
+        if self.context.stereo != self.stereo:
+            if not self.context.stereo and self.clone:
+                self.clone = None
+            elif not self.clone:
+                self.clone = kaa.candy.Clone((0,0), master=self.master)
+                self.clone.parent = self
+            
+    def sync_layout(self, (width, height)):
+        if self.stereo != self.context.stereo:
+            self.master.clip = (0,0), (self.screen_width, self.screen_height)
+            if not self.context.stereo and not self.clone:
+                self.master.scale_x = 1.0
+                self.stereo = self.context.stereo
+            elif self.context.stereo and self.clone:
+                if self.context.stereo.startswith('side'):
+                    self.master.scale_x = 0.5
+                    self.clone.scale_x = 0.5
+                    self.clone.x = self.screen_width / 2
+                else:
+                    self.master.scale_y = 0.5
+                    self.clone.scale_y = 0.5
+                    self.clone.y = self.screen_height / 2
+                self.stereo = self.context.stereo
+        super(OSD, self).sync_layout((width, height))
+        
     def osd_show(self, name, autohide=None):
         """
         Show the OSD with the given name
