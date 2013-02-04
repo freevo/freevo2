@@ -76,8 +76,7 @@
 	    other information is defined as widget and shown on demand
 	    (see eventhandler)
 	-->
-	<osd>
-	    <properties screen-width="1280" screen-height="720"/>
+	<osd width="1280" height="720">
 
 	    <widget x="20" y="570" width="700" height="140" use-as="info">
                 <rectangle color="0x66000000" radius="20"/>

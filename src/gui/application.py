@@ -1,12 +1,9 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# application - application widget
-# -----------------------------------------------------------------------------
-# $Id$
-#
+# Application widget
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2008-2011 Dirk Meyer, et al.
+# Copyright (C) 2009-2013 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -31,11 +28,11 @@
 
 __all__ = [ 'Application', 'ApplicationStyles' ]
 
-# gui imports
 import kaa.candy
 
 from widget import Widget, WidgetStyles
 
+# register xml eventhandler
 kaa.candy.Eventhandler.signatures['system'] = 'widget,event'
 
 
@@ -52,53 +49,64 @@ class Application(kaa.candy.Layer):
     """
     candyxml_name = 'application'
 
+    class OSDWrapper(object):
+        """
+        Wrapper around the actual OSD widget in case it is not
+        available. This class uses simpler method names; instead of
+        osd_show() it is just show(). The actual widget cannot use
+        these names but they are reserved by kaa.candy.
+        """
+        layer = None
+
+        def show(self, name, autohide=None):
+            """
+            Show the OSD with the given name
+            """
+            if self.layer:
+                return self.layer.osd_show(name, autohide)
+
+        def hide(self, name):
+            """
+            Hide the OSD with the given name
+            """
+            if self.layer:
+                return self.layer.osd_hide(name)
+
+        def toggle(self, name):
+            """
+            Toggle the OSD with the given name
+            """
+            if self.layer:
+                return self.layer.osd_toggle(name)
+
+        def is_visible(self, name):
+            """
+            Return if the OSD with the given name is visible
+            """
+            if self.layer:
+                return self.layer.osd_visible(name)
+            return False
+
+
     class __template__(kaa.candy.AbstractGroup.__template__):
         @classmethod
         def candyxml_get_class(cls, element):
             return kaa.candy.candyxml.get_class(element.node, element.name)
 
-    def __init__(self, size, widgets, background=None, context=None, **osd_templates):
+    def __init__(self, size, widgets, background=None, context=None):
+        """
+        Constructor for the application widget
+        """
         if kaa.candy.is_template(background):
             background = background(context=context)
+        self.osd = Application.OSDWrapper()
         self.timer = None
         self.background = background
-        self.osd_widgets = {}
-        for key, template in osd_templates.items():
-            self.osd_widgets[key] = OSD(template)
         super(Application, self).__init__(size, widgets, context)
-        self.osd_layer = None
         for child in self.children:
+            # connect to OSD widget
             if child.candyxml_name == 'osd':
-                self.osd_layer = child
-                
-    def osd_show(self, name, autohide=None, parent=None):
-        """
-        Show the OSD with the given name
-        """
-        if self.osd_layer:
-            return self.osd_layer.osd_show(name, autohide)
-
-    def osd_hide(self, name):
-        """
-        Hide the OSD with the given name
-        """
-        if self.osd_layer:
-            return self.osd_layer.osd_hide(name)
-
-    def osd_toggle(self, name):
-        """
-        Toggle the OSD with the given name
-        """
-        if self.osd_layer:
-            return self.osd_layer.osd_toggle(name)
-
-    def osd_visible(self, name):
-        """
-        Return if the OSD with the given name is visible
-        """
-        if self.osd_layer:
-            return self.osd_layer.osd_visible(name)
-        return False
+                self.osd.layer = child
 
     def sync_context(self):
         """

@@ -1,12 +1,9 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# menu - Menu Application
-# -----------------------------------------------------------------------------
-# $Id$
-#
+# Menu Application
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2008-2011 Dirk Meyer, et al.
+# Copyright (C) 2009-2013 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>

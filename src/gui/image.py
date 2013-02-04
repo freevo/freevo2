@@ -1,14 +1,43 @@
-__all__ = [ 'Thumbnail', 'Icon', 'MediaImage' ]
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------------
+# Misc image widgets
+# -----------------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2009-2013 Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dischi@freevo.org>
+# Maintainer:    Dirk Meyer <dischi@freevo.org>
+#
+# Please see the file AUTHORS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# -----------------------------------------------------------------------------
+
+__all__ = [ 'Image', 'Thumbnail' ]
 
 import os
 
 import kaa.beacon
-import kaa.imlib2
 import kaa.candy
 
 
 class Image(kaa.candy.Image):
-
+    """
+    Basic image widget from kaa.candy with changed cache
+    """
     candyxml_style = None
 
     def get_cachefile(self, url):
@@ -19,6 +48,9 @@ class Image(kaa.candy.Image):
 
 
 class Thumbnail(kaa.candy.Thumbnail):
+    """
+    Thumbnail image with mimetype icons as fallback
+    """
     candyxml_style = 'mimetype'
 
     __item = __item_eval = None
@@ -28,15 +60,24 @@ class Thumbnail(kaa.candy.Thumbnail):
         self.item = item
 
     def _candy_context_sync(self, context):
+        """
+        Sync the kaa.candy context
+        """
         super(Thumbnail, self)._candy_context_sync(context)
         self.item = self.__item
 
     @property
     def item(self):
+        """
+        Get associated item
+        """
         return self.__item_eval
 
     @item.setter
     def item(self, item):
+        """
+        Set associated item and load the thumbnail
+        """
         self.__item = item
         if isinstance(item, (str, unicode)):
             if self.context:
@@ -50,9 +91,30 @@ class Thumbnail(kaa.candy.Thumbnail):
             return
         self.set_thumbnail(item.get('thumbnail'))
         if not self.image:
-            self._load_mimetype(item)
+            # find matching mimetype icon
+            # TODO: cache the results
+            if item.type == 'directory':
+                if self._try_mimetype('folder_%s' % item.media_type):
+                    return
+                return self._try_mimetype('folder')
+            if item.type == 'playlist':
+                if item.parent and self._try_mimetype('playlist_%s' % item.parent.media_type):
+                    return
+                return self._try_mimetype('playlist')
+            try:
+                if self._try_mimetype(item.info['mime'].replace('/', '_')):
+                    return
+            except:
+                pass
+            if item.type and self._try_mimetype(item.type):
+                return
+            if self._try_mimetype('unknown'):
+                return
 
     def _try_mimetype(self, name):
+        """
+        Try the given mimetype. Set self.image and return True if it is found
+        """
         for ext in ('.png', '.jpg'):
             fname = os.path.join(self.theme.icons, 'mimetypes', name + ext)
             if os.path.isfile(fname):
@@ -60,77 +122,10 @@ class Thumbnail(kaa.candy.Thumbnail):
                 return True
         return False
 
-    def _load_mimetype(self, item):
-        if item.type == 'directory':
-            if self._try_mimetype('folder_%s' % item.media_type):
-                return
-            return self._try_mimetype('folder')
-        if item.type == 'playlist':
-            if item.parent and self._try_mimetype('playlist_%s' % item.parent.media_type):
-                return
-            return self._try_mimetype('playlist')
-        try:
-            if self._try_mimetype(item.info['mime'].replace('/', '_')):
-                return
-        except:
-            pass
-        if item.type and self._try_mimetype(item.type):
-            return
-        if self._try_mimetype('unknown'):
-            return
-
     @classmethod
     def candyxml_parse(cls, element):
         """
+        Parse the candyxml element for parameter to create the widget.
         """
         return kaa.candy.Widget.candyxml_parse(element).update(
             item=element.item)
-
-
-class Icon(Image):
-
-    candyxml_style = 'icon'
-
-    __name = __name_eval = None
-
-    def __init__(self, pos, size, icon, context=None):
-        super(Icon, self).__init__(pos, size, context=context)
-        if icon and icon.startswith('$'):
-            icon = self.context.get(icon)
-        if not icon:
-            return
-        for ext in ('.png', '.jpg'):
-            fname = os.path.join(self.theme.icons, icon + ext)
-            if os.path.isfile(fname):
-                self.image = fname
-
-    @classmethod
-    def candyxml_parse(cls, element):
-        """
-        """
-        return kaa.candy.Widget.candyxml_parse(element).update(
-            icon=element.icon)
-
-
-class MediaImage(Image):
-
-    candyxml_style = 'media'
-
-    __name = __name_eval = None
-
-    def __init__(self, pos, size, folder, context=None):
-        super(MediaImage, self).__init__(pos, size, context=context)
-        name = self.context.get('item.media_type') or 'default'
-        for name in (name, 'default'):
-            for ext in ('.png', '.jpg'):
-                fname = os.path.join(self.theme.icons, folder, name + ext)
-                if os.path.isfile(fname):
-                    self.image = fname
-                    return
-
-    @classmethod
-    def candyxml_parse(cls, element):
-        """
-        """
-        return kaa.candy.Widget.candyxml_parse(element).update(
-            folder=element.folder)

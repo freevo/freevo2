@@ -159,8 +159,7 @@
     <application name="videoplayer">
         <video name="player"/>
 
-        <osd>
-            <properties screen-width="1280" screen-height="720"/>
+	<osd width="1280" height="720">
 
             <widget use-as="pause">
                 <image x="300" width="620" url="icons/pause.png">

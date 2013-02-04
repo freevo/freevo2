@@ -1,12 +1,9 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# gui - GUI Subsystem
-# -----------------------------------------------------------------------------
-# $Id$
-#
+# GUI subsystem based on kaa.candy
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2008-2011 Dirk Meyer, et al.
+# Copyright (C) 2009-2013 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -50,26 +47,25 @@ stage = None
 signals = None
 active = False
 
-def show_window(cfg, sharedir):
+def init(cfg, sharedir):
+    """
+    Initialize the GUI subsystem
+    """
     config.load(cfg, sharedir)
-    global stage, signals, active
+    # expose methods and variables from stage to the gui subsystem
+    global signals, active, show_application, destroy_application, show_widget, load_theme
     stage = Stage()
     signals = stage.signals
+    show_application = stage.show_application
+    destroy_application = stage.destroy_application
+    show_widget = stage.show_widget
+    load_theme = stage.load_theme
     active = True
 
 def set_active(state):
+    """
+    Set the gui active/inactive in case Freevo takes too long
+    """
     global active
     stage.set_active(state)
     active = state
-
-def show_application(application, fullscreen, context):
-    return stage.show_application(application, fullscreen, context)
-
-def show_widget(name, context=None):
-    return stage.show_widget(name, context)
-
-def destroy_application(layer):
-    return stage.destroy_application(layer)
-
-def load_theme(theme=None):
-    return stage.load_theme(theme)

@@ -1,12 +1,9 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# stage.py - Clutter Stage
-# -----------------------------------------------------------------------------
-# $Id$
-#
+# Clutter Stage
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2008-2011 Dirk Meyer, et al.
+# Copyright (C) 2009-2013 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -80,11 +77,11 @@ class Stage(kaa.candy.Stage):
         # same theme. Two displays with different themes are not possible.
         # On the other hand setting a theme this way is fast and simple.
         kaa.candy.Widget.theme = self.theme
-        kaa.candy.Widget.ssize = self.size
+        kaa.candy.Widget.screen_width, kaa.candy.Widget.screen_height = self.size
         # Create the defined layers
         self.applications_idx = None
         for c in self.theme.get('freevo')[None]().children[:]:
-            c = c(ssize=self.size)
+            c = c()
             if c.name == 'application':
                 self.applications_idx = self.layer[-1]
                 continue

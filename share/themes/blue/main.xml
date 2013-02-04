@@ -88,9 +88,7 @@
     </widget>
 
     <application name="menu">
-	<group style="scaled" width="1280" height="720" name="menu">
-	    <properties screen-width="1280" screen-height="720"/>
-	</group>
+	<group style="scaled" width="1280" height="720" name="menu"/>
     </application>
 
     <menu name="main">

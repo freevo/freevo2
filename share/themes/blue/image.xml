@@ -37,8 +37,7 @@
     <application name="imageviewer">
 	<photo name="player"/>
 
-        <osd>
-            <properties screen-width="1280" screen-height="720"/>
+	<osd width="1280" height="720">
             <widget use-as="browser">
 		<rectangle y="470" color="0x00000000"/>
 		<listing style="fixed-selection" x="-50" y="480" width="900" height="110"

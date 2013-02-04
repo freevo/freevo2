@@ -147,20 +147,20 @@ class Player(freevo.Player):
             return self.item.eventhandler(event)
         # player control makes only sense if the player is still running
         if event == freevo.TOGGLE_OSD:
-            self.widget.osd_toggle('info')
+            self.widget.osd.toggle('info')
         if event in (freevo.PAUSE, freevo.PLAY):
             if self.player.state == kaa.candy.STATE_PLAYING:
-                self.widget.osd_show('pause')
+                self.widget.osd.show('pause')
                 self.player.pause()
                 return True
             if self.player.state == kaa.candy.STATE_PAUSED:
-                self.widget.osd_hide('pause')
+                self.widget.osd.hide('pause')
                 self.player.resume()
                 return True
             return False
         if event == freevo.SEEK:
-            if not self.widget.osd_visible('info'):
-                self.widget.osd_show('seek', autohide=2)
+            if not self.widget.osd.is_visible('info'):
+                self.widget.osd.show('seek', autohide=2)
             self.player.seek(int(event.arg), kaa.candy.SEEK_RELATIVE)
             return True
         if event == freevo.VIDEO_CHANGE_ASPECT:
