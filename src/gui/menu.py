@@ -61,7 +61,7 @@ class MenuApplication(Application):
         if not name in self.templates:
             name = 'default'
         for c in self.children:
-            if c.candyxml_name == 'content':
+            if c.name == 'menu':
                 self.content = c
         self.menu = self.templates.get(name)(context)
         self.menu.type = name

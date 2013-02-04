@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<theme icons="hires">
+<theme>
 
     <script filename='scripts.py'/>
 
     <freevo>
 	<layer name="background">
-	    <image filename="../../images/blurrback.jpg"/>
+	    <image filename="images/background.jpg"/>
 	</layer>
 
 	<layer name="application"/>
@@ -17,9 +17,9 @@
     </freevo>
 
     <widget name="idlebar" height="60" layer="widgets">
-        <image y="-20" height="75" filename="../../images/idlebar.png"/>
+        <image y="-20" height="75" filename="images/idlebar.png"/>
 	<group>
-	    <image name="logo" height="80" width="200" filename="../../images/gant/logo.png">
+	    <image name="logo" height="80" width="200" filename="images/logo.png">
 		<properties opacity="0" keep-aspect="true"/>
 	    </image>
 	    <group x="210" y="10" width="1050" height="60">
@@ -88,14 +88,14 @@
     </widget>
 
     <application name="menu">
-	<content width="1280" height="720">
+	<group style="scaled" width="1280" height="720" name="menu">
 	    <properties screen-width="1280" screen-height="720"/>
-	</content>
+	</group>
     </application>
 
     <menu name="main">
 	<properties anchor-point="640,360"/>
-	<image x="200" width="880" y="100" filename="../../images/logo_large.png">
+	<image x="200" width="880" y="100" filename="images/logo_large.png">
 	    <properties keep-aspect="true"/>
 	</image>
 	<group name="content" x="-20" y="550" width="1320" height="50">
