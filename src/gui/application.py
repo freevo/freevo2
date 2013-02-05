@@ -87,6 +87,11 @@ class Application(kaa.candy.Layer):
                 return self.layer.osd_visible(name)
             return False
 
+        @property
+        def scale(self):
+            if self.layer:
+                return self.layer.scale_x, self.layer.scale_y
+            return 1.0, 1.0
 
     class __template__(kaa.candy.AbstractGroup.__template__):
         @classmethod
