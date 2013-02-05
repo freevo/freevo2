@@ -88,7 +88,7 @@ class OSD(ScaledGroup):
 
     def sync_context(self):
         super(OSD, self).sync_context()
-        if self.context.stereo != self.stereo:
+        if 'stereo' in self.context and self.context.stereo != self.stereo:
             if not self.context.stereo and self.clone:
                 self.clone = None
             elif not self.clone:
@@ -96,7 +96,7 @@ class OSD(ScaledGroup):
                 self.clone.parent = self
             
     def sync_layout(self, (width, height)):
-        if self.stereo != self.context.stereo:
+        if 'stereo' in self.context and self.stereo != self.context.stereo:
             self.master.clip = (0,0), (self.screen_width, self.screen_height)
             if not self.context.stereo and not self.clone:
                 self.master.scale_x = 1.0
