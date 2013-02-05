@@ -278,3 +278,6 @@ class Widget(candy.Widget):
                     del self.textures[f]
         if 'filename' in modified or 'rotation' in modified:
             self.showimage()
+        if 'width' in modified or 'height' in modified:
+            self.obj.set_clip(0, 0, self.width, self.height)
+            
