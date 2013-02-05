@@ -53,12 +53,22 @@ class ImageItem(freevo.MediaItem):
         self.set_url(url)
         self.duration = duration
 
-    def get_geometry(self):
+    @property
+    def geometry(self):
         """
         Return width x height of the image or None
         """
         if self.get('width') and self.get('height'):
             return '%sx%s' % (self.get('width'), self.get('height'))
+        return None
+
+    @property
+    def date(self):
+        """
+        Return timestamp of the image or None
+        """
+        if self.get('timestamp'):
+            return time.strftime('%D %H:%M', time.localtime(self.get('timestamp')))
         return None
 
     def actions(self):
