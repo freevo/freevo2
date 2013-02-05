@@ -60,7 +60,7 @@ class Widget(kaa.candy.Group):
     # 'showing' and 'hiding' for the transitions. The later translate
     # to True in the visible property to make sure kaa.candy does not
     # delete the item because the flag is False and we need a way to
-    # determain if we are about to be visisble or hidden.
+    # determain if we are about to be visible or hidden.
     __visible = False
 
     class __template__(kaa.candy.AbstractGroup.__template__):
@@ -71,6 +71,14 @@ class Widget(kaa.candy.Group):
     def __init__(self, pos=None, size=None, widgets=[], layer=None, context=None):
         super(Widget, self).__init__(pos, size, widgets, context)
         self.layer = layer
+
+    @property
+    def status(self):
+        if self.__visible == True:
+            return 'visible'
+        if self.__visible == False:
+            return 'hidden'
+        return self.__visible
 
     @property
     def visible(self):
