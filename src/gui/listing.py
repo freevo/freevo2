@@ -234,7 +234,7 @@ class GridListing(AbstractListing):
         if self.__grid_position != menu.selected_pos / (self.num_items_x * self.num_items_y):
             self.__grid_position = menu.selected_pos / (self.num_items_x * self.num_items_y)
             self.scroll_to((0, self.__grid_position * self.num_items_y), secs)
-        self.emit_select(pos, 0.2)
+        self.emit_select(pos, secs)
 
     def sync_context(self):
         super(GridListing, self).sync_context()
