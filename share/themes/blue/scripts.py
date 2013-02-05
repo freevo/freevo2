@@ -1,4 +1,5 @@
 import kaa
+import freevo2.gui
 
 @kaa.coroutine()
 def menu(prev, next):
@@ -22,7 +23,14 @@ def menu(prev, next):
     yield prev.animate('EASE_IN_CUBIC', 0.3, opacity=0)
 
 @kaa.coroutine()
-def fade(prev, next):
-    next.opacity = 0
-    next.animate('EASE_IN_QUAD', 0.2, opacity=255)
-    yield prev.animate('EASE_OUT_QUAD', 0.2, opacity=0)
+def fade(prev, next=None):
+    if next is None and isinstance(prev, freevo2.gui.Widget):
+        if prev.status == 'showing':
+            prev.opacity = 0
+            yield prev.animate('EASE_IN_QUAD', 0.2, opacity=255)
+        else:
+            yield prev.animate('EASE_OUT_QUAD', 0.2, opacity=0)
+    else:
+        next.opacity = 0
+        next.animate('EASE_IN_QUAD', 0.2, opacity=255)
+        yield prev.animate('EASE_OUT_QUAD', 0.2, opacity=0)
