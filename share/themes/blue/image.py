@@ -7,7 +7,7 @@ def image_osd(widget, event):
     visible = getattr(widget, 'image_osd_status', False)
     if not visible:
         widget.get_widget('player').animate('EASE_IN_QUAD', 0.2, scale_x=0.7, scale_y=0.7,
-                  x=widget.osd.scale[0] * 20, y=widget.osd.scale[0] * 80)
+                  x=30 * widget.osd.scale_x, y=120 * widget.osd.scale_y)
         yield kaa.delay(0.2)
         idlebar = widget.stage.get_widget('idlebar')
         if idlebar:

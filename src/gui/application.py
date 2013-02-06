@@ -88,10 +88,16 @@ class Application(kaa.candy.Layer):
             return False
 
         @property
-        def scale(self):
+        def scale_x(self):
             if self.layer:
-                return self.layer.scale_x, self.layer.scale_y
-            return 1.0, 1.0
+                return self.layer.scale_x
+            return 1.0
+
+        @property
+        def scale_y(self):
+            if self.layer:
+                return self.layer.scale_y
+            return 1.0
 
     class __template__(kaa.candy.AbstractGroup.__template__):
         @classmethod

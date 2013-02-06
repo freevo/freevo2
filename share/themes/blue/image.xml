@@ -38,38 +38,38 @@
     <application name="imageviewer">
 	<photo name="player"/>
 
-	<osd width="1280" height="720">
+	<osd width="1920" height="1080">
             <widget use-as="listing">
-		<listing style="fixed-selection" x="1000" y="-100" width="200" height="900"
+		<listing style="fixed-selection" x="1500" y="-150" width="300" height="1300"
 			 selection="1" xpadding="0" ypadding="0">
-                    <group width="178" height="138">
-			<thumbnail style="mimetype" item="item" x="9" y="9" width="160" height="120">
+                    <group width="264" height="204">
+			<thumbnail style="mimetype" item="item" x="12" y="12" width="240" height="180">
 			    <properties xalign="center" yalign="center"/>
 			</thumbnail>
 			<rectangle border-color="0xaaffffff" border-size="2"/>
 		    </group>
 		    <selection>
-			<rectangle border-color="0xffffff" border-size="2" width="178" height="138"/>
+			<rectangle border-color="0xffffff" border-size="2" width="264" height="204"/>
 		    </selection>
 		</listing>
 		<event name="show" script="fade"/>
 		<event name="hide" script="fade"/>
 	    </widget>
 
-            <widget x="20" y="610" width="1260" height="100" use-as="info">
+            <widget x="30" y="910" width="1860" height="150" use-as="info">
 		<!--
 		    FIXME: Add a better info area. The kaa.candy.Text
 		    widget should support some sort of layout, it
 		    should ignore whitespaces from the XML file and
 		    ignore not existing fields.
 		-->
-		<label y="0" width="1240" font="Vera:22" color="0xffffff">
+		<label y="0" font="Vera:32" color="0xffffff">
 		    $item.name
 		</label>
-		<label y="50" width="1240" font="Vera:18" color="0xffffff">
+		<label y="60" font="Vera:26" color="0xffffff">
 		    Date: $item.date
 		</label>
-		<label y="70" width="1240" font="Vera:18" color="0xffffff">
+		<label y="90" font="Vera:26" color="0xffffff">
 		    Geometry: $item.geometry
 		</label>
 		<event name="show" script="fade"/>

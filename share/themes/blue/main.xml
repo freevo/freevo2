@@ -10,19 +10,19 @@
 
 	<layer name="application"/>
 
-	<layer width="1280" height="720" name="widgets"/>
+	<layer width="1920" height="1080" name="widgets"/>
 
-	<layer width="1280" height="720" name="popup"/>
+	<layer width="1920" height="1080" name="popup"/>
 
     </freevo>
 
-    <widget name="idlebar" height="60" layer="widgets">
-        <image y="-20" height="75" filename="images/idlebar.png"/>
+    <widget name="idlebar" height="90" layer="widgets">
+        <image y="-30" height="110" filename="images/idlebar.png"/>
 	<group>
-	    <image name="logo" height="80" width="200" filename="images/logo.png">
+	    <image name="logo" height="120" width="300" filename="images/logo.png">
 		<properties opacity="0" keep-aspect="true"/>
 	    </image>
-	    <group x="210" y="10" width="1050" height="60">
+	    <group x="320" y="15" width="1550" height="90">
 		<properties name="plugins"/>
 	    </group>
 	</group>
@@ -38,7 +38,7 @@
 
     <widget name="osd" layer="widgets">
 	<properties opacity="0"/>
-	<label x="60" width="1200" y="70" height="30" font="Vera" color="0xffffff">
+	<label x="90" width="1800" y="100" height="45" font="Vera" color="0xffffff">
 	    <properties xalign="right"/>
 	    ${message}
 	</label>
