@@ -40,7 +40,6 @@ import kaa.beacon
 
 # menu imports
 from item import Item, ActionItem
-from files import Files
 from menu import Menu
 
 # get logging object
@@ -78,15 +77,11 @@ class MediaItem(Item):
             raise RuntimeError('MediaItem.set_url needs a beacon item')
         self.info = url
         self.url = url.url
-        self.files = Files()
-        if self.info.get('read_only'):
-            self.files.read_only = True
         self.mode = self.url[:self.url.find('://')]
         if self.mode == 'file':
             # The url is based on a file. We can search for images
             # and extra attributes here
             self.filename = self.url[7:]
-            self.files.append(self.filename)
         else:
             # Mode is not file, it has to be a network url. Other
             # types like dvd are handled inside the derivated class

@@ -29,11 +29,10 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'Files', 'Item', 'ActionItem', 'ItemList', 'MediaItem', 'Action',
+__all__ = [ 'Item', 'ActionItem', 'ItemList', 'MediaItem', 'Action',
             'Menu', 'MenuStack', 'ItemPlugin', 'MediaPlugin']
 
 # import the submodules
-from files import Files
 from item import Item, ActionItem
 from listing import ItemList
 from mediaitem import MediaItem

@@ -29,6 +29,7 @@
 # -----------------------------------------------------------------------------
 
 # python imports
+import os
 import logging
 
 # freevo imports
@@ -48,13 +49,10 @@ class PluginInterface(freevo.ItemPlugin):
         if not item.parent or not item.parent.type == 'directory':
             # only activate this for directory listings
             return []
-        if not hasattr(item, 'files') or not item.files:
+        if not getattr(item, 'filename'):
             # no files to operate on
             return []
-        actions = []
-        if item.files.delete_possible():
-            actions.append(freevo.Action(_('Delete'), self.delete, 'delete'))
-        return actions
+        return [ freevo.Action(_('Delete'), self.delete, 'delete') ]
 
     def delete(self, item):
         txt = _('Do you wish to delete\n \'%s\'?') % item.name
@@ -63,5 +61,7 @@ class PluginInterface(freevo.ItemPlugin):
         box.show()
 
     def do_delete(self, item):
-        item.files.delete()
+        os.unlink(item.filename)
+        # FIXME: this menu may not get updated if we do not monitor
+        # the directory. That is kind of bad, we KNOW that it changed.
         item.menustack.back_submenu(True, True)

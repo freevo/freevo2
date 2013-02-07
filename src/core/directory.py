@@ -102,10 +102,6 @@ class Directory(freevo.Playlist):
         super(Directory, self).__init__(parent=parent, type=type)
         self.item_menu  = None
         self.set_url(directory)
-        self.files = freevo.Files()
-        if directory.get('read_only'):
-            self.files.read_only = True
-        self.files.append(directory)
         if name:
             self.name = kaa.str_to_unicode(name)
         if self['show_all_items']:
