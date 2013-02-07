@@ -93,6 +93,7 @@ class Thumbnail(kaa.candy.Thumbnail):
         if not self.image:
             # find matching mimetype icon
             # TODO: cache the results
+            # TODO: rotate if required
             if item.type == 'directory':
                 if self._try_mimetype('folder_%s' % item.media_type):
                     return
