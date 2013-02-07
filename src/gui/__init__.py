@@ -53,7 +53,7 @@ def init(cfg, sharedir):
     """
     config.load(cfg, sharedir)
     # expose methods and variables from stage to the gui subsystem
-    global signals, active, show_application, destroy_application, show_widget, load_theme
+    global stage, signals, active, show_application, destroy_application, show_widget, load_theme
     stage = Stage()
     signals = stage.signals
     show_application = stage.show_application
