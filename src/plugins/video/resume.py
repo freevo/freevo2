@@ -80,7 +80,7 @@ class PluginInterface(freevo.ItemPlugin):
         """
         # auto bookmark store
         if event == freevo.STOP:
-            if item.mode == 'file' and item.elapsed_secs:
+            if item.url.startswith('file://') and item.elapsed_secs:
                 # this will store in kaa.beacon
                 log.info('auto-bookmark store')
                 item[RESUME]= item.elapsed_secs
