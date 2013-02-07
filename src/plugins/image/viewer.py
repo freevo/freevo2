@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# viewer.py - Freevo image viewer
+# Freevo image viewer
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002 Krister Lagerstrom, 2003-2013 Dirk Meyer, et al.
@@ -50,8 +50,15 @@ class Widget(kaa.candy.Widget):
     Imageviewer widget for kaa.candy
     """
     candyxml_name = 'photo'
+
+    # Use the backend code from backend.py. This allows us to use the
+    # full power of clutter in this plugin, outside the main Freevo
+    # GUI code or kaa.candy. The backend,py should NEVER be imported
+    # from within Freevo, the kaa.candy display process will do
+    # this. Only this process should import clutter.
+
     candy_backend = 'backend.Widget'
-    attributes = [ 'cached', 'filename', 'rotation' ]
+    attributes = [ 'cached', 'filename', 'rotation', 'blend_mode' ]
 
 
 class ImageViewer(freevo.Player):
@@ -109,11 +116,12 @@ class ImageViewer(freevo.Player):
         self.player = self.widget.get_widget('player')
         self.player.cached = items
         self.player.filename = self.item.filename
-        self.player.rotation = 0
+        self.player.rotation = self.item.orientation or 0
+        self.player.blend_mode = str(freevo.config.image.viewer.blend_mode)
         self.eventmap = 'image'
         # start timer
         if self.item.duration and self.slideshow and \
-               not self.sshow_timer.active():
+               not self.sshow_timer.active:
             self.sshow_timer.start(self.item.duration)
         # Notify everyone about the viewing
         freevo.PLAY_START.post(item)
@@ -161,9 +169,7 @@ class ImageViewer(freevo.Player):
                 self.player.rotation = (self.player.rotation + 270) % 360
             else:
                 self.player.rotation = (self.player.rotation + 90) % 360
-            return True
-        if event == freevo.TOGGLE_OSD:
-            # FIXME: update widget
+            self.item.orientation = self.player.rotation
             return True
         # pass not handled event to the item
         return self.item.eventhandler(event)

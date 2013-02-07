@@ -1,15 +1,12 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# calendar.py - Show images by date
+# Show images by date
 # -----------------------------------------------------------------------------
-# $Id$
-#
 # This plugin let the user browse the images by date. It does not look
 # so nice on the GUI right now but shows the power of beacon.
-#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2007-2009 Dirk Meyer, et al.
+# Copyright (C) 2007-2013 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>

@@ -1,15 +1,12 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# item.py - Item for image files
+# Item for image files
 # -----------------------------------------------------------------------------
-# $Id$
-#
 # An ImageItem is an Item handling image files for Freevo. It will use
 # the viewer in viewer.py to display the image
-#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2009 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2013 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -46,6 +43,9 @@ class ImageItem(freevo.MediaItem):
     An item for image files
     """
     type = 'image'
+
+    # cached attributes
+    CACHED_ATTRIBUTES_MTIME = ['orientation']
 
     def __init__(self, url, parent, duration = freevo.config.image.viewer.duration):
         super(ImageItem, self).__init__(parent)

@@ -1,13 +1,16 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# backend.py - image viewer kaa.candy backend
+# Image viewer kaa.candy backend
 # -----------------------------------------------------------------------------
 # This file is imported by the backend process in the clutter
 # mainloop. Importing and using clutter is thread-safe.
 #
+# It would have been possible to place this file in the gui
+# subdirectory but it only belongs to this plugin and is a good
+# example to to add backend code in plugins.
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2013 Dirk Meyer, et al.
+# Copyright (C) 2013 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -41,12 +44,14 @@ import random
 import kaa
 import kaa.imlib2
 
+# clutter imports
 from gi.repository import Clutter as clutter
 from gi.repository import GObject as gobject
 
 # candy backend import
 import candy
 
+# register the thread pool for loading images
 kaa.register_thread_pool('candy::photo', kaa.ThreadPool())
 
 CENTER = clutter.Point()
@@ -211,7 +216,7 @@ class Widget(candy.Widget):
         """
         Show the current image (gobject thread)
         """
-        if not self.filename in self.textures or self.previous:
+        if not self.textures.get(self.filename, None) or self.previous:
             # either not loaded or animation still in progress
             return
         width, height = self.textures[self.filename][1:]
@@ -235,19 +240,28 @@ class Widget(candy.Widget):
             self.current.set_scale(factor, factor)
             self.current.set_property('rotation-angle-z', self.rotation)
             self.current_rotation = self.rotation
-            if not self.previous:
+            if not self.previous or self.blend_mode == 'none':
                 # fade in
                 self.current.set_property('opacity', 0)
                 self.current.save_easing_state()
                 self.current.set_easing_duration(200)
                 self.current.set_property('opacity', 255)
                 self.current.restore_easing_state()
+                if self.previous:
+                    self.previous.save_easing_state()
+                    self.previous.set_easing_duration(200)
+                    self.previous.set_property('opacity', 0)
+                    self.previous.restore_easing_state()
+                    gobject.timeout_add(200, self.animation_finished)
             else:
                 # transition between images
                 duration = 1000
-                a = self.previous_animation
-                while a == self.previous_animation:
-                    a = random.choice([ a for a in dir(self) if a.startswith('start_animation') ])
+                if self.blend_mode == 'random':
+                    a = self.previous_animation
+                    while a == self.previous_animation:
+                        a = random.choice([ a for a in dir(self) if a.startswith('start_animation') ])
+                else:
+                    a = 'start_animation_' + self.blend_mode
                 self.previous_animation = a
                 getattr(self, a)(duration, x, y, factor)
                 gobject.timeout_add(duration, self.animation_finished)
@@ -272,6 +286,7 @@ class Widget(candy.Widget):
         if 'cached' in modified:
             for f in self.cached:
                 if not f in self.textures:
+                    self.textures[f] = None
                     self.loadimage_async(f)
             for f in self.textures.keys()[:]:
                 if not f in self.cached:
@@ -280,4 +295,4 @@ class Widget(candy.Widget):
             self.showimage()
         if 'width' in modified or 'height' in modified:
             self.obj.set_clip(0, 0, self.width, self.height)
-            
+

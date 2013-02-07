@@ -1,15 +1,12 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# interface.py - interface between mediamenu and image
+# Interface to the image plugin
 # -----------------------------------------------------------------------------
-# $Id$
-#
 # This file defines the PluginInterface for the image module of
 # Freevo. It will activate the mediamenu for images.
-#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2009 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2013 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>

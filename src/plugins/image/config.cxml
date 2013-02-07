@@ -3,20 +3,27 @@
     <desc lang="en">image configuration</desc>
     <list name="items">
         <desc>
-            Set image items for the media menu. This is a list with path
-            and name. To set the subdir image in your home directory and
-            /image write
+            Set image items for the media menu. This is a list with
+            path, name and scan. To set the subdir image in your home
+            directory and /image write
+
+	    The variable 'scan' is hours between automatic rescan. If
+	    the value is 0, the directory will only be scanned if not
+	    known to Freevo. If set to -1 the directory and all
+	    subdirectories will be monitored for changes.
 
             image.items[+].path = $(HOME)/image
             image.items[ ].name = My Home Images
+            image.items[ ].scan = -1
             image.items[+].path = /image
             image.items[ ].name = My Local Images
+            image.items[ ].scan = 0
         </desc>
         <var name="path" type="str">
-            <desc>Path of the directory / file.</desc>
+            <desc>Path of the directory</desc>
         </var>
         <var name="name" type="unicode">
-            <desc>Name in the mediamenu</desc>
+            <desc>Name in the menu</desc>
         </var>
         <var name="scan" type="int" default="0">
             <desc>
@@ -41,17 +48,16 @@
         </var>
         <var name="blend-mode" default="random">
             <desc>
-                Blend effect when switching from one image to another. Possible
-                values are random, alpha blending, vertical wipe, horizonal wipe,
-                alpha vertical wipe, alpha horizonal wipe and none.
+                Blend effect when switching from one image to another.
             </desc>
             <values>
                 <value>random</value>
-                <value>alpha blending</value>
-                <value>vertical wipe</value>
-                <value>horizonal wipe</value>
-                <value>alpha vertical wipe</value>
-                <value>alpha horizonal wipe</value>
+                <value>scale</value>
+                <value>move_x</value>
+                <value>rotate</value>
+                <value>scale_move</value>
+                <value>rotation_x</value>
+                <value>rotation_y</value>
                 <value>none</value>
             </values>
         </var>
