@@ -89,12 +89,12 @@ class WidgetContext(object):
         """
         Update all widgets
         """
-        if not (cls._changed or force):
+        if not (WidgetContext._changed or force):
             return
-        cls._changed = False
-        for obj in cls._instances[:]:
+        WidgetContext._changed = False
+        for obj in WidgetContext._instances[:]:
             if not obj:
-                cls._instances.remove(obj)
+                WidgetContext._instances.remove(obj)
             elif obj._widget:
                 obj._widget.context = obj._ctx
 
@@ -110,7 +110,7 @@ class WidgetContext(object):
         """
         if attr.startswith('_') or attr == 'widget':
             return super(WidgetContext, self).__setattr__(attr, value)
-        if not self._changed:
+        if not WidgetContext._changed:
             WidgetContext._changed = True
             kaa.signals['step'].connect_first_once(self.sync, force=False)
         self._ctx[attr] = value
