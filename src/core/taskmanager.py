@@ -10,7 +10,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2005-2011 Dirk Meyer, et al.
+# Copyright (C) 2005-2013 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -58,6 +58,27 @@ STATUS_STOPPED  = 'stopped'
 
 CAPABILITY_TOGGLE = 1
 
+class AliveMonitor(object):
+    """
+    Monitor the taskmanager for blocking tasks and fade out the GUI if
+    this happens.
+    """
+    def __init__(self):
+        self.timer = kaa.OneShotTimer(gui.set_active, False)
+
+    def __call__(self, inprogress, secs):
+        self.timer.start(secs)
+        inprogress.connect(self.__stop)
+
+    def __stop(self, *args):
+        self.timer.stop()
+        if not gui.active:
+            gui.set_active(True)
+
+# global object
+monitor = AliveMonitor()
+
+
 class TaskManager(kaa.Object):
     """
     This is the main application for Freevo, handling applications
@@ -77,7 +98,6 @@ class TaskManager(kaa.Object):
         self.current = None
         self.windows = []
         self.eventmap = None
-        self.set_busy = kaa.OneShotTimer(gui.set_active, False)
         kaa.EventHandler(self.eventhandler).register()
 
     def sync(self):
@@ -195,17 +215,9 @@ class TaskManager(kaa.Object):
             # handle by the current application
             result = self.applications[-1].eventhandler(event=event)
             self.applications[-1].widget.eventhandler(event)
-        # FIXME: This function has to return True or it will be
-        # deleted from the kaa eventhandler. The kaa event code is not
-        # aware of InProgress objects so if result is an InProgress
-        # object we wait here using step().
         if isinstance(result, kaa.InProgress):
-            self.set_busy.start(0.5)
-            while not result.finished:
-                kaa.main.step()
-            self.set_busy.stop()
-            if not gui.active:
-                gui.set_active(True)
+            monitor(result, 0.5)
+        return result
 
 
 # create the global object

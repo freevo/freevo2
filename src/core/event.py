@@ -48,9 +48,7 @@ class Event(kaa.Event):
         """
         event = copy.copy(self)
         event.source = kwargs.get('event_source', 'system')
-        if args:
-            event._set_args(args)
-        kaa.Event.post(event)
+        super(Event, self).post(*args)
 
 
 #
