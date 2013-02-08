@@ -44,6 +44,8 @@ RESUME = 'autobookmark_resume'
 
 kaa.beacon.register_file_type_attrs('video',
     autobookmark_resume = (int, kaa.beacon.ATTR_SIMPLE))
+kaa.beacon.register_file_type_attrs('file',
+    autobookmark_resume = (int, kaa.beacon.ATTR_SIMPLE))
 
 
 class PluginInterface(freevo.ItemPlugin):
