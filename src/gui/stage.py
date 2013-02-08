@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# Clutter Stage
+# Clutter Stage and basic groups
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2009-2013 Dirk Meyer, et al.
@@ -26,7 +26,7 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'Stage', 'config' ]
+__all__ = [ 'config', 'ScaledGroup', 'Freevo', 'Layer', 'Stage' ]
 
 # python imports
 import os
@@ -39,8 +39,10 @@ import kaa.candy
 log = logging.getLogger('gui')
 
 class Config(object):
-
-    def load(self, config, sharedir):
+    """
+    Config wrapper
+    """
+    def init(self, config, sharedir):
         self.freevo = config
         self.sharedir = sharedir
 
@@ -49,6 +51,67 @@ class Config(object):
 
 # create config object
 config = Config()
+
+class ScaledGroup(kaa.candy.Group):
+    """
+    Group with XML theme scaling. This is used for an easier XML
+    files. The defined screen_width and screen_height values are used
+    for the group and it is scaled to fit the actual window.
+
+    A ScaledGroup always will the whole screen and only scales the
+    widgets in it to fit the screen dimensions.
+    """
+
+    candyxml_name = 'group'
+    candyxml_style = 'scaled'
+
+    def __init__(self, pos=None, size=None, widgets=[], context=None):
+        if size is None or not size[0] or not size[1]:
+            raise RuntimeError('ScaledGroup needs a fixed size')
+        super(ScaledGroup, self).__init__(pos, size, widgets, context)
+        self.scale_x = float(self.screen_width - ( 2 * config.display.overscan.x)) / int(size[0])
+        self.scale_y = float(self.screen_height - ( 2 * config.display.overscan.y)) / int(size[1])
+
+
+class Freevo(kaa.candy.Group):
+    """
+    Base Freevo widget. Only the template version is used and it is
+    parsed for its layers by the Stage.
+    """
+    candyxml_name = 'freevo'
+    candyxml_style = None
+
+    def __init__(self, pos=None, size=None, widgets=[], context=None):
+        super(Freevo, self).__init__(pos, size, [], context)
+        self.children = widgets
+
+
+class Layer(ScaledGroup):
+    """
+    Scaled version of the basic kaa.candy layer
+    """
+    candyxml_name = 'layer'
+    candyxml_style = None
+
+    _candy_layer_status = 0     # 0 new, 1 active, 2 destroyed
+
+    def __init__(self, pos=None, size=None, widgets=[], context=None):
+        """
+        Create the layer. If no size is given the actual screen size
+        is used deactivating the scaling code.
+        """
+        if not size:
+            size = self.screen_width, self.screen_height
+        size = (size[0] or self.screen_width, size[1] or self.screen_height)
+        super(Layer, self).__init__(pos, size, widgets, context)
+
+    @property
+    def parent(self):
+        """
+        The layer widget has the stage as parent
+        """
+        return self.stage
+
 
 class Stage(kaa.candy.Stage):
     """
