@@ -1,26 +1,49 @@
-Stuff that needs to be done before 2.0pre1
+* Must be done before a next release
 
-o GUI
-  - improve image viewer
-  - add/delete files in view
-  - choose tv images (webinfo)
-  - Video submenu
-  - Overlay menu in video (subtitles, etc)
-o beacon:
-  - monitor directory configure
-  - scan everything at least once
-  - monitor without prev. check
-o music player
-  - playlist manager
-o candy
-  - xrandr support
-  - video in group
-  - audio player volume
-  - Webbrowser
+  - TV support (tvheadend)
+
   - Fix DVD support
-o HTTP
-  - Extra menu stack
-o Watch TV
-o Fix broken plugins from WIP
-o Nice to Have:
-  - Trailer support for videos based on themoviedb / imdb
+
+  - Current directory monitoring without inotify
+
+  - Subtitle / audio configuration in video submenu
+
+  - kaa.webinfo integration
+
+    - search for metadata
+
+  - HTTP Server improvements
+
+    - move get_json to the webserver theme dir
+    - add image and tv support
+    - (optional) extra menu stack
+
+  - Use 1080p as base resolution for the default theme
+
+* Nice to have
+
+  - kaa.webinfo integration
+
+    - choose tv images (webinfo)
+    - Trailer support
+
+  - xrandr support
+
+  - video menu on top of video player
+
+    - select subtitles / audio language
+
+  - playlist manager plugin
+
+  - Volume plugin
+
+  - Fix broken plugins from WIP / add plugins from Freevo 1.x
+
+
+* Ideas with low priority
+
+  - Webbrowser integration
+
+  - Google maps integration for images
+
+  - Video player based on vlc
