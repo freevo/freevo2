@@ -49,7 +49,7 @@ class PluginInterface(freevo.ItemPlugin):
         if not item.parent or not item.parent.type == 'directory':
             # only activate this for directory listings
             return []
-        if not getattr(item, 'filename'):
+        if not getattr(item, 'filename', None):
             # no files to operate on
             return []
         return [ freevo.Action(_('Delete'), self.delete, 'delete') ]
