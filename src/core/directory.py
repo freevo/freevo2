@@ -204,7 +204,6 @@ class Directory(freevo.Playlist):
             a = freevo.Action(_('Recursive play all items'), self.play)
             a.parameter(recursive=True)
             items.append(a)
-        items.append(freevo.Action(_('Configure directory'), self.configure, 'configure'))
         return items
 
     @kaa.coroutine()
@@ -341,14 +340,6 @@ class Directory(freevo.Playlist):
                 freevo.OSD_MESSAGE.post('Show all items')
         return super(Directory, self).eventhandler(event)
 
-    # ======================================================================
-    # configure submenu
-    #
-    # FIXME: this whole code is kind of ugly and needs a nicer
-    # implementation. Maybe make some generic configure code that
-    # other items such as VideoItem can also use.
-    # ======================================================================
-
     def _set_configure_var(self, var, name, choices):
         """
         Update the variable update the menu.
@@ -369,7 +360,8 @@ class Directory(freevo.Playlist):
         self.menustack.current.state += 1
         self.menustack.context.sync(force=True)
 
-    def configure(self):
+    @property
+    def cfgitems(self):
         """
         Show the configure dialog for the item.
         """
@@ -400,11 +392,7 @@ class Directory(freevo.Playlist):
             action = freevo.ActionItem(name + ': '  + txt, self, self._set_configure_var, descr)
             action.parameter(var=i, name=name, choices=list(values))
             items.append(action)
-        if not items:
-            return
-        self.menustack.back_submenu(False)
-        m = freevo.Menu(_('Configure'), items, type='submenu')
-        self.menustack.pushmenu(m)
+        return items
 
     def config2value(self, attr):
         value = getattr(self, attr)
