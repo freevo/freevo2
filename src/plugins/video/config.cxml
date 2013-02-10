@@ -114,6 +114,12 @@
 	    </desc>
 	</group>
 
+	<group name="metadata" plugin="40">
+	    <desc>
+                Search for metadata
+	    </desc>
+	</group>
+
 	<group name="configure" plugin="50">
 	    <desc>
 	        Configure video playback
