@@ -52,7 +52,6 @@ class PluginInterface(freevo.ItemPlugin):
         """
         box = freevo.TextWindow('searching')
         box.show()
-        yield kaa.delay(3)
         result = yield kaa.webmetadata.search(item.filename)
         box.hide()
         items = []
@@ -61,6 +60,9 @@ class PluginInterface(freevo.ItemPlugin):
             item.menustack.back_submenu()
             yield
         for show in result:
+            # FIXME: add more metadata to the item, such as image and
+            # description. This makes it easier for the user to select
+            # the correct item.
             i = freevo.ActionItem(show.name, item, self.select)
             i.parameter(show)
             items.append(i)
@@ -72,14 +74,31 @@ class PluginInterface(freevo.ItemPlugin):
         box.show()
         result = yield kaa.webmetadata.tv.add_series_by_search_result(choice, item.get('series'))
         box.hide()
-        print 'done'
         item.menustack.back_submenu()
         # FIXME: missing menu update
+
+    def choose_poster(self, item):
+        freevo.Event(freevo.OSD_MESSAGE, _('Not implemented')).post()
+        
+    def configure(self, item):
+        # FIXME: add more options
+        items = [
+            freevo.ActionItem('Search metadata', item, self.search),
+            freevo.ActionItem('Choose poster', item, self.choose_poster)
+            ]
+        item.menustack.pushmenu(freevo.Menu(_('Configure metadata'), items, type='submenu'))
+        
 
     def actions(self, item):
         """
         Return additional actions for the item.
         """
-        if item.filename and item.get('series'):
-            return [ freevo.Action(_('Metadata'), self.search) ]
-        return []
+        if not item.filename:
+            return []
+        if not item.get('series'):
+            # FIXME: add movie search
+            return []
+        result = kaa.webmetadata.parse(item.filename)
+        if result:
+            return [ freevo.Action(_('Configure metadata'), self.configure) ]
+        return [ freevo.Action(_('Search metadata'), self.search) ]
