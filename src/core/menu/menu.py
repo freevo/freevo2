@@ -42,9 +42,21 @@ from .. import api as freevo
 
 # menu imports
 from listing import ItemList
+from item import ActionItem
 
 # get logging object
 log = logging.getLogger()
+
+def show_config_menu(item):
+    """
+    Show the item configure submenu
+    """
+    items = item.cfgitems
+    if not len(items):
+        # no submenu
+        return False
+    item.menustack.pushmenu(Menu(_('Configure'), items, type='submenu'))
+        
 
 class Menu(ItemList):
     """
@@ -162,6 +174,8 @@ class Menu(ItemList):
             if self.type == 'submenu' or not self.stack:
                 return False
             items = self.selected.subitems
+            if self.selected.cfgitems:
+                items.append(ActionItem(_('Configure'), self.selected, show_config_menu))
             if len(items) < 2:
                 # no submenu
                 return False

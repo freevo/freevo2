@@ -30,7 +30,7 @@
 # -----------------------------------------------------------------------------
 
 __all__ = [ 'Item', 'ActionItem', 'ItemList', 'MediaItem', 'Action',
-            'Menu', 'MenuStack', 'ItemPlugin', 'MediaPlugin']
+            'Menu', 'MenuStack', 'ItemPlugin', 'ItemConfigurePlugin', 'MediaPlugin']
 
 # import the submodules
 from item import Item, ActionItem
@@ -39,4 +39,4 @@ from mediaitem import MediaItem
 from action import Action
 from menu import Menu
 from stack import MenuStack
-from plugin import ItemPlugin, MediaPlugin
+from plugin import ItemPlugin, ItemConfigurePlugin, MediaPlugin

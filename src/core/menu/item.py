@@ -41,7 +41,7 @@ from kaa.weakref import weakref
 from kaa.utils import property
 
 # menu imports
-from plugin import ItemPlugin
+from plugin import ItemPlugin, ItemConfigurePlugin
 from action import Action
 
 # get logging object
@@ -146,7 +146,7 @@ class Item(object):
     def get_thumbnail_attribute(self, attribute):
         """
         Return a thumbnail object for the given attribute (e.g. movie
-        poster). The attribute mist be an image filename.
+        poster). The attribute must be an image filename.
         """
         if hasattr(self.info, 'get_thumbnail_attribute'):
             return self.info.get_thumbnail_attribute(attribute)
@@ -218,6 +218,16 @@ class Item(object):
         Return submenu items.
         """
         return [ SubMenuItem(self, a) for a in self._get_actions() ]
+
+    @property
+    def cfgitems(self):
+        """
+        Return configure items.
+        """
+        configure = []
+        for p in ItemConfigurePlugin.plugins(self.type):
+            configure += p.actions(self)
+        return [ SubMenuItem(self, a) for a in configure ]
 
     @property
     def playlist(self):
