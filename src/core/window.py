@@ -47,6 +47,10 @@ class TextWindow(object):
     """
     A basic empty window, not very usefull on its own.
     """
+
+    # window is used to mark Freevo busy
+    busy = True
+
     class WidgetContext(BaseWidgetContext):
         """
         Context link between Window and view
@@ -130,6 +134,11 @@ class MessageWindow(TextWindow):
     A simple window showing a text. The window will hide on input
     events. It is used as small information.
     """
+
+    # window is not used to mark Freevo busy and requires user
+    # interaction
+    busy = False
+
     def __init__(self, text, button=_('OK')):
         super(MessageWindow, self).__init__(text)
         self.button = Button(button)
@@ -153,6 +162,11 @@ class ConfirmWindow(TextWindow):
     from. In most cases this window is used to ask the user if an action
     should really be performed.
     """
+
+    # window is not used to mark Freevo busy and requires user
+    # interaction
+    busy = False
+
     def __init__(self, text, buttons=(_('Yes'), _('No')), default_choice=0):
         super(ConfirmWindow, self).__init__(text)
         self.buttons = []

@@ -215,7 +215,7 @@ class TaskManager(kaa.Object):
             # handle by the current application
             result = self.applications[-1].eventhandler(event=event)
             self.applications[-1].widget.eventhandler(event)
-        if isinstance(result, kaa.InProgress):
+        if isinstance(result, kaa.InProgress) and not (len(self.windows) and self.windows[-1].busy):
             monitor(result, 0.5)
         return result
 
