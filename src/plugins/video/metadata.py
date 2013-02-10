@@ -38,7 +38,7 @@ from ... import core as freevo
 # the logging object
 log = logging.getLogger()
 
-class PluginInterface(freevo.ItemPlugin):
+class PluginInterface(freevo.ItemConfigurePlugin):
     """
     class to handle metadata
     """
@@ -60,13 +60,11 @@ class PluginInterface(freevo.ItemPlugin):
             item.menustack.back_submenu()
             yield
         for show in result:
-            # FIXME: add more metadata to the item, such as image and
-            # description. This makes it easier for the user to select
-            # the correct item.
             i = freevo.ActionItem(show.name, item, self.select)
             i.parameter(show)
+            i.description = show.overview
             items.append(i)
-        item.menustack.pushmenu(freevo.Menu(_('Results'), items, type='submenu'))
+        item.menustack.pushmenu(freevo.Menu(_('Results'), items, type='video'))
 
     @kaa.coroutine()
     def select(self, item, choice):
@@ -74,20 +72,20 @@ class PluginInterface(freevo.ItemPlugin):
         box.show()
         result = yield kaa.webmetadata.tv.add_series_by_search_result(choice, item.get('series'))
         box.hide()
-        item.menustack.back_submenu()
+        item.menustack.back_one_menu()
         # FIXME: missing menu update
 
     def choose_poster(self, item):
+        for p in kaa.webmetadata.parse(item.filename).series.get_all_posters():
+            print p.thumbnail
         freevo.Event(freevo.OSD_MESSAGE, _('Not implemented')).post()
-        
+
     def configure(self, item):
         # FIXME: add more options
-        items = [
-            freevo.ActionItem('Search metadata', item, self.search),
-            freevo.ActionItem('Choose poster', item, self.choose_poster)
-            ]
+        items = [ freevo.ActionItem(_('Replace metadata'), item, self.search) ]
+        if len(kaa.webmetadata.parse(item.filename).series.get_all_posters()) > 1:
+            items.append(freevo.ActionItem('Choose poster', item, self.choose_poster))
         item.menustack.pushmenu(freevo.Menu(_('Configure metadata'), items, type='submenu'))
-        
 
     def actions(self, item):
         """
@@ -100,5 +98,5 @@ class PluginInterface(freevo.ItemPlugin):
             return []
         result = kaa.webmetadata.parse(item.filename)
         if result:
-            return [ freevo.Action(_('Configure metadata'), self.configure) ]
-        return [ freevo.Action(_('Search metadata'), self.search) ]
+            return [ freevo.ActionItem(_('Configure metadata'), item, self.configure) ]
+        return [ freevo.ActionItem(_('Search metadata'), item, self.search) ]

@@ -31,25 +31,16 @@ __all__ = [ 'PluginInterface' ]
 # freevo imports
 from ... import core as freevo
 
-class PluginInterface(freevo.ItemPlugin):
+class PluginInterface(freevo.ItemConfigurePlugin):
     """
     class to configure video playback
     """
     def actions(self, item):
-        """
-        Return additional actions for the item.
-        """
-        if item.type == 'video':
-            return [ freevo.Action(_('Configure'), self.configure) ]
-        return []
-
-    def get_items(self, item):
+        if item.type != 'video':
+            return []
         return [
             (freevo.ActionItem(_('Player: %s') % item.player, item, self.player_selection))
         ]
-
-    def configure(self, item):
-        item.menustack.pushmenu(freevo.Menu(_('Configure'), self.get_items(item), type='submenu'))
 
     def player_selection(self, item):
         """
