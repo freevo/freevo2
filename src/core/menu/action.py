@@ -53,13 +53,13 @@ class Action(object):
     extra parameters are used.  If it is outside the item, the first
     parameter is the item.
     """
-    def __init__(self, name, function, shortcut=None, description=None):
+    def __init__(self, name, function, shortcut=None, description=None, args=None, kwargs=None):
         self.name = name
         self.function = function
         self.shortcut = shortcut
         self.description = description
-        self.args = []
-        self.kwargs = {}
+        self.args = args or []
+        self.kwargs = kwargs or {}
         self.item = None
 
     def __call__(self):

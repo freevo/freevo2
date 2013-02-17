@@ -359,9 +359,9 @@ class ActionItem(Item, Action):
     A simple item with one action. The first parameter of the function
     passed to this action is always the parent item if not None.
     """
-    def __init__(self, name, parent, function, description=''):
+    def __init__(self, name, parent, function, description='', args=None, kwargs=None):
         Item.__init__(self, parent)
-        Action.__init__(self, name, function, description=description)
+        Action.__init__(self, name, function, description=description, args=args, kwargs=kwargs)
         self.item = parent
 
     def select(self):
