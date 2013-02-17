@@ -59,7 +59,7 @@ class ItemPlugin(freevo.Plugin):
         """
         return []
 
-    def actions_playback(self, item):
+    def actions_playback(self, item, player):
         """
         Return a list of actions to that item for a menu during
         playback. Each action is type Action

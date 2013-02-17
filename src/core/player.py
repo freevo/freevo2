@@ -56,6 +56,7 @@ class Player(freevo.Application):
         super(Player, self).__init__(eventmap, capabilities)
         self.PLAY_START = freevo.Event(freevo.PLAY_START, handler=self.eventhandler)
         self.PLAY_END = freevo.Event(freevo.PLAY_END, handler=self.eventhandler)
+        self.menustack = None
 
     @kaa.coroutine()
     def play(self, item, resources):
@@ -89,7 +90,7 @@ class Player(freevo.Application):
             self.playlist.select(self.item)
         # Set the current item to the gui engine
         self.context.item = self.item.properties
-        self.context.menu = self.playlist
+        self.context.playlist = self.playlist
         self.item.elapsed_secs = 0
         self.status = freevo.STATUS_RUNNING
         # update GUI
@@ -143,5 +144,37 @@ class Player(freevo.Application):
             self.item.eventhandler(event)
             if self.status == freevo.STATUS_STOPPED:
                 self.status = freevo.STATUS_IDLE
+                if self.menustack:
+                    self.menustack = None
+                    self.eventmap = self.orig_eventmap
             return True
+        if event == freevo.MENU:
+            # Show a menu during playback
+            items = []
+            for p in freevo.ItemPlugin.plugins(self.item.type):
+                items += p.actions_playback(self.item, self)
+            if items:
+                self.menustack = freevo.MenuStack()
+                self.menustack.pushmenu(freevo.Menu(_('Menu'), items))
+                self.context.menu = self.menustack.current
+                self.widget.osd.show('menu')
+                self.orig_eventmap = self.eventmap
+                self.eventmap = 'menu'
+            return True
+        if self.menustack:
+            if self.menustack.eventhandler(event):
+                if self.context.menu != self.menustack.current:
+                    self.context.previous = self.context.menu
+                    self.context.next = self.menustack.current
+                    self.context.menu = self.menustack.current
+                # set item to currently selected (or None for an empty menu)
+                self.context.item = None
+                if self.menustack.current.selected:
+                    self.context.item = self.menustack.current.selected.properties
+                return True
+            elif event == freevo.MENU_BACK_ONE_MENU:
+                self.menustack = None
+                self.widget.osd.hide('menu')
+                self.eventmap = self.orig_eventmap
+                return True
         return False
