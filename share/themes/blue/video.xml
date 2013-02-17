@@ -225,6 +225,28 @@
                     ]]>
                 </event>
             </widget>
+
+            <widget x="2000" width="420" use-as="menu">
+		<rectangle color="0x66000000"/>
+		<listing x="30" y="100" width="360" height="900" xpadding="30" ypadding="15">
+                <label font="Vera" height="36" color="0xffffff">
+                    <properties opacity="150"/>
+                    $item.name
+                </label>
+                <selection>
+		    <rectangle border-color="0xffffff" border-size="2" radius="30" height="45"/>
+                </selection>
+            </listing>
+                <event name="show"><![CDATA[
+                    return self.animate('EASE_OUT_BACK', 0.2, x=1500)
+                    ]]>
+                </event>
+                <event name="hide"><![CDATA[
+                    return self.animate('EASE_IN_BACK', 0.2, x=2000)
+                    ]]>
+                </event>
+            </widget>
+
         </osd>
     </application>
 </theme>
