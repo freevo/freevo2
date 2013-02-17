@@ -41,7 +41,7 @@
 	<osd width="1920" height="1080">
             <widget use-as="listing">
 		<listing style="fixed-selection" x="1500" y="-150" width="300" height="1300"
-			 selection="1" xpadding="0" ypadding="0">
+			 selection="1" xpadding="0" ypadding="0" menu="playlist">
                     <group width="264" height="204">
 			<thumbnail style="mimetype" item="item" x="12" y="12" width="240" height="180">
 			    <properties xalign="center" yalign="center"/>
