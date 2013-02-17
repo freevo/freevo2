@@ -98,6 +98,7 @@ VIDEO_EVENTS = {
     'REW'       : freevo.Event(freevo.SEEK, -10),
     'FFWD'      : freevo.Event(freevo.SEEK,  10),
     'MENU'      : freevo.MENU,
+    'ENTER'     : freevo.MENU,
     'DISPLAY'   : freevo.TOGGLE_OSD,
     'REC'       : freevo.STORE_BOOKMARK,
     '0'         : freevo.VIDEO_MANUAL_SEEK,
