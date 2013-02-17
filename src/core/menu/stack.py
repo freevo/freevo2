@@ -77,10 +77,11 @@ class MenuStack(object):
         Go back one menu page.
         """
         if len(self._stack) == 1:
-            return
+            return False
         self._stack.pop()
         if refresh:
             self.refresh(True)
+        return True
 
     def back_submenu(self, refresh=True, reload=False):
         """
@@ -224,8 +225,7 @@ class MenuStack(object):
             self.refresh()
             return True
         if event == freevo.MENU_BACK_ONE_MENU:
-            self.back_one_menu()
-            return True
+            return self.back_one_menu()
         if event == freevo.MENU_GOTO_MEDIA:
             # TODO: it would be nice to remember the current menu stack
             # but that is something we have to do inside mediamenu if it
