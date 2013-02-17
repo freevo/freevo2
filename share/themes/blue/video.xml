@@ -159,10 +159,10 @@
     <application name="videoplayer">
         <video name="player"/>
 
-	<osd width="1280" height="720">
+	<osd width="1920" height="1080">
 
             <widget use-as="pause">
-                <image x="300" width="620" url="icons/pause.png">
+                <image x="450" width="930" url="icons/pause.png">
                     <properties opacity="50" keep-aspect="true"/>
                 </image>
                 <event name="show"><![CDATA[
@@ -177,51 +177,51 @@
                 </event>
             </widget>
 
-            <widget y="-150" height="100" use-as="seek">
-                <rectangle x="-10" width="1300" height="80" color="0x66000000"/>
-                <image x="10" y="30" height="80" width="200" filename="../../images/gant/logo.png">
+            <widget y="-225" height="150" use-as="seek">
+                <rectangle x="-15" width="1950" height="120" color="0x66000000"/>
+                <image x="15" y="45" height="120" width="300" filename="images/logo.png">
                     <properties keep-aspect="true"/>
                 </image>
-                <label x="1030" y="35" width="180" font="Vera" height="25" color="0xffffff">
+                <label x="1545" y="52" width="270" font="Vera" height="36" color="0xffffff">
                     <properties xalign="right"/>
                     $item.elapsed  / $item.length
                 </label>
                 <event name="show"><![CDATA[
-                    return self.animate('EASE_OUT_QUAD', 0.2, y=-20)
+                    return self.animate('EASE_OUT_QUAD', 0.2, y=-30)
                     ]]>
                 </event>
                 <event name="hide"><![CDATA[
-                    return self.animate('EASE_IN_QUAD', 0.2, y=-150)
+                    return self.animate('EASE_IN_QUAD', 0.2, y=-225)
                     ]]>
                 </event>
             </widget>
 
-            <widget y="720" height="200" use-as="info">
-                <rectangle x="-10" y="40" width="1300" height="135" color="0x55000000"/>
+            <widget y="1080" height="300" use-as="info">
+                <rectangle x="-15" y="60" width="1950" height="200" color="0x55000000"/>
                 <group style="condition">
                     <case condition="item.poster">
-                        <rectangle x="28" y="-2" width="139" height="204" color="0x000000"/>
-                        <image x="30" width="135" height="200" url="$item.poster">
+                        <rectangle x="42" y="-3" width="206" height="306" color="0x000000"/>
+                        <image x="45" width="200" height="300" url="$item.poster">
                             <properties load-async="True"/>
                         </image>
                     </case>
                 </group>
-                <label x="200" y="50" width="1000" font="Vera" height="25" color="0xffffff">
+                <label x="300" y="75" width="1500" font="Vera" height="36" color="0xffffff">
                     $item.title
                 </label>
-                <text x="200" y="90" width="800" height="80" font="Vera:18" color="0xffffff">
+                <text x="300" y="135" width="1200" height="120" font="Vera:26" color="0xffffff">
                     $item.description
                 </text>
-                <label x="1030" y="150" width="180" font="Vera" height="20" color="0xffffff">
+                <label x="1545" y="225" width="270" font="Vera" height="30" color="0xffffff">
                     <properties xalign="right"/>
                     $item.elapsed  / $item.length
                 </label>
                 <event name="show"><![CDATA[
-                    return self.animate('EASE_OUT_BACK', 0.2, y=500)
+                    return self.animate('EASE_OUT_BACK', 0.2, y=750)
                     ]]>
                 </event>
                 <event name="hide"><![CDATA[
-                    return self.animate('EASE_IN_BACK', 0.2, y=720)
+                    return self.animate('EASE_IN_BACK', 0.2, y=1080)
                     ]]>
                 </event>
             </widget>
