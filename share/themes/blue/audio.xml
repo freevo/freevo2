@@ -62,9 +62,6 @@
                 ]]>
             </event>
         </listing>
-        <image style="icon" x="500" y="350" width="290" height="240" name="audio">
-            <properties xalign="right" yalign="bottom" keep-aspect="true" opacity="50"/>
-        </image>
     </menu>
 
     <application name="audioplayer">
