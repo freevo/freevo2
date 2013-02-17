@@ -48,8 +48,9 @@ class AbstractListing(kaa.candy.SelectionGrid):
 
     __previous_selected = None
 
-    def __init__(self, pos, size, template, selection, xpadding=None, ypadding=None, context=None):
-        menu = context.get('menu')
+    def __init__(self, pos, size, template, selection, xpadding=None, ypadding=None, menu=None, context=None):
+        self.__menu = menu or 'menu'
+        menu = context.get(self.__menu)
         super(AbstractListing, self).__init__(pos, size, None, 'item', menu.choices,
             template, selection, kaa.candy.SelectionGrid.VERTICAL, xpadding, ypadding, context)
         self.selected = menu.selected
@@ -60,7 +61,11 @@ class AbstractListing(kaa.candy.SelectionGrid):
         self.state = menu.state
         # A new menu means we want to be exchanged with a new version
         # of ourself and not reused.
-        self.add_dependencies('menu')
+        self.add_dependencies(self.__menu)
+
+    @property
+    def menu(self):
+        return self.context.get(self.__menu)
 
     @property
     def example_item(self):
@@ -82,22 +87,21 @@ class AbstractListing(kaa.candy.SelectionGrid):
     def sync_context(self):
         if self.create_grid:
             self.create_grid()
-        menu = self.context.get('menu')
-        if self.state != menu.state:
-            if self.items == menu.choices:
+        if self.state != self.menu.state:
+            if self.items == self.menu.choices:
                 # kaa.candy has no way to redraw items in a grid and
                 # clears it when the items list changes. Since the
                 # state may only indicate that a text inside the menu
                 # changes we have to force a redraw here. This should
                 # be fixed in future versions.
                 self.clear()
-            self.items = menu.choices
-            self.state = menu.state
+            self.items = self.menu.choices
+            self.state = self.menu.state
 
     def create_grid(self):
         super(AbstractListing, self).create_grid()
-        self.context.get('menu').cols = self.num_items_x
-        self.context.get('menu').rows = self.num_items_y
+        self.menu.cols = self.num_items_x
+        self.menu.rows = self.num_items_y
 
     @classmethod
     def candyxml_parse(cls, element):
@@ -106,7 +110,8 @@ class AbstractListing(kaa.candy.SelectionGrid):
         """
         return super(AbstractListing, cls).candyxml_parse(element).\
             remove('cell_item', 'cell_size', 'items', 'orientation').\
-            update(xpadding=int(element.xpadding or 0), ypadding=int(element.ypadding or 0))
+            update(xpadding=int(element.xpadding or 0), ypadding=int(element.ypadding or 0),
+                   menu=element.menu or 'menu')
 
 
 
@@ -120,20 +125,18 @@ class Listing(AbstractListing):
 
     def sync_context(self):
         super(Listing, self).sync_context()
-        menu = self.context.get('menu')
-        if self.selected != menu.selected:
-            self.select((0, menu.selected_pos), 0.2)
-        self.selected = menu.selected
+        if self.selected != self.menu.selected:
+            self.select((0, self.menu.selected_pos), 0.2)
+        self.selected = self.menu.selected
 
     def clear(self):
         super(Listing, self).clear()
-        self.select((0, self.context.get('menu').selected_pos), 0)
+        self.select((0, self.menu.selected_pos), 0)
 
     def select(self, pos, secs):
         super(Listing, self).select(pos, secs)
-        menu = self.context.get('menu')
-        if menu.selected_pos / self.num_items_y != self.__grid_position:
-            self.__grid_position = menu.selected_pos / self.num_items_y
+        if self.menu.selected_pos / self.num_items_y != self.__grid_position:
+            self.__grid_position = self.menu.selected_pos / self.num_items_y
             self.scroll_to((0, self.__grid_position * self.num_items_y), secs)
         self.emit_select(pos, secs)
 
@@ -142,23 +145,22 @@ class Listing(AbstractListing):
         context[self.cell_item] = self.items[0]
         self.cell_size = self.width - self.item_padding[0], self.template(context=context).height
         super(Listing, self).create_grid()
-        self.select((0, self.context.get('menu').selected_pos), 0)
+        self.select((0, self.menu.selected_pos), 0)
 
 
 class FixedSelectionListing(AbstractListing):
 
     candyxml_style = 'fixed-selection'
 
-    def __init__(self, pos, size, template, selection, selection_pos=2, xpadding=0, ypadding=0, context=None):
-        super(FixedSelectionListing, self).__init__(pos, size, template, selection, xpadding, ypadding, context)
+    def __init__(self, pos, size, template, selection, selection_pos=2, xpadding=0, ypadding=0, menu=None, context=None):
+        super(FixedSelectionListing, self).__init__(pos, size, template, selection, xpadding, ypadding, menu, context)
         self.selection_pos = selection_pos
 
     def sync_context(self):
         super(FixedSelectionListing, self).sync_context()
-        menu = self.context.get('menu')
-        if self.selected != menu.selected:
-            self.select(menu.selected_pos, 0.2)
-        self.selected = menu.selected
+        if self.selected != self.menu.selected:
+            self.select(self.menu.selected_pos, 0.2)
+        self.selected = self.menu.selected
 
     def create_grid(self):
         self.cell_size = None
@@ -185,13 +187,13 @@ class FixedSelectionListing(AbstractListing):
         else:
             self.selection.x += self.item_group.x + self.selection_pos * self.item_width
             self.selection.y += self.item_group.y
-        self.select(self.context.get('menu').selected_pos, 0)
+        self.select(self.menu.selected_pos, 0)
 
     def clear(self):
         super(FixedSelectionListing, self).clear()
         self.selection.parent = self
         self.selection.lower_bottom()
-        self.select(self.context.get('menu').selected_pos, 0)
+        self.select(self.menu.selected_pos, 0)
 
     def select(self, pos, secs):
         if self.orientation == 'vertical':
@@ -220,25 +222,23 @@ class GridListing(AbstractListing):
     def create_grid(self):
         self.cell_size = self.example_item.size
         super(GridListing, self).create_grid()
-        pos = self.context.get('menu').selected_pos
+        pos = self.menu.selected_pos
         self.select((pos % self.num_items_x, pos / self.num_items_x), 0)
 
     def clear(self):
         super(GridListing, self).clear()
-        pos = self.context.get('menu').selected_pos
+        pos = self.menu.selected_pos
         self.select((pos % self.num_items_x, pos / self.num_items_y), 0)
 
     def select(self, pos, secs):
         super(GridListing, self).select(pos, secs)
-        menu = self.context.get('menu')
-        if self.__grid_position != menu.selected_pos / (self.num_items_x * self.num_items_y):
-            self.__grid_position = menu.selected_pos / (self.num_items_x * self.num_items_y)
+        if self.__grid_position != self.menu.selected_pos / (self.num_items_x * self.num_items_y):
+            self.__grid_position = self.menu.selected_pos / (self.num_items_x * self.num_items_y)
             self.scroll_to((0, self.__grid_position * self.num_items_y), secs)
         self.emit_select(pos, secs)
 
     def sync_context(self):
         super(GridListing, self).sync_context()
-        menu = self.context.get('menu')
-        if self.selected != menu.selected:
-            self.select((menu.selected_pos % self.num_items_x, menu.selected_pos / self.num_items_x), 0.2)
-        self.selected = menu.selected
+        if self.selected != self.menu.selected:
+            self.select((self.menu.selected_pos % self.num_items_x, self.menu.selected_pos / self.num_items_x), 0.2)
+        self.selected = self.menu.selected
