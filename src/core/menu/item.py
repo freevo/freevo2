@@ -41,7 +41,7 @@ from kaa.weakref import weakref
 from kaa.utils import property
 
 # menu imports
-from plugin import ItemPlugin, ItemConfigurePlugin
+from plugin import ItemPlugin
 from action import Action
 
 # get logging object
@@ -194,7 +194,7 @@ class Item(object):
             actions = post_actions
             if p.plugin_level() < 10:
                 actions = pre_actions
-            for a in p.actions(self):
+            for a in p.actions_menu(self):
                 # set item for the action
                 a.item = self
                 actions.append(a)
@@ -225,8 +225,8 @@ class Item(object):
         Return configure items.
         """
         configure = []
-        for p in ItemConfigurePlugin.plugins(self.type):
-            configure += p.actions(self)
+        for p in ItemPlugin.plugins(self.type):
+            configure += p.actions_cfg(self)
         return [ SubMenuItem(self, a) for a in configure ]
 
     @property

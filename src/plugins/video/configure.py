@@ -31,11 +31,11 @@ __all__ = [ 'PluginInterface' ]
 # freevo imports
 from ... import core as freevo
 
-class PluginInterface(freevo.ItemConfigurePlugin):
+class PluginInterface(freevo.ItemPlugin):
     """
     class to configure video playback
     """
-    def actions(self, item):
+    def actions_cfg(self, item):
         if item.type != 'video':
             return []
         return [

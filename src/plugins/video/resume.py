@@ -60,7 +60,7 @@ class PluginInterface(freevo.ItemPlugin):
         self._ignore_end = False
         self._seek = 0
 
-    def actions(self, item):
+    def actions_menu(self, item):
         """
         Return additional actions for the item.
         """

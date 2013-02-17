@@ -42,7 +42,7 @@ class PluginInterface(freevo.ItemPlugin):
     """
     Small plugin to delete files
     """
-    def actions(self, item):
+    def actions_menu(self, item):
         """
         Create list of possible actions
         """

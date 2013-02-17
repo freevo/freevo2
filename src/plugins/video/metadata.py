@@ -38,7 +38,7 @@ from ... import core as freevo
 # the logging object
 log = logging.getLogger()
 
-class PluginInterface(freevo.ItemConfigurePlugin):
+class PluginInterface(freevo.ItemPlugin):
     """
     class to handle metadata
     """
@@ -87,7 +87,7 @@ class PluginInterface(freevo.ItemConfigurePlugin):
             items.append(freevo.ActionItem('Choose poster', item, self.choose_poster))
         item.menustack.pushmenu(freevo.Menu(_('Configure metadata'), items, type='submenu'))
 
-    def actions(self, item):
+    def actions_cfg(self, item):
         """
         Return additional actions for the item.
         """

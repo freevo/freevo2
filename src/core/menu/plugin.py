@@ -29,7 +29,7 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'ItemPlugin', 'ItemConfigurePlugin', 'MediaPlugin' ]
+__all__ = [ 'ItemPlugin', 'MediaPlugin' ]
 
 # freevo imports
 from .. import api as freevo
@@ -44,9 +44,25 @@ class ItemPlugin(freevo.Plugin):
     True, the event won't be passed to other eventhandlers and also not to
     the item itself.
     """
-    def actions(self, item):
+
+    def actions_menu(self, item):
         """
-        return a list of actions to that item. Each action is type Action
+        Return a list of actions to that item for the menu. Each
+        action is type Action
+        """
+        return []
+
+    def actions_cfg(self, item):
+        """
+        Return a list of actions to that item for the configure
+        submenu. Each action is type Action
+        """
+        return []
+
+    def actions_playback(self, item):
+        """
+        Return a list of actions to that item for a menu during
+        playback. Each action is type Action
         """
         return []
 
@@ -62,24 +78,6 @@ class ItemPlugin(freevo.Plugin):
         Static function to return all ItemPlugins.
         """
         return [ x for x in ItemPlugin.plugin_list if x.plugin_media in (None, subtype) ]
-
-
-class ItemConfigurePlugin(freevo.Plugin):
-    """
-    Plugin class to add something to the item configure list
-    """
-    def actions(self, item):
-        """
-        return a list of actions to that item. Each action is type Action
-        """
-        return []
-
-    @staticmethod
-    def plugins(subtype=''):
-        """
-        Static function to return all ItemConfigurePlugin.
-        """
-        return [ x for x in ItemConfigurePlugin.plugin_list if x.plugin_media in (None, subtype) ]
 
 
 class MediaPlugin(freevo.Plugin):
@@ -129,4 +127,3 @@ class MediaPlugin(freevo.Plugin):
 # register base class
 freevo.register_plugin(MediaPlugin)
 freevo.register_plugin(ItemPlugin)
-freevo.register_plugin(ItemConfigurePlugin)
