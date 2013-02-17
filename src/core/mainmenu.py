@@ -108,6 +108,12 @@ class MenuWidget(freevo.Application, freevo.MenuStack):
             self.context.next = self.current
             self.context.menu = self.current
             self.context.type = self.current.type
+            if self.current.type == 'submenu':
+                for m in self.current.stack._stack:
+                    if m.type != 'submenu':
+                        self.context.source = m.selected
+            else:
+                self.context.source = None
         # set item to currently selected (or None for an empty menu)
         self.context.item = None
         if self.current.selected:
