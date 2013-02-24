@@ -39,10 +39,10 @@ import kaa
 
 # freevo imports
 from .. import core as freevo
+from ..core.system import manager as system
 
 # get shutdown config
 config = freevo.config.plugin.shutdown
-system = freevo.system.manager
 
 class ShutdownItem(freevo.MainMenuItem):
     """
