@@ -100,6 +100,18 @@
 	        <desc>Enable VDPAU playback (NVIDIA only)</desc>
 	    </var>
         </group>
+	<dict name="fps" type="str">
+	  <desc>
+            Automatic refresh rate setting based on the video fps. Use
+            'xrandr' to get the available refresh rates.
+
+	    Example:
+	      video.player.fps[23.98] = 24
+	      video.player.fps[50.00] = 50
+	      video.player.fps[60.00] = 60
+	  </desc>
+	  <var type="int"/>
+	</dict>
     </group>
 
     <group name="plugin">
