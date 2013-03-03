@@ -44,7 +44,7 @@ for name, module in kaa.utils.get_plugins(group='freevo.gui', location=__file__)
         globals()[widget] = getattr(module, widget)
 
 stage = None
-signals = None
+signals = kaa.Signals('reset', 'key-press')
 active = False
 
 def init(cfg, sharedir):
@@ -53,9 +53,10 @@ def init(cfg, sharedir):
     """
     config.init(cfg, sharedir)
     # expose methods and variables from stage to the gui subsystem
-    global stage, signals, active, show_application, destroy_application, show_widget, load_theme
+    global stage, active, show_application, destroy_application, show_widget, load_theme
     stage = Stage()
-    signals = stage.signals
+    for key in stage.signals:
+        stage.signals[key].connect(signals[key].emit)
     show_application = stage.show_application
     destroy_application = stage.destroy_application
     show_widget = stage.show_widget

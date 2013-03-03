@@ -99,7 +99,20 @@ class TaskManager(kaa.Object):
         self.windows = []
         self.eventmap = None
         kaa.EventHandler(self.eventhandler).register()
+        gui.signals['reset'].connect(self.reset)
 
+    def reset(self):
+        """
+        GUI reset
+        """
+        log.warning('kaa.candy reset, going back to menu')
+        while len(self.applications) > 1:
+            app = self.applications.pop()
+            app.reset()
+            app.context.remove_widget()
+        self.current = None
+        self.sync()
+        
     def sync(self):
         """
         Set new focus (input mapping, application show/hide)

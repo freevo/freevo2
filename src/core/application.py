@@ -82,7 +82,8 @@ class WidgetContext(object):
         """
         Remove the widget
         """
-        self._widget = gui.destroy_application(self._widget)
+        if self._widget:
+            self._widget = gui.destroy_application(self._widget)
 
     @classmethod
     def sync(cls, force=True):
@@ -148,6 +149,12 @@ class Application(freevo.ResourceHandler):
         Return True if the application has the given capability.
         """
         return (self.__capabilities & capability) != 0
+
+    def reset(self):
+        """
+        Reset application due to kaa.candy failure
+        """
+        self.status = STATUS_IDLE
 
     @property
     def status(self):

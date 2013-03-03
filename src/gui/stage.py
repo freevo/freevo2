@@ -86,14 +86,12 @@ class Freevo(kaa.candy.Group):
         self.children = widgets
 
 
-class Layer(ScaledGroup):
+class Layer(kaa.candy.Layer, ScaledGroup):
     """
     Scaled version of the basic kaa.candy layer
     """
     candyxml_name = 'layer'
     candyxml_style = None
-
-    _candy_layer_status = 0     # 0 new, 1 active, 2 destroyed
 
     def __init__(self, pos=None, size=None, widgets=[], context=None):
         """
@@ -103,20 +101,23 @@ class Layer(ScaledGroup):
         if not size:
             size = self.screen_width, self.screen_height
         size = (size[0] or self.screen_width, size[1] or self.screen_height)
-        super(Layer, self).__init__(pos, size, widgets, context)
-
-    @property
-    def parent(self):
-        """
-        The layer widget has the stage as parent
-        """
-        return self.stage
+        ScaledGroup.__init__(self, pos, size, widgets, context)
 
 
 class Stage(kaa.candy.Stage):
     """
     Freevo main window
     """
+
+    __kaasignals__ = {
+        'reset':
+            '''
+            Emitted when the backend process closed its socket, most
+            likely due to a crash. The stage and all its processes are
+            now invalid.
+            ''',
+    }
+
     def __init__(self):
         size = (int(config.display.width), int(config.display.height))
         super(Stage, self).__init__(size, 'freevo2', os.path.expanduser('~/.freevo/log/candy'))
@@ -149,6 +150,9 @@ class Stage(kaa.candy.Stage):
                 self.applications_idx = self.layer[-1]
                 continue
             self.add_layer(c)
+
+    def __reset__(self):
+        self.signals['reset'].emit()
 
     def show_application(self, application, fullscreen, context):
         """
