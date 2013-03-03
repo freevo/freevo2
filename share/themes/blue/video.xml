@@ -100,25 +100,25 @@
 
         <listing style="fixed-selection" x="10" y="100" width="780" height="380" xpadding="20" ypadding="10">
             <label font="Vera" height="25" color="0xffffff">
-                <properties opacity="150"/>
+                <properties opacity="200"/>
                 $item.name
             </label>
             <selection>
                 <rectangle color="0xa0000000" radius="25" height="30"/>
             </selection>
             <event name="replace"><![CDATA[
-                diff = 50
+                diff = 200
                 if prev.pos < next.pos:
-                    diff = -50
+                    diff = -200
                 next.x -= diff
                 next.opacity = 0
-                next.animate('EASE_IN_QUAD', 0.2, x=next.x + diff, opacity=255)
-                yield prev.animate('EASE_OUT_QUAD', 0.2, x=prev.x + diff, opacity=0)
+                next.animate('EASE_IN_OUT_QUAD', 0.2, x=next.x + diff, opacity=255)
+                yield prev.animate('EASE_IN_OUT_QUAD', 0.2, x=prev.x + diff, opacity=0)
                 ]]>
             </event>
             <event name="select"><![CDATA[
                 if prev:
-                    prev.animate('EASE_OUT_QUAD', secs, opacity=130)
+                    prev.animate('EASE_OUT_QUAD', secs, opacity=200)
                 next.animate('EASE_OUT_QUAD', secs, opacity=255)
                 ]]>
             </event>
@@ -128,7 +128,7 @@
     <menu name="video+submenu">
 	<event name="submenu-show"><![CDATA[
 	    self.x = 1300
-	    menu.animate('EASE_OUT_QUAD', 0.2, opacity=100)
+	    menu.animate('EASE_OUT_QUAD', 0.2, opacity=200)
 	    yield menu.get_widget('right-image').animate('EASE_OUT_QUAD', 0.2, opacity=0)
 	    yield self.animate('EASE_OUT_BACK', 0.3, x=800)
             ]]>
@@ -141,7 +141,7 @@
 	</event>
 	<listing y="100" width="400" height="480" xpadding="20" ypadding="10">
 	    <label font="Vera" height="25" color="0xffffff">
-		<properties opacity="150"/>
+		<properties opacity="200"/>
 		$item.name
 	    </label>
 	    <selection>
@@ -149,7 +149,7 @@
 	    </selection>
 	    <event name="select"><![CDATA[
 	        if prev:
-                    prev.animate('EASE_OUT_QUAD', secs, opacity=150)
+                    prev.animate('EASE_OUT_QUAD', secs, opacity=200)
                 next.animate('EASE_OUT_QUAD', secs, opacity=255)
 		]]>
 	    </event>
@@ -229,14 +229,14 @@
             <widget x="2000" width="420" use-as="menu">
 		<rectangle color="0x66000000"/>
 		<listing x="30" y="100" width="360" height="900" xpadding="30" ypadding="15">
-                <label font="Vera" height="36" color="0xffffff">
-                    <properties opacity="150"/>
-                    $item.name
-                </label>
-                <selection>
-		    <rectangle border-color="0xffffff" border-size="2" radius="30" height="45"/>
-                </selection>
-            </listing>
+		    <label font="Vera" height="36" color="0xffffff">
+			<properties opacity="200"/>
+			$item.name
+		    </label>
+		    <selection>
+			<rectangle border-color="0xffffff" border-size="2" radius="30" height="45"/>
+		    </selection>
+		</listing>
                 <event name="show"><![CDATA[
                     return self.animate('EASE_OUT_BACK', 0.2, x=1500)
                     ]]>

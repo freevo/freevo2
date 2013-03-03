@@ -8,7 +8,7 @@
         <listing style="grid" x="20" y="100" width="1240" height="480" xpadding="30" ypadding="30">
 	    <properties xalign="center"/>
 	    <group width="130" height="130">
-		<properties anchor-point="65,65" opacity="150"/>
+		<properties anchor-point="65,65" opacity="200"/>
 		<thumbnail style="mimetype" height="100" item="item">
 		    <properties xalign="center" yalign="center"/>
 		</thumbnail>
@@ -22,7 +22,7 @@
             </selection>
 	    <event name="select"><![CDATA[
 	        if prev:
-                    prev.animate('EASE_OUT_QUAD', secs, opacity=130, scale_x=1, scale_y=1)
+                    prev.animate('EASE_OUT_QUAD', secs, opacity=200, scale_x=1, scale_y=1)
                 next.animate('EASE_OUT_QUAD', secs, opacity=255, scale_x=1.2, scale_y=1.2)
 		]]>
 	    </event>

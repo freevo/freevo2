@@ -39,7 +39,7 @@
         </group>
         <listing x="420" y="100" width="590" height="590" xpadding="20" ypadding="10">
             <label font="Vera" height="30" color="0xcccccc">
-                <properties opacity="150"/>
+                <properties opacity="200"/>
                 $item.name
             </label>
             <selection>
@@ -51,14 +51,14 @@
                     diff = -50
                 next.x -= diff
                 next.opacity = 0
-                next.animate('EASE_IN_QUAD', 0.2, x=next.x + diff, opacity=255)
-                yield prev.animate('EASE_OUT_QUAD', 0.2, x=prev.x + diff, opacity=0)
+                next.animate('EASE_IN_OUT_QUAD', 0.2, x=next.x + diff, opacity=255)
+                yield prev.animate('EASE_IN_OUT_QUAD', 0.2, x=prev.x + diff, opacity=0)
                 ]]>
             </event>
             <event name="select"><![CDATA[
                 if prev:
-                    prev.animate('EASE_OUT_QUAD', secs, opacity=130)
-                next.animate('EASE_OUT_QUAD', secs, opacity=255)
+                    prev.animate('EASE_IN_OUT_QUAD', secs, opacity=200)
+                next.animate('EASE_IN_OUT_QUAD', secs, opacity=255)
                 ]]>
             </event>
         </listing>
