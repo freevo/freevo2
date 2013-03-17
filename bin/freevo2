@@ -11,7 +11,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, 2003-2011 Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2013 Dirk Meyer, et al.
 #
 # First edition: Krister Lagerstrom <krister-freevo@kmlager.com>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -39,48 +39,17 @@ import os
 import sys
 import gc
 import logging
-import logging.config
-import logging.handlers
 import gettext
 
+# some imports required at the beginning
+import kaa
 from gi.repository import GObject
-from gi.repository import Clutter as clutter
 
 # get logging object
 log = logging.getLogger()
 
-# set basic env variables
-if not os.environ.has_key('HOME') or not os.environ['HOME'] or os.environ['HOME'] == '/':
-    os.environ['HOME'] = '/root'
-if not os.environ.has_key('USER') or not os.environ['USER']:
-    os.environ['USER'] = 'root'
-
-# insert freevo path information
-__site__ = '../lib/python%s.%s/site-packages' % sys.version_info[:2]
-__site__ = os.path.abspath(os.path.join(os.path.dirname(__file__), __site__))
-if not __site__ in sys.path:
-    sys.path.insert(0, __site__)
-
-
-#
-# kaa checking
-#
-try:
-    import kaa
-except ImportError:
-    d = os.path.dirname(__file__)[:-15]
-    print 'The kaa module repository could not be loaded!'
-    print
-    print 'Please check out the kaa repository from SVN'
-    print 'svn co svn://svn.freevo.org/kaa/trunk kaa'
-    print
-    print 'Please install it as root into your system or into the same'
-    print 'directory you installed Freevo in'
-    print
-    print 'Kaa is under development right now. Make sure you update the kaa'
-    print 'directory every time you update freevo.'
-    print
-    sys.exit(1)
+# set log level
+log.setLevel(logging.WARNING)
 
 #
 # i18n support
@@ -97,34 +66,8 @@ i18npath = os.path.abspath(os.path.join(os.path.dirname(__file__), '../share/loc
 i18n = gettext.translation('freevo', i18npath, fallback=True)
 i18n.install(unicode=True)
 
-#
-# Set up logging module
-#
-logger = logging.getLogger()
-
-# remove handler, we want to set the look and avoid duplicate handlers
-for l in logger.handlers[:]:
-    logger.removeHandler(l)
-
-# set stdout logging
-formatter = logging.Formatter('%(levelname)s %(module)s(%(lineno)s): %(message)s')
-handler = logging.StreamHandler()
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-# set file logger
-logdir = '/var/log/freevo'
-if os.getuid():
-    logdir = os.path.expanduser('~/.freevo/log')
-if not os.path.isdir(logdir):
-    os.makedirs(logdir)
-formatter = logging.Formatter('%(asctime)s %(levelname)-8s [%(name)6s] %(filename)s %(lineno)s: %(message)s')
-handler = logging.handlers.RotatingFileHandler('%s/freevo' % logdir, maxBytes=1000000, backupCount=2)
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-# set log level
-logger.setLevel(logging.WARNING)
+logging.add_stdout_handler()
+logging.add_file_handler(os.path.expanduser('~/.freevo/log/freevo.log'))
 
 kaa.main.init('generic')
 
