@@ -81,7 +81,7 @@ class OSD(ScaledGroup):
         Internal kaa.candy function before sync
         """
         if 'stereo' in self.context and self.stereo != self.context.stereo:
-            self.master.clip = (0,0), (self.screen_width, self.screen_height)
+            self.master.clip = (0,0), (self.width, self.height)
             if not self.context.stereo and not self.clone:
                 self.master.scale_x = 1.0
                 self.stereo = self.context.stereo
@@ -89,11 +89,11 @@ class OSD(ScaledGroup):
                 if self.context.stereo.startswith('side'):
                     self.master.scale_x = 0.5
                     self.clone.scale_x = 0.5
-                    self.clone.x = self.screen_width / 2
+                    self.clone.x = self.width / 2
                 else:
                     self.master.scale_y = 0.5
                     self.clone.scale_y = 0.5
-                    self.clone.y = self.screen_height / 2
+                    self.clone.y = self.height / 2
                 self.stereo = self.context.stereo
         super(OSD, self).sync_layout((width, height))
 
