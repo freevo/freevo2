@@ -103,7 +103,9 @@ VIDEO_EVENTS = {
     '0'         : freevo.VIDEO_MANUAL_SEEK,
     'MENU'      : freevo.DVDNAV_MENU,
     'NEXT'      : freevo.NEXT,
-    'PREV'      : freevo.PREV
+    'PREV'      : freevo.PREV,
+    '8'         : freevo.VIDEO_NEXT_AUDIOLANG,
+    '9'         : freevo.VIDEO_NEXT_SUBTITLE,
     }
 
 DVDNAV_EVENTS = {
