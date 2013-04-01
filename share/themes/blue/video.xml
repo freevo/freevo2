@@ -226,25 +226,81 @@
                 </event>
             </widget>
 
-            <widget x="2000" width="420" use-as="menu">
-		<rectangle color="0x66000000"/>
-		<listing x="30" y="100" width="360" height="900" xpadding="30" ypadding="15">
-		    <label font="Vera" height="36" color="0xffffff">
-			<properties opacity="200"/>
-			$item.name
-		    </label>
-		    <selection>
-			<rectangle border-color="0xffffff" border-size="2" radius="30" height="45"/>
-		    </selection>
-		</listing>
-                <event name="show"><![CDATA[
-                    return self.animate('EASE_OUT_BACK', 0.2, x=1500)
-                    ]]>
-                </event>
-                <event name="hide"><![CDATA[
-                    return self.animate('EASE_IN_BACK', 0.2, x=2000)
-                    ]]>
-                </event>
+            <widget use-as="menu">
+		<group style="condition">
+		    <case condition="not stereo">
+			<listing x="1430" y="200" width="460" height="700" xpadding="30" ypadding="15">
+			    <label font="Vera" height="38" color="0xffffff">
+				<properties opacity="200"/>
+				$item.name
+			    </label>
+			    <selection>
+				<rectangle color="0xa0000000" radius="38" height="45"/>
+			    </selection>
+			    <event name="select"><![CDATA[
+			    if prev:
+			        prev.animate('EASE_OUT_QUAD', secs, opacity=200)
+			    next.animate('EASE_OUT_QUAD', secs, opacity=255)
+			    ]]>
+			    </event>
+			</listing>
+			<label x="30" y="150" width="1400" font="Vera" height="48" color="0xffffff">
+			    $video.title
+			</label>
+			<label x="1545" y="1025" width="270" font="Vera" height="30" color="0xffffff">
+			    <properties xalign="right"/>
+			    $video.elapsed  / $video.length
+			</label>
+		    </case>
+		    <case condition="stereo">
+			<rectangle color="0x000000"/>
+			<listing x="30" y="100" width="460" height="900" xpadding="30" ypadding="15">
+			    <label font="Vera" height="38" color="0xffffff">
+				<properties opacity="200"/>
+				$item.name
+			    </label>
+			    <selection>
+				<rectangle color="0x555555" height="45"/>
+			    </selection>
+			    <event name="select"><![CDATA[
+			    if prev:
+			        prev.animate('EASE_OUT_QUAD', secs, opacity=200)
+			    next.animate('EASE_OUT_QUAD', secs, opacity=255)
+			    ]]>
+			    </event>
+			</listing>
+		    </case>
+		</group>
+		<event name="show"><![CDATA[
+                if not self.context.get('stereo'):
+                    widget = self.application
+                    self.stage.layer[0].visible = True
+                    self.opacity = 0
+                    yield widget.get_widget('player').animate('EASE_IN_QUAD', 0.2, scale_x=0.7, scale_y=0.7,
+                             x=30 * widget.osd.scale_x, y=120 * widget.osd.scale_y)
+                    idlebar = widget.stage.get_widget('idlebar')
+                    if idlebar:
+                        idlebar.show()
+                    yield self.animate('EASE_OUT_QUAD', 0.2, opacity=255)
+                else:
+                    self.x = 2000
+                    yield self.animate('EASE_OUT_BACK', 0.2, x=1400)
+		]]>
+		</event>
+		<event name="hide"><![CDATA[
+                if not self.context.get('stereo'):
+                    widget = self.application
+                    idlebar = widget.stage.get_widget('idlebar')
+                    if idlebar:
+                        idlebar.hide()
+                    self.animate('EASE_IN_QUAD', 0.2, opacity=0)
+                    yield widget.get_widget('player').animate(
+                        'EASE_IN_QUAD', 0.2, scale_x=1.0, scale_y=1.0, x=0, y=0)
+                    self.stage.layer[0].visible = False
+                else:
+                    yield self.animate('EASE_IN_BACK', 0.2, x=2000)
+		]]>
+		</event>
             </widget>
 
         </osd>

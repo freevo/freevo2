@@ -79,6 +79,7 @@ class Player(freevo.Player):
         # player
         self.streaminfo = None
         self.context.stereo = item.get('stereo')
+        self.context.video = self.item.properties
         self.player = self.widget.get_widget('player')
         self.player.player = item.player
         self.player.uri = item.filename or item.url
