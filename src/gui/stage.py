@@ -124,6 +124,7 @@ class Stage(kaa.candy.Stage):
         self.theme_prefix = ''
         self.width, self.height = self.size
         self.applications = []
+        self.destroy_layer(0)
 
     def load_theme(self, name=None, part=''):
         if name == None:
