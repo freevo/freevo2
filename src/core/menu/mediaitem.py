@@ -37,6 +37,7 @@ import logging
 # kaa imports
 import kaa
 import kaa.beacon
+import kaa.metadata
 
 # menu imports
 from item import Item, ActionItem
@@ -62,6 +63,7 @@ class MediaItem(Item):
     """
 
     elapsed_secs = 0
+    __metadata = False
 
     def __init__(self, parent):
         Item.__init__(self, parent)
@@ -87,6 +89,18 @@ class MediaItem(Item):
             self.filename = ''
             if not self.name:
                 self.name = kaa.str_to_unicode(self.url)
+
+    @property
+    def metadata(self):
+        """
+        kaa.metadata information
+        """
+        if self.__metadata is False:
+            if self.filename is None:
+                self.__metadata = None
+            else:
+                self.__metadata = kaa.metadata.parse(self.filename)
+        return self.__metadata
 
     @property
     def length(self):
