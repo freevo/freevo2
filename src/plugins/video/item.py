@@ -37,7 +37,7 @@ import kaa
 
 # freevo imports
 from ... import core as freevo
-import player as videoplayer
+from player import player as videoplayer
 
 # get logging object
 log = logging.getLogger('video')
@@ -45,11 +45,7 @@ log = logging.getLogger('video')
 class VideoItem(freevo.MediaItem):
     type = 'video'
 
-    metadata = None
     user_stop = False
-
-    # cached attributes
-    CACHED_ATTRIBUTES_MTIME = ['selected_audio', 'selected_sub']
 
     def __init__(self, url, parent):
         super(VideoItem, self).__init__(parent)

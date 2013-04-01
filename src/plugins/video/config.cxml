@@ -126,6 +126,12 @@
 	    </desc>
 	</group>
 
+	<group name="language" plugin="20">
+	    <desc>
+	        Audio and subtitle language selection
+	    </desc>
+	</group>
+
 	<group name="configure" plugin="50">
 	    <desc>
 	        Configure video playback

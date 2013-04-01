@@ -26,7 +26,7 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'play', 'stop' ]
+__all__ = [ 'player' ]
 
 # python imports
 import logging
@@ -70,10 +70,6 @@ class Player(freevo.Player):
             # kaa.candy does not support dvd playback with gstreamer
             item.player = 'mplayer'
         self.eventmap = 'video'
-        if self.item.selected_audio == None:
-            self.item.selected_audio = 0
-        if self.item.selected_sub == None:
-            self.item.selected_sub = -1
         # get the player object; each play() call has its own player
         # unless it is a playlist, in this case we want to reuse the
         # player
@@ -94,13 +90,6 @@ class Player(freevo.Player):
             bool(freevo.config.video.player.mplayer.passthrough)
         self.player.config['mplayer.vdpau'] = \
             bool(freevo.config.video.player.mplayer.vdpau)
-        if not item.url.startswith('dvd://'):
-            # Restore last audio/subtitle settings. This only makes
-            # sense for files and not DVDs with changing audio /
-            # subtitle streams depending on the title.
-            self.player.set_audio(self.item.selected_audio)
-            self.player.set_subtitle(self.item.selected_sub)
-        # self.player.seek(20, self.player.SEEK_PERCENTAGE)
         self.player.signals['finished'].connect_weak_once(self.PLAY_END.post, self.item)
         self.player.signals['progress'].connect_weak(self.set_elapsed)
         self.player.signals['streaminfo'].connect_weak(self.set_streaminfo)
@@ -173,19 +162,6 @@ class Player(freevo.Player):
             return True
         if event == freevo.VIDEO_CHANGE_ASPECT:
             self.player.set_aspect(kaa.candy.NEXT)
-        if event == freevo.VIDEO_NEXT_AUDIOLANG:
-            self.item.selected_audio = self.player.set_audio(kaa.candy.NEXT)
-            lang = self.streaminfo['audio'][self.item.selected_audio] or \
-                '#%s' % self.item.selected_audio
-            freevo.Event(freevo.OSD_MESSAGE, _('Audio %s' % lang)).post()
-        if event == freevo.VIDEO_NEXT_SUBTITLE:
-            self.item.selected_sub = self.player.set_subtitle(kaa.candy.NEXT)
-            if self.item.selected_sub == -1:
-                lang = _('off')
-            else:
-                lang = self.streaminfo['subtitle'][self.item.selected_sub] or \
-                '#%s' % self.item.selected_sub
-            freevo.Event(freevo.OSD_MESSAGE, _('Subtitle %s' % lang)).post()
         if str(event).startswith('DVDNAV_'):
             self.player.nav_command(str(event)[7:].lower())
             return True
@@ -194,7 +170,3 @@ class Player(freevo.Player):
 
 # create singleton object
 player = kaa.utils.Singleton(Player)
-
-# create functions to use from the outside
-play = player.play
-stop = player.stop
