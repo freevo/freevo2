@@ -277,7 +277,7 @@
                     self.stage.layer[0].visible = True
                     self.opacity = 0
                     yield widget.get_widget('player').animate('EASE_IN_QUAD', 0.2, scale_x=0.7, scale_y=0.7,
-                             x=30 * widget.osd.scale_x, y=120 * widget.osd.scale_y)
+                             x=30 * widget.osd.scale_x, y=200 * widget.osd.scale_y)
                     idlebar = widget.stage.get_widget('idlebar')
                     if idlebar:
                         idlebar.show()
