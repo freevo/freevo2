@@ -1,14 +1,54 @@
-import struct
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------------
+# TVHeadEnd TV backend
+# -----------------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2013 Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dischi@freevo.org>
+# Maintainer:    Dirk Meyer <dischi@freevo.org>
+#
+# Please see the file AUTHORS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# -----------------------------------------------------------------------------
 
-import kaa
+__all__ = [ 'init' ]
+
+# python imports
+import struct
 import logging
 
+# kaa imports
+import kaa
+
+# freevo imports
+import freevo2
+
+# get logging object
+log = logging.getLogger('tv.tvheadend')
+
+
+# For details how to communicate with tvheadend see
 # https://www.lonelycoder.com/redmine/projects/tvheadend/wiki/Htsp
 
 class binary(str):
     pass
 
-class Client(object):
+class Backend(object):
 
     host = None
 
@@ -28,7 +68,6 @@ class Client(object):
         yield self.socket.connect((host, 9982))
         yield self.send('hello', htspversion=5, clientname='Freevo', clientversion='2.0git')
         self.send('enableAsyncMetadata', epg=1, async=False)
-        self.connected = kaa.InProgress()
         yield self.connected
 
     @kaa.coroutine()
@@ -128,19 +167,9 @@ class Client(object):
     def event_initialSyncCompleted(self, result):
         self.connected.finish(None)
 
-
-if __name__ == "__main__":
-    log = logging.getLogger()
-    formatter = logging.Formatter('%(levelname)s %(module)s(%(lineno)s): %(message)s')
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
-    log.addHandler(handler)
-
-    @kaa.coroutine()
-    def main():
-        tv = Client()
-        yield tv.connect('raspberrypi')
-        print (yield tv.stream(tv.channels[6]))
-
-    main()
-    kaa.main.run()
+def init():
+    if not freevo2.config.tv.tvheadend.server:
+        return None
+    backend = Backend()
+    backend.connect(freevo2.config.tv.tvheadend.server)
+    return backend

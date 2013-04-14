@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<config name="tv" plugin="10">
+    <desc lang="en">tv plugin</desc>
+
+    <var name="backend" default="tvheadend">
+        <desc>
+            TV backend to use. Right now only tvheadend is
+            suported. To use tvheadend you must configure it below.
+        </desc>
+        <values>
+            <value>tvheadend</value>
+        </values>
+    </var>
+
+    <var name="location" default="main">
+        <desc>
+            Location where to show the TV menu. Possible locations are
+            the main menu or in one of the various video menus. If a
+            video menu is choosen this video menu must be activated
+            inside the video section.
+        </desc>
+        <values>
+            <value>main</value>
+            <value>tv</value>
+            <value>movie</value>
+            <value>misc</value>
+        </values>
+    </var>
+
+    <group name="tvheadend">
+        <var name="server" type="str">
+	    <desc>
+	        Hostname of the TVHeadend process. If not given the
+	        backend is disabled.
+	    </desc>
+	</var>
+    </group>
+
+    <var name="recordings" type="str">
+        <desc>
+	    Directory for the saved recordings. If set a menu item for
+	    the directory is shown inside the TV menu. This option has
+	    nothing to do with the location the backend actually
+	    stores recordings.
+	</desc>
+    </var>
+
+</config>
