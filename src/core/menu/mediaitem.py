@@ -76,9 +76,13 @@ class MediaItem(Item):
         on the url. Each MediaItem has to call this function.
         """
         if not isinstance(url, kaa.beacon.Item):
-            raise RuntimeError('MediaItem.set_url needs a beacon item')
-        self.info = url
-        self.url = url.url
+            if not url.startswith('http:'):
+                raise RuntimeError('MediaItem.set_url needs a beacon item')
+            self.info = {}
+            self.url = url
+        else:
+            self.info = url
+            self.url = url.url
         if self.url.startswith('file://'):
             # The url is based on a file. We can search for images
             # and extra attributes here
