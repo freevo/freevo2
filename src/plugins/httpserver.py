@@ -8,6 +8,7 @@ from kaa.base.net.httpserver import HTTPServer
 
 # freevo imports
 from .. import core as freevo
+from input.plugin import InputPlugin
 
 log = logging.getLogger('freevo')
 
@@ -31,12 +32,14 @@ class PluginInterface( freevo.Plugin ):
         self.server = HTTPServer(("", port))
         self.server.serve_forever()
         self.server.add_json_handler('/event/', self.event)
+        self.server.add_json_handler('/key/', self.key)
         self.server.add_json_handler('/view', self.view)
         self.server.add_json_handler('/select/', self.select)
         self.server.add_handler('/images/', self.images)
         self.server.add_static('/', freevo.FREEVO_SHARE_DIR + '/httpserver/simple.html')
         self.server.add_static('/jquery', freevo.FREEVO_SHARE_DIR + '/httpserver/jquery')
         freevo.signals['application-change'].connect(self.application_change)
+        self.post_key = InputPlugin().post_key
 
     def application_change(self, app):
         self.application = app
@@ -99,6 +102,10 @@ class PluginInterface( freevo.Plugin ):
 
     def event(self, path, **attributes):
         freevo.Event(path).post()
+        return {}
+
+    def key(self, path, **attributes):
+        self.post_key(path)
         return {}
 
     @kaa.coroutine()
