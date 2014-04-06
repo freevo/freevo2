@@ -111,10 +111,16 @@ class WidgetContext(object):
         """
         if attr.startswith('_') or attr == 'widget':
             return super(WidgetContext, self).__setattr__(attr, value)
-        if not WidgetContext._changed:
-            WidgetContext._changed = True
-            kaa.signals['step'].connect_first_once(self.sync, force=False)
+        WidgetContext._changed = True
         self._ctx[attr] = value
+
+# Ugly monkey patch to make sure sync is called after everything else
+# is done and before we enter the mainloop again and may sleep.
+notifier_step = kaa.main.notifier.step
+def step():
+    WidgetContext.sync(force=False)
+    notifier_step()
+kaa.main.notifier.step = step
 
 
 class Application(freevo.ResourceHandler):
