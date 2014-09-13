@@ -40,6 +40,11 @@ from xml.dom import minidom
 # kaa imports
 import kaa.distribution.xmlconfig
 
+def nodeattr(node, attr):
+    for c in node.childNodes:
+        if c.nodeName == attr:
+            return ''.join(x.toxml() for x in c.childNodes)
+    return ''
 
 def xmlconfig(configfile, sources, package):
     """
@@ -62,11 +67,14 @@ def xmlconfig(configfile, sources, package):
     for cfg in sources:
         # load cxml file
         m = minidom.parse(cfg).firstChild
-        if m.nodeName != 'config':
+        if m.nodeName == 'plugin':
+            m.setAttribute('plugin', m.getAttribute('activate'))
+        elif m.nodeName == 'config':
+            if not m.getAttribute('name'):
+                doc = m.parentNode
+                continue
+        else:
             raise RuntimeError('%s is no valid cxml file' % cfg)
-        if not m.getAttribute('name'):
-            doc = m.parentNode
-            continue
         modules.append(m)
 
     def valfunc(node):
