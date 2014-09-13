@@ -60,13 +60,6 @@ class Plugin(object):
         """
         pass
 
-    def plugin_set_name(self, name):
-        """
-        Register plugin with the given name. In most cases this is not needed
-        because the plugin will always be registered by its own name.
-        """
-        _loader.names[name] = self
-
     def plugin_level(self):
         """
         Return plugin level.
@@ -103,8 +96,7 @@ class PluginLoader(object):
         plugins are searched in.
         """
         self._initialized = True
-        self.path = os.path.dirname(module.__file__)
-        self.import_path = module.__name__
+        self.path = [ (os.path.dirname(module.__file__), module.__name__) ]
         for name, type, level, args in self._plugin_list:
             self.__load_plugin(name, type, level, args)
         # sort plugins
@@ -125,34 +117,6 @@ class PluginLoader(object):
         plugin.plugin_list = []
         return self._baseclasses.append(plugin)
 
-    def _find_plugin_file(self, name):
-        """
-        Find the filename for the plugin and the python import statement.
-        """
-        filename = name.replace('.', '/')
-        full_filename = os.path.join(self.path, filename)
-        if os.path.isfile(full_filename + '.py'):
-            return filename.replace('/', '.'), None
-        if os.path.isdir(full_filename):
-            return filename.replace('/', '.'), None
-        full_filename = os.path.join(self.path, 'plugins', filename)
-        if os.path.isfile(full_filename + '.py'):
-            return 'plugins.' + filename.replace('/', '.'), None
-        if os.path.isdir(full_filename):
-            return 'plugins.' + filename.replace('/', '.'), None
-        if filename.find('/') == -1:
-            # unable to find plugin
-            return None, None
-        special, filename = filename.split('/', 1)
-        filename = os.path.join(special, 'plugins', filename)
-        full_filename = os.path.join(self.path, filename)
-        if os.path.isfile(full_filename + '.py'):
-            return filename.replace('/', '.'), special
-        if os.path.isdir(full_filename):
-            return filename.replace('/', '.'), special
-        # unable to find plugin
-        return None, None
-
     def __load_plugin(self, name, type, level, args):
         """
         Load the plugin and add it to the lists
@@ -161,17 +125,10 @@ class PluginLoader(object):
             # -----------------------------------------------------
             # locate plugin python file
             # -----------------------------------------------------
-            module, special = self._find_plugin_file(name)
-            if module:
-                pclass = 'PluginInterface'
-            elif name.find('.') > 0:
-                pname = name[:name.rfind('.')]
-                module, special = self._find_plugin_file(pname)
-                if module:
-                    pclass = name[name.rfind('.')+1:]
-                else:
-                    log.critical('unable to locate plugin %s' % name)
-                    return
+            for path, module in self.path:
+                filename = os.path.join(path, 'plugins', name.replace('.', '/'))
+                if os.path.isfile(filename + '.py') or os.path.isdir(filename):
+                    break
             else:
                 log.critical('unable to locate plugin %s' % name)
                 return
@@ -179,9 +136,8 @@ class PluginLoader(object):
             # load plugin python file
             # -----------------------------------------------------
             try:
-                module = '%s.%s' % (self.import_path, module)
-                log.debug('loading %s as plugin %s' % (module, pclass))
-                exec('from %s import %s as plugin_class' % (module, pclass))
+                module = '%s.plugins.%s' % (module, name)
+                exec('from %s import PluginInterface as plugin_class' % module)
                 # create object
                 if not args:
                     plugin = plugin_class()
@@ -205,16 +161,14 @@ class PluginLoader(object):
         else:
             # name is a plugin object
             plugin = name
-            special = None
+
         # -----------------------------------------------------
         # configure and activate plugin object
         # -----------------------------------------------------
-        if type:
-            special = type
         try:
             plugin._plugin_level = level
-            if special:
-                plugin.plugin_media = special
+            if type:
+                plugin.plugin_media = type
             plugin.plugin_activate(level)
         except:
             log.exception('failed to activate plugin %s' % name)
