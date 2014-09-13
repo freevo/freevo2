@@ -119,16 +119,10 @@
 
 	<group name="resume" plugin="10">
 	    <desc>
-	        Add resume option to video files. The plugin will remember the
-		position when playback is stopped and add a resume option to the
-		item menu. If the plugin level is lower than 10 resume will be the
-		default option.
-	    </desc>
-	</group>
-
-	<group name="language" plugin="20">
-	    <desc>
-	        Audio and subtitle language selection
+	        Add resume option to video files. The plugin will
+	        remember the position when playback is stopped and add
+	        a resume option to the item menu. If the plugin level
+	        is lower than 10 resume will be the default option.
 	    </desc>
 	</group>
 
@@ -145,7 +139,9 @@
 	</group>
 
 	<group name="series" plugin="False">
-	    <desc>Show Video TV Series</desc>
+	    <desc>
+		Show Video TV Series
+	    </desc>
 	</group>
 
     </group>
