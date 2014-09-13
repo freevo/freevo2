@@ -227,14 +227,29 @@ class MenuStack(object):
         if event == freevo.MENU_BACK_ONE_MENU:
             return self.back_one_menu()
         if event == freevo.MENU_GOTO_MEDIA:
+            goto = event.arg
+            if not isinstance(goto, (list, tuple)):
+                goto = (goto, None)
             # TODO: it would be nice to remember the current menu stack
             # but that is something we have to do inside mediamenu if it
             # is possible at all.
-            if len(self._stack) > 1 and getattr(menu.selected, 'media_type', None) == event.arg:
-                # already in that menu
-                return True
+            if len(self._stack) > 1:
+                current = self._stack[1]
+                if getattr(current, 'media_type', None) == goto[0] and \
+                   (getattr(current, 'media_subtype', None) == goto[1] or not goto[1]):
+                    # already in that menu
+                    return True
+            menu = self._stack[0]
             for item in menu.choices:
-                if getattr(item, 'media_type', None) == event.arg:
+                if getattr(item, 'media_type', None) == goto[0] and \
+                   (getattr(item, 'media_subtype', None) == goto[1] or not goto[1]):
+                    self._stack = [ menu ]
+                    menu.select(item)
+                    item.actions()[0]()
+                    return True
+            # not found. :( Try without the subtype
+            for item in menu.choices:
+                if getattr(item, 'media_type', None) == goto[0]:
                     self._stack = [ menu ]
                     menu.select(item)
                     item.actions()[0]()
