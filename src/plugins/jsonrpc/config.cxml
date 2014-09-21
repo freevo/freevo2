@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<config name="plugin.jsonrpc" plugin="False">
+     <desc>
+	 JSONRPC and XBMC eventserver to be used for XBMC-compatible
+	 remotes. Only tested with Yatse so far. If something is not
+	 working, do not blame the remote, blame this plugin.
+
+	 Requires the httpserver plugin to be activated.
+     </desc>
+     <var name="eventserver" default="9777"/>
+ </config>
