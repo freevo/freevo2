@@ -66,3 +66,52 @@ def register_image(image, item=None):
         return os.path.join('thumbnail', item._beacon_id[0], str(item._beacon_id[1]))
     log.error('unsupported image: %s' % image)
     return ''
+
+PROPERTY_NOT_FOUND = object()
+
+def fill_basic_item_properties(item, properties):
+    """
+    Fill basic item properties
+    """
+    result = { 'label': item.get('title') }
+    if item.get('series') and item.get('episode'):
+        result = { 'label': '%s %sx%02d - %s' % \
+           (item.get('series'), item.get('season'), item.get('episode'), item.get('title')) }
+    for prop in properties[:]:
+        value = PROPERTY_NOT_FOUND
+        if prop in ('cast', 'artist', 'director', 'genre', 'writer', 'studio'):
+            value = []
+        if prop == 'plot':
+            value = item.get('description')
+        if prop == 'showtitle':
+            value = item.get('series') or ''
+        if prop == 'title':
+            value = item.get('title')
+        if prop in ('track', 'season', 'episode'):
+            value = int(item.get(prop) or -1)
+        if prop in ('year', ):
+            value = 0
+        if prop == 'file':
+            value = item.get('url') or ''
+        if prop == 'rating':
+            value = 0.0
+        if prop == 'thumbnail':
+            value = register_image(item.get('image'))
+        if prop == 'tagline':
+            value = ''
+        if prop == 'fanart':
+            value = register_image(item.background)
+        if prop == 'imdbnumber':
+            value = (item.webmetadata and item.webmetadata.imdb) or ''
+        if prop in ('album', 'albumartist', 'originaltitle'):
+            value = ''
+        if prop == 'type':
+            if item.get('series') and item.get('episode'):
+                value = 'episode'
+            else:
+                log.error('unsupported type')
+                value = ''
+        if value != PROPERTY_NOT_FOUND:
+            result[prop] = value
+            properties.remove(prop)
+    return result
