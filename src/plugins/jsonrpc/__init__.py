@@ -58,6 +58,7 @@ import eventserver
 # jsonrpc callbacks
 import videolibrary as VideoLibrary
 import player as Player
+import playlist as Playlist
 
 class PluginInterface( freevo.Plugin ):
     """
@@ -75,15 +76,15 @@ class PluginInterface( freevo.Plugin ):
             raise RuntimeError('httpserver plugin not running')
         self.httpserver.server.add_json_handler('/jsonrpc', self.jsonrpc)
         self.httpserver.server.add_handler('/image/', self.provide_image)
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.bind(('', freevo.config.plugin.jsonrpc.eventserver))
+        self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self._sock.bind(('', freevo.config.plugin.jsonrpc.eventserver))
         udp = kaa.Socket()
-        udp.wrap(sock, kaa.IO_READ | kaa.IO_WRITE)
+        udp.wrap(self._sock, kaa.IO_READ | kaa.IO_WRITE)
         udp.signals['read'].connect(eventserver.handle)
         utils.imagedir = (yield kaa.beacon.get_db_info())['directory']
         utils.cachedir = os.path.join(os.environ['HOME'], '.thumbnails')
         self.api = {}
-        for module in ('VideoLibrary', 'Player'):
+        for module in ('VideoLibrary', 'Player', 'Playlist'):
             for name in dir(eval(module)):
                 method = getattr(eval(module), name)
                 if callable(method) and not name.startswith('_'):
@@ -131,12 +132,6 @@ class PluginInterface( freevo.Plugin ):
             else:
                 raise AttributeError('unsupported property: %s' % prop)
         return result
-
-    def Playlist_GetItems(self, playlistid, properties, limits):
-        """
-        JsonRPC Callback Playlist.GetItems
-        """
-        return []
 
     def XBMC_GetInfoBooleans(self, booleans):
         """
