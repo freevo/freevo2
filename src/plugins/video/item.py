@@ -34,6 +34,10 @@ import time
 
 # kaa imports
 import kaa
+try:
+    import kaa.webmetadata as webmetadata
+except ImportError:
+    webmetadata = None
 
 # freevo imports
 from ... import core as freevo
@@ -62,6 +66,28 @@ class VideoItem(freevo.MediaItem):
             # FIXME: make this a configure option and fix sorting if season is >9
             self.name = '%s %dx%02d - %s' % (
                 self.get('series'), self.get('season'), self.get('episode'), self.get('title'))
+
+    @property
+    def webmetadata(self):
+        """
+        Return webmetadata
+        """
+        if not webmetadata:
+            return None
+        if not hasattr(self, '_webmetadata'):
+            self._webmetadata = webmetadata.parse(self.filename, self.metadata)
+        return self._webmetadata
+
+    @property
+    def background(self):
+        """
+        Return background art
+        """
+        if not hasattr(self, '_background'):
+            self._background = None
+            if self.webmetadata and self.webmetadata.series.image:
+                self._background = self.webmetadata.series.image
+        return self._background
 
     @property
     def geometry(self):
