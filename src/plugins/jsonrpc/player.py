@@ -57,13 +57,18 @@ def _fill_audio_details(a):
     """
     Helper function to provide audio stream details
     """
-    return {
-        'bitrate': 0,
+    result = {
+        'bitrate': int(a.get('samplerate') or 0),
         'channels': a.get('channels') or 2,
-        'codec': a.get('codec') or '',
+        'codec': a.get('codec').lower() or '',
         'index': a.get('id') or 0,
-        'language': a.get('langcode') or 'und',
-        'name': a.get('language') or 'Undetermined'}
+        'language': a.get('langcode') or 'unkown',
+        'name': a.get('language') or 'unkown'}
+    if result['language'] == 'und':
+        result['language'] = 'unkown'
+    if result['name'] == 'Undetermined':
+        result['name'] = 'unkown'
+    return result
 
 def _fill_subtitle_details(s):
     """
@@ -107,7 +112,7 @@ def GetProperties(playerid, properties):
             result[prop] = True
         elif prop == 'currentaudiostream':
             result[prop] = {}
-            if app.item.metadata.audio:
+            if app.name == 'videoplayer' and app.item.metadata.audio:
                 result[prop] = _fill_audio_details(app.item.metadata.audio[0])
                 if app.player.streaminfo.get('current-audio') is not None:
                     idx = app.player.streaminfo.get('current-audio')
@@ -117,7 +122,7 @@ def GetProperties(playerid, properties):
                 log.error('no audio stream')
         elif prop == 'currentsubtitle':
             result[prop] = {}
-            if app.player.streaminfo.get('current-subtitle') is not None:
+            if app.name == 'videoplayer' and app.player.streaminfo.get('current-subtitle') is not None:
                 idx = app.player.streaminfo.get('current-subtitle')
                 if idx >= 0 and len(app.item.metadata.subtitles) > idx:
                     result[prop] = _fill_subtitle_details(app.item.metadata.subtitles[idx])
@@ -126,9 +131,9 @@ def GetProperties(playerid, properties):
         elif prop == 'partymode':
             result[prop] = False
         elif prop == 'playlistid':
-            result[prop] = 1
+            result[prop] = 1    # FIXME
         elif prop == 'position':
-            result[prop] = 0
+            result[prop] = -1    # FIXME
         elif prop == 'repeat':
             result[prop] = 'off'
         elif prop == 'shuffled':
@@ -139,7 +144,10 @@ def GetProperties(playerid, properties):
             else:
                 result[prop] = 0
         elif prop == 'subtitleenabled':
-            result[prop] = False
+            if app.name == 'videoplayer' and app.player.streaminfo.get('current-subtitle') is not None:
+                result[prop] = True
+            else:
+                result[prop] = False
         elif prop == 'subtitles':
             result[prop] = []
             for s in app.item.metadata.subtitles:
@@ -158,7 +166,13 @@ def GetProperties(playerid, properties):
                 'seconds': int(val) % 60,
                 'milliseconds': int(val * 1000) % 1000}
         elif prop == 'type':
-            result[prop] = 'video'
+            if app.name == 'videoplayer':
+                if item.get('series') and item.get('episode'):
+                    result[prop] = 'episode'
+                else:
+                    result[prop] = 'video'
+            else:
+                raise AttributeError('unsupported application')
         else:
             raise AttributeError('unsupported property: %s' % prop)
     return result
@@ -168,56 +182,25 @@ def GetItem(playerid, properties):
     JsonRPC Callback Player.GetItem
     """
     app = freevo.taskmanager.applications[-1]
-    result = { 'label': app.item.get('title') }
-    if app.item.get('series') and app.item.get('episode'):
-        result = { 'label': '%s %sx%02d - %s' % \
-           (app.item.get('series'), app.item.get('season'), app.item.get('episode'), app.item.get('title')) }
+    if not 'type' in properties:
+        properties.append('type')
+    result = utils.fill_basic_item_properties(app.item, properties)
+    result['id'] = 0
     for prop in properties:
-        if prop in ('cast', 'artist', 'director', 'genre', 'writer', 'studio'):
-            value = []
-        elif prop == 'plot':
-            value = app.item.get('description')
-        elif prop == 'showtitle':
-            value = app.item.get('series') or ''
-        elif prop in ('title', 'showtitle', 'originaltitle'):
-            value = app.item.get('title')
-        elif prop == 'id':
-            value = 0
-        elif prop in ('track', 'season', 'episode'):
-            value = int(app.item.get(prop) or -1)
-        elif prop in ('year', ):
-            value = 0
-        elif prop == 'type':
-            value = 'unknown'
-        elif prop == 'file':
-            value = app.item.get('url') or ''
-        elif prop == 'streamdetails':
+        if prop == 'streamdetails':
             value = {
                 'audio': [],
                 'subtitle': [],
                 'video': [] }
             if app.name == 'videoplayer':
                 for a in app.item.metadata.audio:
-                    value['audio'].append({'channels': a.channels, 'codec': a.codec, 'language': a.langcode})
+                    value['audio'].append(_fill_audio_details(a))
                 for s in app.item.metadata.subtitles:
                     value['subtitle'].append(_fill_subtitle_details(s))
                 for v in app.item.metadata.video:
-                    value['video'].append({'aspect': v.aspect, 'duration': app.item.metadata.length,
-                                           'height': v.height, 'width': v.width, 'stereomode': ''})
-        elif prop == 'rating':
-            value = 0.0
-        elif prop == 'thumbnail':
-            image = app.item.get('poster') or app.item.get('image')
-            if image:
-                value = utils.register_image(image)
-            else:
-                value = ''
-        elif prop == 'tagline':
-            value = ''          # FIXME
-        elif prop == 'fanart':
-            value = ''          # FIXME
-        elif prop in ('album', 'albumartist', 'imdbnumber'):
-            value = ''
+                    value['video'].append({'aspect': v.aspect, 'duration': int(app.item.metadata.length),
+                                           'height': v.height, 'width': v.width, 'stereomode': '',
+                                           'codec': v.codec.lower().replace('h.264 avc', 'h264')})
         else:
             log.error('no support for %s' % prop)
             value = ''
