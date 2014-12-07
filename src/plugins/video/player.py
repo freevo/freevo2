@@ -82,8 +82,7 @@ class Player(freevo.Player):
         self.player.config['rate'] = None
         if self.player.metadata and self.player.metadata.video and self.player.metadata.video[0].fps:
             fps = '%0.2f' % self.player.metadata.video[0].fps
-            if fps in freevo.config.video.player.fps and \
-                    freevo.config.video.player.fps[fps] in kaa.candy.REFRESH_RATES:
+            if fps in freevo.config.video.player.fps:
                 log.info('set refresh rate to %s' % freevo.config.video.player.fps[fps])
                 self.player.config['refresh-rate'] = int(freevo.config.video.player.fps[fps])
         self.player.config['mplayer.passthrough'] = \
