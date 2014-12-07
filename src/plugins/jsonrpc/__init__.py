@@ -163,7 +163,6 @@ class PluginInterface( freevo.Plugin ):
         """
         JsonRPC Callback XBMC.GetInfoLabels
         """
-        print 'ping'
         return ''
 
     @kaa.coroutine()
