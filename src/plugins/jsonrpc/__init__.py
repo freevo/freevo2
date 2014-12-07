@@ -159,6 +159,13 @@ class PluginInterface( freevo.Plugin ):
                 raise AttributeError('unsupported label: %s' % l)
         return result
 
+    def XBMC_Ping(self):
+        """
+        JsonRPC Callback XBMC.GetInfoLabels
+        """
+        print 'ping'
+        return ''
+
     @kaa.coroutine()
     def jsonrpc(self, path, **attributes):
         """

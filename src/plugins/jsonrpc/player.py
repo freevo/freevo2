@@ -207,7 +207,7 @@ def GetItem(playerid, properties):
         result[prop] = value
     return {'item': result }
 
-def PlayPause(playerid, play):
+def PlayPause(playerid, play='toggle'):
     """
     JsonRPC Callback Player.PlayPause
     """
@@ -220,6 +220,12 @@ def PlayPause(playerid, play):
         if play == True and app.player.state == kaa.candy.STATE_PAUSED:
             freevo.Event(freevo.PLAY).post()
             return 1
+        if play == 'toggle':
+            if app.player.state == kaa.candy.STATE_PAUSED:
+                freevo.Event(freevo.PLAY).post()
+                return 1
+            freevo.Event(freevo.PAUSE).post()
+            return 0
     if play == False:
         return 0
     return 1
