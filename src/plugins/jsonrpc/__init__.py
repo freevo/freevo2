@@ -151,17 +151,30 @@ class PluginInterface( freevo.Plugin ):
         """
         result = {}
         for l in labels:
+            # FIXME: use correct values for all these labels
             if l == 'System.BuildVersion':
                 result[l] = "13.1"
             elif l == 'System.KernelVersion':
                 result[l] = "Linux 3.11.0"
+            elif l == 'MusicPlayer.Codec':
+                result[l] = ""
+            elif l == 'MusicPlayer.SampleRate':
+                result[l] = ""
+            elif l == 'MusicPlayer.BitRate':
+                result[l] = ""
             else:
                 raise AttributeError('unsupported label: %s' % l)
         return result
 
     def XBMC_Ping(self):
         """
-        JsonRPC Callback XBMC.GetInfoLabels
+        JsonRPC Ping
+        """
+        return ''
+
+    def JSONRPC_Ping(self):
+        """
+        JsonRPC Ping
         """
         return ''
 
