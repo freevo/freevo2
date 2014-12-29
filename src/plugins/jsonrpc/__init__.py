@@ -128,7 +128,7 @@ class PluginInterface( freevo.Plugin ):
             elif prop == 'volume':
                 result[prop] = 100
             elif prop == 'muted':
-                result[prop] = False
+                result[prop] = eventserver.muted
             else:
                 raise AttributeError('unsupported property: %s' % prop)
         return result

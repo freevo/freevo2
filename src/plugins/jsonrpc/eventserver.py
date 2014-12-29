@@ -66,6 +66,10 @@ keymap = {
         }
 }
 
+# Muted is not supported by Freevo but Yatse uses it to test the
+# eventserver.
+muted = False
+
 def handle(data):
     """
     Callback for UDP eventserver events
@@ -98,6 +102,9 @@ def handle(data):
                 freevo.Event(freevo.MENU_GOTO_MAINMENU).post(event_source='user')
             else:
                 log.error('ActivateWindow: unsupported window: %s' % window)
+        elif action.startswith('Mute'):
+            global muted
+            muted = not muted
         else:
             log.error('unsupported eventserver action: %s' % action)
     else:
