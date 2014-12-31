@@ -5,6 +5,14 @@
     <script filename='image.py'/>
 
     <menu name="image">
+        <event name="create"><![CDATA[
+            background = widget.get_widget('background')
+            if widget.context.get('item').type == 'image':
+                background.y = 600
+            else:
+                background.y = 660
+            ]]>
+        </event>
         <listing style="grid" x="20" y="100" width="1240" height="480" xpadding="30" ypadding="30">
 	    <properties xalign="center"/>
 	    <group width="130" height="130">
@@ -27,12 +35,39 @@
 		]]>
 	    </event>
         </listing>
-	<group y="620" height="120">
-	    <rectangle color="0x66000000"/>
-	    <text font="Vera:20" color="0xffffff">
-		$item.name with ${item.width}x${item.height}
+        <group name="background" x="-10" y="600" width="1300" height="140">
+            <rectangle color="0x66000000"/>
+            <text x="20" y="10" width="1260" font="Vera:22" color="0xffffff">
+		$item.name
 	    </text>
-	</group>
+            <group style="condition" x="20" y="10" width="1260" height="120">
+                <event name="replace"><![CDATA[
+                    background = next.parent.parent.get_widget('background')
+                    if next.context.get('item').type == 'image':
+                        background.animate('EASE_IN_QUAD', 0.2, y=600)
+                    else:
+                        background.animate('EASE_IN_QUAD', 0.2, y=660)
+                    next.opacity = 0
+                    next.animate('EASE_IN_QUAD', 0.2, opacity=255)
+                    yield prev.animate('EASE_OUT_QUAD', 0.2, opacity=0)
+                    ]]>
+                </event>
+                <case condition="item.type" value="image">
+                    <text y="50" font="Vera:18" color="0xffffff">
+			Resolution: ${item.width}x${item.height}
+		    </text>
+                    <text y="70" font="Vera:18" color="0xffffff" condition="item.date">
+			Date: ${item.date}
+		    </text>
+                </case>
+                <case condition="item.type" value="directory">
+                    <label font="Vera:18" color="0xffffff">
+                        <properties xalign="right"/>
+                        $item.num_items Items
+                    </label>
+                </case>
+            </group>
+        </group>
     </menu>
 
     <application name="imageviewer">
