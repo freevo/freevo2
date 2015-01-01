@@ -69,6 +69,50 @@ def register_image(image, item=None):
 
 PROPERTY_NOT_FOUND = object()
 
+
+def fill_video_details(stream, metadata):
+    """
+    Helper function to provide video stream details
+    """
+    result = {
+        'aspect': stream.aspect, 
+        'duration': int(metadata.length),
+        'height': stream.height, 
+        'width': stream.width, 
+        'stereomode': '',
+        'codec': stream.codec.lower().replace('h.264 avc', 'h264')}
+    if hasattr(metadata, 'stereo') and metadata.stereo:
+        result['stereomode'] = 'left_right'
+    return result
+
+def fill_audio_details(a):
+    """
+    Helper function to provide audio stream details
+    """
+    result = {
+        'bitrate': int(a.get('samplerate') or 0),
+        'channels': a.get('channels') or 2,
+        'codec': a.get('codec').lower() or '',
+        'index': a.get('id') or 0,
+        'language': a.get('langcode') or 'unkown',
+        'name': a.get('language') or 'unkown'}
+    if result['language'] == 'und':
+        result['language'] = 'unkown'
+    if result['name'] == 'Undetermined':
+        result['name'] = 'unkown'
+    if result['codec'].startswith('dolby dts'):
+        result['codec'] = 'dca'
+    return result
+
+def fill_subtitle_details(s):
+    """
+    Helper function to provide subtitle stream details
+    """
+    return {
+        'index': s.get('id') or 0,
+        'language': s.get('langcode') or 'und',
+        'name': s.get('language') or 'Undetermined'}
+
 def fill_basic_item_properties(item, properties):
     """
     Fill basic item properties

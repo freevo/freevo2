@@ -85,27 +85,11 @@ def _fill_episode_details(f, properties):
         elif prop in ('cast', ):
             info[prop] = []
         elif prop == 'streamdetails':
+            # Filled correctly later for on episode details
             info[prop] = {
                 'audio': [],
                 'subtitle': [],
                 'video': [] }
-            # metadata = f.get('metadata')
-            # print metadata
-            # if metadata:
-            #     for a in metadata.audio:
-            #         info[prop]['audio'].append({
-            #             'channels': a.get('channels', 2),
-            #             'codec': a.get('codec', 'MP3'),
-            #             'language': a.get('language', 'und')})
-            #     if metadata.subtitles:
-            #         log.error('subtitle exctraction missing')
-            #     for v in metadata.video:
-            #         info[prop].append({
-            #             'aspect': v.get('aspect', 1.7777),
-            #             'duration': v.get('duration', 0),
-            #             'height': v.get('height', 0),
-            #             'width': v.get('width'),
-            #             'stereomode': v.get('stereomode', 0)})
         else:
             log.error('no support for %s' % prop)
             info[prop] = ''
@@ -226,12 +210,114 @@ def GetEpisodeDetails(episodeid, properties):
             'audio': [],
             'subtitle': [],
             'video': [] }
-        for a in metadata.audio:
-            value['audio'].append({'channels': a.channels, 'codec': a.codec, 'language': a.langcode})
-        if metadata.subtitles:
-            log.error('subtitle exctraction missing')
-        for v in metadata.video:
-            value['video'].append({'aspect': v.aspect, 'duration': metadata.length,
-                                   'height': v.height, 'width': v.width, 'stereomode': ''})
+        if metadata:
+            for v in metadata.video:
+                value['video'].append(utils.fill_video_details(v, metadata))
+            for a in metadata.audio:
+                value['audio'].append(utils.fill_audio_details(a))
+            for s in metadata.subtitles:
+                value['subtitle'].append(utils.fill_subtitle_details(s))
         details['streamdetails'] = value
     yield {'episodedetails': details}
+
+
+
+###################################################################################################
+# Movie
+###################################################################################################
+
+
+def _fill_movie_details(f, properties):
+    """
+    Helper function to provide episode details
+    """
+    info = {
+        'movieid': f._beacon_id[1],
+        'label': f.get('title')
+    }
+    # it kind of sucks, but we have to ask kaa.(web)metadata again for
+    # each movie to get the details.
+    metadata = kaa.metadata.parse(f.url[7:])
+    webmetadata = kaa.webmetadata.parse(f.url[7:], metadata)
+    for prop in properties:
+        if prop == 'title':
+            info[prop] = f.get('title')
+        elif prop == 'thumbnail':
+            info[prop] = utils.register_image(f.get('poster'), f)
+        elif prop in ('rating',):
+            info[prop] = 0.0
+        elif prop == 'file':
+            info[prop] = f.url
+        elif prop == 'plot':
+            info[prop] = f.get('description')
+        elif prop in ('playcount', 'setid'):
+            info[prop] = 0
+        elif prop == 'resume':
+            info[prop] =  { 'position': 0, 'total': 0 }
+        elif prop == 'set':
+            info[prop] = ''
+        elif prop == 'fanart':
+            info[prop] = utils.register_image((webmetadata and webmetadata.image) or '')
+        elif prop == 'imdbnumber':
+            info[prop] = (webmetadata and webmetadata.imdb) or ''
+        elif prop == 'genre':
+            info[prop] = (webmetadata and webmetadata.genre) or []
+        elif prop == 'year':
+            info[prop] = (webmetadata and webmetadata.year) or 0
+        elif prop == 'runtime':
+            info[prop] = f.get('length')
+        elif prop in ('firstaired', 'dateadded', 'originaltitle', 'sorttitle', 'trailer'):
+            info[prop] = ''
+        elif prop in ('cast', 'mpaa', 'studio', 'director', 'tag'):
+            info[prop] = []
+        elif prop == 'streamdetails':
+            info[prop] = {
+                'audio': [],
+                'subtitle': [],
+                'video': [] }
+            if metadata:
+                for v in metadata.video:
+                    info[prop]['video'].append(utils.fill_video_details(v, metadata))
+                for a in metadata.audio:
+                    info[prop]['audio'].append(utils.fill_audio_details(a))
+                for s in metadata.subtitles:
+                    info[prop]['subtitle'].append(utils.fill_subtitle_details(s))
+        else:
+            log.error('no support for %s' % prop)
+            info[prop] = ''
+    return info
+
+def GetMovieSets(properties, limits):
+    """
+    JsonRPC Callback VideoLibrary.GetMovieSets
+    """
+    moviesets = []
+    start = limits['start']
+    end = min(limits['end'], len(moviesets))
+    return {
+        'limits': {'start': start, 'end': end, 'total': len(moviesets)},
+        'moviesets': moviesets[start:end+1] }
+
+@kaa.coroutine()
+def GetMovies(properties, limits):
+    """
+    JsonRPC Callback VideoLibrary.GetMovies
+    """
+    movies = []
+    # only provide the once kaa.webmetadata detected as movie
+    for info in (yield kaa.beacon.query(type='video', movie=True)):
+        movies.append(_fill_movie_details(info, properties))
+    movies.sort(lambda x,y: cmp(x['movieid'], y['movieid']))
+    start = limits['start']
+    end = min(limits['end'], len(movies))
+    yield {
+        'limits': {'start': start, 'end': end, 'total': len(movies)},
+        'movies': movies[start:end+1] }
+
+@kaa.coroutine()
+def GetMovieDetails(movieid, properties):
+    """
+    JsonRPC Callback VideoLibrary.GetMovieDetails
+    """
+    info = (yield kaa.beacon.query(type='video', id=movieid))
+    yield {'moviedetails': _fill_movie_details(info[0], properties) }

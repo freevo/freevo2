@@ -53,32 +53,6 @@ import utils
 # get logging object
 log = logging.getLogger('freevo')
 
-def _fill_audio_details(a):
-    """
-    Helper function to provide audio stream details
-    """
-    result = {
-        'bitrate': int(a.get('samplerate') or 0),
-        'channels': a.get('channels') or 2,
-        'codec': a.get('codec').lower() or '',
-        'index': a.get('id') or 0,
-        'language': a.get('langcode') or 'unkown',
-        'name': a.get('language') or 'unkown'}
-    if result['language'] == 'und':
-        result['language'] = 'unkown'
-    if result['name'] == 'Undetermined':
-        result['name'] = 'unkown'
-    return result
-
-def _fill_subtitle_details(s):
-    """
-    Helper function to provide subtitle stream details
-    """
-    return {
-        'index': s.get('id') or 0,
-        'language': s.get('langcode') or 'und',
-        'name': s.get('language') or 'Undetermined'}
-
 def _is_playing(app):
     """
     Helper function to detect play/pause
@@ -118,11 +92,11 @@ def GetProperties(playerid, properties):
             if app.name in 'videoplayer':
                 if app.item.metadata.audio:
                     for a in app.item.metadata.audio:
-                        result[prop].append(_fill_audio_details(a))
+                        result[prop].append(utils.fill_audio_details(a))
                 else:
                     log.error('no audio stream')
             elif app.name in 'audioplayer':
-                result[prop].append(_fill_audio_details(app.item.metadata))
+                result[prop].append(utils.fill_audio_details(app.item.metadata))
             elif app.name not in ('imageviewer',):
                 log.error('no audio stream')
         elif prop == 'canseek':
@@ -130,13 +104,13 @@ def GetProperties(playerid, properties):
         elif prop == 'currentaudiostream':
             result[prop] = {}
             if app.name == 'videoplayer' and app.item.metadata.audio:
-                result[prop] = _fill_audio_details(app.item.metadata.audio[0])
+                result[prop] = utils.fill_audio_details(app.item.metadata.audio[0])
                 if app.player.streaminfo.get('current-audio') is not None:
                     idx = app.player.streaminfo.get('current-audio')
                     if len(app.item.metadata.audio) > idx:
-                        result[prop] = _fill_audio_details(app.item.metadata.audio[idx])
+                        result[prop] = utils.fill_audio_details(app.item.metadata.audio[idx])
             elif app.name in 'audioplayer':
-                result[prop] = _fill_audio_details(app.item.metadata)
+                result[prop] = utils.fill_audio_details(app.item.metadata)
             elif app.name not in ('imageviewer',):
                 log.error('no audio stream')
         elif prop == 'currentsubtitle':
@@ -144,7 +118,7 @@ def GetProperties(playerid, properties):
             if app.name == 'videoplayer' and app.player.streaminfo.get('current-subtitle') is not None:
                 idx = app.player.streaminfo.get('current-subtitle')
                 if idx >= 0 and len(app.item.metadata.subtitles) > idx:
-                    result[prop] = _fill_subtitle_details(app.item.metadata.subtitles[idx])
+                    result[prop] = utils.fill_subtitle_details(app.item.metadata.subtitles[idx])
                 elif idx >= 0:
                     log.error('subtitle out of range')
         elif prop == 'partymode':
@@ -171,7 +145,7 @@ def GetProperties(playerid, properties):
             result[prop] = []
             if app.name == 'videoplayer':
                 for s in app.item.metadata.subtitles:
-                    result[prop].append(_fill_subtitle_details(s))
+                    result[prop].append(utils.fill_subtitle_details(s))
         elif prop in ('time', 'totaltime'):
             item = getattr(app, 'item', None)
             if not item:
@@ -218,9 +192,9 @@ def GetItem(playerid, properties):
                 'video': [] }
             if app.name == 'videoplayer':
                 for a in app.item.metadata.audio:
-                    value['audio'].append(_fill_audio_details(a))
+                    value['audio'].append(utils.fill_audio_details(a))
                 for s in app.item.metadata.subtitles:
-                    value['subtitle'].append(_fill_subtitle_details(s))
+                    value['subtitle'].append(utils.fill_subtitle_details(s))
                 for v in app.item.metadata.video:
                     value['video'].append({'aspect': v.aspect, 'duration': int(app.item.metadata.length),
                                            'height': v.height, 'width': v.width, 'stereomode': '',
