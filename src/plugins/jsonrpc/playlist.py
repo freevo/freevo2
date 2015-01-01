@@ -59,7 +59,7 @@ def GetItems(playlistid, properties, limits):
     # playlist in progress
     if app.name == 'menu':
         playlist = []
-    elif app.name in ('videoplayer', 'audioplayer'):
+    elif app.name in ('videoplayer', 'audioplayer', 'imageviewer'):
         if not app.item.playlist:
             playlist = [ app.item ]
         else:

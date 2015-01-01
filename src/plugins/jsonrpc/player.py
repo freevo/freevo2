@@ -79,6 +79,17 @@ def _fill_subtitle_details(s):
         'language': s.get('langcode') or 'und',
         'name': s.get('language') or 'Undetermined'}
 
+def _is_playing(app):
+    """
+    Helper function to detect play/pause
+    """
+    if app.name in ('videoplayer', 'audioplayer'):
+        return app.player.state == kaa.candy.STATE_PLAYING
+    if app.name == 'imageviewer':
+        return app.slideshow
+    log.error('unsupported application %s' % app)
+    return False
+
 def GetActivePlayers():
     """
     JsonRPC Callback Player.GetActivePlayers
@@ -90,6 +101,8 @@ def GetActivePlayers():
         return [ { 'playerid': 1, 'type': 'video' }]
     if app == 'audioplayer':
         return [ { 'playerid': 1, 'type': 'audio' }]
+    if app == 'imageviewer':
+        return [ { 'playerid': 1, 'type': 'picture' }]
     log.error('unsupported application %s' % app)
     return []
 
@@ -110,7 +123,7 @@ def GetProperties(playerid, properties):
                     log.error('no audio stream')
             elif app.name in 'audioplayer':
                 result[prop].append(_fill_audio_details(app.item.metadata))
-            else:
+            elif app.name not in ('imageviewer',):
                 log.error('no audio stream')
         elif prop == 'canseek':
             result[prop] = True
@@ -124,7 +137,7 @@ def GetProperties(playerid, properties):
                         result[prop] = _fill_audio_details(app.item.metadata.audio[idx])
             elif app.name in 'audioplayer':
                 result[prop] = _fill_audio_details(app.item.metadata)
-            else:
+            elif app.name not in ('imageviewer',):
                 log.error('no audio stream')
         elif prop == 'currentsubtitle':
             result[prop] = {}
@@ -145,7 +158,7 @@ def GetProperties(playerid, properties):
         elif prop == 'shuffled':
             result[prop] = False
         elif prop == 'speed':
-            if app.player.state == kaa.candy.STATE_PLAYING:
+            if _is_playing(app):
                 result[prop] = 1
             else:
                 result[prop] = 0
@@ -180,6 +193,8 @@ def GetProperties(playerid, properties):
                     result[prop] = 'video'
             elif app.name == 'audioplayer':
                 result[prop] = 'song'
+            elif app.name == 'imageviewer':
+                result[prop] = 'picture'
             else:
                 raise AttributeError('unsupported application')
         else:
@@ -221,16 +236,16 @@ def PlayPause(playerid, play='toggle'):
     JsonRPC Callback Player.PlayPause
     """
     app = freevo.taskmanager.applications[-1]
-    if app.name in ('videoplayer', 'audioplayer'):
+    if app.name in ('videoplayer', 'audioplayer', 'imageviewer'):
         item = app.item
-        if play == False and app.player.state == kaa.candy.STATE_PLAYING:
+        if play == False and _is_playing(app):
             freevo.Event(freevo.PAUSE).post()
             return 0
-        if play == True and app.player.state == kaa.candy.STATE_PAUSED:
+        if play == True and not _is_playing(app):
             freevo.Event(freevo.PLAY).post()
             return 1
         if play == 'toggle':
-            if app.player.state == kaa.candy.STATE_PAUSED:
+            if not _is_playing(app):
                 freevo.Event(freevo.PLAY).post()
                 return 1
             freevo.Event(freevo.PAUSE).post()

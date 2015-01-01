@@ -106,10 +106,15 @@ def fill_basic_item_properties(item, properties):
         if prop in ('album', 'albumartist', 'originaltitle'):
             value = ''
         if prop == 'type':
-            if item.get('series') and item.get('episode'):
-                value = 'episode'
+            if item.type == 'video':
+                if item.get('series') and item.get('episode'):
+                    value = 'episode'
+                else:
+                    value = 'movie'
             elif item.type == 'audio':
                 value = 'song'
+            elif item.type == 'image':
+                value = 'picture'
             else:
                 log.error('unsupported type')
                 value = ''

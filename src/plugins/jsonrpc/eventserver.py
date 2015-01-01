@@ -72,7 +72,14 @@ keymap = {
         'skipplus': freevo.PLAYLIST_NEXT,
         'left': freevo.Event(freevo.SEEK, -60),
         'right': freevo.Event(freevo.SEEK, 60),
-        }
+        },
+    'imageviewer': {
+        'back': freevo.STOP,
+        'skipminus': freevo.PLAYLIST_PREV,
+        'skipplus': freevo.PLAYLIST_NEXT,
+        'left': freevo.Event(freevo.IMAGE_ROTATE, 'left'),
+        'right': freevo.Event(freevo.IMAGE_ROTATE, 'right'),
+        },
 }
 
 # Muted is not supported by Freevo but Yatse uses it to test the
