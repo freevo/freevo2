@@ -111,7 +111,7 @@
 	-->
         <event name="system"><![CDATA[
             if event == 'SEEK' or event == 'PLAY_START':
-                widget.osd_show('info', autohide=5)
+                widget.osd.show('info', autohide=5)
         ]]>
         </event>
 	<!--
@@ -128,7 +128,7 @@
             if idlebar:
                 idlebar.hide()
             yield kaa.delay(0.1)
-            widget.osd_show('info', autohide=5)
+            widget.osd.show('info', autohide=5)
         ]]>
         </event>
     </application>
