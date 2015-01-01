@@ -88,6 +88,8 @@ def GetActivePlayers():
         return []
     if app == 'videoplayer':
         return [ { 'playerid': 1, 'type': 'video' }]
+    if app == 'audioplayer':
+        return [ { 'playerid': 1, 'type': 'audio' }]
     log.error('unsupported application %s' % app)
     return []
 
@@ -100,12 +102,14 @@ def GetProperties(playerid, properties):
     for prop in properties:
         if prop == 'audiostreams':
             result[prop] = []
-            if app.name == 'videoplayer':
+            if app.name in 'videoplayer':
                 if app.item.metadata.audio:
                     for a in app.item.metadata.audio:
                         result[prop].append(_fill_audio_details(a))
                 else:
                     log.error('no audio stream')
+            elif app.name in 'audioplayer':
+                result[prop].append(_fill_audio_details(app.item.metadata))
             else:
                 log.error('no audio stream')
         elif prop == 'canseek':
@@ -118,6 +122,8 @@ def GetProperties(playerid, properties):
                     idx = app.player.streaminfo.get('current-audio')
                     if len(app.item.metadata.audio) > idx:
                         result[prop] = _fill_audio_details(app.item.metadata.audio[idx])
+            elif app.name in 'audioplayer':
+                result[prop] = _fill_audio_details(app.item.metadata)
             else:
                 log.error('no audio stream')
         elif prop == 'currentsubtitle':
@@ -150,8 +156,9 @@ def GetProperties(playerid, properties):
                 result[prop] = False
         elif prop == 'subtitles':
             result[prop] = []
-            for s in app.item.metadata.subtitles:
-                result[prop].append(_fill_subtitle_details(s))
+            if app.name == 'videoplayer':
+                for s in app.item.metadata.subtitles:
+                    result[prop].append(_fill_subtitle_details(s))
         elif prop in ('time', 'totaltime'):
             item = getattr(app, 'item', None)
             if not item:
@@ -171,6 +178,8 @@ def GetProperties(playerid, properties):
                     result[prop] = 'episode'
                 else:
                     result[prop] = 'video'
+            elif app.name == 'audioplayer':
+                result[prop] = 'song'
             else:
                 raise AttributeError('unsupported application')
         else:
@@ -212,7 +221,7 @@ def PlayPause(playerid, play='toggle'):
     JsonRPC Callback Player.PlayPause
     """
     app = freevo.taskmanager.applications[-1]
-    if app.name == 'videoplayer':
+    if app.name in ('videoplayer', 'audioplayer'):
         item = app.item
         if play == False and app.player.state == kaa.candy.STATE_PLAYING:
             freevo.Event(freevo.PAUSE).post()
@@ -226,6 +235,8 @@ def PlayPause(playerid, play='toggle'):
                 return 1
             freevo.Event(freevo.PAUSE).post()
             return 0
+    else:
+        raise AttributeError('unsupported application')
     if play == False:
         return 0
     return 1
@@ -280,3 +291,13 @@ def Seek(playerid, value):
     """
     app = freevo.taskmanager.applications[-1]
     app.player.seek(value, kaa.candy.SEEK_PERCENTAGE)
+
+def GoTo(playerid, to):
+    """
+    JsonRPC Callback Player.Goto
+    """
+    if isinstance(to, int):
+        freevo.taskmanager.applications[-1].item.playlist.choices[to].play()
+    else:
+        log.error('unable to go to %s' % str(to))
+    return ''

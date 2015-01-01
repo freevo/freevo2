@@ -63,6 +63,15 @@ keymap = {
         'right': freevo.Event(freevo.SEEK, 60),
         'info': freevo.TOGGLE_OSD,
         'display': freevo.VIDEO_CHANGE_ASPECT,
+        },
+    'audioplayer': {
+        'back': freevo.STOP,
+        'skipminus': freevo.PLAYLIST_PREV,
+        'reverse': freevo.Event(freevo.SEEK, -10),
+        'forward': freevo.Event(freevo.SEEK, 10),
+        'skipplus': freevo.PLAYLIST_NEXT,
+        'left': freevo.Event(freevo.SEEK, -60),
+        'right': freevo.Event(freevo.SEEK, 60),
         }
 }
 

@@ -100,14 +100,16 @@ def fill_basic_item_properties(item, properties):
         if prop == 'tagline':
             value = ''
         if prop == 'fanart':
-            value = register_image(item.background)
+            value = register_image(hasattr(item, 'background') and item.background)
         if prop == 'imdbnumber':
-            value = (item.webmetadata and item.webmetadata.imdb) or ''
+            value = (hasattr(item, 'webmetadata') and item.webmetadata and item.webmetadata.imdb) or ''
         if prop in ('album', 'albumartist', 'originaltitle'):
             value = ''
         if prop == 'type':
             if item.get('series') and item.get('episode'):
                 value = 'episode'
+            elif item.type == 'audio':
+                value = 'song'
             else:
                 log.error('unsupported type')
                 value = ''

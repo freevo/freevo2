@@ -59,15 +59,18 @@ def GetItems(playlistid, properties, limits):
     # playlist in progress
     if app.name == 'menu':
         playlist = []
-    elif app.name == 'videoplayer':
-        playlist = [ freevo.taskmanager.applications[-1].item ]
+    elif app.name in ('videoplayer', 'audioplayer'):
+        if not app.item.playlist:
+            playlist = [ app.item ]
+        else:
+            playlist = app.item.playlist.choices
     else:
         playlist = []
         log.error('unsupported application %s' % app)
     result = []
     for item in playlist:
         _properties = properties[:]
-        result.append(utils.fill_basic_item_properties(app.item, _properties))
+        result.append(utils.fill_basic_item_properties(item, _properties))
         for prop in _properties:
             if prop == 'playcount':
                 value = 0
