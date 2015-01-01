@@ -74,7 +74,7 @@ class ImageViewer(freevo.Player):
         """
         capabilities = (freevo.CAPABILITY_TOGGLE, freevo.CAPABILITY_FULLSCREEN)
         super(ImageViewer, self).__init__('image', capabilities)
-        self.slideshow = True
+        self.slideshow = False
         self.sshow_timer = kaa.OneShotTimer(self.slideshow_next)
         self.signals['stop'].connect_weak(self.application_stop)
 
@@ -155,7 +155,7 @@ class ImageViewer(freevo.Player):
             else:
                 freevo.OSD_MESSAGE.post(_('play'))
                 self.slideshow = True
-                self.sshow_timer.start(1)
+                self.sshow_timer.start(0.1)
             return True
         if event == freevo.PLAYLIST_NEXT or event == freevo.PLAYLIST_PREV:
             # up and down will stop the slideshow and pass the
