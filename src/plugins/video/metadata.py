@@ -73,7 +73,7 @@ class PluginInterface(freevo.ItemPlugin):
         result = yield kaa.webmetadata.tv.add_series_by_search_result(choice, item.get('series'))
         box.hide()
         item.menustack.back_one_menu()
-        # FIXME: missing menu update
+        freevo.Event(freevo.OSD_MESSAGE, _('Updating Media Database')).post()
 
     def choose_poster(self, item):
         for p in kaa.webmetadata.parse(item.filename).series.get_all_posters():
