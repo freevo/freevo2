@@ -39,6 +39,10 @@ import logging
 import kaa
 import kaa.beacon
 from kaa.weakref import weakref
+try:
+    import kaa.webmetadata as webmetadata
+except ImportError:
+    webmetadata = None
 
 # freevo imports
 import api as freevo
@@ -108,6 +112,7 @@ class Directory(freevo.Playlist):
             # FIXME: no way to set this
             self.media_type = None
         self._beacon_query = None
+        self.__description  = ''
 
     @kaa.coroutine(policy=kaa.POLICY_SINGLETON)
     def __calculate_num_items(self, type):
@@ -179,6 +184,44 @@ class Directory(freevo.Playlist):
         if space > 1000:
             return '%s,%s' % (space / 1000, space % 1000)
         return space
+
+    @property
+    def webmetadata(self):
+        """
+        Return webmetadata and set description
+        """
+        # FIXME: this is very video plugin specific and should be
+        # moved into the video plugin somehow
+        if not webmetadata:
+            return None
+        if not hasattr(self, '_webmetadata'):
+            self._webmetadata = None
+            if self.info.get('series'):
+                self._webmetadata = webmetadata.tv.series(self.info.get('series'))
+                if self._webmetadata:
+                    self.description = self._webmetadata.overview
+                    if self.info.get('season') and len(self._webmetadata.seasons) >= self.info.get('season'):
+                        self._webmetadata = self._webmetadata.seasons[self.info.get('season')-1]
+        return self._webmetadata
+
+    @property
+    def poster(self):
+        """
+        Return poster
+        """
+        # FIXME: this is very video plugin specific and should be
+        # moved into the video plugin somehow
+        return self.webmetadata and self.webmetadata.poster
+
+    @property
+    def properties(self):
+        """
+        Generate webmetadata before creating properties
+        """
+        # FIXME: this is very video plugin specific and should be
+        # moved into the video plugin somehow
+        self.webmetadata
+        return super(Directory, self).properties
 
     def actions(self):
         """

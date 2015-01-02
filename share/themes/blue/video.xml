@@ -9,7 +9,7 @@
         <rectangle name="background" y="520" height="200" color="0x66000000"/>
         <event name="create"><![CDATA[
             background = widget.get_widget('background')
-            if widget.context.get('item').get('series') or widget.context.get('item').get('description'):
+            if widget.context.get('item').get('description'):
                 background.y = 520
             else:
                 background.y = 660
@@ -42,7 +42,7 @@
             <group style="condition" x="10" y="10" width="900" height="140">
                 <event name="replace"><![CDATA[
                     background = next.parent.parent.get_widget('background')
-                    if next.context.get('item').get('series') or next.context.get('item').get('description'):
+                    if next.context.get('item').get('description'):
                         background.animate('EASE_IN_QUAD', 0.2, y=520)
                     else:
                         background.animate('EASE_IN_QUAD', 0.2, y=660)
@@ -57,7 +57,7 @@
                         $item.description
                     </text>
                 </case>
-                <case condition="item.series">
+                <case condition="item.series and item.description and item.type == 'video'">
                     <thumbnail x="10" width="285" thumbnail="$item.thumbnail">
                         <replace-on-context-change keys="item" script="fade"/>
                         <properties xalign="center" yalign="center"/>
@@ -89,7 +89,7 @@
                     <replace-on-context-change keys="item.poster" script="fade"/>
                 </image>
             </case>
-            <case condition="not item.poster and item.image and not item.series and not item.description">
+            <case condition="not item.poster and item.image and not item.description">
                 <rectangle x="960" y="485" width="280" height="154" color="0xa0000000" radius="8"/>
                 <image x="965" y="490" width="270" height="144" url="$item.image">
                     <replace-on-context-change keys="item.image" script="fade"/>
