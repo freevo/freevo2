@@ -140,7 +140,6 @@ class Directory(freevo.Playlist):
         self.num_items_dict['dir%s' % media_type] = len(listing.get('beacon:dir'))
         self.num_items_dict['all%s' % media_type] = num + len(listing.get('beacon:dir'))
         self.num_items_dict = self.num_items_dict
-        self.menustack.refresh()
 
     @property
     def num_items(self):
@@ -275,12 +274,23 @@ class Directory(freevo.Playlist):
             return
         self.item_menu = None
         self._beacon_query = yield kaa.beacon.query(parent=self.info)
-        self._beacon_query.signals['changed'].connect_weak(self._get_items)
+        self._beacon_query.signals['changed'].connect_weak(self._query_update)
         self._beacon_query.monitor()
-        item_menu = freevo.Menu(self.name, self._get_items(False), type = self.menu_type)
+        item_menu = freevo.Menu(self.name, self._get_items(False), self._get_items, type = self.menu_type)
         item_menu.autoselect = self.config2value('autoplay_single_item')
         self.menustack.pushmenu(item_menu)
         self.item_menu = weakref(item_menu)
+
+    def _query_update(self):
+        """
+        Query update from kaa.beacon
+        """
+        if self.item_menu and self.item_menu == self.menustack[-1]:
+            # Only override the items if the item menu is the current
+            # menu in the stack. Otherwise updates will create a new
+            # directory item for this one without a menu and we loose
+            # the query.
+            self._get_items()
 
     def _get_items(self, update=True):
         """
