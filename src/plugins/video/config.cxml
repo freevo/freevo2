@@ -8,6 +8,11 @@
             and name. To set the subdir video in your home directory and
             /video write
 
+	    The variable 'scan' is hours between automatic rescan. If
+	    the value is 0, the directory will only be scanned if not
+	    known to Freevo. If set to -1 the directory and all
+	    subdirectories will be monitored for changes.
+
             video.tv[+].path = $(HOME)/video
             video.tv[ ].name = My Home Videos
             video.tv[+].path = /video

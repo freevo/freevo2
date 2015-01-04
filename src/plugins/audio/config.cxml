@@ -7,6 +7,11 @@
             and name. To set the subdir audio in your home directory and
             /audio write
 
+	    The variable 'scan' is hours between automatic rescan. If
+	    the value is 0, the directory will only be scanned if not
+	    known to Freevo. If set to -1 the directory and all
+	    subdirectories will be monitored for changes.
+
             audio.items[+].path = $(HOME)/audio
             audio.items[ ].name = My Music
             audio.items[+].path = /audio
