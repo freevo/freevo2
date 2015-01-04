@@ -22,9 +22,21 @@
                     <image x="15" y="15" width="525" height="525" filename="$item.image">
                         <replace-on-context-change keys="item.artist item.album" script="fade"/>
                     </image>
-                    <label x="15" y="570" width="525" font="Vera:30" color="0xffffff">
+                    <label x="15" y="570" width="525" font="Vera:30"
+			   color="0xffffff" condition="item.type == 'audio'">
                         <replace-on-context-change keys="item.name" script="fade"/>
                         $item.name
+                    </label>
+                    <label x="15" y="570" width="225" font="Vera:30"
+			   color="0xffffff" condition="item.type != 'audio' and item.num_items">
+                        <replace-on-context-change keys="item.num_items" script="fade"/>
+                        $item.num_items Items
+                    </label>
+                    <label x="250" y="573" width="275" font="Vera:27"
+			   color="0xffffff" condition="item.type != 'audio' and item.length">
+                        <properties xalign="right"/>
+                        <replace-on-context-change keys="item.length" script="fade"/>
+                        Total: $item.length
                     </label>
                     <label x="15" y="630" width="525" font="Vera:27" color="0xffffff">
                         <replace-on-context-change keys="item.artist" script="fade"/>
@@ -38,12 +50,14 @@
             </case>
         </group>
         <listing x="630" y="150" width="885" height="885" xpadding="30" ypadding="15">
-            <label font="Vera" height="37" color="0xcccccc">
+	    <group width="880" height="37">
                 <properties opacity="200"/>
-                $item.name
-            </label>
+		<label font="Vera" height="37" color="0xcccccc">
+                    $item.name
+		</label>
+	    </group>
             <selection>
-                <rectangle color="0xa0000000" radius="30" height="40"/>
+                <rectangle color="0xa0000000" radius="37" height="45"/>
             </selection>
             <event name="replace"><![CDATA[
                 diff = 75

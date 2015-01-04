@@ -89,6 +89,13 @@ class Playlist(freevo.MediaItem, freevo.ItemList):
         # create a basic info object
         self.info = {}
 
+    @property
+    def num_items(self):
+        """
+        Return the number of items in the playlist
+        """
+        return len(self.choices)
+
     def set_items(self, items, selected=None):
         """
         Set/replace the items.

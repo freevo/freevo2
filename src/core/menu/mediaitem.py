@@ -117,16 +117,6 @@ class MediaItem(Item):
             return ''
 
     @property
-    def length_min(self):
-        """
-        Return the length of the item as formated unicode string.
-        """
-        try:
-            return _('%d min') % (int(self.info.get('length')) / 60)
-        except ValueError:
-            return ''
-
-    @property
     def elapsed(self):
         """
         Return the elapsed time of the item.
