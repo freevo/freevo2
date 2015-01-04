@@ -88,23 +88,23 @@
     </widget>
 
     <application name="menu">
-	<group style="scaled" width="1280" height="720" name="menu"/>
+	<group style="scaled" width="1920" height="1080" name="menu"/>
     </application>
 
     <menu name="main">
-	<properties anchor-point="640,360"/>
-	<image x="200" width="880" y="100" filename="images/logo_large.png">
+	<properties anchor-point="960,540"/>
+	<image x="300" width="1320" y="150" filename="images/logo_large.png">
 	    <properties keep-aspect="true"/>
 	</image>
-	<group name="content" x="-20" y="550" width="1320" height="50">
+	<group name="content" x="-30" y="825" width="1980" height="75">
 	    <rectangle color="0x60000000"/>
-	    <listing width="1320" height="50" style="fixed-selection" xpadding="20" ypadding="3">
-		<label font="Vera" height="25" width="230" color="0xffffff">
+	    <listing width="1980" height="75" style="fixed-selection" xpadding="30" ypadding="5">
+		<label font="Vera" height="37" width="345" color="0xffffff">
 		    <properties xalign="center" yalign="center" opacity="200"/>
 		    $item.name
 		</label>
-		<selection xpadding="20" ypadding="20">
-		    <rectangle color="0xa0ffffff" height="35" width="220" radius="20"/>
+		<selection xpadding="30" ypadding="30">
+		    <rectangle color="0xa0ffffff" height="52" width="330" radius="30"/>
 		</selection>
 		<event name="select"><![CDATA[
     	            if prev:
@@ -121,21 +121,21 @@
 	<event name="submenu-show"><![CDATA[
 	    self.x = 1300
 	    yield menu.animate('EASE_OUT_QUAD', 0.2, scale_x=0.6, opacity=200)
-	    yield self.animate('EASE_OUT_BACK', 0.3, x=800)
+	    yield self.animate('EASE_OUT_BACK', 0.3, x=1200)
             ]]>
 	</event>
 	<event name="submenu-hide"><![CDATA[
-	    yield self.animate('EASE_IN_BACK', 0.3, x=1300)
+	    yield self.animate('EASE_IN_BACK', 0.3, x=1950)
 	    yield menu.animate('EASE_OUT_QUAD', 0.2, scale_x=1.0, opacity=255)
             ]]>
 	</event>
-	<listing y="100" width="400" height="480" xpadding="20" ypadding="10">
-	    <label font="Vera" height="25" color="0xffffff">
+	<listing y="150" width="600" height="720" xpadding="30" ypadding="15">
+	    <label font="Vera" height="37" color="0xffffff">
 		<properties opacity="200"/>
 		$item.name
 	    </label>
 	    <selection>
-		<rectangle color="0xa0000000" radius="25" height="30"/>
+		<rectangle color="0xa0000000" radius="25" height="45"/>
 	    </selection>
 	    <event name="select"><![CDATA[
 	        if prev:
@@ -148,13 +148,13 @@
 
     <menu name="default">
 	<event name="replace" script="menu"/>
-        <listing x="20" y="100" width="600" height="480" xpadding="20" ypadding="10">
-	    <label font="Vera" height="25" color="0xffffff">
+        <listing x="30" y="150" width="900" height="720" xpadding="30" ypadding="15">
+	    <label font="Vera" height="37" color="0xffffff">
 		<properties opacity="200"/>
 		$item.name
 	    </label>
             <selection>
-                <rectangle color="0xa0000000" radius="25" height="30"/>
+                <rectangle color="0xa0000000" radius="37" height="45"/>
             </selection>
 	    <event name="select"><![CDATA[
 	        if prev:
