@@ -131,20 +131,22 @@ class MenuStack(object):
         if self.locked:
             return
         menu = self._stack[-1]
-        if menu.autoselect and len(menu.choices) == 1:
-            # do not show a menu with only one item. Go back to
-            # the previous page
-            log.info('delete menu with only one item')
-            self.back_one_menu()
-        elif reload and menu.reload_func:
-            # The menu has a reload function. Call it to rebuild
-            # this menu. If the functions returns something, replace
-            # the old menu with the returned one.
-            new_menu = menu.reload_func()
-            if new_menu and not isinstance(new_menu, kaa.InProgress):
-                # FIXME: is this special case needed?
-                self._stack[-1] = new_menu
-                menu = new_menu
+        if reload:
+            if menu.reload_func:
+                # The menu has a reload function. Call it to rebuild
+                # this menu. If the functions returns something,
+                # replace the old menu with the returned one.
+                menu = menu.reload_func()
+                if menu and not isinstance(menu, kaa.InProgress):
+                    # FIXME: is this special case needed?
+                    self._stack[-1] = menu
+                menu = self._stack[-1]
+            if menu.autoselect and len(menu.choices) == 1:
+                # do not show a menu with only one item. Go back to
+                # the previous page. back_one_menu calls refresh
+                # again with reload set to True
+                log.info('delete menu with only one item')
+                return self.back_one_menu()
         self.signals['refresh'].emit()
 
     def __getitem__(self, attr):
