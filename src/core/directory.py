@@ -140,6 +140,8 @@ class Directory(freevo.Playlist):
         self.num_items_dict['dir%s' % media_type] = len(listing.get('beacon:dir'))
         self.num_items_dict['all%s' % media_type] = num + len(listing.get('beacon:dir'))
         self.num_items_dict = self.num_items_dict
+        # Update GUI if num_items was called from the theme
+        self.menustack.refresh()
 
     @property
     def num_items(self):
@@ -228,6 +230,17 @@ class Directory(freevo.Playlist):
         """
         browse = freevo.Action(_('Browse directory'), self.browse)
         play = freevo.Action(_('Play all files in directory'), self.play)
+        self.menustack.locked = True
+        # actions() is not allowed to return a coroutine but
+        # self.num_items requires a beacon query which always returns
+        # an InProgress object. Therefore, we need to step() here. To
+        # make it worse, if you have autoselect one item tured on the
+        # stack may refresh here. To prevent that we need to lock the
+        # stack.
+        while self.num_items is None:
+            kaa.main.step()
+        self.menustack.locked = False
+        # create and sort the items
         if self.num_items:
             if self.config2value('autoplay_items') and not self.num_items_dir:
                 items = [ play, browse ]
@@ -273,10 +286,19 @@ class Directory(freevo.Playlist):
 	    freevo.MessageWindow(_('Directory does not exist')).show()
             return
         self.item_menu = None
-        self._beacon_query = yield kaa.beacon.query(parent=self.info)
+        try:
+            # we need to lock the menustack here because during the
+            # beacon query the parent item may get a notification to
+            # rebuild its items and after that this item creates a
+            # menu but is not connected to the stack anymore. The lock
+            # will prevent any reloading.
+            self.menustack.locked = True
+            self._beacon_query = yield kaa.beacon.query(parent=self.info)
+        finally:
+            self.menustack.locked = False
         self._beacon_query.signals['changed'].connect_weak(self._query_update)
         self._beacon_query.monitor()
-        item_menu = freevo.Menu(self.name, self._get_items(False), self._get_items, type = self.menu_type)
+        item_menu = freevo.Menu(self.name, self._get_items(False), type = self.menu_type)
         item_menu.autoselect = self.config2value('autoplay_single_item')
         self.menustack.pushmenu(item_menu)
         self.item_menu = weakref(item_menu)
@@ -285,12 +307,17 @@ class Directory(freevo.Playlist):
         """
         Query update from kaa.beacon
         """
-        if self.item_menu and self.item_menu == self.menustack[-1]:
+        self.menustack.refresh(True)
+        if self.item_menu and self.item_menu == self.menustack[-1] and \
+           not self.menustack.locked:
             # Only override the items if the item menu is the current
-            # menu in the stack. Otherwise updates will create a new
-            # directory item for this one without a menu and we loose
-            # the query.
+            # menu in the stack and the stack is not locked. Otherwise
+            # updates will create a new directory item for this one
+            # without a menu and we loose the query.
             self._get_items()
+        else:
+            # Save the item re-creation for the normal reload
+            self.reload_func = self._get_items
 
     def _get_items(self, update=True):
         """
@@ -359,6 +386,7 @@ class Directory(freevo.Playlist):
         if not self.item_menu:
             return items
         # update menu
+        self.reload_func = None
         self.item_menu.set_items(items)
 
     def eventhandler(self, event):
