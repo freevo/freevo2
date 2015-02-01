@@ -7,7 +7,7 @@
         <var name="width" default="800">
             <desc>display width</desc>
         </var>
-        <var name="height" default="600">
+        <var name="height" default="450">
             <desc>display height</desc>
         </var>
         <group name="overscan">
