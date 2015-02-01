@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<plugin name="plugin.commands" activate="80">
+    <desc>
+	Run commands from the Freevo Main Menu
+    </desc>
+    <list name="items">
+        <desc>
+	    List of commands in the menu. The name is used and args is
+	    executed. If mode is background the command is executed in
+	    the background and Freevo will no monitor it anymore. If
+	    mode is controlled Freevo will wait until the command is
+	    done. In this case Freevo listens on the event
+	    MENU_BACK_ONE_MENU to force a stop.
+
+	    Example:
+            plugin.commands.items[+].name = Netflix
+            plugin.commands.items[ ].args = google-chrome http://www.netflix.com
+            plugin.commands.items[ ].mode = controlled
+            plugin.commands.items[+].name = Terminal
+            plugin.commands.items[ ].args = xterm
+            plugin.commands.items[ ].mode = background
+        </desc>
+        <var name="name" type="unicode">
+            <desc>Name in the menu</desc>
+        </var>
+        <var name="args" type="str">
+            <desc>Command and arguments</desc>
+        </var>
+        <var name="mode" value="controlled">
+            <desc>How the command is handled after execution</desc>
+            <values>
+                <value>controlled</value>
+                <value>background</value>
+            </values>
+        </var>
+    </list>
+</plugin>
