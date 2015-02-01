@@ -33,7 +33,8 @@ __all__ = []
 import os
 import kaa.utils
 
-from stage import Stage, config
+from core import config
+from stage import Stage
 
 # import all widgets
 for name, module in kaa.utils.get_plugins(group='freevo.gui', location=__file__).items():

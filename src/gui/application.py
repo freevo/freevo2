@@ -31,7 +31,7 @@ __all__ = [ 'OSD', 'Application', 'ApplicationStyles' ]
 import kaa.candy
 
 from widget import Widget, WidgetStyles
-from stage import ScaledGroup
+from core import ScaledGroup
 
 # register xml eventhandler
 kaa.candy.Eventhandler.signatures['system'] = 'widget,event'
