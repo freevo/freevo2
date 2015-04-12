@@ -40,7 +40,6 @@ import logging
 # kaa imports
 import kaa
 import kaa.beacon
-from kaa.utils import property
 from kaa.weakref import weakref
 
 # freevo imports

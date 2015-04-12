@@ -33,7 +33,6 @@ __all__ = [ 'TextWindow', 'MessageWindow', 'ConfirmWindow' ]
 
 # kaa imports
 import kaa
-from kaa.utils import property
 
 # freevo imports
 from .. import gui

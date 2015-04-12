@@ -38,7 +38,6 @@ import logging
 
 # kaa imports
 from kaa.weakref import weakref
-from kaa.utils import property
 
 # menu imports
 from plugin import ItemPlugin
