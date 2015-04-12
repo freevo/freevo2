@@ -9,7 +9,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2003-2009 Dirk Meyer, et al.
+# Copyright (C) 2003-2015 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -160,16 +160,16 @@ class MediaMenu(freevo.MainMenuItem):
         """
         if self.item_menu:
             items = yield self._get_items()
-            self.item_menu.set_items(items)
+            # the yield may result in the item_menu deletion if it
+            # only contains one item.
+            if self.item_menu:
+                self.item_menu.set_items(items)
 
-    @kaa.coroutine()
     def media_change(self, media):
         """
         Media change from kaa.beacon
         """
-        if self.item_menu:
-            items = yield self._get_items()
-            self.item_menu.set_items(items)
+        self.reload()
 
     def eventhandler(self, event):
         """
