@@ -96,6 +96,7 @@ class PluginInterface( freevo.Plugin ):
         HTTP callback for images
         """
         filename = ''
+        path = urllib.unquote(path)
         if path.startswith('beacon'):
             filename = os.path.join(utils.imagedir, path[7:])
         if path.startswith('cache'):

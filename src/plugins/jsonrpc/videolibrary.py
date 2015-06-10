@@ -90,6 +90,8 @@ def _fill_episode_details(f, properties):
                 'audio': [],
                 'subtitle': [],
                 'video': [] }
+        elif prop == 'tvshowid':
+            info[prop] = -1
         else:
             log.error('no support for %s' % prop)
             info[prop] = ''
@@ -126,11 +128,11 @@ def GetTVShows(properties, limits):
                 info[prop] = 0.0
             elif prop == 'plot':
                 info[prop] = series.overview
-            elif prop in ('genre', 'studio'):
+            elif prop in ('genre', 'studio', 'cast', 'tag'):
                 info[prop] = []
             elif prop in ('title', 'originaltitle', 'sorttitle'):
                 info[prop] = name
-            elif prop in ('mpaa', 'lastplayed', 'dateadded'):
+            elif prop in ('mpaa', 'lastplayed', 'dateadded', 'imdbnumber', 'premiered', 'votes'):
                 info[prop] = ''
             elif prop in ('episode'):
                 info[prop] = len((yield kaa.beacon.query(series=series.name, type='video')))
@@ -147,7 +149,7 @@ def GetTVShows(properties, limits):
     yield None
 
 @kaa.coroutine()
-def GetSeasons(tvshowid, properties):
+def GetSeasons(tvshowid, properties, limits=None):
     """
     JsonRPC Callback VideoLibrary.GetSeasons
     """
@@ -176,7 +178,13 @@ def GetSeasons(tvshowid, properties):
                         log.error('no support for %s' % prop)
                         info[prop] = ''
                 result['seasons'].append(info)
-    result['limits'] = {'start': 0, 'end': len(result['seasons']), 'total': len(result['seasons'])}
+    start = 0
+    end = len(result['seasons'])
+    if limits:
+        start = limits['start']
+        end = min(end, limits['end'])
+        result['limits'] = {'start': start, 'end': end, 'total': len(result['seasons'])}
+        result['seasons'] = result['seasons'][start:end+1]
     yield result
 
 @kaa.coroutine()
