@@ -51,7 +51,7 @@ import utils
 log = logging.getLogger('freevo')
 tvdb = kaa.webmetadata.tv.backends['thetvdb']
 
-def _fill_episode_details(f, properties):
+def _fill_episode_details(f, properties, metadata=None):
     """
     Helper function to provide episode details
     """
@@ -61,13 +61,13 @@ def _fill_episode_details(f, properties):
     }
     for prop in properties:
         if prop == 'season':
-            info[prop] = f.get('season')
+            info[prop] = f.get('season') or 0
         elif prop == 'episode':
-            info[prop] = f.get('episode')
+            info[prop] = f.get('episode') or 0
         elif prop == 'showtitle':
-            info[prop] = f.get('series')
+            info[prop] = f.get('series') or ''
         elif prop == 'title':
-            info[prop] = f.get('title')
+            info[prop] = f.get('title') or ''
         elif prop == 'thumbnail':
             info[prop] = utils.register_image(f.thumbnail, f)
         elif prop in ('rating',):
@@ -75,28 +75,54 @@ def _fill_episode_details(f, properties):
         elif prop == 'file':
             info[prop] = f.url
         elif prop == 'plot':
-            info[prop] = f.get('description')
+            info[prop] = f.get('description') or ''
         elif prop == 'playcount':
             info[prop] = 0
         elif prop == 'resume':
-            info[prop] = False
-        elif prop in ('firstaired', 'dateadded', 'originaltitle'):
+            info[prop] =  { 'position': 0.0, 'total': 0.0 }
+        elif prop in ('firstaired', 'dateadded', 'originaltitle', 'lastplayed'):
             info[prop] = ''
         elif prop in ('cast', ):
             info[prop] = []
         elif prop == 'streamdetails':
-            # Filled correctly later for on episode details
             info[prop] = {
                 'audio': [],
                 'subtitle': [],
                 'video': [] }
-        elif prop == 'tvshowid':
+            if metadata and 0:
+                for v in metadata.video:
+                    info[prop]['video'].append(utils.fill_video_details(v, metadata))
+                for a in metadata.audio:
+                    info[prop]['audio'].append(utils.fill_audio_details(a))
+                for s in metadata.subtitles:
+                    info[prop]['subtitle'].append(utils.fill_subtitle_details(s))
+            else:
+                info[prop]['video'].append({
+                    'height': 720,
+                    'width': 1280,
+                    'aspect': 16.0/9,
+                    'codec': 'h264',
+                    'duration': 1290,
+                    'stereomode': '',
+                })
+                info[prop]['audio'].append({
+                    'channels': 6,
+                    'codec': 'ac3',
+                    'language': '',
+                })
+        elif prop in ('tvshowid', 'specialsortepisode', 'specialsortseason'):
             info[prop] = -1
         else:
             log.error('no support for %s' % prop)
             info[prop] = ''
     return info
 
+def subset(limits, key, value):
+    start = limits['start']
+    end = min(limits['end'], len(value))
+    result = {'limits': {'start': start, 'end': end, 'total': len(value)}}
+    result[key] = value[start:end+1]
+    return result
 
 @kaa.coroutine()
 def GetTVShows(properties, limits):
@@ -132,7 +158,9 @@ def GetTVShows(properties, limits):
                 info[prop] = []
             elif prop in ('title', 'originaltitle', 'sorttitle'):
                 info[prop] = name
-            elif prop in ('mpaa', 'lastplayed', 'dateadded', 'imdbnumber', 'premiered', 'votes'):
+            elif prop == 'dateadded':
+                info[prop] = '2015-12-11 16:12:49'
+            elif prop in ('mpaa', 'lastplayed', 'imdbnumber', 'premiered', 'votes'):
                 info[prop] = ''
             elif prop in ('episode'):
                 info[prop] = len((yield kaa.beacon.query(series=series.name, type='video')))
@@ -141,12 +169,7 @@ def GetTVShows(properties, limits):
                 info[prop] = ''
         info['tvshowid'] = series.id
         tvshows.append(info)
-    start = limits['start']
-    end = min(limits['end'], len(tvshows))
-    yield {
-        'limits': {'start': start, 'end': end, 'total': len(tvshows)},
-        'tvshows': tvshows[start:end+1] }
-    yield None
+    yield subset(limits, 'tvshows', tvshows)
 
 @kaa.coroutine()
 def GetSeasons(tvshowid, properties, limits=None):
@@ -177,30 +200,24 @@ def GetSeasons(tvshowid, properties, limits=None):
                     else:
                         log.error('no support for %s' % prop)
                         info[prop] = ''
-                result['seasons'].append(info)
-    start = 0
-    end = len(result['seasons'])
-    if limits:
-        start = limits['start']
-        end = min(end, limits['end'])
-        result['limits'] = {'start': start, 'end': end, 'total': len(result['seasons'])}
-        result['seasons'] = result['seasons'][start:end+1]
-    yield result
+                seasons.append(info)
+    yield subset(limits, 'seasons', seasons)
 
 @kaa.coroutine()
-def GetEpisodes(properties, limits, tvshowid=-1, season=-1):
+def GetEpisodes(properties, limits, tvshowid=-1, season=-1, sort=None):
     """
     JsonRPC Callback VideoLibrary.GetEpisodes
     """
     episodes = []
     for name in sorted((yield kaa.beacon.query(attr='series', type='video'))):
+        series = kaa.webmetadata.tv.series(name)
+        if not series:
+            continue
         for f in (yield kaa.beacon.query(series=name, type='video')):
-            episodes.append(_fill_episode_details(f, properties))
-    start = limits['start']
-    end = min(limits['end'], len(episodes))
-    yield {
-        'limits': {'start': start, 'end': end, 'total': len(episodes)},
-        'episodes': episodes[start:end+1] }
+            e = _fill_episode_details(f, properties)
+            e['tvshowid'] = series.id
+            episodes.append(e)
+    yield subset(limits, 'episodes', episodes)
 
 @kaa.coroutine()
 def GetEpisodeDetails(episodeid, properties):
@@ -211,21 +228,10 @@ def GetEpisodeDetails(episodeid, properties):
     if len(result) != 1:
         log.error('bad query')
         yield {}
-    details = _fill_episode_details(result[0], properties)
+    metadata = None
     if 'streamdetails' in properties:
         metadata = kaa.metadata.parse(result[0].url)
-        value = {
-            'audio': [],
-            'subtitle': [],
-            'video': [] }
-        if metadata:
-            for v in metadata.video:
-                value['video'].append(utils.fill_video_details(v, metadata))
-            for a in metadata.audio:
-                value['audio'].append(utils.fill_audio_details(a))
-            for s in metadata.subtitles:
-                value['subtitle'].append(utils.fill_subtitle_details(s))
-        details['streamdetails'] = value
+    details = _fill_episode_details(result[0], properties, metadata)
     yield {'episodedetails': details}
 
 
@@ -258,12 +264,16 @@ def _fill_movie_details(f, properties):
             info[prop] = f.url
         elif prop == 'plot':
             info[prop] = f.get('description')
-        elif prop in ('playcount', 'setid'):
+        elif prop == 'tagline':
+            info[prop] = (webmetadata and webmetadata.tagline) or ''
+        elif prop in ('playcount', 'setid', 'top250'):
             info[prop] = 0
         elif prop == 'resume':
-            info[prop] =  { 'position': 0, 'total': 0 }
+            info[prop] =  { 'position': 0.0, 'total': 0.0 }
         elif prop == 'set':
             info[prop] = ''
+        elif prop == 'votes':
+            info[prop] = '0'
         elif prop == 'fanart':
             info[prop] = utils.register_image((webmetadata and webmetadata.image) or '')
         elif prop == 'imdbnumber':
@@ -276,7 +286,7 @@ def _fill_movie_details(f, properties):
             info[prop] = f.get('length')
         elif prop in ('firstaired', 'dateadded', 'originaltitle', 'sorttitle', 'trailer'):
             info[prop] = ''
-        elif prop in ('cast', 'mpaa', 'studio', 'director', 'tag'):
+        elif prop in ('cast', 'mpaa', 'studio', 'director', 'tag', 'country', 'writer'):
             info[prop] = []
         elif prop == 'streamdetails':
             info[prop] = {
@@ -307,7 +317,7 @@ def GetMovieSets(properties, limits):
         'moviesets': moviesets[start:end+1] }
 
 @kaa.coroutine()
-def GetMovies(properties, limits):
+def GetMovies(properties, limits, sort=None):
     """
     JsonRPC Callback VideoLibrary.GetMovies
     """

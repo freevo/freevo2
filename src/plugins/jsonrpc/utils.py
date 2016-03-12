@@ -94,12 +94,12 @@ def fill_audio_details(a):
         'channels': a.get('channels') or 2,
         'codec': a.get('codec').lower() or '',
         'index': a.get('id') or 0,
-        'language': a.get('langcode') or 'unkown',
-        'name': a.get('language') or 'unkown'}
+        'language': a.get('langcode') or 'unknown',
+        'name': a.get('language') or 'unknown'}
     if result['language'] == 'und':
-        result['language'] = 'unkown'
+        result['language'] = 'unknown'
     if result['name'] == 'Undetermined':
-        result['name'] = 'unkown'
+        result['name'] = 'unknown'
     if result['codec'].startswith('dolby dts'):
         result['codec'] = 'dca'
     return result

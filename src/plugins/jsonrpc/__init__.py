@@ -125,7 +125,7 @@ class PluginInterface( freevo.Plugin ):
         result = {}
         for prop in properties:
             if prop == 'version':
-                result[prop] = {"major": 13,"minor": 1,"revision": "f2acae7", "tag": "stable"}
+                result[prop] = {"major": 16,"minor": 0,"revision": "a5f3a99", "tag": "stable"}
             elif prop == 'volume':
                 result[prop] = 100
             elif prop == 'muted':
@@ -133,6 +133,12 @@ class PluginInterface( freevo.Plugin ):
             else:
                 raise AttributeError('unsupported property: %s' % prop)
         return result
+
+    def Settings_GetSettingValue(self, setting):
+        """
+        JsonRPC Settings.GetSettingValue (MISSING)
+        """
+        return {}
 
     def XBMC_GetInfoBooleans(self, booleans):
         """
@@ -199,7 +205,6 @@ class PluginInterface( freevo.Plugin ):
                 result = callback(**params)
             if isinstance(result, kaa.InProgress):
                 result = yield result
-            # log.info('returns %s' % str(result))
         else:
             raise AttributeError('unsupported method: %s' % method)
         yield {'jsonrpc': '2.0', 'result': result, 'id': attributes.get('id')}

@@ -127,6 +127,8 @@ def GetProperties(playerid, properties):
             result[prop] = 1    # FIXME
         elif prop == 'position':
             result[prop] = -1    # FIXME
+        elif prop == 'playcount':
+            result[prop] = 0     # FIXME
         elif prop == 'repeat':
             result[prop] = 'off'
         elif prop == 'shuffled':
@@ -199,6 +201,8 @@ def GetItem(playerid, properties):
                     value['video'].append({'aspect': v.aspect, 'duration': int(app.item.metadata.length),
                                            'height': v.height, 'width': v.width, 'stereomode': '',
                                            'codec': v.codec.lower().replace('h.264 avc', 'h264')})
+        elif prop == 'playcount':
+            value = 0     # FIXME
         else:
             log.error('no support for %s' % prop)
             value = ''
