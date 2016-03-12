@@ -106,6 +106,6 @@ class PluginInterface(freevo.MainMenuPlugin):
     Plugin to run commands from the main menu
     """
     def items(self, parent):
-        if freevo.config.plugin.commands:
+        if freevo.config.plugin.commands.items:
             return [ MainMenuItem(parent, _('Commands'), freevo.config.plugin.commands.items) ]
         return []
