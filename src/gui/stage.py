@@ -39,6 +39,12 @@ import kaa.candy
 from core import config
 from application import Application
 
+try:
+    from gi.repository import Gdk
+    screen = Gdk.Screen.get_default()
+except ImportError:
+    screen = None
+    
 # get logging object
 log = logging.getLogger('gui')
 
@@ -58,7 +64,10 @@ class Stage(kaa.candy.Stage):
 
     def __init__(self):
         size = (int(config.display.width), int(config.display.height))
-        super(Stage, self).__init__(size, 'freevo2', os.path.expanduser('~/.freevo/log/candy'))
+        if config.display.fullscreen and screen:
+            size = screen.get_width(), screen.get_height()
+        super(Stage, self).__init__(size, 'freevo2', os.path.expanduser('~/.freevo/log/candy'),
+            bool(config.display.fullscreen))
         self.theme_prefix = ''
         self.width, self.height = self.size
         self.applications = []
