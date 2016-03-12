@@ -33,6 +33,7 @@ __all__ = [ 'Directory' ]
 
 # python imports
 import os
+import time
 import logging
 
 # kaa imports
@@ -345,7 +346,8 @@ class Directory(freevo.Playlist):
             dir_items.append(Directory(item, self, type = self.menu_type))
         # handle hide_played
         if self.config2value('hide_played'):
-            play_items = [ p for p in play_items if not p.info.get('last_played') ]
+            play_items = [ p for p in play_items if \
+                (not p.info.get('last_played')) or p.info.get('last_played') > time.time() - 10 ]
         # remove same beginning from all play_items
         substr = u''
         if len(play_items) > 4 and len(play_items[0].name) > 5:
