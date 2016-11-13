@@ -203,6 +203,22 @@ def GetItem(playerid, properties):
                                            'codec': v.codec.lower().replace('h.264 avc', 'h264')})
         elif prop == 'playcount':
             value = 0     # FIXME
+        elif prop == 'art':
+            value = {}
+            if app.item.get('series') and app.item.get('episode'):
+                series = app.item.get('series')
+                series = kaa.webmetadata.tv.series(series)
+                if series:
+                    if series.banner:
+                        value['tvshow.banner'] = utils.register_image(series.banner)
+                    if series.image:
+                        value['tvshow.fanart'] = utils.register_image(series.image)
+                    if series.poster:
+                        value['tvshow.poster'] = utils.register_image(series.poster)
+            thumb = app.item.get('image')
+            if thumb:
+                value['thumb'] = utils.register_image(thumb, app.item)
+            print value
         else:
             log.error('no support for %s' % prop)
             value = ''
