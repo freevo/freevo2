@@ -51,6 +51,7 @@ log = logging.getLogger('freevo')
 keymap = {
     'menu': {
         'title': freevo.MENU_SUBMENU,
+        'contextmenu': freevo.MENU_SUBMENU,
         'back': freevo.MENU_BACK_ONE_MENU,
     },
     'videoplayer': {
@@ -62,6 +63,7 @@ keymap = {
         'left': freevo.Event(freevo.SEEK, -60),
         'right': freevo.Event(freevo.SEEK, 60),
         'info': freevo.TOGGLE_OSD,
+        'osd': freevo.VIDEO_CHANGE_ASPECT,
         'display': freevo.VIDEO_CHANGE_ASPECT,
         },
     'audioplayer': {
@@ -125,3 +127,16 @@ def handle(data):
             log.error('unsupported eventserver action: %s' % action)
     else:
         log.error('unsupported packet type: %s' % int(header[6]))
+
+def input(key, params):
+    if key == 'executeaction':
+        key = params['action']
+    app = freevo.taskmanager.applications[-1]
+    if app.name in keymap and key in keymap[app.name]:
+        freevo.Event(keymap[app.name][key]).post(event_source='user')
+        return True
+    if app.eventmap in EVENTMAP and key.upper() in EVENTMAP[app.eventmap]:
+        EVENTMAP[app.eventmap][key.upper()].post(event_source='user')
+        return True
+    log.error('unmapped key: %s' % key)
+    return True

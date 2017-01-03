@@ -185,6 +185,26 @@ class PluginInterface( freevo.Plugin ):
         """
         return ''
 
+    def GUI_ActivateWindow(self, window, parameters=None):
+        """
+        Switch Menu Type
+        """
+        window = window.lower()
+        if window == 'pictures':
+            freevo.Event(freevo.MENU_GOTO_MEDIA).post('image', event_source='user')
+        elif window == 'musiclibrary':
+            freevo.Event(freevo.MENU_GOTO_MEDIA).post('audio', event_source='user')
+        elif window == 'videos':
+            if parameters and parameters[0] == 'MovieTitles':
+                freevo.Event(freevo.MENU_GOTO_MEDIA).post('video', 'movie', event_source='user')
+            if parameters and parameters[0] == 'TvShowTitles':
+                freevo.Event(freevo.MENU_GOTO_MEDIA).post('video', 'tv', event_source='user')
+        elif window == 'home':
+            freevo.Event(freevo.MENU_GOTO_MAINMENU).post(event_source='user')
+        else:
+            log.error('ActivateWindow: unsupported window: %s' % window)
+
+
     @kaa.coroutine()
     def jsonrpc(self, path, **attributes):
         """
@@ -196,6 +216,9 @@ class PluginInterface( freevo.Plugin ):
         method = attributes.get('method')
         params = attributes.get('params')
         result = None
+        if method.startswith('Input'):
+            callback = eventserver.input(method[6:].lower(), params)
+            yield {'jsonrpc': '2.0', 'result': 'OK', 'id': attributes.get('id')}
         callback = self.api.get(method, None) or getattr(self, method.replace('.', '_'), None)
         if callback:
             # log.info('%s(%s)' % (method, params))
