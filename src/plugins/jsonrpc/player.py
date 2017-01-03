@@ -161,6 +161,14 @@ def GetProperties(playerid, properties):
                 'minutes': (int(val) / 60) % 60,
                 'seconds': int(val) % 60,
                 'milliseconds': int(val * 1000) % 1000}
+        elif prop == 'percentage':
+            result[prop] = 0
+            item = getattr(app, 'item', None)
+            if item:
+                tcur = item.get('elapsed_secs') or 0
+                tlen = item.info.get('length') or item.get('elapsed_secs') or 0
+                if tcur and tlen:
+                    result[prop] = (tcur * 100) / tlen
         elif prop == 'type':
             if app.name == 'videoplayer':
                 if item.get('series') and item.get('episode'):
@@ -203,25 +211,13 @@ def GetItem(playerid, properties):
                                            'codec': v.codec.lower().replace('h.264 avc', 'h264')})
         elif prop == 'playcount':
             value = 0     # FIXME
-        elif prop == 'art':
-            value = {}
-            if app.item.get('series') and app.item.get('episode'):
-                series = app.item.get('series')
-                series = kaa.webmetadata.tv.series(series)
-                if series:
-                    if series.banner:
-                        value['tvshow.banner'] = utils.register_image(series.banner)
-                    if series.image:
-                        value['tvshow.fanart'] = utils.register_image(series.image)
-                    if series.poster:
-                        value['tvshow.poster'] = utils.register_image(series.poster)
-            thumb = app.item.get('image')
-            if thumb:
-                value['thumb'] = utils.register_image(thumb, app.item)
-            print value
+        elif prop == 'resume':
+            value = {
+                'position': 0.0,
+                'total': 0.0 }  # FIXME
         else:
             log.error('no support for %s' % prop)
-            value = ''
+            continue
         result[prop] = value
     return {'item': result }
 

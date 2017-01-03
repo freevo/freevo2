@@ -50,7 +50,7 @@ import utils
 # get logging object
 log = logging.getLogger('freevo')
 
-def GetItems(playlistid, properties, limits):
+def GetItems(playlistid, properties, limits=None):
     """
     JsonRPC Callback Playlist.GetItems
     """
@@ -74,12 +74,12 @@ def GetItems(playlistid, properties, limits):
         for prop in _properties:
             if prop == 'playcount':
                 value = 0
-            elif prop == 'duration':
-                value = app.item.info.get('length')
             else:
                 log.error('no support for %s' % prop)
-                value = ''
+                continue
             result[-1][prop] = value
+    if not limits:
+        limits = { 'start': 0, 'end': len(result) }
     start = limits['start']
     end = min(limits['end'], len(result))
     return {

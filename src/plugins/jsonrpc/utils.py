@@ -42,6 +42,7 @@ import logging
 # ka imports
 import kaa
 import kaa.beacon
+import kaa.webmetadata
 
 cachedir = ''
 imagedir = ''
@@ -117,6 +118,8 @@ def fill_basic_item_properties(item, properties):
     """
     Fill basic item properties
     """
+    if not 'type' in properties:
+        properties.append('type')
     result = { 'label': item.get('title') }
     if item.get('series') and item.get('episode'):
         result = { 'label': '%s %sx%02d - %s' % \
@@ -125,7 +128,7 @@ def fill_basic_item_properties(item, properties):
         value = PROPERTY_NOT_FOUND
         if prop in ('cast', 'artist', 'director', 'genre', 'writer', 'studio'):
             value = []
-        if prop == 'plot':
+        if prop in ('plot', 'description'):
             value = item.get('description')
         if prop == 'showtitle':
             value = item.get('series') or ''
@@ -149,6 +152,28 @@ def fill_basic_item_properties(item, properties):
             value = (hasattr(item, 'webmetadata') and item.webmetadata and item.webmetadata.imdb) or ''
         if prop in ('album', 'albumartist', 'originaltitle'):
             value = ''
+        if prop in ('duration', 'runtime'):
+            value = item.info.get('length')
+        if prop == 'art':
+            value = {}
+            fanart = register_image(hasattr(item, 'background') and item.background)
+            if fanart:
+                value['fanart'] = fanart
+            if item.get('series') and item.get('episode'):
+                series = item.get('series')
+                series = kaa.webmetadata.tv.series(series)
+                if series:
+                    if series.banner:
+                        value['tvshow.banner'] = register_image(series.banner)
+                    if series.image:
+                        value['tvshow.fanart'] = register_image(series.image)
+                        value['fanart'] = register_image(series.image)
+                    if series.poster:
+                        value['tvshow.poster'] = register_image(series.poster)
+                        value['poster'] = register_image(series.poster)
+            thumb = item.get('image')
+            if thumb:
+                value['thumb'] = register_image(thumb, item)
         if prop == 'type':
             if item.type == 'video':
                 if item.get('series') and item.get('episode'):
@@ -162,7 +187,12 @@ def fill_basic_item_properties(item, properties):
             else:
                 log.error('unsupported type')
                 value = ''
+        if prop in ('top250',):
+            value = 0
+        if prop in ('votes',):
+            value = ''
         if value != PROPERTY_NOT_FOUND:
             result[prop] = value
             properties.remove(prop)
+        result['id'] = 1
     return result
