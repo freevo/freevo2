@@ -6,7 +6,7 @@
 # Copyright (C) 2002 Krister Lagerstrom, 2003-2012 Dirk Meyer, et al.
 #
 # First Edition: Aubin Paul <aubin@outlyer.org>
-# Maintainer:    Dirk Meyer <dischi@freevo.org>
+# Maintainer:    Dirk Meyer <https://github.com/Dischi>
 #
 # Please see the file AUTHORS for a complete list of authors.
 #

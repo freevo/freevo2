@@ -4,8 +4,8 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# First edition: Dirk Meyer <dischi@freevo.org>
-# Maintainer:    Dirk Meyer <dischi@freevo.org>
+# First edition: Dirk Meyer <https://github.com/Dischi>
+# Maintainer:    Dirk Meyer <https://github.com/Dischi>
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

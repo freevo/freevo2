@@ -8,8 +8,8 @@
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2007 Dirk Meyer, et al.
 #
-# First Edition: Dirk Meyer <dischi@freevo.org>
-# Maintainer:    Dirk Meyer <dischi@freevo.org>
+# First Edition: Dirk Meyer <https://github.com/Dischi>
+# Maintainer:    Dirk Meyer <https://github.com/Dischi>
 #
 # Please see the file AUTHORS for a complete list of authors.
 #

@@ -9,7 +9,7 @@
 # Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
 #
 # First Edition: Andreas Büsching <crunchy@tzi.de>
-# Maintainer:    Dirk Meyer <dischi@freevo.org>
+# Maintainer:    Dirk Meyer <https://github.com/Dischi>
 #
 # Please see the file AUTHORS for a complete list of authors.
 # Some of the work from Andreas Büsching is moved into kaa.display
